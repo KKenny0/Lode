@@ -1,0 +1,4 @@
+# Design docs, plans, and working notes — not part of the skill
+docs/
+*.plan.md
+*.design.md
