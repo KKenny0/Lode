@@ -1,5 +1,21 @@
 # {stage_name} Stage Implementation
 
+## Table of Contents
+
+- [0. Document Meta（文档元信息）](#0-document-meta文档元信息)
+- [1. Stage Role in Pipeline（在 Pipeline 中的位置）](#1-stage-role-in-pipeline在-pipeline-中的位置)
+- [2. Responsibilities and Non-Goals（职责与边界）](#2-responsibilities-and-non-goals职责与边界)
+- [3. Inputs and Upstream Dependencies（输入契约）](#3-inputs-and-upstream-dependencies输入契约)
+- [4. Outputs and Downstream Contracts（输出契约）](#4-outputs-and-downstream-contracts输出契约)
+- [5. Core Processing Flow（核心处理流程）](#5-core-processing-flow核心处理流程)
+- [6. Prompt / Rule / Reference Contracts](#6-prompt--rule--reference-contracts)
+- [7. Validation, Repair, and Failure Handling（校验与修复）](#7-validation-repair-and-failure-handling校验与修复)
+- [8. Observability and Debugging（可观测性）](#8-observability-and-debugging可观测性)
+- [9. Compatibility and Migration Notes（兼容与迁移）](#9-compatibility-and-migration-notes兼容与迁移)
+- [10. Known Issues and Open Questions（已知问题）](#10-known-issues-and-open-questions已知问题)
+- [11. Versioned Changes Since Previous Iteration（版本差异）](#11-versioned-changes-since-previous-iteration版本差异)
+- [12. Source of Truth（事实来源）](#12-source-of-truth事实来源)
+
 ---
 
 ## 0. Document Meta（文档元信息）

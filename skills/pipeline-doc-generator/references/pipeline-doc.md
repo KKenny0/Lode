@@ -1,6 +1,24 @@
 ```markdown
 # Pipeline Evolution / Architecture Doc 编写指南（v1.1）
 
+## Table of Contents
+
+- [0. Document Meta](#0-document-meta)
+- [1. Context and Problem Statement](#1-context-and-problem-statement)
+- [2. Current Pipeline Snapshot](#2-current-pipeline-snapshot)
+- [3. Evolution Goals and Design Principles](#3-evolution-goals-and-design-principles)
+- [4. Key Architectural Changes](#4-key-architectural-changes)
+- [5. Cross-Stage Contract Changes](#5-cross-stage-contract-changes)
+- [6. Dataflow and Artifact Evolution](#6-dataflow-and-artifact-evolution)
+- [7. System-Level Trade-offs](#7-system-level-trade-offs)
+- [8. Impact Analysis](#8-impact-analysis-quality--efficiency--stability)
+- [9. Evaluation and Verification Strategy](#9-evaluation-and-verification-strategy)
+- [10. Migration and Rollout Plan](#10-migration-and-rollout-plan)
+- [11. Known Risks and Failure Modes](#11-known-risks-and-failure-modes)
+- [12. Versioned Evolution History](#12-versioned-evolution-history)
+- [13. References and Source of Truth](#13-references-and-source-of-truth)
+- [编写约束（必须遵守）](#编写约束必须遵守)
+
 本指南用于规范“Pipeline 级架构演进文档”的编写。该文档聚焦系统整体结构的变化、原因与影响，不涉及具体 Stage 实现细节。
 
 ---

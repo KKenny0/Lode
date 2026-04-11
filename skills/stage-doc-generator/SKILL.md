@@ -1,6 +1,13 @@
 ---
 name: stage-doc-generator
-description: Generate Stage implementation documentation following the 13-section structure (sections 0-12) defined in stage-implementation-spec.md. Use this skill whenever the user asks to write, create, or generate documentation for a Stage, implementation doc for a stage, stage specification, or any document describing how a pipeline stage works. Also triggers for requests like "为 X Stage 写文档"、"stage 实现文档"、"stage impl doc", or when documenting stage behavior, responsibilities, inputs/outputs, or processing flow. Even if the user doesn't explicitly mention "implementation" but is asking for stage-related technical documentation that covers responsibilities, pipeline position, or contracts, use this skill.
+description: >
+  Generate implementation documentation for a single pipeline Stage — covering behavior,
+  responsibilities, inputs/outputs, processing flow, and contracts. Triggers on requests like
+  "为 X Stage 写文档", "stage 实现文档", "stage impl doc", "document this stage",
+  "how does X stage work?" (when expecting formal docs). Also triggers when the user asks to
+  write technical documentation about ONE specific stage, even without saying "implementation".
+  Does NOT trigger for pipeline-level architecture docs (use pipeline-doc-generator) or
+  general README/API docs.
 ---
 
 # Stage Implementation Documentation Generator
@@ -42,6 +49,22 @@ Before writing, check if a document for this stage already exists (look for `{st
 
 - **If it exists**: Read the existing document, compare against current code, identify which sections have stale or missing information. Update only the affected sections, increment `doc_version`, refresh `last_updated`. `created_date` stays unchanged. Add a new row to Section 11 (Versioned Changes).
 - **If not**: Proceed with full document creation (Steps 1-4).
+
+### Step 0.5: Choose Documentation Scope
+
+Judge the complexity of the stage to decide the documentation scope:
+
+- **Full mode** (default): Write all 13 sections. Use for new stages, major refactors, or stages with complex LLM interactions, validation/repair loops, or cross-stage dependencies.
+- **Minimal mode**: Write only the essential sections, leave the rest as `<!-- TODO -->` placeholders. Use for simple stages (e.g., pure data transforms, lightweight post-processing) where the full 13-section doc would be disproportionate effort.
+
+Minimal mode sections (always write these):
+- Section 0: Document Meta
+- Section 1: Stage Role in Pipeline (with Pipeline Position diagram)
+- Section 2: Responsibilities and Non-Goals
+- Section 5: Core Processing Flow (simplified — key steps only, no need for all 8 canonical steps if fewer apply)
+- Section 12: Source of Truth
+
+Skip or placeholder: Sections 3, 4, 6, 7, 8, 9, 10, 11 — add `<!-- TODO: Section N - brief note on what goes here -->`.
 
 ### Step 1: Gather Context
 

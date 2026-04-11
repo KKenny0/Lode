@@ -1,6 +1,13 @@
 ---
 name: pipeline-doc-generator
-description: Generate Pipeline-level architecture evolution documentation following the 14-section structure (sections 0-13) defined in pipeline-doc.md. Use this skill whenever the user asks to write, create, or generate Pipeline architecture documentation, architecture evolution docs, system design docs for the whole pipeline, or any document describing how the entire pipeline system evolves and changes. Also triggers for requests like "写架构文档"、"pipeline 架构演进"、"系统架构设计", or when documenting cross-stage changes, dataflow evolution, architectural trade-offs, or system-level refactoring. Even if the user doesn't explicitly mention "architecture" but is asking for pipeline-wide technical documentation that covers multiple stages, system structure, or evolution history, use this skill.
+description: >
+  Generate architecture evolution documentation for the entire Pipeline system — covering
+  cross-stage changes, dataflow evolution, architectural trade-offs, and version history.
+  Triggers on requests like "写架构文档", "pipeline 架构演进", "系统架构设计",
+  "architecture doc", "document the pipeline". Also triggers when the user asks to write
+  technical documentation covering MULTIPLE stages or the whole system, even without saying
+  "architecture". Does NOT trigger for single-stage implementation docs (use stage-doc-generator)
+  or general README/API docs.
 ---
 
 # Pipeline Architecture Documentation Generator
@@ -58,6 +65,21 @@ Before writing, check if a document for this version already exists (look for `p
 
 - **If it exists**: Read the existing document, compare against current system state, identify which sections are outdated. Update the affected sections, refresh `last_updated`. `created_date` stays unchanged. Add a new entry to Section 12 (Versioned Evolution History).
 - **If not**: Proceed with full document creation (Steps 1-4).
+
+### Step 0.5: Choose Documentation Scope
+
+Judge the scope of the evolution to decide the documentation depth:
+
+- **Full mode** (default): Write all 14 sections. Use for major architectural changes, new stage additions, cross-stage refactoring, or changes that affect data flow and contracts.
+- **Minimal mode**: Write only the essential sections, leave the rest as `<!-- TODO -->` placeholders. Use for minor adjustments (e.g., config changes, small bug fixes, single-stage parameter tuning) where a full 14-section doc would be disproportionate effort.
+
+Minimal mode sections (always write these):
+- Section 0: Document Meta
+- Section 1: Context and Problem Statement
+- Section 4: Key Architectural Changes (Before/After)
+- Section 13: References and Source of Truth
+
+Skip or placeholder: Sections 2, 3, 5, 6, 7, 8, 9, 10, 11, 12 — add `<!-- TODO: Section N - brief note on what goes here -->`.
 
 ### Step 1: Gather Context
 
