@@ -1,11 +1,11 @@
 ---
 name: pipeline-doc-generator
-description: Generate Pipeline-level architecture evolution documentation following the 13-section structure defined in pipeline-doc.md. Use this skill whenever the user asks to write, create, or generate Pipeline architecture documentation, architecture evolution docs, system design docs for the whole pipeline, or any document describing how the entire pipeline system evolves and changes. Also triggers for requests like "写架构文档"、"pipeline 架构演进"、"系统架构设计", or when documenting cross-stage changes, dataflow evolution, architectural trade-offs, or system-level refactoring. Even if the user doesn't explicitly mention "architecture" but is asking for pipeline-wide technical documentation that covers multiple stages, system structure, or evolution history, use this skill.
+description: Generate Pipeline-level architecture evolution documentation following the 14-section structure (sections 0-13) defined in pipeline-doc.md. Use this skill whenever the user asks to write, create, or generate Pipeline architecture documentation, architecture evolution docs, system design docs for the whole pipeline, or any document describing how the entire pipeline system evolves and changes. Also triggers for requests like "写架构文档"、"pipeline 架构演进"、"系统架构设计", or when documenting cross-stage changes, dataflow evolution, architectural trade-offs, or system-level refactoring. Even if the user doesn't explicitly mention "architecture" but is asking for pipeline-wide technical documentation that covers multiple stages, system structure, or evolution history, use this skill.
 ---
 
 # Pipeline Architecture Documentation Generator
 
-This skill guides you through creating comprehensive Pipeline-level architecture evolution documentation following a standardized 13-section structure.
+This skill guides you through creating comprehensive Pipeline-level architecture evolution documentation following a standardized 14-section structure.
 
 ## When to Use
 
@@ -33,24 +33,31 @@ Use this skill when:
 
 ## Documentation Structure
 
-**CRITICAL**: Always follow the 13-section structure defined in `references/pipeline-doc.md`. Each section serves a specific purpose:
+**CRITICAL**: Always follow the 14-section structure (sections 0-13) defined in `references/pipeline-doc.md`. Each section serves a specific purpose:
 
-1. **Document Meta** - Version tracking and impacted stages
-2. **Context and Problem Statement** - Why this evolution is needed
-3. **Current Pipeline Snapshot** - System state before changes
-4. **Evolution Goals and Design Principles** - What we're achieving
-5. **Key Architectural Changes** - Before/After comparisons
-6. **Cross-Stage Contract Changes** - Stage间数据契约变化
-7. **Dataflow and Artifact Evolution** - How data flows through the system
-8. **System-Level Trade-offs** - Architectural权衡分析
-9. **Impact Analysis** - Quality/Efficiency/Stability metrics
-10. **Evaluation and Verification** - How to validate changes
-11. **Migration and Rollout Plan** - Deployment strategy
-12. **Known Risks and Failure Modes** - What could go wrong
-13. **Versioned Evolution History** - Historical tracking
-14. **References and Source of Truth** - Authoritative sources
+0. **Document Meta** - Version tracking and impacted stages
+1. **Context and Problem Statement** - Why this evolution is needed
+2. **Current Pipeline Snapshot** - System state before changes
+3. **Evolution Goals and Design Principles** - What we're achieving
+4. **Key Architectural Changes** - Before/After comparisons
+5. **Cross-Stage Contract Changes** - Stage间数据契约变化
+6. **Dataflow and Artifact Evolution** - How data flows through the system
+7. **System-Level Trade-offs** - Architectural权衡分析
+8. **Impact Analysis** - Quality/Efficiency/Stability metrics
+9. **Evaluation and Verification** - How to validate changes
+10. **Migration and Rollout Plan** - Deployment strategy
+11. **Known Risks and Failure Modes** - What could go wrong
+12. **Versioned Evolution History** - Historical tracking
+13. **References and Source of Truth** - Authoritative sources
 
 ## Writing Workflow
+
+### Step 0: Check for Existing Document
+
+Before writing, check if a document for this version already exists (look for `pipeline-evolution-v{version}-*.md` in the target docs directory).
+
+- **If it exists**: Read the existing document, compare against current system state, identify which sections are outdated. Update the affected sections, refresh `last_updated`. `created_date` stays unchanged. Add a new entry to Section 12 (Versioned Evolution History).
+- **If not**: Proceed with full document creation (Steps 1-4).
 
 ### Step 1: Gather Context
 
@@ -58,7 +65,6 @@ Before writing, collect:
 - **Evolution scope** - What is changing? (New stages? Refactoring? Bug fixes?)
 - **Affected stages** - Which stages are impacted?
 - **Trigger** - Why is this change happening? (Bad case? Evaluation results? New requirements?)
-- **Current state** - What does the pipeline look like now?
 
 Read the existing documentation and code to understand the current system state.
 
@@ -70,187 +76,29 @@ Always read `references/pipeline-doc.md` before starting. This contains the full
 
 Follow this order:
 
-**Section 0: Document Meta**
-- `version`: Version number (e.g., v2.4)
-- `created_date`: Document creation date (YYYY-MM-DD)
-- `last_updated`: Last modification date (YYYY-MM-DD, same as created_date for new docs)
-- `author`: Owner/responsible person
-- `related_changelog`: Path to CHANGELOG
-- `impacted_stages`: List of affected stages
+**Section 0: Document Meta** — Version, created_date, last_updated, author, changelog path, impacted stages. Keep to 5-10 lines.
 
-Keep it concise, 5-10 lines max.
+**Section 1: Context and Problem Statement** — Current system state, 3-5 cross-stage problems (each must be verifiable), trigger reasons (bad cases, eval results, new requirements).
 
-**Section 1: Context and Problem Statement**
+**Section 2: Current Pipeline Snapshot** — Pipeline structure diagram, core artifacts, main data flow. Must include a Pipeline Structure diagram (see Visual Documentation).
 
-Current system state:
-- Main pipeline structure
-- Core capabilities
+**Section 3: Evolution Goals and Design Principles** — 3-5 result-oriented goals + method-oriented design principles. Focus on WHAT and WHY, not specific solutions.
 
-Core problems (3-5 system-level issues):
-- Must be cross-stage or full-pipeline problems
-- Each problem must be verifiable
-- Don't write implementation details
+**Section 4: Key Architectural Changes** — Each change needs Before/After/Why/What Changed/Impact. At least 3 changes, no code or prompt details.
 
-Trigger reasons:
-- Bad case examples
-- Batch evaluation results
-- New requirements or constraints
+**Section 5: Cross-Stage Contract Changes** — Per stage-pair: new/removed/adjusted constraints, compatibility notes. Focus on data contracts, not implementation.
 
-**Section 2: Current Pipeline Snapshot**
+**Section 6: Dataflow and Artifact Evolution** — Before vs After for data flows, artifact changes (new/deleted/enhanced), main chain evolution.
 
-Use visual diagrams to show:
-- Pipeline structure (text-based diagram)
-- Core artifacts (narrative_timeline, storyboard, etc.)
-- Main data flow
+**Section 7: System-Level Trade-offs** — 2-4 trade-offs. Each must include both Gain (收益) and Cost (代价). Common dimensions: quality vs performance, flexibility vs control, upstream complexity vs downstream stability.
 
-**Must include a Pipeline Structure diagram** (see Visual Documentation section).
+**Section 8: Impact Analysis** — Qualitative capabilities changed + quantitative metrics (coverage, error rate, generation time) in Before/After table format. At least 2 quantitative metrics if obtainable.
 
-**Section 3: Evolution Goals and Design Principles**
+**Sections 9-10: Verification & Rollout** — Evaluation strategy (must be actionable, not conceptual), migration plan (phases, data strategy, rollback).
 
-Goals (3-5 items):
-- Result-oriented
-- Map to specific problems
+**Section 11: Known Risks** — 3-5 specific risks with trigger conditions and impact scope. No generalized descriptions.
 
-Design Principles:
-- Method-oriented
-- Guide the architectural approach
-
-Don't write specific solutions here — focus on WHAT and HOW, not the exact implementation.
-
-**Section 4: Key Architectural Changes**
-
-Each change must use this structure:
-
-### Change N: {名称}
-- **Before**: 改动前结构或行为
-- **After**: 改动后结构或行为
-- **Why**: 对应解决的问题
-- **What Changed**: 具体变化范围（模块/数据/流程）
-- **Impact**: 对系统的影响（质量/稳定性/复杂度）
-
-Requirements:
-- At least 3 changes
-- Must have clear Before/After comparison
-- Don't write code or prompts
-
-**Section 5: Cross-Stage Contract Changes**
-
-Describe by stage relationship:
-
-### {Stage A} → {Stage B}
-- New constraints (fields / validation rules)
-- Removed or adjusted constraints
-- Compatibility notes
-
-Focus on "data contracts" between stages, not implementation details.
-
-**Section 6: Dataflow and Artifact Evolution**
-
-Data flow changes:
-- Before vs After
-
-Artifact changes:
-- New / deleted / enhanced data structures
-
-Core chain changes:
-- Main data path evolution
-
-Use structural diagrams or flow descriptions. Emphasize the closed loop.
-
-**Section 7: System-Level Trade-offs**
-
-List 2-4 key trade-offs:
-
-### Trade-off N
-- **Gain**: 收益
-- **Cost**: 代价
-
-Common dimensions:
-- Quality vs Performance
-- Flexibility vs Control
-- Upstream complexity vs Downstream stability
-
-Must include costs — don't just list advantages.
-
-**Section 8: Impact Analysis**
-
-Qualitative impact:
-- Which capabilities improved or changed
-
-Quantitative metrics (if available):
-- Coverage
-- Error rate
-- Generation time
-
-Use table format:
-
-| 维度 | Before | After | 变化 |
-|------|--------|-------|------|
-
-At least 2 quantitative metrics if obtainable.
-
-**Section 9: Evaluation and Verification Strategy**
-
-Validation methods:
-- How to verify changes are effective
-
-Evaluation types:
-- Stage-level
-- E2E
-- Batch evaluation
-
-Data sources:
-- Datasets or sample types used
-
-Must be actionable — avoid conceptual descriptions.
-
-**Section 10: Migration and Rollout Plan**
-
-Rollout phases:
-- Parallel run
-- Canary release
-- Full rollout
-
-Data strategy:
-- Whether migration is needed
-
-Rollback strategy:
-- How to restore previous version
-
-Clear steps, actionable.
-
-**Section 11: Known Risks and Failure Modes**
-
-List 3-5 risks:
-- Risk point
-- Trigger condition
-- Impact scope
-
-Must be specific — no generalized descriptions.
-
-**Section 12: Versioned Evolution History**
-
-Record key version changes:
-
-```
-v2.2 → v2.3
-* Core changes
-
-v2.3 → v2.4
-* Core changes
-```
-
-Only key architectural changes — don't repeat CHANGELOG.
-
-**Section 13: References and Source of Truth**
-
-List:
-- Design docs
-- Changelogs
-- Stage docs
-- Evaluation documents
-
-Use paths or links. Mark authoritative sources.
+**Sections 12-13: History & References** — Key version changes (don't repeat CHANGELOG), authoritative source list with paths/links.
 
 ### Step 4: Output Format
 
@@ -384,39 +232,20 @@ v2.2 → v2.3: Added scenes output (optional)
 v2.3 → v2.4: narrative_timeline now includes audio_notes
 ```
 
-## Principles
+## Guidelines
 
-1. **Focus on Pipeline Level** - Don't describe Stage internal implementation
-2. **All Changes Need Before/After** - Show evolution clearly
-3. **Problems Must Be Verifiable** - Don't write vague issues
-4. **Solutions Must Be Actionable** - Avoid conceptual fluff
-5. **Emphasize Structure and Data Flow** - Not code details
-6. **No Code/Prompt Details** - This is architecture, not implementation
-7. **Keep Engineering-Focused** - Must be actionable and concrete
-
-## Common Mistakes to Avoid
-
-- **Don't** describe Stage internal implementation — that's what stage-doc-generator is for
-- **Don't** skip Before/After comparisons — all changes must show evolution
-- **Don't** write un-verifiable problems — every issue should be testable
-- **Don't** include code or prompt details — focus on architecture
-- **Don't** write vague descriptions — be concrete about what changed
-- **Don't** forget trade-offs — always document the costs
-- **Don't** ignore data flow changes — show how artifacts evolve
-
-## Writing Constraints (Must Follow)
-
-1. Only describe Pipeline level, not Stage internal implementation
-2. All changes must have Before / After comparison
-3. All problems must be verifiable
-4. All validation strategies must be actionable
-5. Prioritize describing structural changes and data flow changes
-6. No prompt / code details
-7. Content must be engineering-focused and actionable
+- **Pipeline level only** — don't describe Stage internal implementation; that's what stage-doc-generator is for
+- **Before/After for every change** — show evolution clearly; skipping comparisons makes the doc useless
+- **Problems must be verifiable** — every issue should be testable; vague problems waste readers' time
+- **Solutions must be actionable** — avoid conceptual fluff; if you can't execute it, don't write it
+- **Emphasize structure and data flow** — show how artifacts evolve; don't get lost in code details
+- **No code/prompt details** — this is architecture documentation, not implementation
+- **Trade-offs need costs** — always document both gains and costs; one-sided analysis is misleading
+- **Engineering-focused and concrete** — every claim should be backed by evidence or a concrete example
 
 ## After Writing
 
-1. Verify all 13 sections are complete
+1. Verify all 14 sections are complete
 2. Check that Before/After comparisons are clear
 3. Ensure all problems are verifiable
 4. Confirm trade-offs include both gains and costs
@@ -424,19 +253,14 @@ v2.3 → v2.4: narrative_timeline now includes audio_notes
 
 ### Step 5: Export Change Summary
 
-After completing and verifying the document, export a change summary entry so downstream tools (like weekly report generators) know this architecture evolution was documented.
+After completing the document, append a change entry to `~/.weekly-ppt/weeks/{current-ISO-week}/{project-slug}.json` following `references/weekly-ppt-convention.md`.
 
-Read `references/weekly-ppt-convention.md` for the full schema and storage rules. Generate a single entry:
-
+Skill-specific values:
 - **type**: `"decision"` (pipeline architecture evolution is inherently a decision)
-- **summary**: 1 sentence — what evolved (version, scope, which stages)
-- **context**: 1-2 sentences — what stages are impacted and the strategic intent
-- **related_docs**: path to the generated `pipeline-evolution-v{version}-{YYYY-MM-DD}.md`
 - **source**: `"pipeline-doc"`
+- **related_docs**: path to the generated `pipeline-evolution-v{version}-{YYYY-MM-DD}.md`
 
-Append the entry to `~/.weekly-ppt/weeks/{current-ISO-week}/{project-slug}.json`.
-
-If the project slug cannot be determined (no `~/.weekly-ppt/projects.json`, no clear project context), skip this step silently. The documentation is the primary deliverable; the change summary is a side effect.
+If the project slug cannot be determined, skip silently.
 
 ## Shared Storage Convention
 
