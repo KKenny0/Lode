@@ -9,7 +9,8 @@
 
 ### 应写内容
 - version：版本号（如 v2.4）
-- date：日期
+- created_date：文档创建日期（YYYY-MM-DD）
+- last_updated：最后修改日期（YYYY-MM-DD，新建文档时与 created_date 相同）
 - author：负责人
 - related_changelog：对应 CHANGELOG 路径
 - impacted_stages：涉及的 Stage 列表

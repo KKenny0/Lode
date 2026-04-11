@@ -8,6 +8,7 @@
 必须包含：
 - stage_name:
 - doc_version:
+- created_date: （YYYY-MM-DD）
 - last_updated:
 - owner:
 - related_code_paths: （精确到文件/模块）

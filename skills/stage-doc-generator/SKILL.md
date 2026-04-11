@@ -55,7 +55,8 @@ Follow this order:
 **Section 0: Document Meta**
 - `stage_name`: Name of the stage
 - `doc_version`: Start at 1.0.0
-- `last_updated`: Current date
+- `created_date`: Document creation date (YYYY-MM-DD)
+- `last_updated`: Last modification date (YYYY-MM-DD, same as created_date for new docs)
 - `owner`: Stage owner/team
 - `related_code_paths`: File paths
 - `related_prompts`: Prompt files used
@@ -154,7 +155,7 @@ Always include: "本文档仅为解释性描述，实际行为以代码为准"
 
 ### Step 4: Output Format
 
-Save the documentation to a file named `{stage_name}-implementation.md` in the appropriate docs directory.
+Save the documentation to a file named `{stage_name}-implementation-{YYYY-MM-DD}.md` in the appropriate docs directory.
 
 Use the exact template from `references/stage-implementation-spec.md`.
 
@@ -334,7 +335,7 @@ Key rules:
 2. **Be specific** - Use concrete field names, file paths, function names
 3. **Explain why** - Don't just list what; explain the reasoning
 4. **Be honest** - Document known issues and limitations transparently
-5. **Keep current** - Update doc_version and last_updated when changing
+5. **Keep current** - Update doc_version and last_updated when changing; created_date never changes
 
 ## Common Mistakes to Avoid
 
@@ -360,7 +361,7 @@ Read `references/weekly-ppt-convention.md` for the full schema and storage rules
 - **type**: `"feature"` (documenting a new implementation) or `"decision"` (documenting a design choice)
 - **summary**: 1 sentence — what stage was documented and what it does
 - **context**: 1-2 sentences — why this stage matters and its downstream impact
-- **related_docs**: path to the generated `{stage_name}-implementation.md`
+- **related_docs**: path to the generated `{stage_name}-implementation-{YYYY-MM-DD}.md`
 - **source**: `"stage-doc"`
 
 Append the entry to `~/.weekly-ppt/weeks/{current-ISO-week}/{project-slug}.json`.

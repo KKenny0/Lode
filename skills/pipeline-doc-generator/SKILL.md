@@ -72,7 +72,8 @@ Follow this order:
 
 **Section 0: Document Meta**
 - `version`: Version number (e.g., v2.4)
-- `date`: Current date
+- `created_date`: Document creation date (YYYY-MM-DD)
+- `last_updated`: Last modification date (YYYY-MM-DD, same as created_date for new docs)
 - `author`: Owner/responsible person
 - `related_changelog`: Path to CHANGELOG
 - `impacted_stages`: List of affected stages
@@ -253,7 +254,7 @@ Use paths or links. Mark authoritative sources.
 
 ### Step 4: Output Format
 
-Save the documentation to a file named `pipeline-evolution-v{version}.md` or similar in the appropriate docs directory.
+Save the documentation to a file named `pipeline-evolution-v{version}-{YYYY-MM-DD}.md` in the appropriate docs directory.
 
 Use the exact template from `references/pipeline-doc.md`.
 
@@ -430,7 +431,7 @@ Read `references/weekly-ppt-convention.md` for the full schema and storage rules
 - **type**: `"decision"` (pipeline architecture evolution is inherently a decision)
 - **summary**: 1 sentence — what evolved (version, scope, which stages)
 - **context**: 1-2 sentences — what stages are impacted and the strategic intent
-- **related_docs**: path to the generated `pipeline-evolution-v{version}.md`
+- **related_docs**: path to the generated `pipeline-evolution-v{version}-{YYYY-MM-DD}.md`
 - **source**: `"pipeline-doc"`
 
 Append the entry to `~/.weekly-ppt/weeks/{current-ISO-week}/{project-slug}.json`.
