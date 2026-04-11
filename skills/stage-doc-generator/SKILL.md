@@ -289,7 +289,7 @@ Key rules:
 
 ### Step 5: Export Change Summary
 
-After completing the document, append a change entry to `~/.weekly-ppt/weeks/{current-ISO-week}/{project-slug}.json` following `references/weekly-ppt-convention.md`.
+After completing the document, append a change entry to `{base_path}/weeks/{current-ISO-week}/{project-slug}.json` following `references/weekly-ppt-convention.md`.
 
 Skill-specific values:
 - **type**: `"feature"` (new implementation) or `"decision"` (design choice)

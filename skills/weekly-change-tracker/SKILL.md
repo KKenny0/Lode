@@ -5,7 +5,8 @@ description: >
   signals end of a work session — e.g. "收工", "今天到这", "done", "wrap up",
   "that's it for today", "好了", "先这样". Also trigger on explicit requests like
   "记录变更", "log changes", "记一下今天做了什么".
-  Read conversation context, extract structured change entries, append to ~/.weekly-ppt/weeks/.
+  Read conversation context, extract structured change entries, append to {base_path}/weeks/.
+  See references/weekly-ppt-convention.md for base path resolution (env var, config, or default).
   Do NOT trigger when the user is simply saying goodbye or switching topics.
 ---
 
@@ -26,7 +27,7 @@ Session-end change extraction. When the developer wraps up work, reads the conve
 
 Determine which project was worked on during this session:
 
-1. Check `~/.weekly-ppt/projects.json` — match the current working directory against project `path` fields → use the corresponding `slug`
+1. Check `{base_path}/projects.json` — match the current working directory against project `path` fields → use the corresponding `slug`
 2. If no match, derive a slug from the current working directory name (lowercase, replace spaces/underscores with hyphens)
 
 ### Step 2: Analyze Conversation Context
@@ -55,7 +56,7 @@ For each distinct change, produce an entry following the schema in `references/w
 ### Step 4: Write to Weekly Log
 
 1. Calculate current ISO week: `date +%Y-W%V`
-2. Ensure directory exists: `~/.weekly-ppt/weeks/{ISO-week}/`
+2. Ensure directory exists: `{base_path}/weeks/{ISO-week}/`
 3. If `{project-slug}.json` already exists, read the existing array
 4. Append new entries to the array
 5. Write the updated file

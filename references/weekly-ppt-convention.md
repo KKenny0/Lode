@@ -2,10 +2,29 @@
 
 This file defines the shared data schema and storage convention used by all skills in this monorepo. When generating change entries, follow this spec exactly so downstream consumers (like weekly PPT generators) can reliably read them.
 
+## Base Path
+
+The base path determines where all weekly-ppt data is stored. It is resolved in this order:
+
+1. **`$WEEKLY_PPT_PATH`** environment variable (if set)
+2. **`~/.weekly-ppt/config.json`** → `base_path` field (if file exists)
+3. **Default**: `~/.weekly-ppt/`
+
+To customize the location, create `~/.weekly-ppt/config.json`:
+
+```json
+{
+  "base_path": "/path/to/preferred/location"
+}
+```
+
+All subsequent path references in this document use `{base_path}` as shorthand for the resolved base path.
+
 ## Storage Location
 
 ```
-~/.weekly-ppt/
+{base_path}/
+  config.json            # Optional: base_path override (only here, not in custom location)
   projects.json          # Optional project registry
   weeks/
     2026-W15/
@@ -23,7 +42,7 @@ If the `weeks/{week}/` directory does not exist, create it before writing.
 ## Project Slug
 
 Resolution order:
-1. Look up the current project path in `~/.weekly-ppt/projects.json` → use its `slug`
+1. Look up the current project path in `{base_path}/projects.json` → use its `slug`
 2. If not found, derive from the project directory name: lowercase, replace spaces/underscores with hyphens
 
 ## projects.json (Optional)
@@ -43,7 +62,7 @@ This file is created and maintained manually. Skills should work correctly wheth
 
 ## Change Entry Schema
 
-Each `~/.weekly-ppt/weeks/{week}/{slug}.json` file contains a **JSON array** of entries:
+Each `{base_path}/weeks/{week}/{slug}.json` file contains a **JSON array** of entries:
 
 ```json
 [
