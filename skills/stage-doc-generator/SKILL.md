@@ -114,7 +114,7 @@ Architectural understanding depends heavily on visual structure. Use ASCII diagr
 | 5. Core Processing Flow | Data Flow | Show parallel execution, branching, and merge |
 | 6. Prompt/Rule Contracts | Data Flow | Show prompt assembly pipeline |
 
-Each diagram type (Data Flow, Schema Hierarchy, Function Call Tree, Pipeline Position) has specific formatting rules and examples. See the Appendix in `references/stage-implementation-spec.md` for character set, per-type rules, and examples.
+See the Appendix in `references/stage-implementation-spec.md` for character set and general rules. Per-type examples appear inline in the relevant spec sections (1, 3.3, 5.x, 6.1).
 
 ## Guidelines
 
@@ -154,6 +154,10 @@ Skill-specific values:
 - **type**: choose based on the primary nature of the change — `feature` (new capability), `fix` (bug resolved), `refactor` (restructured), `decision` (design choice), or `risk` (issue identified)
 - **source**: always `"stage-doc"`
 - **related_docs**: absolute path to the generated `{stage_name}-implementation-{YYYY-MM-DD}.md`
+
+**New document**: summary should capture what the stage implements. Context should explain why this stage was documented now.
+
+**Updating an existing document**: summary should describe what changed since the last version (e.g. "Updated section 5-7 to reflect new retry loop"). Context should explain why the update was needed (e.g. "Stage gained repair logic in v2.4; previous doc didn't cover it").
 
 If the project slug cannot be determined, skip silently.
 

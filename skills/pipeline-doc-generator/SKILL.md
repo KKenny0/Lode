@@ -184,6 +184,10 @@ Skill-specific values:
 - **source**: always `"pipeline-doc"`
 - **related_docs**: absolute path to the generated `pipeline-evolution-v{version}-{YYYY-MM-DD}.md`
 
+**New document**: summary should capture the architectural evolution described. Context should explain what triggered this evolution.
+
+**Updating an existing document**: summary should describe what sections changed and why (e.g. "Updated trade-off analysis and added rollback plan for v2.5 migration"). Context should explain what made the update necessary (e.g. "New monitoring data revealed instability in the original rollback strategy").
+
 If the project slug cannot be determined, skip silently.
 
 ## Shared Storage Convention

@@ -1,4 +1,4 @@
-# Weekly PPT Shared Convention
+# Weekly PPT Shared Convention (v1.1)
 
 This file defines the shared data schema and storage convention used by all skills in this monorepo. When generating change entries, follow this spec exactly so downstream consumers (like weekly PPT generators) can reliably read them.
 
@@ -33,7 +33,7 @@ If the `weeks/{week}/` directory does not exist, create it before writing.
 
 Resolution order:
 1. Look up the current project path in `{base_path}/projects.json` → use its `slug`
-2. If not found, derive from the project directory name: lowercase, replace spaces/underscores with hyphens
+2. If not found or the file contains invalid JSON, derive from the project directory name: lowercase, replace spaces/underscores with hyphens
 
 ## projects.json (Optional)
 
@@ -111,6 +111,7 @@ Pattern: `[Trigger/motivation]. [Approach chosen] → [expected impact or what i
 - **Append** new entries to the existing array (read → append → write)
 - Do not deduplicate or overwrite — the consumer handles merging
 - **Silent failure**: if the project slug cannot be determined or the write fails, skip silently. The primary deliverable of each skill is never the change entry — it is always a side effect.
+- **Concurrent writes**: two sessions writing to the same `{slug}.json` simultaneously may lose data. This is acceptable for the intended use case (single developer, single machine). If concurrent access becomes a concern, the consumer should implement merge logic.
 
 ## Consumers
 
