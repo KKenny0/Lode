@@ -174,7 +174,7 @@ The change entry JSON looks like this:
   "type": "feature | fix | refactor | decision | risk",
   "summary": "1 sentence, engineering-level abstraction",
   "context": "1-2 sentences explaining why and impact",
-  "related_docs": ["path/to/doc"],
+  "related_docs": ["/absolute/path/to/doc"],
   "source": "pipeline-doc"
 }
 ```
@@ -182,7 +182,7 @@ The change entry JSON looks like this:
 Skill-specific values:
 - **type**: `"decision"` (pipeline architecture evolution is inherently a decision)
 - **source**: always `"pipeline-doc"`
-- **related_docs**: path to the generated `pipeline-evolution-v{version}-{YYYY-MM-DD}.md`
+- **related_docs**: absolute path to the generated `pipeline-evolution-v{version}-{YYYY-MM-DD}.md`
 
 If the project slug cannot be determined, skip silently.
 

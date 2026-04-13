@@ -45,7 +45,7 @@ For each distinct change, produce an entry following the schema in `references/w
 - **type**: Classify as `feature` | `fix` | `refactor` | `decision` | `risk`
 - **summary**: 1 sentence, engineering-level — what was done, not how
 - **context**: 1-2 sentences — why it was done and what impact it has
-- **related_docs**: paths to any docs that were created or modified during this session (stage-docs, pipeline-docs, design docs)
+- **related_docs**: absolute paths to any docs that were created or modified during this session (stage-docs, pipeline-docs, design docs)
 - **source**: `"session-recap"`
 - **timestamp**: current time in ISO 8601
 

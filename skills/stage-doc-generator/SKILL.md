@@ -145,7 +145,7 @@ The change entry JSON looks like this:
   "type": "feature | fix | refactor | decision | risk",
   "summary": "1 sentence, engineering-level abstraction",
   "context": "1-2 sentences explaining why and impact",
-  "related_docs": ["path/to/doc"],
+  "related_docs": ["/absolute/path/to/doc"],
   "source": "stage-doc"
 }
 ```
@@ -153,7 +153,7 @@ The change entry JSON looks like this:
 Skill-specific values:
 - **type**: `"feature"` (new implementation) or `"decision"` (design choice)
 - **source**: always `"stage-doc"`
-- **related_docs**: path to the generated `{stage_name}-implementation-{YYYY-MM-DD}.md`
+- **related_docs**: absolute path to the generated `{stage_name}-implementation-{YYYY-MM-DD}.md`
 
 If the project slug cannot be determined, skip silently.
 

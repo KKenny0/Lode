@@ -62,7 +62,7 @@ Each `{base_path}/weeks/{week}/{slug}.json` file contains a **JSON array** of en
     "type": "feature",
     "summary": "Built scene composition system with auto-layout and overlap resolution",
     "context": "Replaced manual positioning with constraint solver. Resolves 3 bad cases from v2.3 batch eval.",
-    "related_docs": ["docs/stage-composition-implementation.md"],
+    "related_docs": ["/Users/dev/projects/my-project/docs/stage-composition-implementation.md"],
     "source": "session-recap"
   }
 ]
@@ -76,7 +76,7 @@ Each `{base_path}/weeks/{week}/{slug}.json` file contains a **JSON array** of en
 | `type` | enum | Yes | `feature` \| `fix` \| `refactor` \| `decision` \| `risk` |
 | `summary` | string | Yes | 1 sentence, engineering-level abstraction |
 | `context` | string | Yes | 1-2 sentences explaining why and impact |
-| `related_docs` | string[] | No | Paths to relevant documentation files |
+| `related_docs` | string[] | No | Absolute paths to relevant documentation files |
 | `source` | enum | Yes | `session-recap` \| `stage-doc` \| `pipeline-doc` |
 
 ### Type Definitions
