@@ -15,7 +15,6 @@ All subsequent path references in this document use `{base_path}` as shorthand f
 
 ```
 {base_path}/
-  config.json            # Optional: base_path override (only here, not in custom location)
   projects.json          # Optional project registry
   weeks/
     2026-W15/
@@ -78,6 +77,26 @@ Each `{base_path}/weeks/{week}/{slug}.json` file contains a **JSON array** of en
 | `context` | string | Yes | 1-2 sentences explaining why and impact |
 | `related_docs` | string[] | No | Absolute paths to relevant documentation files |
 | `source` | enum | Yes | `session-recap` \| `stage-doc` \| `pipeline-doc` |
+
+### Writing `summary`
+
+One sentence that answers: **what was done + how**. Use active voice, specific technical nouns, avoid generic verbs.
+
+Pattern: `[Action verb] [specific output/change] [with/using/replacing key approach]`
+
+- Good: "Added retry-with-repair loop to narrative validation, replacing single-pass validation"
+- Good: "Extracted character extraction into a standalone stage with fan-out parallelism"
+- Avoid: "Updated documentation" / "Made improvements" / "Fixed issues"
+
+### Writing `context`
+
+1-2 sentences that answer: **why this was needed + what impact it has**. Capture the design intent and reasoning that git commits rarely convey.
+
+Pattern: `[Trigger/motivation]. [Approach chosen] → [expected impact or what it resolves].`
+
+- Good: "Single-pass validation missed 3 recurring failure patterns from v2.3 eval. Repair loop now catches and corrects these automatically, reducing manual review by ~40%."
+- Good: "Character extraction was tightly coupled with parsing, blocking independent iteration. New isolation allows tuning extraction without risking parse stability."
+- Avoid: Repeating the summary / describing implementation details / vague statements like "improved quality"
 
 ### Type Definitions
 

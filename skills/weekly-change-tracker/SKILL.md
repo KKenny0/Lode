@@ -40,13 +40,26 @@ Group related work into logical units. A session that touched 15 files for one f
 
 ### Step 3: Generate Change Entries
 
-For each distinct change, produce an entry following the schema in `references/weekly-ppt-convention.md` (read this file for the full spec).
+For each distinct change, produce an entry following the schema in `references/weekly-ppt-convention.md` (read this file for the full spec, including structured guidance on writing summary and context).
+
+The change entry JSON looks like this:
+
+```json
+{
+  "timestamp": "ISO 8601",
+  "type": "feature | fix | refactor | decision | risk",
+  "summary": "1 sentence, engineering-level abstraction",
+  "context": "1-2 sentences explaining why and impact",
+  "related_docs": ["/absolute/path/to/doc"],
+  "source": "session-recap"
+}
+```
 
 - **type**: Classify as `feature` | `fix` | `refactor` | `decision` | `risk`
 - **summary**: 1 sentence, engineering-level — what was done, not how
 - **context**: 1-2 sentences — why it was done and what impact it has
 - **related_docs**: absolute paths to any docs that were created or modified during this session (stage-docs, pipeline-docs, design docs)
-- **source**: `"session-recap"`
+- **source**: always `"session-recap"`
 - **timestamp**: current time in ISO 8601
 
 **Granularity**: Maximum 5 entries per session. If the session was complex, aggressively merge related changes. The goal is a concise log, not a detailed diary.
@@ -65,6 +78,7 @@ Print a brief confirmation, e.g.:
 
 ```
 记录了 3 条变更 → comic-automation (2026-W15)
+  写入: ~/.weekly-ppt/weeks/2026-W15/comic-automation.json
   - [feature] Built scene composition system
   - [fix] Fixed LLM timeout in narrative stage
   - [decision] Chose constraint solver over manual layout

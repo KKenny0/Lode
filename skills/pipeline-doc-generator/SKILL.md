@@ -162,7 +162,7 @@ Each diagram type (Pipeline Structure, Before/After, Data Flow, Cross-Stage Cont
 4. Confirm trade-offs include both gains and costs
 5. Make sure references point to correct locations
 
-### Step 5: Export Change Summary
+## Step 5: Export Change Summary
 
 After completing the document, append a change entry to `{base_path}/weeks/{current-ISO-week}/{project-slug}.json` following the schema in `references/weekly-ppt-convention.md`.
 
@@ -180,7 +180,7 @@ The change entry JSON looks like this:
 ```
 
 Skill-specific values:
-- **type**: `"decision"` (pipeline architecture evolution is inherently a decision)
+- **type**: choose based on the primary nature of the change — `feature` (new capability), `fix` (bug resolved), `refactor` (restructured), `decision` (design choice), or `risk` (issue identified)
 - **source**: always `"pipeline-doc"`
 - **related_docs**: absolute path to the generated `pipeline-evolution-v{version}-{YYYY-MM-DD}.md`
 

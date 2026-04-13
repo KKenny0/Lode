@@ -133,7 +133,7 @@ Each diagram type (Data Flow, Schema Hierarchy, Function Call Tree, Pipeline Pos
 3. Ensure JSON examples are valid
 4. Confirm source of truth points to correct locations
 
-### Step 5: Export Change Summary
+## Step 5: Export Change Summary
 
 After completing the document, append a change entry to `{base_path}/weeks/{current-ISO-week}/{project-slug}.json` following the schema in `references/weekly-ppt-convention.md`.
 
@@ -151,7 +151,7 @@ The change entry JSON looks like this:
 ```
 
 Skill-specific values:
-- **type**: `"feature"` (new implementation) or `"decision"` (design choice)
+- **type**: choose based on the primary nature of the change — `feature` (new capability), `fix` (bug resolved), `refactor` (restructured), `decision` (design choice), or `risk` (issue identified)
 - **source**: always `"stage-doc"`
 - **related_docs**: absolute path to the generated `{stage_name}-implementation-{YYYY-MM-DD}.md`
 
