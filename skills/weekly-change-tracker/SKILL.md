@@ -5,8 +5,6 @@ description: >
   signals end of a work session — e.g. "收工", "今天到这", "done", "wrap up",
   "that's it for today", "好了", "先这样". Also trigger on explicit requests like
   "记录变更", "log changes", "记一下今天做了什么".
-  Read conversation context, extract structured change entries, append to {base_path}/weeks/.
-  See references/weekly-ppt-convention.md for base path resolution (env var, config, or default).
   Do NOT trigger when the user is simply saying goodbye or switching topics.
 ---
 
@@ -42,7 +40,7 @@ Group related work into logical units. A session that touched 15 files for one f
 
 ### Step 3: Generate Change Entries
 
-For each distinct change, produce an entry following the schema in `references/weekly-ppt-convention.md`:
+For each distinct change, produce an entry following the schema in `references/weekly-ppt-convention.md` (read this file for the full spec).
 
 - **type**: Classify as `feature` | `fix` | `refactor` | `decision` | `risk`
 - **summary**: 1 sentence, engineering-level — what was done, not how

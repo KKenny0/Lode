@@ -1,4 +1,3 @@
-```markdown
 # Pipeline Evolution / Architecture Doc 编写指南（v1.1）
 
 ## Table of Contents
@@ -308,4 +307,108 @@ v2.3 → v2.4
 5. 优先描述结构变化与数据流变化
 6. 禁止出现 prompt / 代码细节
 7. 内容必须工程化、可落地
+
+---
+
+## Appendix: Visual Documentation Guide
+
+### Character Set
+
+Use Unicode box-drawing characters for diagrams. They render reliably in all Markdown viewers and terminals:
+
 ```
+Horizontal:  ─ ── ─────
+Vertical:    │
+Corners:     ┌ ┐ └ ┘
+T-junctions: ├ ┤ ┬ ┴
+Cross:       ┼
+Arrows:      ▼ ▲ → ← ► ◄
+Branches:    ├── └──
+```
+
+### Diagram Types
+
+#### Pipeline Structure
+
+For showing the overall system topology and stage relationships.
+
+```markdown
+                ┌─────────────────────────────────────┐
+                │         Pipeline Orchestrator        │
+                └─────────────────────────────────────┘
+                                  │
+                ┌─────────────────┴─────────────────┐
+                │                                   │
+        ┌───────▼────────┐              ┌──────────▼──────────┐
+        │  Parse Stage   │              │  Extract Characters │
+        └────────────────┘              └─────────────────────┘
+```
+
+Key rules:
+- Use box-drawing characters for clean borders
+- Show data flow with arrows
+- Group related stages
+- Keep width ≤ 80 characters
+
+#### Before/After Comparison
+
+For showing architectural evolution.
+
+```markdown
+Before:
+┌─────────┐    ┌─────────┐    ┌─────────┐
+│ Stage A │───▶│ Stage B │───▶│ Stage C │
+└─────────┘    └─────────┘    └─────────┘
+
+After:
+┌─────────┐    ┌─────────┐    ┌─────────┐
+│ Stage A │───▶│ Stage B │───▶│ Stage C │
+└─────────┘    └─────────┘    └─────────┘
+                    │
+                    ▼
+              ┌─────────┐
+              │ Stage D │  (NEW)
+              └─────────┘
+```
+
+#### Data Flow Overview
+
+For showing how data flows through the pipeline.
+
+```markdown
+User Input (Script)
+      │
+      ▼
+┌─────────────┐
+│    Parse    │ ──▶ narrative_timeline
+└─────────────┘
+      │
+      ▼
+┌─────────────┐
+│   Slice     │ ──▶ narrative_slices[]
+└─────────────┘
+```
+
+#### Cross-Stage Contracts
+
+For showing data relationships between stages.
+
+```markdown
+Stage A (Parse)                    Stage B (Slice)
+─────────────────                  ─────────────────
+Outputs:                    ──▶   Inputs:
+- narrative_timeline              - narrative_timeline (required)
+- scenes                          - scenes (optional)
+
+Contract Changes:
+v2.2 → v2.3: Added scenes output (optional)
+```
+
+### General Diagram Rules
+
+1. **Always use fenced code blocks** (` ``` `) — never inline monospace
+2. **Width**: Keep diagrams ≤ 80 characters wide. If wider, split into sub-diagrams
+3. **Horizontal alignment matters** — use consistent indentation for parallel paths
+4. **Labels on branches** — every branch point should have a label
+5. **Prefer diagrams over prose** for system topology, data flow, and stage relationships
+6. **Don't over-diagram** — simple sequential flows are fine as prose

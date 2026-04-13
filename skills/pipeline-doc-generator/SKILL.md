@@ -132,7 +132,7 @@ Use the exact template from `references/pipeline-doc.md`.
 
 Architecture understanding depends heavily on visual structure. Use ASCII diagrams to make data flows, system topology, and stage relationships immediately visible.
 
-### Diagram Types for Pipeline Docs
+### When to Use Diagrams
 
 | Section | Diagram Type | Purpose |
 |---------|-------------|---------|
@@ -141,118 +141,7 @@ Architecture understanding depends heavily on visual structure. Use ASCII diagra
 | 4. Key Architectural Changes | Before/After Comparison | Show structural evolution |
 | 6. Dataflow and Artifact Evolution | Data Flow Diagram | Show how data moves through stages |
 
-### Character Set
-
-Use Unicode box-drawing characters:
-
-```
-Horizontal:  ─ ── ─────
-Vertical:    │
-Corners:     ┌ ┐ └ ┘
-T-junctions: ├ ┤ ┬ ┴
-Cross:       ┼
-Arrows:      ▼ ▲ → ← ► ◄
-```
-
-### Diagram Type 1: Pipeline Structure
-
-For showing the overall system topology and stage relationships.
-
-```markdown
-                    ┌─────────────────────────────────────┐
-                    │         Pipeline Orchestrator        │
-                    └─────────────────────────────────────┘
-                                      │
-                    ┌─────────────────┴─────────────────┐
-                    │                                   │
-            ┌───────▼────────┐              ┌──────────▼──────────┐
-            │  Parse Stage   │              │  Extract Characters │
-            └────────────────┘              └─────────────────────┘
-                    │                                   │
-                    └─────────────────┬─────────────────┘
-                                      ▼
-                            ┌───────────────────┐
-                            │  Narrative Slice  │
-                            └───────────────────┘
-                                      │
-                    ┌─────────────────┴─────────────────┐
-                    │                                   │
-            ┌───────▼────────┐              ┌──────────▼──────────┐
-            │ Analyze Scenes │              │ Generate Storyboard │
-            └────────────────┘              └─────────────────────┘
-```
-
-Key rules:
-- Use box-drawing characters for clean borders
-- Show data flow with arrows
-- Group related stages
-- Keep width ≤ 80 characters
-
-### Diagram Type 2: Before/After Comparison
-
-For showing architectural evolution.
-
-```markdown
-Before:
-┌─────────┐    ┌─────────┐    ┌─────────┐
-│ Stage A │───▶│ Stage B │───▶│ Stage C │
-└─────────┘    └─────────┘    └─────────┘
-
-After:
-┌─────────┐    ┌─────────┐    ┌─────────┐
-│ Stage A │───▶│ Stage B │───▶│ Stage C │
-└─────────┘    └─────────┘    └─────────┘
-                    │
-                    ▼
-              ┌─────────┐
-              │ Stage D │  (NEW)
-              └─────────┘
-```
-
-### Diagram Type 3: Data Flow Overview
-
-For showing how data flows through the pipeline.
-
-```markdown
-User Input (Script)
-      │
-      ▼
-┌─────────────┐
-│    Parse    │ ──▶ narrative_timeline
-└─────────────┘
-      │
-      ▼
-┌─────────────┐
-│   Slice     │ ──▶ narrative_slices[]
-└─────────────┘
-      │
-      ▼
-┌─────────────┐
-│  Analyze    │ ──▶ scene_analysis[]
-└─────────────┘
-      │
-      ▼
-┌─────────────┐
-│ Storyboard  │ ──▶ storyboard
-└─────────────┘
-```
-
-### Diagram Type 4: Cross-Stage Contracts
-
-For showing data relationships between stages.
-
-```markdown
-Stage A (Parse)                    Stage B (Slice)
-─────────────────                  ─────────────────
-Outputs:                    ──▶   Inputs:
-- narrative_timeline              - narrative_timeline (required)
-- scenes                          - scenes (optional)
-                                  - config.overrides
-
-Contract Changes:
-v2.2 → v2.3: Added scenes output (optional)
-v2.3 → v2.4: narrative_timeline now includes audio_notes
-```
+Each diagram type (Pipeline Structure, Before/After, Data Flow, Cross-Stage Contracts) has specific formatting rules and examples. See the Appendix in `references/pipeline-doc.md` for character set, per-type rules, and examples.
 
 ## Guidelines
 
@@ -275,15 +164,28 @@ v2.3 → v2.4: narrative_timeline now includes audio_notes
 
 ### Step 5: Export Change Summary
 
-After completing the document, append a change entry to `{base_path}/weeks/{current-ISO-week}/{project-slug}.json` following `references/weekly-ppt-convention.md`.
+After completing the document, append a change entry to `{base_path}/weeks/{current-ISO-week}/{project-slug}.json` following the schema in `references/weekly-ppt-convention.md`.
+
+The change entry JSON looks like this:
+
+```json
+{
+  "timestamp": "ISO 8601",
+  "type": "feature | fix | refactor | decision | risk",
+  "summary": "1 sentence, engineering-level abstraction",
+  "context": "1-2 sentences explaining why and impact",
+  "related_docs": ["path/to/doc"],
+  "source": "pipeline-doc"
+}
+```
 
 Skill-specific values:
 - **type**: `"decision"` (pipeline architecture evolution is inherently a decision)
-- **source**: `"pipeline-doc"`
+- **source**: always `"pipeline-doc"`
 - **related_docs**: path to the generated `pipeline-evolution-v{version}-{YYYY-MM-DD}.md`
 
 If the project slug cannot be determined, skip silently.
 
 ## Shared Storage Convention
 
-This skill participates in the weekly-ppt shared storage system alongside `stage-doc-generator` and `weekly-change-tracker`. The full schema and storage rules are defined in `references/weekly-ppt-convention.md`.
+This skill participates in the weekly-ppt shared storage system alongside `stage-doc-generator` and `weekly-change-tracker`. Read `references/weekly-ppt-convention.md` for the full schema and storage rules.

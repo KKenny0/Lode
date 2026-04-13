@@ -390,3 +390,30 @@ type 示例：
 
 并明确：
 > 本文档仅为解释性描述，实际行为以代码为准
+
+---
+
+## Appendix: Visual Documentation Guide
+
+### Character Set
+
+Use Unicode box-drawing characters for diagrams. They render reliably in all Markdown viewers and terminals:
+
+```
+Horizontal:  ─ ── ─────
+Vertical:    │
+Corners:     ┌ ┐ └ ┘
+T-junctions: ├ ┤ ┬ ┴
+Cross:       ┼
+Arrows:      ▼ ▲ → ← ► ◄
+Branches:    ├── └──
+```
+
+### General Diagram Rules
+
+1. **Always use fenced code blocks** (` ``` `) — never inline monospace
+2. **Width**: Keep diagrams ≤ 80 characters wide. If wider, split into sub-diagrams
+3. **Horizontal alignment matters** — use consistent indentation for parallel paths
+4. **Labels on branches** — every branch point should have a label (PASS/FAIL, success/error, etc.)
+5. **Prefer diagrams over prose** for data flow, type relationships, pipeline topology, and conditional branching logic
+6. **Don't over-diagram** — simple sequential steps are fine as numbered lists. Reserve diagrams for non-trivial flows with branching, parallelism, or composition

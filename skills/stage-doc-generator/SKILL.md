@@ -114,161 +114,7 @@ Architectural understanding depends heavily on visual structure. Use ASCII diagr
 | 5. Core Processing Flow | Data Flow | Show parallel execution, branching, and merge |
 | 6. Prompt/Rule Contracts | Data Flow | Show prompt assembly pipeline |
 
-### Character Set
-
-Use Unicode box-drawing characters for diagrams. They render reliably in all Markdown viewers and terminals:
-
-```
-Horizontal:  ─ ── ─────
-Vertical:    │
-Corners:     ┌ ┐ └ ┘
-T-junctions: ├ ┤ ┬ ┴
-Cross:       ┼
-Arrows:      ▼ ▲ → ← ► ◄
-Branches:    ├── └──
-```
-
-### Diagram Type 1: Data Flow
-
-For showing how data moves through the stage — parallel execution, branching paths (PASS/FAIL), and merge points.
-
-```markdown
-                        ┌─── input_1 ───┐
-                        │               │
-                        │ (concurrent)  │
-                        ▼               ▼
-                  process_a         process_b
-                        │               │
-                 ┌──────┴──────┐  ┌─────┴─────┐
-                 PASS          │  PASS        │
-                 │          FAIL              FAIL
-                 │             │              │
-                 │         repair           repair
-                 │             │              │
-                 ▼             ▼              ▼
-           (result_a)    (result_b)
-                 │              │
-                 └──────┬───────┘
-                        ▼
-                   merge_results
-                        │
-                        ▼
-                   final_output
-```
-
-Key rules:
-- Each processing step is a labeled box or line
-- Branching uses `┌──┤` or `├──┐` T-junctions
-- Arrows (`▼`) show flow direction at critical transitions
-- Use `PASS` / `FAIL` labels on conditional branches
-- Parallel sections are shown side-by-side at the same indentation level
-- Wrap the entire diagram in a fenced code block (` ``` `)
-
-### Diagram Type 2: Schema Hierarchy
-
-For showing type inheritance, composition, and field-level detail between related data structures.
-
-```markdown
-                SliceDraft (LLM output layer)
-                ─────────────────────────────
-                source_text: str
-                narrative_summary: str
-                content_type: Literal
-                extra: forbid
-                       │
-                       │  inherits
-                       ▼
-                NarrativeSlice (system enrichment layer)
-                ────────────────────────────────────────
-                + slice_id: str
-                + slice_index: int
-                + location: str
-                       │
-                       │  composed into
-                       ▼
-                NarrativeSlicePlan (scene wrapper)
-                ──────────────────────────────────
-                title: str
-                slices: list[NarrativeSlice]
-```
-
-Key rules:
-- Each type is a horizontal block with `───────` separators
-- Show fields with their types on separate lines
-- Use `│` and `▼` for inheritance/composition arrows with labels
-- Use `+` prefix for fields added at each layer
-- Include key constraints (e.g., `extra: forbid`) inline
-
-### Diagram Type 3: Function Call Tree
-
-For showing the execution hierarchy within a module — which functions call which, with parameters and return values.
-
-```markdown
-run(inputs)
- ├── ValidateInputs.model_validate(inputs)          # input validation
- ├── _build_episode_order(parsed_scenes)              # extract episode order
- ├── asyncio.gather(                                  # concurrent fan-out
- │     _process_scene(scene_0),
- │     _process_scene(scene_1),
- │     ...  (Semaphore limited)
- │ )
- ├── sort by scene_order
- └── materialize_output(all_results, parsed_scenes)
-```
-
-For loops and branching within a function:
-
-```markdown
-for attempt in range(max_attempts):
-    ├── render_template(system + user)
-    ├── llm_call → structured_output
-    ├── _finalize → deterministic enrichment
-    ├── _validate → coverage check
-    │
-    ├── PASS → return result
-    │
-    └── FAIL
-          └── _build_repair_prompt
-              └── next attempt (repair replaces user_prompt)
-```
-
-Key rules:
-- Root function at the top, no indentation
-- Each call is `├──` or `└──` with function name and brief comment
-- Use `# comment` for inline annotations (what the call does)
-- Show loops with `for ... :` headers followed by indented tree
-- Show conditional branches with `PASS →` / `FAIL →` labels
-- Keep it readable — if a function has >8 sub-calls, split into sub-diagrams
-
-### Diagram Type 4: Pipeline Position
-
-For showing where the stage sits in the overall pipeline execution order.
-
-```markdown
-parse → extract_characters → THIS_STAGE → analyze_scenes → generate_storyboard
-                                ↑
-                     dependencies: (parse, extract_characters)
-                     artifact_input_key: "narrative_timeline"
-```
-
-Key rules:
-- Linear left-to-right flow with `→`
-- `THIS_STAGE` or `↑` marks the current stage
-- Dependencies listed below with `↑` connector
-- Keep it to a single line for the main flow; add context below
-
-### General Diagram Rules
-
-1. **Always use fenced code blocks** (` ``` `) — never inline monospace
-2. **Width**: Keep diagrams ≤ 80 characters wide. If wider, split into sub-diagrams
-3. **Horizontal alignment matters** — use consistent indentation for parallel paths
-4. **Labels on branches** — every branch point should have a label (PASS/FAIL, success/error, etc.)
-5. **Prefer diagrams over prose** for:
-   - Data flow between functions/modules
-   - Type relationships and inheritance
-   - Pipeline topology
-   - Conditional branching logic
-6. **Don't over-diagram** — simple sequential steps are fine as numbered lists. Reserve diagrams for non-trivial flows with branching, parallelism, or composition.
+Each diagram type (Data Flow, Schema Hierarchy, Function Call Tree, Pipeline Position) has specific formatting rules and examples. See the Appendix in `references/stage-implementation-spec.md` for character set, per-type rules, and examples.
 
 ## Guidelines
 
@@ -289,15 +135,28 @@ Key rules:
 
 ### Step 5: Export Change Summary
 
-After completing the document, append a change entry to `{base_path}/weeks/{current-ISO-week}/{project-slug}.json` following `references/weekly-ppt-convention.md`.
+After completing the document, append a change entry to `{base_path}/weeks/{current-ISO-week}/{project-slug}.json` following the schema in `references/weekly-ppt-convention.md`.
+
+The change entry JSON looks like this:
+
+```json
+{
+  "timestamp": "ISO 8601",
+  "type": "feature | fix | refactor | decision | risk",
+  "summary": "1 sentence, engineering-level abstraction",
+  "context": "1-2 sentences explaining why and impact",
+  "related_docs": ["path/to/doc"],
+  "source": "stage-doc"
+}
+```
 
 Skill-specific values:
 - **type**: `"feature"` (new implementation) or `"decision"` (design choice)
-- **source**: `"stage-doc"`
+- **source**: always `"stage-doc"`
 - **related_docs**: path to the generated `{stage_name}-implementation-{YYYY-MM-DD}.md`
 
 If the project slug cannot be determined, skip silently.
 
 ## Shared Storage Convention
 
-This skill participates in the weekly-ppt shared storage system alongside `pipeline-doc-generator` and `weekly-change-tracker`. The full schema and storage rules are defined in `references/weekly-ppt-convention.md`.
+This skill participates in the weekly-ppt shared storage system alongside `pipeline-doc-generator` and `weekly-change-tracker`. Read `references/weekly-ppt-convention.md` for the full schema and storage rules.
