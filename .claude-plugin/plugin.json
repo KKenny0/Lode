@@ -1,6 +1,6 @@
 {
-  "name": "dev-context-skills",
-  "description": "开发上下文捕获工具集：变更追踪、Stage 文档、Pipeline 架构文档",
+  "name": "work-sync-skills",
+  "description": "工作同步工具集：变更追踪、文档生成、日报更新、周报PPT",
   "author": {
     "name": "Kennywu"
   }

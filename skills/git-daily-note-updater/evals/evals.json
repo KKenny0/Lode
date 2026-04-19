@@ -1,0 +1,192 @@
+{
+  "skill_name": "git-daily-note-updater",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "根据今天的 git 提交历史更新日报，仓库路径 /project/storyboard-automation-hub，日报文件 /workspace/Daily Note.md",
+      "expected_output": "获取今天的 git 提交，分析内容，按日报格式更新对应日期的条目",
+      "assertions": [
+        {
+          "name": "correct_date_section",
+          "description": "更新了正确日期的日报部分"
+        },
+        {
+          "name": "proper_format",
+          "description": "使用正确的日报格式（层级、checkbox）"
+        },
+        {
+          "name": "category_classification",
+          "description": "提交被正确分类到【能力升级】等类别"
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "帮我更新 2026-03-06 的日报，仓库在 /project/storyboard-automation-hub",
+      "expected_output": "获取指定日期的 git 提交并更新日报",
+      "assertions": [
+        {
+          "name": "specified_date",
+          "description": "获取了正确的指定日期提交"
+        },
+        {
+          "name": "content_merged",
+          "description": "同类提交被合理合并"
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "根据 storyboard-automation-hub 项目的提交记录写一份工作日报",
+      "expected_output": "询问具体参数（日期、日报文件路径）后执行更新",
+      "assertions": [
+        {
+          "name": "ask_for_params",
+          "description": "主动询问缺失的必要参数"
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "更新今天的日报，这是第一次使用这个 skill",
+      "expected_output": "检测到首次使用（无全局配置也无项目配置），提示创建全局配置 ~/.claude/daily-note-config.yaml",
+      "assertions": [
+        {
+          "name": "first_time_detection",
+          "description": "正确检测到首次使用并提示创建全局配置"
+        },
+        {
+          "name": "global_config_path",
+          "description": "配置文件路径指向 ~/.claude/daily-note-config.yaml 而非项目根目录"
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "prompt": "我有配置文件，更新今天的日报，仓库列表包含 /project/a 和 /project/b",
+      "expected_output": "从多个仓库获取提交并合并到日报",
+      "assertions": [
+        {
+          "name": "multi_repo_support",
+          "description": "正确处理多个仓库"
+        },
+        {
+          "name": "commits_merged",
+          "description": "提交被正确合并到日报"
+        }
+      ]
+    },
+    {
+      "id": 6,
+      "prompt": "我的配置文件定义了【安全加固】类别，提交消息包含 security 关键词",
+      "expected_output": "使用自定义类别分类",
+      "assertions": [
+        {
+          "name": "custom_category_applied",
+          "description": "正确应用自定义类别"
+        }
+      ]
+    },
+    {
+      "id": 7,
+      "prompt": "我已经在日报中记录了今天的一部分工作，现在再次运行更新日报",
+      "expected_output": "检测到当天已有条目，在现有条目下增量追加新内容，不重复创建日期标题",
+      "assertions": [
+        {
+          "name": "incremental_update",
+          "description": "检测到已有当天条目后进行增量更新而非重复创建"
+        },
+        {
+          "name": "no_duplicate_date_header",
+          "description": "不会产生重复的日期标题"
+        }
+      ]
+    },
+    {
+      "id": 8,
+      "prompt": "我有一个项目需要单独配置日报路径，其他项目用全局配置。帮我设置项目级配置",
+      "expected_output": "在项目根目录创建 .daily-note-config.yaml，只覆盖 daily_note_path，其他字段从全局继承",
+      "assertions": [
+        {
+          "name": "project_override",
+          "description": "创建项目级配置而非修改全局配置"
+        },
+        {
+          "name": "partial_override",
+          "description": "只覆盖必要字段，其他字段可从全局继承"
+        }
+      ]
+    },
+    {
+      "id": 9,
+      "prompt": "今天没有提交任何代码，更新一下今天的日报",
+      "expected_output": "检测到当天无提交，告知用户当天没有 git 提交记录，不生成空条目",
+      "assertions": [
+        {
+          "name": "no_empty_entry",
+          "description": "不会生成空的日报条目"
+        },
+        {
+          "name": "inform_user",
+          "description": "明确告知用户当天无提交"
+        }
+      ]
+    },
+    {
+      "id": 10,
+      "prompt": "补过去三天的日报",
+      "expected_output": "获取最近三天的提交，按日期从新到旧生成多个日期条目",
+      "assertions": [
+        {
+          "name": "multi_date_support",
+          "description": "正确处理多日期范围"
+        },
+        {
+          "name": "date_ordering",
+          "description": "日期条目从新到旧排列"
+        }
+      ]
+    },
+    {
+      "id": 11,
+      "prompt": "我的仓库路径是 /tmp/not-a-repo，更新今天的日报",
+      "expected_output": "检测到路径不是有效的 git 仓库，告知用户路径无效",
+      "assertions": [
+        {
+          "name": "invalid_repo_detection",
+          "description": "检测到非 git 仓库并提示用户"
+        }
+      ]
+    },
+    {
+      "id": 12,
+      "prompt": "更新今天的日报，commit 有 feat(auth): add JWT 和 fix(auth): fix JWT expiry，应该合并",
+      "expected_output": "将同一功能（auth/JWT）的 feat 和 fix commit 合并为一条日报条目",
+      "assertions": [
+        {
+          "name": "smart_merge",
+          "description": "同功能的 feat + fix 被合并为一条"
+        },
+        {
+          "name": "merged_category",
+          "description": "合并后取最高优先级类别（能力升级 > 问题定位）"
+        }
+      ]
+    },
+    {
+      "id": 13,
+      "prompt": "我开了 enable_smart_classify，有个 commit 是 chore(deps): bump eslint from 8 to 9，帮我分类",
+      "expected_output": "关键词匹配不到合适类别（chore 不在默认列表），LLM 语义分类判断为类似依赖升级的类别",
+      "assertions": [
+        {
+          "name": "smart_classify_triggered",
+          "description": "关键词匹配失败后启用了语义分类"
+        },
+        {
+          "name": "reasonable_category",
+          "description": "给出了合理的分类（非【其他更新】）"
+        }
+      ]
+    }
+  ]
+}

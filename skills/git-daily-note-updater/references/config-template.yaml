@@ -1,0 +1,21 @@
+# Daily Note Updater Configuration
+# 位置: ~/.claude/daily-note-config.yaml（全局）或项目根目录 .daily-note-config.yaml（项目级）
+
+# 日报文件路径（必填）
+daily_note_path: /path/to/your/Daily Note.md
+
+# 工作仓库列表（可选，不配置则使用当前目录）
+repos:
+  - /path/to/repo1
+  - /path/to/repo2
+
+# 自定义类别（可选，不配置则使用默认类别）
+categories:
+  - name: 【安全加固】
+    patterns: ["security", "auth", "permission"]
+  - name: 【性能优化】
+    patterns: ["perf", "optimize", "speed"]
+
+# 启用 LLM 语义分类（可选，默认 false）
+# 开启后，关键词匹配失败时会将 diff 交给 LLM 判断最合适的分类
+enable_smart_classify: false
