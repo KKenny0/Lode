@@ -2,3 +2,8 @@
 docs/
 *.plan.md
 *.design.md
+
+# Claude Code / plugin config — local only
+CLAUDE.md
+DESIGN.md
+.claude-plugin/
