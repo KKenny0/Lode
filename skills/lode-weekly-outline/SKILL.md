@@ -1,5 +1,5 @@
 ---
-name: weekly-multi-project-ppt-lite
+name: lode-weekly-outline
 description: Use when consolidating multiple projects weekly git activity into a presentation outline, or when user requests cross-project weekly reports, 周报, weekly PPT, or multi-project status summaries
 ---
 

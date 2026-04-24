@@ -1,5 +1,5 @@
 ---
-name: weekly-change-tracker
+name: lode-session-recap
 description: >
   Session-end change log extraction for weekly reporting. Use this skill when the user
   signals end of a work session — e.g. "收工", "今天到这", "done", "wrap up",

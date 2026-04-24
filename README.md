@@ -1,8 +1,8 @@
-# work-sync-skills
+# Lode
 
-Claude Code skill collection — 工作同步工具集。
+Claude Code skill collection — 从开发活动中开采值得留下的东西。
 
-将开发过程中的变更意图、设计决策、架构演进自动记录，并生成日报和周报。
+将开发过程中的变更意图、设计决策、架构演进自动记录，并生成日报和周报大纲。
 
 ## 包含的 Skills
 
@@ -10,30 +10,30 @@ Claude Code skill collection — 工作同步工具集。
 
 | Skill | 用途 | 触发方式 |
 |-------|------|----------|
-| **stage-doc-generator** | 生成 Stage 实现文档（12 节结构） | "为 X stage 写文档"、"stage impl doc" |
-| **pipeline-doc-generator** | 生成 Pipeline 架构演进文档（13 节结构） | "写架构文档"、"pipeline 架构演进" |
-| **weekly-change-tracker** | Session 结束时捕获变更记录 | "收工"、"done"、"今天到这" |
-| **git-daily-note-updater** | 从 git 提交记录生成 Obsidian 日报 | "更新日报"、"日报"、"daily note" |
-| **weekly-ppt-lite** | 多项目 git 周报 PPT 大纲 | "周报"、"weekly PPT" |
+| **lode-stage-doc** | 生成 Stage 实现文档（12 节结构） | "为 X stage 写文档"、"stage impl doc" |
+| **lode-pipeline-doc** | 生成 Pipeline 架构演进文档（13 节结构） | "写架构文档"、"pipeline 架构演进" |
+| **lode-session-recap** | Session 结束时捕获变更记录 | "收工"、"done"、"今天到这" |
+| **lode-git-daily-note** | 从 git 提交记录生成 Obsidian 日报 | "更新日报"、"日报"、"daily note" |
+| **lode-weekly-outline** | 多项目 git 周报 PPT 大纲 | "周报"、"weekly PPT" |
 
 ## 信息流
 
 ```
 开发过程中:
-  weekly-change-tracker (session-end) ──→ ~/.weekly-ppt/weeks/{week}/{slug}.json
-  stage-doc-generator (doc 生成后) ──────→ ~/.weekly-ppt/weeks/{week}/{slug}.json
-  pipeline-doc-generator (doc 生成后) ──→ ~/.weekly-ppt/weeks/{week}/{slug}.json
+  lode-session-recap (session-end) ──→ ~/.weekly-ppt/weeks/{week}/{slug}.json
+  lode-stage-doc (doc 生成后) ───────→ ~/.weekly-ppt/weeks/{week}/{slug}.json
+  lode-pipeline-doc (doc 生成后) ────→ ~/.weekly-ppt/weeks/{week}/{slug}.json
 
 每天:
-  git-daily-note-updater ← git commit history → Obsidian 日报
+  lode-git-daily-note ← git commit history → Obsidian 日报
 
 每周:
-  weekly-ppt-lite ← git commits + ~/.weekly-ppt/ → 周报 PPT 大纲
+  lode-weekly-outline ← git commits + ~/.weekly-ppt/ → 周报大纲
 ```
 
 ## 共享存储约定
 
-stage-doc-generator、pipeline-doc-generator、weekly-change-tracker 遵循同一份 schema，定义在 `references/weekly-ppt-convention.md`。
+lode-stage-doc、lode-pipeline-doc、lode-session-recap 遵循同一份 schema，定义在 `references/weekly-ppt-convention.md`。
 
 存储位置：`~/.weekly-ppt/weeks/{YYYY-WNN}/{project-slug}.json`
 

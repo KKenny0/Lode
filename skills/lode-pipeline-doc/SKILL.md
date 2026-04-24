@@ -1,12 +1,12 @@
 ---
-name: pipeline-doc-generator
+name: lode-pipeline-doc
 description: >
   Generate architecture evolution documentation for the entire Pipeline system — covering
   cross-stage changes, dataflow evolution, architectural trade-offs, and version history.
   Triggers on requests like "写架构文档", "pipeline 架构演进", "系统架构设计",
   "architecture doc", "document the pipeline". Also triggers when the user asks to write
   technical documentation covering MULTIPLE stages or the whole system, even without saying
-  "architecture". Does NOT trigger for single-stage implementation docs (use stage-doc-generator)
+  "architecture". Does NOT trigger for single-stage implementation docs (use lode-stage-doc)
   or general README/API docs.
 ---
 
@@ -27,7 +27,7 @@ Use this skill when:
 
 ## Key Difference from Stage Docs
 
-**Stage Implementation Docs** (`stage-doc-generator`):
+**Stage Implementation Docs** (`lode-stage-doc`):
 - Focus on a single Stage's internal implementation
 - Describe how ONE stage processes data
 - Cover inputs/outputs, validation, error handling for that stage
@@ -145,7 +145,7 @@ Each diagram type (Pipeline Structure, Before/After, Data Flow, Cross-Stage Cont
 
 ## Guidelines
 
-- **Pipeline level only** — don't describe Stage internal implementation; that's what stage-doc-generator is for
+- **Pipeline level only** — don't describe Stage internal implementation; that's what lode-stage-doc is for
 - **Before/After for every change** — show evolution clearly; skipping comparisons makes the doc useless
 - **Problems must be verifiable** — every issue should be testable; vague problems waste readers' time
 - **Solutions must be actionable** — avoid conceptual fluff; if you can't execute it, don't write it
@@ -192,4 +192,4 @@ If the project slug cannot be determined, skip silently.
 
 ## Shared Storage Convention
 
-This skill participates in the weekly-ppt shared storage system alongside `stage-doc-generator` and `weekly-change-tracker`. Read `references/weekly-ppt-convention.md` for the full schema and storage rules.
+This skill participates in the weekly-ppt shared storage system alongside `lode-stage-doc` and `lode-session-recap`. Read `references/weekly-ppt-convention.md` for the full schema and storage rules.

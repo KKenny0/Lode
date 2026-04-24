@@ -1,12 +1,12 @@
 ---
-name: stage-doc-generator
+name: lode-stage-doc
 description: >
   Generate implementation documentation for a single pipeline Stage — covering behavior,
   responsibilities, inputs/outputs, processing flow, and contracts. Triggers on requests like
   "为 X Stage 写文档", "stage 实现文档", "stage impl doc", "document this stage",
   "how does X stage work?" (when expecting formal docs). Also triggers when the user asks to
   write technical documentation about ONE specific stage, even without saying "implementation".
-  Does NOT trigger for pipeline-level architecture docs (use pipeline-doc-generator) or
+  Does NOT trigger for pipeline-level architecture docs (use lode-pipeline-doc) or
   general README/API docs.
 ---
 
@@ -163,4 +163,4 @@ If the project slug cannot be determined, skip silently.
 
 ## Shared Storage Convention
 
-This skill participates in the weekly-ppt shared storage system alongside `pipeline-doc-generator` and `weekly-change-tracker`. Read `references/weekly-ppt-convention.md` for the full schema and storage rules.
+This skill participates in the weekly-ppt shared storage system alongside `lode-pipeline-doc` and `lode-session-recap`. Read `references/weekly-ppt-convention.md` for the full schema and storage rules.

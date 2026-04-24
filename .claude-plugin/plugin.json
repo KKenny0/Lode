@@ -1,6 +1,6 @@
 {
-  "name": "work-sync-skills",
-  "description": "工作同步工具集：变更追踪、文档生成、日报更新、周报PPT",
+  "name": "lode",
+  "description": "从开发活动中开采值得留下的东西：变更追踪、文档生成、日报更新、周报大纲",
   "author": {
     "name": "Kennywu"
   }
