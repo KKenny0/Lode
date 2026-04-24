@@ -15,8 +15,7 @@ These skills share one purpose: **extracting lasting value from raw development 
 | Skill | Purpose | Trigger timing |
 |---|---|---|
 | `lode-git-daily-note` | Obsidian daily notes from git history | Per day, on demand |
-| `lode-pipeline-doc` | 13-section Pipeline architecture docs | After architectural work |
-| `lode-stage-doc` | 12-section Stage implementation docs | After stage implementation |
+| `lode-arch-doc` | Stage impl docs + Pipeline arch docs | After architectural work |
 | `lode-session-recap` | Session-end change log extraction | Per session, at wrap-up |
 | `lode-weekly-outline` | Multi-project weekly PPT outline | Per week, on demand |
 
@@ -31,8 +30,7 @@ Lode is **not** a pipeline. These skills are independent — each triggered at i
 ```
 开发过程中:
   lode-session-recap ──→ ~/.weekly-ppt/weeks/{week}/{slug}.json
-  lode-pipeline-doc ──────→ ~/.weekly-ppt/weeks/{week}/{slug}.json
-  lode-stage-doc ─────────→ ~/.weekly-ppt/weeks/{week}/{slug}.json
+  lode-arch-doc ────────→ ~/.weekly-ppt/weeks/{week}/{slug}.json
 
 每天:
   lode-git-daily-note ← git commit history → Obsidian 日报

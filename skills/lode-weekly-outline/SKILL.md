@@ -9,8 +9,6 @@ description: Use when consolidating multiple projects weekly git activity into a
 
 Convert **multiple projects' weekly git commits** into a structured Markdown PPT outline. Each project gets an independent narrative using a unified template. Cross-project themes appear only on the overview slide.
 
-**Related skill:** weekly-report-ppt (for actual .pptx file generation)
-
 ## When to Use
 
 - Multiple projects running in parallel need a consolidated weekly report

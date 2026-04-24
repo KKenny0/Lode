@@ -10,8 +10,7 @@ if [ ! -f "$CANONICAL" ]; then
 fi
 
 TARGETS=(
-  "$REPO_ROOT/skills/lode-stage-doc/references/"
-  "$REPO_ROOT/skills/lode-pipeline-doc/references/"
+  "$REPO_ROOT/skills/lode-arch-doc/references/"
   "$REPO_ROOT/skills/lode-session-recap/references/"
 )
 
