@@ -1,6 +1,10 @@
-# Lode
+<p align="center">
+  <img src="logo.png" alt="Lode" width="180" />
+</p>
 
-> 从开发活动中，开采值得留下的东西。
+<h1 align="center">Lode</h1>
+
+<p align="center">从开发活动中，开采值得留下的东西。</p>
 
 A lode is a vein of ore: the place where valuable mineral is concentrated underground, waiting to be discovered and refined. The word shares its root with **load** (to carry, to bear) — and with the Chinese character **载 (zài)**, meaning to carry, to record, to preserve across time.
 
