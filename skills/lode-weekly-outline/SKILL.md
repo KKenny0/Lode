@@ -1,6 +1,14 @@
 ---
 name: lode-weekly-outline
-description: Use when consolidating multiple projects weekly git activity into a presentation outline, or when user requests cross-project weekly reports, 周报, weekly PPT, or multi-project status summaries
+description: >
+  Convert multiple projects' weekly git commits into a structured Markdown PPT outline for
+  presentation. Triggers on requests like "周报", "写周报", "本周总结", "weekly PPT",
+  "weekly report", "weekly outline", "总结这周工作", "这周做了什么", "multi-project status",
+  "cross-project summary", "presentation outline from git". Also triggers when user wants
+  to summarize work across repos, prepare a weekly slide deck, or consolidate git activity
+  into a report. Supports single-project mode too. Key phrases: "周报大纲", "PPT 大纲",
+  "本周汇报", "git 周报". Do NOT trigger for: daily notes, architecture docs, single-commit
+  lookups, or non-git-based reporting.
 ---
 
 # Weekly Multi-Project PPT Lite
