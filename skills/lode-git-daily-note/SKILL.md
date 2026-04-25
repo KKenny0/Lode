@@ -111,62 +111,59 @@ enable_smart_classify: false
 2. 检查 ~/.claude/daily-note-config.yaml
 3. 如果都不存在 → 首次使用引导，创建全局配置
 4. 合并配置（项目级覆盖全局级）
+5. 如果 config 中没有 repos，尝试从 {base_path}/projects.json 读取项目路径作为补充
 ```
 
 | 参数 | 来源 | 默认值 |
 |------|------|--------|
 | `daily_note_path` | 配置文件 | - |
-| `repos` | 配置文件 | 当前目录 |
+| `repos` | 配置文件 → projects.json | 当前目录 |
 | `date` | 用户指定 | 今天 (YYYY-MM-DD) |
 | `date_end` | 用户指定 | 同 date（单天模式） |
 
-### Step 2: 获取提交历史（优先使用脚本）
+### Step 2: 读取 weekly-ppt JSON（主数据源）
 
-如果 `scripts/git-stats.sh` 可访问，优先使用它获取结构化数据：
+从 `~/.weekly-ppt/weeks/{week}/{slug}.json` 读取当天已有的 change entries。
+
+1. 计算 target date 的 ISO week（`date +%Y-W%V`）
+2. 遍历所有 repos 对应的 slug，读取 `{base_path}/weeks/{week}/{slug}.json`
+3. 筛选 timestamp 匹配 target date 的 entries（比较日期部分 YYYY-MM-DD）
+4. 将 entries 按 type 映射为日报分类：
+
+| JSON type | 日报分类 |
+|-----------|---------|
+| `feature` | 【能力升级】 |
+| `fix` | 【问题定位】 |
+| `refactor` | 【结构变更】 |
+| `decision` | 【其他更新】 |
+| `risk` | 【其他更新】 |
+
+**JSON entries 已经是高质量结构化数据**（有 summary + context），不需要再做 diff 分析或分类。直接进入 Step 5 的智能合并。
+
+如果 `{base_path}` 不存在或对应 week 目录不存在，跳过此步骤，全部走 Step 3 补漏。
+
+### Step 3: Git log 补漏（次数据源）
+
+用 `git log --stat` 获取当天所有 commit，与 JSON entries 对比，找出未覆盖的提交。
 
 ```bash
-# 单天模式
+git log --since="<date> 00:00:00" --until="<date> 23:59:59" --pretty=format:"%h %s" --stat
+```
+
+**覆盖判断**：对比 commit subject 与 JSON entry 的 summary。如果 commit 的语义已被某个 entry 覆盖，跳过该 commit。
+
+**未覆盖的 commit** 走简化分析流程：
+- 只看 commit subject + stat（文件变更统计），**不做完整 diff 分析**
+- 用分类系统的关键词匹配分类（不需要 LLM 语义分类）
+- 生成轻量日报条目
+
+如果 `scripts/git-stats.sh` 可访问，也可用它获取结构化数据（但仍然跳过完整 diff）：
+
+```bash
 bash <skill-path>/scripts/git-stats.sh <repo_path> <date>
-
-# 多天模式（含 date_end）
-bash <skill-path>/scripts/git-stats.sh <repo_path> <date> <date_end>
 ```
 
-脚本输出 JSON，包含每个提交的 hash、subject、body、stat、insertions、deletions、files_changed。
-
-如果脚本不可用，回退到手动 git 命令：
-
-```bash
-git log --since="<date> 00:00:00" --until="<date> 23:59:59" --pretty=format:"%h %s"
-git reflog --since="<date> 00:00:00" | head -50
-```
-
-对每个仓库执行后，合并所有提交进行分析。
-
-### Step 3: 获取每个提交的完整信息
-
-如果使用了 git-stats.sh，此步骤的数据已包含在 JSON 输出中。否则手动执行：
-
-```bash
-git log -1 --format="%s%n%b" <hash>      # 提交消息
-git show <hash> --stat --format=""        # 文件变更统计
-git show <hash> --format=""               # 完整 diff
-```
-
-**diff 是主要信息源**，commit message 常遗漏细节。跳过 diff = 日报不完整。
-
-### Step 4: Diff 分析
-
-从 diff 中提取：
-
-| 信息 | 用途 |
-|------|------|
-| 修改文件路径 | 判断影响模块 |
-| 增删行数 (+N/-M) | 量化改动规模 |
-| Schema / 配置 / 提示词变更 | 识别关键改动 |
-| 改动意图与效果 | 语义化描述 |
-
-### Step 5: 分类 + 智能合并
+### Step 4: 分类（仅用于 Step 3 补漏的 commit）
 
 #### 5a. 分类
 
@@ -188,6 +185,14 @@ git show <hash> --format=""               # 完整 diff
 - 详细说明保留每个 commit 的关键信息
 
 **不合并**：完全无关的 commit 保持独立。
+
+### Step 5: 智能合并
+
+**JSON entries（来自 Step 2）**：不合并，已经是高质量结构化数据。直接进入 Step 6。
+
+**补漏 commits（来自 Step 3-4）**：按原合并规则处理 — 同功能多 commit 可合并为一条。
+
+最终将两组数据合并，按分类和模块排列进入 Step 6。
 
 ### Step 6: 生成日报内容
 

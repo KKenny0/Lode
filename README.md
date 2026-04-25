@@ -33,7 +33,7 @@ Lode is **not** a pipeline. These skills are independent — each triggered at i
   lode-arch-doc ────────→ ~/.weekly-ppt/weeks/{week}/{slug}.json
 
 每天:
-  lode-git-daily-note ← git commit history → Obsidian 日报
+  lode-git-daily-note ← ~/.weekly-ppt/ JSON + git log 补漏 → Obsidian 日报
 
 每周:
   lode-weekly-outline ← git commits + ~/.weekly-ppt/ → 周报大纲

@@ -76,7 +76,7 @@ Each `{base_path}/weeks/{week}/{slug}.json` file contains a **JSON array** of en
 | `summary` | string | Yes | 1 sentence, engineering-level abstraction |
 | `context` | string | Yes | 1-2 sentences explaining why and impact |
 | `related_docs` | string[] | No | Absolute paths to relevant documentation files |
-| `source` | enum | Yes | `session-recap` \| `stage-doc` \| `pipeline-doc` |
+| `source` | enum | Yes | `session-recap` \| `arch-doc` |
 
 ### Writing `summary`
 
