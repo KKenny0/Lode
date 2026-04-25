@@ -205,6 +205,23 @@ Skill-specific values:
 
 If the project slug cannot be determined, skip silently.
 
+## Configuration
+
+此 skill 使用 Lode 统一配置系统。从以下位置解析知识库路径（`{vault}`），高优先级优先：
+
+| 优先级 | 位置 | 说明 |
+|--------|------|------|
+| 1 | `.lode/config.yaml`（项目根目录） | 项目级覆盖 |
+| 2 | `~/.lode/config.yaml` | 全局配置 |
+| 3 | `$WEEKLY_PPT_PATH` 环境变量 | 向后兼容 |
+| 4 | `~/.weekly-ppt/` | 向后兼容默认值 |
+
+项目级配置覆盖全局配置的同名字段。如果没有任何配置文件，提示用户提供知识库路径并写入 `~/.lode/config.yaml`。完整配置格式和合并规则见 `references/weekly-ppt-convention.md`。
+
+此 skill 的产出路径：
+- 文档输出：`docs/{YYYY-WNN}/lode-stage-{name}-implementation-v{N}.md` 或 `docs/{YYYY-WNN}/lode-pipeline-evolution-v{N}.md`（项目仓库内）
+- Change entry 写入：`{vault}/raw/weeks/{ISO-week}/{project-slug}.json`
+
 ## Shared Storage Convention
 
-This skill participates in the weekly-ppt shared storage system alongside `lode-session-recap` and `lode-git-daily-note`. Read `references/weekly-ppt-convention.md` for the full schema and storage rules. The `{vault}` path is resolved from `.lode/config.yaml` (project-level or `~/.lode/config.yaml`).
+Change entries follow the schema in `references/weekly-ppt-convention.md`. Read it for the full field spec and writing guidelines.

@@ -28,15 +28,22 @@ description: >
 
 ## 配置
 
-此 skill 使用 Lode 统一配置系统。读取 `.lode/config.yaml`（项目级优先，其次 `~/.lode/config.yaml`）获取 `knowledge_vault` 路径。
+此 skill 使用 Lode 统一配置系统。从以下位置解析知识库路径（`{vault}`），高优先级优先：
 
-关键路径：
+| 优先级 | 位置 | 说明 |
+|--------|------|------|
+| 1 | `.lode/config.yaml`（项目根目录） | 项目级覆盖 |
+| 2 | `~/.lode/config.yaml` | 全局配置 |
+| 3 | `$WEEKLY_PPT_PATH` 环境变量 | 向后兼容 |
+| 4 | `~/.weekly-ppt/` | 向后兼容默认值 |
+
+项目级配置覆盖全局配置的同名字段。如果没有任何配置文件，提示用户提供知识库路径并写入 `~/.lode/config.yaml`。完整配置格式和合并规则见 `references/weekly-ppt-convention.md`。
+
+此 skill 的路径映射：
 - 输入：`{vault}/Daily Note.md`
 - 归档输出：`{vault}/Work Diary/{YYYY-MM}.md`
 - 中间数据：`{vault}/raw/months/{YYYY-MM}/signals.json` 和 `skeleton.json`
 - 总结输出：`{vault}/Work Diary/{YYYY-MM}.summary.md`
-
-如果配置文件不存在，回退到 `$WEEKLY_PPT_PATH` → `~/.weekly-ppt/`。
 
 ## 输入参数
 

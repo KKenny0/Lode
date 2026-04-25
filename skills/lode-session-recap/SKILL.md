@@ -19,6 +19,22 @@ Session-end change extraction. When the developer wraps up work, reads the conve
 
 **Not for:** generating reports, summarizing code, creating documentation — those are separate skills. This skill only writes raw change log entries.
 
+## Configuration
+
+此 skill 使用 Lode 统一配置系统。从以下位置解析知识库路径（`{vault}`），高优先级优先：
+
+| 优先级 | 位置 | 说明 |
+|--------|------|------|
+| 1 | `.lode/config.yaml`（项目根目录） | 项目级覆盖 |
+| 2 | `~/.lode/config.yaml` | 全局配置 |
+| 3 | `$WEEKLY_PPT_PATH` 环境变量 | 向后兼容 |
+| 4 | `~/.weekly-ppt/` | 向后兼容默认值 |
+
+项目级配置覆盖全局配置的同名字段。如果没有任何配置文件，提示用户提供知识库路径并写入 `~/.lode/config.yaml`。完整配置格式见 `references/weekly-ppt-convention.md`。
+
+此 skill 的产出路径：
+- 写入：`{vault}/raw/weeks/{ISO-week}/{project-slug}.json`
+
 ## How It Works
 
 ### Step 1: Identify the Project
@@ -27,7 +43,7 @@ Determine which project was worked on during this session:
 
 1. Check `.lode/config.yaml` (project-level then `~/.lode/config.yaml`) for `project_slug`
 2. If not set, check `{vault}/raw/projects.json` — match the current working directory against project `path` fields → use the corresponding `slug`
-2. If no match, derive a slug from the current working directory name (lowercase, replace spaces/underscores with hyphens)
+3. If no match, derive a slug from the current working directory name (lowercase, replace spaces/underscores with hyphens)
 
 ### Step 2: Analyze Conversation Context
 
