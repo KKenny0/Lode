@@ -7,3 +7,8 @@ docs/
 CLAUDE.md
 DESIGN.md
 .claude-plugin/
+
+# CLI build artifacts
+cli/node_modules/
+cli/dist/
+cli/skills/

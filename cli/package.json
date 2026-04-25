@@ -1,0 +1,36 @@
+{
+  "name": "@lode/cli",
+  "version": "0.1.0",
+  "description": "CLI installer for Lode skills — guided setup for Claude Code and Codex",
+  "type": "module",
+  "bin": {
+    "lode": "dist/index.js"
+  },
+  "files": [
+    "dist",
+    "skills"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "prepublishOnly": "npm run build && npm run copy-skills",
+    "copy-skills": "cp -r ../skills ./skills"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "dependencies": {
+    "commander": "^12.1.0",
+    "inquirer": "^9.2.12",
+    "chalk": "^5.3.0",
+    "ora": "^8.0.1",
+    "js-yaml": "^4.1.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.5.0",
+    "@types/inquirer": "^9.0.7",
+    "@types/js-yaml": "^4.0.9"
+  }
+}
