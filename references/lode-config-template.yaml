@@ -1,0 +1,23 @@
+# Lode Configuration Template
+# 全局配置: ~/.lode/config.yaml
+# 项目配置: {project-root}/.lode/config.yaml (覆盖全局)
+
+# 知识库路径（必填）
+# 所有 Lode skill 的数据存储根目录，应为一个 git repo 以支持跨机器同步
+knowledge_vault: /path/to/your/knowledge-vault
+
+# 项目标识（可选，默认从 git repo 目录名推导）
+# project_slug: my-project
+
+# 日报设置（可选，原 .daily-note-config.yaml）
+# daily_note:
+#   path: /path/to/Daily Note.md      # 默认 {vault}/Daily Note.md
+#   repos:                             # 工作仓库列表
+#     - /path/to/repo1
+#     - /path/to/repo2
+#   categories:                        # 自定义类别
+#     - name: 【安全加固】
+#       patterns: ["security", "auth", "permission"]
+#     - name: 【性能优化】
+#       patterns: ["perf", "optimize", "speed"]
+#   enable_smart_classify: false        # LLM 语义分类（默认 false）

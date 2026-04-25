@@ -181,7 +181,7 @@ See the Appendix in the relevant reference file (`stage-implementation-spec.md` 
 
 ## Step 5: Export Change Summary
 
-After completing the document, append a change entry to `{base_path}/weeks/{current-ISO-week}/{project-slug}.json` following the schema in `references/weekly-ppt-convention.md`.
+After completing the document, append a change entry to `{vault}/raw/weeks/{current-ISO-week}/{project-slug}.json` following the schema in `references/weekly-ppt-convention.md`.
 
 ```json
 {
@@ -207,4 +207,4 @@ If the project slug cannot be determined, skip silently.
 
 ## Shared Storage Convention
 
-This skill participates in the weekly-ppt shared storage system alongside `lode-session-recap` and `lode-git-daily-note`. Read `references/weekly-ppt-convention.md` for the full schema and storage rules.
+This skill participates in the weekly-ppt shared storage system alongside `lode-session-recap` and `lode-git-daily-note`. Read `references/weekly-ppt-convention.md` for the full schema and storage rules. The `{vault}` path is resolved from `.lode/config.yaml` (project-level or `~/.lode/config.yaml`).

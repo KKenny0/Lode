@@ -12,6 +12,7 @@ fi
 TARGETS=(
   "$REPO_ROOT/skills/lode-arch-doc/references/"
   "$REPO_ROOT/skills/lode-session-recap/references/"
+  "$REPO_ROOT/skills/lode-monthly-review/references/"
 )
 
 for target in "${TARGETS[@]}"; do

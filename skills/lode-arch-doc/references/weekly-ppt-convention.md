@@ -1,26 +1,48 @@
-# Weekly PPT Shared Convention (v1.1)
+# Weekly PPT Shared Convention (v2.0)
 
 This file defines the shared data schema and storage convention used by all skills in this monorepo. When generating change entries, follow this spec exactly so downstream consumers (like weekly PPT generators) can reliably read them.
 
-## Base Path
+## Configuration
 
-The base path determines where all weekly-ppt data is stored. It is resolved in this order:
+Lode uses a YAML configuration file to determine the knowledge vault location. The vault is a git repo (typically an Obsidian vault) that stores both raw intermediate data and human-readable outputs.
 
-1. **`$WEEKLY_PPT_PATH`** environment variable (if set)
-2. **Default**: `~/.weekly-ppt/`
+**Config file locations** (higher priority wins):
 
-All subsequent path references in this document use `{base_path}` as shorthand for the resolved base path.
+| Priority | Location | Scope |
+|----------|----------|-------|
+| 1 | `{project-root}/.lode/config.yaml` | Project-level override |
+| 2 | `~/.lode/config.yaml` | Global default |
+| 3 | `$WEEKLY_PPT_PATH` env var | Legacy fallback |
+| 4 | `~/.weekly-ppt/` | Legacy default |
+
+**Config file format** (see `references/lode-config-template.yaml` for full template):
+
+```yaml
+knowledge_vault: /path/to/your/knowledge-vault
+# project_slug: my-project  # optional, defaults to git repo directory name
+```
+
+All subsequent path references use `{vault}` as shorthand for the resolved knowledge vault path.
 
 ## Storage Location
 
+Data is organized in two layers following the raw/wiki pattern:
+
 ```
-{base_path}/
-  projects.json          # Optional project registry
-  weeks/
-    2026-W15/
-      my-project.json    # Array of change entries
-    2026-W16/
-      my-project.json
+{vault}/
+  raw/                            # Raw layer (immutable intermediate data)
+    projects.json                 # Optional project registry
+    weeks/
+      2026-W15/
+        my-project.json           # Array of change entries
+      2026-W16/
+        my-project.json
+    months/
+      2026-04/
+        signals.json              # Monthly extracted signals
+        skeleton.json             # Monthly summary skeleton
+  Daily Note.md                   # Wiki layer (daily notes)
+  Work Diary/                     # Wiki layer (monthly archives + summaries)
 ```
 
 ## ISO Week
@@ -32,8 +54,9 @@ If the `weeks/{week}/` directory does not exist, create it before writing.
 ## Project Slug
 
 Resolution order:
-1. Look up the current project path in `{base_path}/projects.json` → use its `slug`
-2. If not found or the file contains invalid JSON, derive from the project directory name: lowercase, replace spaces/underscores with hyphens
+1. Check `.lode/config.yaml` for explicit `project_slug` field
+2. Look up the current project path in `{vault}/raw/projects.json` → use its `slug`
+3. If not found or the file contains invalid JSON, derive from the project directory name: lowercase, replace spaces/underscores with hyphens
 
 ## projects.json (Optional)
 
@@ -52,7 +75,7 @@ This file is created and maintained manually. Skills should work correctly wheth
 
 ## Change Entry Schema
 
-Each `{base_path}/weeks/{week}/{slug}.json` file contains a **JSON array** of entries:
+Each `{vault}/raw/weeks/{week}/{slug}.json` file contains a **JSON array** of entries:
 
 ```json
 [
@@ -118,4 +141,6 @@ Pattern: `[Trigger/motivation]. [Approach chosen] → [expected impact or what i
 Downstream tools read these files to get high-quality development context:
 
 - **weekly-multi-project-ppt-lite** — reads change entries as primary context for weekly report generation (user provides the path when invoking the skill)
+- **lode-git-daily-note** — reads change entries as primary data source, with git log as fallback
+- **lode-monthly-review** — reads daily notes (produced by lode-git-daily-note) for monthly summaries
 - Any future reporting or review tool that needs structured change history

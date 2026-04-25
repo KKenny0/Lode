@@ -25,7 +25,8 @@ Session-end change extraction. When the developer wraps up work, reads the conve
 
 Determine which project was worked on during this session:
 
-1. Check `{base_path}/projects.json` — match the current working directory against project `path` fields → use the corresponding `slug`
+1. Check `.lode/config.yaml` (project-level then `~/.lode/config.yaml`) for `project_slug`
+2. If not set, check `{vault}/raw/projects.json` — match the current working directory against project `path` fields → use the corresponding `slug`
 2. If no match, derive a slug from the current working directory name (lowercase, replace spaces/underscores with hyphens)
 
 ### Step 2: Analyze Conversation Context
@@ -67,7 +68,7 @@ The change entry JSON looks like this:
 ### Step 4: Write to Weekly Log
 
 1. Calculate current ISO week: `date +%Y-W%V`
-2. Ensure directory exists: `{base_path}/weeks/{ISO-week}/`
+2. Ensure directory exists: `{vault}/raw/weeks/{ISO-week}/`
 3. If `{project-slug}.json` already exists, read the existing array
 4. Append new entries to the array
 5. Write the updated file
@@ -78,7 +79,7 @@ Print a brief confirmation, e.g.:
 
 ```
 记录了 3 条变更 → comic-automation (2026-W15)
-  写入: ~/.weekly-ppt/weeks/2026-W15/comic-automation.json
+  写入: {vault}/raw/weeks/2026-W15/comic-automation.json
   - [feature] Built scene composition system
   - [fix] Fixed LLM timeout in narrative stage
   - [decision] Chose constraint solver over manual layout
