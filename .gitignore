@@ -1,5 +1,7 @@
-# Design docs, plans, and working notes — not part of the skill
+# Design docs, plans, and working notes — local only
 docs/
+ROADMAP.md
+TODO*.md
 *.plan.md
 *.design.md
 
