@@ -17,7 +17,7 @@ These skills share one purpose: **extracting lasting value from raw development 
 | `lode-session-recap` | Session-end change log extraction | Per session, at wrap-up |
 | `lode-arch-doc` | Stage impl docs + Pipeline arch docs | After architectural work |
 | `lode-git-daily-note` | Obsidian daily notes from git history | Per day, on demand |
-| `lode-weekly-outline` | Multi-project weekly PPT outline | Per week, on demand |
+| `lode-weekly-outline` | Raw-first multi-project weekly PPT outline | Per week, on demand |
 | `lode-monthly-review` | Monthly work review from daily notes | Per month, on demand |
 
 All skills carry the `lode-` prefix to avoid collision with user-installed skills from other sources.
@@ -39,7 +39,7 @@ The skills can reuse each other's outputs when those files exist, but none of th
   lode-git-daily-note ← {vault}/raw/weeks/ JSON + git log → {vault}/Daily Note.md
 
 每周:
-  lode-weekly-outline ← git commits + optional {vault}/raw/weeks/ → 周报大纲
+  lode-weekly-outline ← {vault}/raw/weeks/ + fallback git coverage → 周报大纲
 
 每月:
   lode-monthly-review ← Daily Note.md
@@ -72,6 +72,10 @@ The knowledge vault is a git repo (typically an Obsidian vault) for cross-machin
 
 **Scripts for deterministic work** — Python scripts handle parsing and aggregation; the agent handles interpretation and writing.
 
+**Raw-first weekly reporting** — `lode-weekly-outline` uses weekly raw change entries as its primary semantic source. Git logs are fallback and coverage evidence only.
+
+**Local evals, public benchmarks** — `skills/*/evals/` and `*-workspace/` are local-only. Public benchmark guidance lives under `benchmarks/`.
+
 ## Installation
 
 ### Via CLI (Recommended)
@@ -100,6 +104,12 @@ After installation, verify that the five official skills are present:
 - `lode-monthly-review`
 
 Evaluation workspaces such as `lode-*-workspace/` and `evals/` are repository artifacts only; they are not installed as skills.
+
+## Benchmarks
+
+Benchmark guidance documents the quality bar without publishing local fixtures:
+
+- `benchmarks/weekly-outline.md` — raw-first weekly outline benchmark covering sufficient raw entries, git fallback, and related architecture docs.
 
 ### Local Development
 

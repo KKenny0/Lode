@@ -1,10 +1,10 @@
-# CLAUDE.md
+# AGENTS.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+This file provides guidance to Codex (Codex.ai/code) when working with code in this repository.
 
 ## What This Is
 
-**Lode** — a cross-runtime skill monorepo (Claude Code plugin + Codex skills) containing five declarative skills for development workflow recording: capturing context, generating docs, writing daily notes, producing weekly outlines, and generating monthly reviews.
+**Lode** — a cross-runtime skill monorepo (Codex skills + Claude Code plugin) containing five declarative skills for development workflow recording: capturing context, generating docs, writing daily notes, producing weekly outlines, and generating monthly reviews.
 
 The skills themselves are Markdown-first and dependency-light. The repository also includes a Node-based CLI installer under `cli/`, local-only eval fixtures, and public benchmark guidance.
 
@@ -34,7 +34,7 @@ references/
 scripts/sync-convention.sh              # Sync convention to skill directories
 benchmarks/
   weekly-outline.md                     # Public benchmark guidance (fixtures stay local)
-cli/                                     # Installer CLI for Claude Code / Codex
+cli/                                     # Installer CLI for Codex / Claude Code
   src/
   package.json
 skills/
