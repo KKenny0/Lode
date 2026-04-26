@@ -1,28 +1,29 @@
 ---
 name: lode-weekly-outline
 description: >
-  Convert multiple projects' weekly git commits into a structured Markdown PPT outline for
-  presentation. Triggers on requests like "周报", "写周报", "本周总结", "weekly PPT",
-  "weekly report", "weekly outline", "总结这周工作", "这周做了什么", "multi-project status",
-  "cross-project summary", "presentation outline from git". Also triggers when user wants
-  to summarize work across repos, prepare a weekly slide deck, or consolidate git activity
-  into a report. Supports single-project mode too. Key phrases: "周报大纲", "PPT 大纲",
-  "本周汇报", "git 周报". Do NOT trigger for: daily notes, architecture docs, single-commit
-  lookups, or non-git-based reporting.
+  Convert weekly Lode raw change entries and fallback git commits into a structured
+  Markdown PPT outline for presentation. Triggers on requests like "周报", "写周报",
+  "本周总结", "weekly PPT", "weekly report", "weekly outline", "总结这周工作",
+  "这周做了什么", "multi-project status", "cross-project summary",
+  "presentation outline from git". Also triggers when user wants to summarize work
+  across repos, prepare a weekly slide deck, or consolidate development activity
+  into a report. Supports single-project mode too. Key phrases: "周报大纲",
+  "PPT 大纲", "本周汇报", "git 周报". Do NOT trigger for: daily notes,
+  architecture docs, single-commit lookups, or non-git-based reporting.
 ---
 
 # Weekly Multi-Project PPT Lite
 
 ## Overview
 
-Convert **multiple projects' weekly git commits** into a structured Markdown PPT outline. Each project gets an independent narrative using a unified template. Cross-project themes appear only on the overview slide.
+Convert **weekly Lode raw change entries** into a structured Markdown PPT outline, using git commits only as coverage checks and fallback evidence. Each project gets an independent narrative using a unified template. Cross-project themes appear only on the overview slide.
 
 ## Quick Reference
 
 | Phase | Executor | Input | Output |
 |-------|----------|-------|--------|
-| 0: Scope | Main dialog | User prompt | Git logs + params |
-| 1: Analysis | Main dialog by default; optional parallel agents when explicitly allowed | Git logs + template | Structured JSON (with work_streams) |
+| 0: Scope | Main dialog | User prompt + config | Raw entries + optional git coverage + params |
+| 1: Analysis | Main dialog by default; optional parallel agents when explicitly allowed | Raw entries + fallback git logs + template | Structured JSON (with work_streams) |
 | 2: Stitching | Main dialog | JSONs | Markdown PPT outline |
 
 ## Inputs
@@ -30,44 +31,69 @@ Convert **multiple projects' weekly git commits** into a structured Markdown PPT
 | Parameter | Required | Default | How to resolve |
 |-----------|----------|---------|----------------|
 | Time range | No | `this_week` | "本周" → this_week; "上周" → last_week |
-| Projects (name + repo path) | **Yes** | — | From prompt, or ask user |
+| Projects (name + repo path + slug) | No | `{vault}/raw/projects.json` or current repo | Prompt overrides project registry |
 | Mode: `tech` / `report` | No | `tech` | Infer from context |
 | Priority order | No | Auto | By commit volume (see below) |
 
 **Mode:** `tech` = 6-part narrative with technical approach; `report` = 4-part focused on outcomes. See [references/slide-template.md](references/slide-template.md) for both structures.
 
-**Priority (auto):** Sort by commit count descending. ≥10 commits → Core; 5-9 → Supporting; <5 → Exploratory. User override takes precedence.
+**Priority (auto):** Prefer `projects.json` `priority` when present. Otherwise sort by raw entry count plus uncovered commit count: ≥5 signals → Core; 2-4 → Supporting; <2 → Exploratory. User override takes precedence.
 
-**Work streams:** Analyze commit patterns to identify narratively independent groups of changes. Multi-project mode: one stream per project by default. Single-project mode: decide whether to split into streams based on commit clustering. See [references/subagent-prompt.md](references/subagent-prompt.md) for the reusable analysis template and detection criteria.
+**Work streams:** Analyze raw entries first to identify narratively independent groups of changes. Use `summary`, `context`, `type`, `source`, and `related_docs` as the main semantic input. Use git commits only to fill gaps when raw entries are missing or incomplete. Multi-project mode: one stream per project by default. Single-project mode: decide whether to split into streams based on raw entry clustering. See [references/subagent-prompt.md](references/subagent-prompt.md) for the reusable analysis template and detection criteria.
 
 ## Phase 0: Scope Gathering
 
-Parse the user's prompt and collect missing parameters before analysis.
+Parse the user's prompt, resolve configuration, and collect missing parameters before analysis.
 
 ### Date Calculation
 
 - `this_week`: current week's Monday → today
 - `last_week`: previous week's Monday → previous week's Sunday
 
-### Git Log Collection
+### Project Resolution
 
-For each project:
+- Resolve `{vault}` using the Lode configuration convention.
+- If the prompt lists projects, use those names/paths/slugs as overrides.
+- Otherwise read `{vault}/raw/projects.json` and include registered projects.
+- If no registry exists, use the current repo as a single project and derive the slug from the repo directory.
+
+### Raw Entry Collection
+
+For each project, read `{vault}/raw/weeks/{week}/{slug}.json` and filter entries whose `timestamp` falls inside the requested date range.
+
+Primary fields:
+- `summary` + `context`: main narrative signal
+- `type`: category and risk/decision signal
+- `source`: distinguish session recap from architecture documentation
+- `related_docs`: optional deep evidence for technical approach
+
+If `related_docs` points to an existing architecture document, read it only when the raw entry is not enough to explain the technical approach. Do not read every related document by default.
+
+### Git Coverage Check
+
+For projects with a repo path, run a lightweight git log only to detect uncovered work:
+
 ```bash
 git -C <repo_path> log --oneline --no-merges --since="<start_date>"
 ```
 
 For `last_week`, add `--until="<this_monday_date>"`. Dates are YYYY-MM-DD.
 
+Compare commit subjects against raw entry summaries/contexts. If a commit is clearly covered by a raw entry, exclude it from analysis. Pass only uncovered commits forward as fallback evidence.
+
 **Edge cases:**
-- Repo path invalid → ask user to verify, don't guess
-- No commits in range → mark as "maintenance week"
+- Raw entries exist and git path is missing/invalid → proceed from raw entries; mention that git coverage was skipped
+- No raw entries but repo path valid → fallback to git log analysis
+- No raw entries and no valid git path → mark as "maintenance week" or ask user for project source
 - All projects maintenance week → output overview slide only with a note
 
-Pass collected logs into Phase 1 as `{git_logs}`.
+Pass collected raw entries and uncovered git logs into Phase 1 as `{raw_entries}` and `{fallback_git_logs}`.
 
 ## Phase 1: Analyze Projects
 
 For each project, use the template in [references/subagent-prompt.md](references/subagent-prompt.md) to produce a structured analysis. By default, perform this in the main dialog. If the runtime supports parallel agents and the user explicitly requested or approved them, each project may be analyzed in a separate agent. The analysis returns a `work_streams` array — each stream is an independent narrative unit with its own technical approach.
+
+Raw entries are authoritative for intent and impact because they were produced at session/doc-writing time. Fallback git commits are lower-confidence evidence and should never override a clear raw entry.
 
 **Error handling:**
 - Analysis returns non-JSON → retry with "Return ONLY valid JSON, no markdown fencing"
@@ -95,11 +121,11 @@ When streams share close context (e.g. a bug fix stream and the feature it fixes
 
 | Anti-Pattern | Symptom | Fix |
 |-------------|---------|-----|
-| commit流水账 | Commits listed verbatim | Group and abstract into engineering descriptions |
+| commit流水账 | Commits listed verbatim | Prefer raw entry summaries/contexts; use commits only as fallback evidence |
 | 项目拼接 | Each project has different slide format | Apply same template; vary depth by priority |
 | 没有目标 | "做了一些优化" without why | Every stream needs a clear goal |
 | 跨项目强行融合 | Invented themes in project slides | Keep cross-project themes on overview slide only |
-| Raw git appendix | Commit logs in main slides | Logs are input, not output. Use optional appendix for verification |
+| Raw git appendix | Commit logs in main slides | Logs are coverage evidence, not the main narrative |
 
 ## Clarity Over Constraints
 

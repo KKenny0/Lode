@@ -1,6 +1,6 @@
 # Weekly PPT Shared Convention (v2.0)
 
-This file defines the shared data schema and storage convention used by all skills in this monorepo. When generating change entries, follow this spec exactly so downstream consumers (like weekly PPT generators) can reliably read them.
+This file defines the shared data schema and storage convention used by all skills in this monorepo. When generating change entries, follow this spec exactly so downstream consumers can reliably read them.
 
 ## Configuration
 
@@ -101,6 +101,18 @@ Each `{vault}/raw/weeks/{week}/{slug}.json` file contains a **JSON array** of en
 | `related_docs` | string[] | No | Absolute paths to relevant documentation files |
 | `source` | enum | Yes | `session-recap` \| `arch-doc` |
 
+### Optional Future Fields
+
+Consumers must tolerate these fields being absent. Producers may add them later when the signal is available without extra analysis:
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `project_area` | string | Product/module area affected by the change |
+| `work_stream` | string | Suggested weekly-report narrative grouping |
+| `impact` | string | User, system, or engineering impact in report-friendly language |
+| `status` | enum | `done` \| `ongoing` \| `risk` \| `decision` |
+| `evidence_refs` | string[] | Commit SHAs, eval IDs, issue IDs, or doc paths supporting the entry |
+
 ### Writing `summary`
 
 One sentence that answers: **what was done + how**. Use active voice, specific technical nouns, avoid generic verbs.
@@ -140,7 +152,17 @@ Pattern: `[Trigger/motivation]. [Approach chosen] → [expected impact or what i
 
 Downstream tools read these files to get high-quality development context:
 
-- **lode-weekly-outline** — reads change entries as optional context for weekly report generation when available
+- **lode-weekly-outline** — reads change entries as the primary semantic source for weekly report generation. Git logs are only fallback and coverage evidence when raw entries are missing or incomplete.
 - **lode-git-daily-note** — reads change entries as primary data source, with git log as fallback
 - **lode-monthly-review** — reads daily notes (produced by lode-git-daily-note) for monthly summaries
 - Any future reporting or review tool that needs structured change history
+
+## Weekly Report Consumption
+
+For weekly reporting, raw entries should carry the meaning of the work:
+
+- `summary` should describe the engineering change at report granularity.
+- `context` should explain why it mattered and what changed as a result.
+- `source: arch-doc` entries should summarize the architectural change or decision, not merely state that a document was written.
+- `related_docs` are evidence and deep context; consumers should read them only when the raw entry is not enough to explain the technical approach.
+- Git commits are useful for coverage checks, but they should not override explicit raw-entry intent.
