@@ -25,6 +25,12 @@ Session-end change extraction. When the developer wraps up work, read the conver
 
 项目级配置覆盖全局配置的同名字段。如果无法解析 `{vault}`，简短说明未写入 raw log，不要阻塞用户收工。完整配置格式见 `references/weekly-ppt-convention.md`。
 
+Use the repository helper for deterministic storage operations:
+
+```bash
+python <this-skill>/scripts/lode_raw.py append-entry --entry /tmp/lode-session-entries.json --cwd "$PWD"
+```
+
 此 skill 的产出路径：
 - 写入：`{vault}/raw/weeks/{ISO-week}/{project-slug}.json`
 
@@ -33,6 +39,8 @@ Session-end change extraction. When the developer wraps up work, read the conver
 ### Step 1: Identify the Project
 
 Determine which project was worked on during this session:
+
+Use `python <this-skill>/scripts/lode_raw.py project-slug --cwd "$PWD"` when the helper is available. It applies the shared resolution order:
 
 1. Check `.lode/config.yaml` (project-level then `~/.lode/config.yaml`) for `project_slug`
 2. If not set, check `{vault}/raw/projects.json` — match the current working directory against project `path` fields → use the corresponding `slug`
@@ -98,11 +106,17 @@ The change entry JSON looks like this:
 
 ### Step 4: Write to Weekly Log
 
-1. Calculate current ISO week: `date +%Y-W%V`
-2. Ensure directory exists: `{vault}/raw/weeks/{ISO-week}/`
-3. If `{project-slug}.json` already exists, read the existing array
-4. Append new entries to the array
-5. Write the updated file
+Write the generated entry object or array to a temporary JSON file, then call the shared helper:
+
+```bash
+python <this-skill>/scripts/lode_raw.py append-entry \
+  --entry /tmp/lode-session-entries.json \
+  --cwd "$PWD"
+```
+
+The helper resolves `{vault}`, calculates the current ISO week, resolves the project slug, creates `{vault}/raw/weeks/{ISO-week}/`, validates required entry fields, and appends to the existing `{project-slug}.json` array.
+
+If the helper is unavailable or returns an error, briefly explain that the raw log was not written and do not block session wrap-up.
 
 ### Step 5: Confirm
 

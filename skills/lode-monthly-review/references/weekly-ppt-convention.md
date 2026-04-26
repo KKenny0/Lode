@@ -51,12 +51,25 @@ Use `date +%Y-W%V` to calculate the current week string. Format: `YYYY-WNN` (zer
 
 If the `weeks/{week}/` directory does not exist, create it before writing.
 
+When a skill-local or repository helper script is available, prefer it over
+hand-written date logic:
+
+```bash
+python <skill-or-repo>/scripts/lode_raw.py week --date 2026-04-26
+```
+
 ## Project Slug
 
 Resolution order:
 1. Check `.lode/config.yaml` for explicit `project_slug` field
 2. Look up the current project path in `{vault}/raw/projects.json` → use its `slug`
 3. If not found or the file contains invalid JSON, derive from the project directory name: lowercase, replace spaces/underscores with hyphens
+
+Helper command:
+
+```bash
+python <skill-or-repo>/scripts/lode_raw.py project-slug --cwd "$PWD"
+```
 
 ## projects.json (Optional)
 
@@ -147,6 +160,21 @@ Pattern: `[Trigger/motivation]. [Approach chosen] → [expected impact or what i
 - Do not deduplicate or overwrite — the consumer handles merging
 - **Side-effect failure**: if the project slug cannot be determined or the write fails, skip the change-entry write gracefully. The primary deliverable of each skill is never the change entry — it is always a side effect.
 - **Concurrent writes**: two sessions writing to the same `{slug}.json` simultaneously may lose data. This is acceptable for the intended use case (single developer, single machine). If concurrent access becomes a concern, the consumer should implement merge logic.
+
+When `scripts/lode_raw.py` is available in the skill directory or repository,
+producers should write the entry object or array to a temporary JSON file and
+delegate validation and append behavior to the helper:
+
+```bash
+python <skill-or-repo>/scripts/lode_raw.py append-entry \
+  --entry /tmp/lode-entry.json \
+  --cwd "$PWD"
+```
+
+The helper accepts a single entry object or an array of entries. It validates
+required fields, resolves `{vault}` and project slug, creates the target week
+directory, appends to the existing project JSON array, and prints a JSON summary
+containing `week`, `slug`, `path`, `entries_appended`, and `total_entries`.
 
 ## Consumers
 

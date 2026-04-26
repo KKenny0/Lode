@@ -174,7 +174,15 @@ See the Appendix in the relevant reference file (`stage-implementation-spec.md` 
 
 ## Step 5: Export Weekly Signal
 
-After completing the document, append a report-friendly change entry to `{vault}/raw/weeks/{current-ISO-week}/{project-slug}.json` following the schema in `references/weekly-ppt-convention.md`.
+After completing the document, append a report-friendly change entry to `{vault}/raw/weeks/{current-ISO-week}/{project-slug}.json` following the schema in `references/weekly-ppt-convention.md`. Generate the entry JSON, save it to a temporary file, and call the shared helper:
+
+```bash
+python <this-skill>/scripts/lode_raw.py append-entry \
+  --entry /tmp/lode-arch-doc-entry.json \
+  --cwd "$PWD"
+```
+
+The helper resolves config, calculates the current ISO week, resolves the project slug, validates required fields, creates the week directory, and appends to the existing project array.
 
 ```json
 {
@@ -206,7 +214,7 @@ The entry must describe the architecture signal, not the documentation activity:
 
 If the document only records a simple component with no report-worthy architecture signal, skip the raw entry rather than writing a low-value "updated docs" entry.
 
-If the project slug cannot be determined, skip silently.
+If the helper is unavailable, config cannot be resolved, or the write fails, skip the raw entry side effect silently. The generated architecture document is the primary deliverable.
 
 ## Configuration
 
@@ -219,7 +227,7 @@ If the project slug cannot be determined, skip silently.
 | 3 | `$WEEKLY_PPT_PATH` 环境变量 | legacy fallback |
 | 4 | `~/.weekly-ppt/` | legacy fallback 默认值 |
 
-项目级配置覆盖全局配置的同名字段。文档输出不依赖 `{vault}`；如果无法解析配置，只跳过 raw change entry 副作用。完整配置格式和合并规则见 `references/weekly-ppt-convention.md`。
+项目级配置覆盖全局配置的同名字段。文档输出不依赖 `{vault}`；如果无法解析配置，只跳过 raw change entry 副作用。完整配置格式、合并规则和 helper 命令见 `references/weekly-ppt-convention.md`。
 
 此 skill 的产出路径：
 - 文档输出：`docs/{YYYY-WNN}/lode-stage-{name}-implementation-v{N}.md` 或 `docs/{YYYY-WNN}/lode-pipeline-evolution-v{N}.md`（项目仓库内）
