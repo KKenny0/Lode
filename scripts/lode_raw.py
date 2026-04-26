@@ -24,6 +24,7 @@ except Exception:  # pragma: no cover - optional dependency
 
 VALID_TYPES = {"feature", "fix", "refactor", "decision", "risk"}
 VALID_SOURCES = {"session-recap", "arch-doc"}
+VALID_STATUSES = {"done", "ongoing", "risk", "decision"}
 REQUIRED_FIELDS = ("timestamp", "type", "summary", "context", "source")
 
 
@@ -184,6 +185,19 @@ def validate_entry(entry: Any) -> dict[str, Any]:
             raise ValueError(f"entry field must be a non-empty string: {field}")
     if "related_docs" in entry and not isinstance(entry["related_docs"], list):
         raise ValueError("entry related_docs must be a list when present")
+    for field in ("related_docs", "evidence_refs"):
+        if field in entry:
+            if not isinstance(entry[field], list) or not all(
+                isinstance(item, str) for item in entry[field]
+            ):
+                raise ValueError(f"entry {field} must be a list of strings when present")
+    for field in ("project_area", "work_stream", "impact"):
+        if field in entry and (
+            not isinstance(entry[field], str) or not entry[field].strip()
+        ):
+            raise ValueError(f"entry {field} must be a non-empty string when present")
+    if "status" in entry and entry["status"] not in VALID_STATUSES:
+        raise ValueError(f"entry status must be one of: {', '.join(sorted(VALID_STATUSES))}")
     return entry
 
 

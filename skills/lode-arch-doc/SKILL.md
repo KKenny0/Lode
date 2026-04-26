@@ -191,7 +191,10 @@ The helper resolves config, calculates the current ISO week, resolves the projec
   "summary": "1 sentence, engineering-level abstraction",
   "context": "1-2 sentences explaining why and impact",
   "related_docs": ["/absolute/path/to/doc"],
-  "source": "arch-doc"
+  "source": "arch-doc",
+  "status": "done | ongoing | risk | decision",
+  "impact": "optional report-ready impact",
+  "evidence_refs": ["optional doc path, commit SHA, issue ID, or eval ID"]
 }
 ```
 
@@ -199,6 +202,9 @@ Skill-specific values:
 - **type**: `feature` (new capability), `fix` (bug resolved), `refactor` (restructured), `decision` (design choice), or `risk` (issue identified)
 - **source**: always `"arch-doc"`
 - **related_docs**: absolute path to the generated document
+- **status**: recommended when clear — usually `done`, `decision`, or `risk`
+- **impact**: recommended when the architecture signal has a clear reporting, migration, reliability, or coordination impact
+- **evidence_refs**: recommended for the generated document path and any known commit, issue, or eval reference
 
 The entry must describe the architecture signal, not the documentation activity:
 
@@ -207,6 +213,7 @@ The entry must describe the architecture signal, not the documentation activity:
 - **summary**: capture the architecture change, technical decision, contract boundary, risk, or system behavior that the document makes explicit
 - **context**: explain why that architecture signal matters for future work, debugging, migration, weekly reporting, or cross-stage coordination
 - **related_docs**: keep the document path as evidence, not as the main message
+- **recommended optional fields**: populate `status`, `impact`, and `evidence_refs` when naturally available; leave them absent rather than guessing
 
 **New document**: summary captures the architecture/implementation knowledge newly made explicit. Context explains why that knowledge matters now.
 

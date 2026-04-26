@@ -65,48 +65,12 @@ daily_note:
 
 ---
 
-## 智能分类系统
+## Writing and Classification Rules
 
-### 分类优先级
-
-| 优先级 | 类别 | 匹配方式 |
-|--------|------|---------|
-| 1 | 【用户自定义】 | 配置文件中定义的类别，按 patterns 关键词匹配 |
-| 2 | 【能力升级】 | feat, enhance, add, new, implement |
-| 3 | 【问题定位】 | fix, bug, resolve, repair, patch |
-| 4 | 【结构变更】 | refactor, restructure, reorg, migrate |
-| 5 | 【配置调整】 | config, setting, env, manager |
-| 6 | 【文档优化】 | docs, doc, readme, comment |
-| 7 | 【测试覆盖】 | test, spec, coverage |
-| 8 | 【其他更新】 | 以上都不匹配时 |
-
-### LLM 语义分类（当 `enable_smart_classify: true` 时）
-
-当关键词匹配落入【其他更新】时，启用语义分类作为回退：
-
-1. **关键词匹配** — 先用上表的快速路径匹配（零开销）
-2. **语义回退** — 如果关键词匹配失败（落入【其他更新】），将 commit subject + diff 摘要交给 LLM 判断
-3. **LLM 判断依据**：
-   - diff 中新增了功能代码 → 【能力升级】
-   - diff 中修复了错误处理/边界条件 → 【问题定位】
-   - diff 中重新组织了代码结构 → 【结构变更】
-   - diff 中调整了配置/参数 → 【配置调整】
-   - diff 中仅有注释/文档 → 【文档优化】
-   - diff 中仅增加了测试用例 → 【测试覆盖】
-4. **LLM 也可以创造新类别** — 如果 diff 内容明显属于一个尚未定义的类别（如"依赖升级"、"CI/CD 调整"），LLM 可以用 `【新类别名】` 标注，并在日报末尾附注说明
-
-语义分类的目标是让日报分类更贴近实际工作内容，而非机械匹配关键词。
-
----
-
-## 写作风格：语义化优先
-
-日报是给人读的工作日志，不是 code review 记录。
-
-- **写意图，不写实现** — "数据格式从嵌套对象简化为自然语言" 而非 "`SomeSchema.field_a` 从 `dict` 改为 `str`"
-- **写效果，不写手段** — "绑定时能匹配到正确选项" 而非 "新增 `_resolve_match()` 遍历查找"
-- **标注模块归属** — 每条改动用 `（模块A → 模块B）` 标注影响范围，从 commit scope 和 diff 文件路径推断
-- **保留关键实体名作为锚点** — 配置项名、schema 名可保留，但不要堆砌整个句子
+Read `references/daily-note-writing.md` before classifying fallback commits or
+writing final Daily Note content. Keep `SKILL.md` focused on execution flow; the
+reference contains category mapping, semantic writing rules, merge rules, and
+the exact output format.
 
 ---
 
@@ -137,17 +101,9 @@ daily_note:
 1. 计算 target date 的 ISO week（`date +%Y-W%V`）
 2. 遍历所有 repos 对应的 slug，读取 `{vault}/raw/weeks/{week}/{slug}.json`
 3. 筛选 timestamp 匹配 target date 的 entries（比较日期部分 YYYY-MM-DD）
-4. 将 entries 按 type 映射为日报分类：
+4. 按 `references/daily-note-writing.md` 将 entries 映射为日报分类。
 
-| JSON type | 日报分类 |
-|-----------|---------|
-| `feature` | 【能力升级】 |
-| `fix` | 【问题定位】 |
-| `refactor` | 【结构变更】 |
-| `decision` | 【其他更新】 |
-| `risk` | 【其他更新】 |
-
-**JSON entries 已经是高质量结构化数据**（有 summary + context），不需要再做 diff 分析或分类。直接进入 Step 5 的智能合并。
+**JSON entries 已经是高质量结构化数据**（有 summary + context，可能有 impact/status/project_area/evidence_refs），不需要再做 diff 分析或分类。优先使用 `impact` 写日报描述；`status: ongoing` 不写成已完成，`status: risk` 保留风险语气。直接进入 Step 5 的智能合并。
 
 如果 `{vault}/raw/` 不存在或对应 week 目录不存在，跳过此步骤，全部走 Step 3 补漏。
 
@@ -174,26 +130,9 @@ bash <skill-path>/scripts/git-stats.sh <repo_path> <date>
 
 ### Step 4: 分类（仅用于 Step 3 补漏的 commit）
 
-#### 5a. 分类
-
-按分类优先级匹配。如果 `enable_smart_classify: true`，关键词匹配失败时启用 LLM 语义分类回退。
-
-#### 5b. 同功能多 commit 智能合并
-
-识别属于同一功能/任务的多个 commit，合并为一条日报条目：
-
-**合并信号**（满足任一即可合并）：
-- commit scope 相同（如 `feat(auth): ...` 和 `fix(auth): ...`）
-- diff 涉及相同的核心文件
-- commit message 语义关联（如 "add X" 后跟 "fix X edge case"）
-
-**合并规则**：
-- 取最高优先级的类别作为合并后的类别（如 feat + fix → 【能力升级】）
-- 行数累加（+N1+N2 / -M1-M2）
-- 语义描述合并为一条，涵盖整体意图
-- 详细说明保留每个 commit 的关键信息
-
-**不合并**：完全无关的 commit 保持独立。
+Use `references/daily-note-writing.md` for keyword categories, optional LLM
+semantic classification, and same-task merge rules. These rules apply only to
+fallback commits. Do not reclassify raw entries.
 
 ### Step 5: 智能合并
 
@@ -219,18 +158,7 @@ bash <skill-path>/scripts/git-stats.sh <repo_path> <date>
 
 #### 输出格式
 
-```markdown
-### YYYY.MM.DD
-- [项目名称]
-	- {模块}
-		- 【类别】
-			- [x] （模块A → 模块B）语义化描述（+N/-M 行）
-				- 详细说明
-```
-
-模块标签规则：
-- 单模块：`（模块名）`
-- 跨模块：`（模块A → 模块B → 模块C）`，按改动链路排列
+Use the exact output format and module label rules in `references/daily-note-writing.md`.
 
 ---
 
@@ -248,7 +176,15 @@ bash <skill-path>/scripts/git-stats.sh <repo_path> <date>
 **输出质量**:
 - [ ] 语义化描述（意图/效果，非函数名/字段名）
 - [ ] 每条改动标注了模块归属
+- [ ] raw entry 的 `impact` / `status` 已正确反映在日报措辞中（如存在）
 - [ ] 格式与现有日报一致
 - [ ] 已检查当天是否有重复条目
 - [ ] 相关 commit 已智能合并
 - [ ] 分类准确（必要时使用了语义分类）
+
+## Reference 文件
+
+| 文件 | 何时读取 |
+|-----|---------|
+| `references/daily-note-writing.md` | 分类、合并、写作风格、输出格式 |
+| `references/config-template.yaml` | 配置文件示例 |

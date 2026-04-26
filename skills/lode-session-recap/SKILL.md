@@ -84,7 +84,10 @@ The change entry JSON looks like this:
   "summary": "1 sentence, engineering-level abstraction",
   "context": "1-2 sentences explaining why and impact",
   "related_docs": ["/absolute/path/to/doc"],
-  "source": "session-recap"
+  "source": "session-recap",
+  "status": "done | ongoing | risk | decision",
+  "impact": "optional report-ready impact",
+  "evidence_refs": ["optional commit SHA, issue ID, eval ID, or doc path"]
 }
 ```
 
@@ -94,6 +97,9 @@ The change entry JSON looks like this:
 - **related_docs**: absolute paths to any docs that were created or modified during this session (stage-docs, pipeline-docs, design docs)
 - **source**: always `"session-recap"`
 - **timestamp**: current time in ISO 8601
+- **status**: recommended when clear — `done`, `ongoing`, `risk`, or `decision`
+- **impact**: recommended when the user/system/reporting impact is clear and can be stated without extra analysis
+- **evidence_refs**: recommended for already-known commit SHAs, issues, eval IDs, or doc paths
 
 **Weekly-friendly writing rules:**
 
@@ -101,6 +107,7 @@ The change entry JSON looks like this:
 - **context**: explain why the work mattered and what it enables, prevents, or changes
 - **related_docs**: include architecture docs, design docs, eval notes, or other durable evidence created or changed in the session
 - **type**: use `decision` for design choices even when implementation is still pending; use `risk` for discovered issues even when no fix landed
+- **recommended optional fields**: populate `status`, `impact`, and `evidence_refs` when naturally available; leave them absent rather than guessing
 
 **Granularity**: Maximum 5 entries per session. If the session was complex, aggressively merge related changes. A good default is 1-3 entries: one for the main outcome, one for an important decision, and one for a risk or follow-up if present. The goal is a concise weekly-report signal log, not a detailed diary.
 

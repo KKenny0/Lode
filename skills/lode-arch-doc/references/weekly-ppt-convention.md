@@ -98,7 +98,10 @@ Each `{vault}/raw/weeks/{week}/{slug}.json` file contains a **JSON array** of en
     "summary": "Built scene composition system with auto-layout and overlap resolution",
     "context": "Replaced manual positioning with constraint solver. Resolves 3 bad cases from v2.3 batch eval.",
     "related_docs": ["/Users/dev/projects/my-project/docs/stage-composition-implementation.md"],
-    "source": "session-recap"
+    "source": "session-recap",
+    "status": "done",
+    "impact": "Weekly outline can explain the shipped layout capability without re-reading implementation commits.",
+    "evidence_refs": ["abc1234", "/Users/dev/projects/my-project/docs/stage-composition-implementation.md"]
   }
 ]
 ```
@@ -114,9 +117,9 @@ Each `{vault}/raw/weeks/{week}/{slug}.json` file contains a **JSON array** of en
 | `related_docs` | string[] | No | Absolute paths to relevant documentation files |
 | `source` | enum | Yes | `session-recap` \| `arch-doc` |
 
-### Optional Future Fields
+### Recommended Optional Fields
 
-Consumers must tolerate these fields being absent. Producers may add them later when the signal is available without extra analysis:
+Consumers must tolerate these fields being absent. Producers should add them when the signal is available without extra analysis:
 
 | Field | Type | Description |
 |-------|------|-------------|
@@ -125,6 +128,13 @@ Consumers must tolerate these fields being absent. Producers may add them later 
 | `impact` | string | User, system, or engineering impact in report-friendly language |
 | `status` | enum | `done` \| `ongoing` \| `risk` \| `decision` |
 | `evidence_refs` | string[] | Commit SHAs, eval IDs, issue IDs, or doc paths supporting the entry |
+
+Recommended producer behavior:
+
+- Add `status` whenever it can be inferred from the session: `done` for completed work, `ongoing` for partially completed work, `risk` for open risk entries, and `decision` for design decisions.
+- Add `impact` when the entry has a clear user, system, reporting, reliability, migration, or developer-workflow effect. This should be more report-ready than `context`, not a duplicate.
+- Add `evidence_refs` for commit SHAs, issue IDs, eval IDs, or doc paths that are already known. Do not perform extra repository analysis only to populate this field.
+- Add `project_area` or `work_stream` when the natural module or narrative grouping is obvious. Leave them absent rather than guessing.
 
 ### Writing `summary`
 
