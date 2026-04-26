@@ -1,8 +1,8 @@
-# 月度工作总结模板（Claude 专用）
+# 月度工作总结模板（Agent 专用）
 
 ---
-本文件是 Claude 生成 `YYYY-MM.summary.md` 的指导模板。
-Claude 读取原始月度归档后，按本模板的格式和规则撰写总结。
+本文件是 agent 生成 `YYYY-MM.summary.md` 的指导模板。
+Agent 读取原始月度归档后，按本模板的格式和规则撰写总结。
 
 ---
 

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Lode Weekly Outline"
+  short_description: "Create weekly report outlines from commits"
+  default_prompt: "Use $lode-weekly-outline to create a weekly report outline from project commits."

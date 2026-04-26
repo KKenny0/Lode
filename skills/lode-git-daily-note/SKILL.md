@@ -1,11 +1,19 @@
 ---
 name: lode-git-daily-note
-description: Generate or update structured Obsidian daily notes from git commit history with diff analysis. Triggers on: updating daily notes/work logs/diary from git commits, generating work reports from git history, filling in missing daily notes for past dates, summarizing today's work across repos. Key phrases: "更新日报", "写日报", "日报", "工作日志", "生成工作日志", "根据git提交写日报", "补日报", "daily note", "work log", "git daily". Do NOT trigger for: writing code, git operations (merge/rebase/conflict), meeting notes, generic reports without git context.
+description: >
+  Generate or update structured Obsidian daily notes from weekly change entries
+  and git commit history. Triggers on updating daily notes/work logs/diary from
+  git commits, generating work reports from git history, filling in missing
+  daily notes for past dates, or summarizing today's work across repos.
+  Key phrases: "更新日报", "写日报", "日报", "工作日志", "生成工作日志",
+  "根据git提交写日报", "补日报", "daily note", "work log", "git daily".
+  Do NOT trigger for writing code, git operations (merge/rebase/conflict),
+  meeting notes, or generic reports without git context.
 ---
 
 # Git 日报更新器
 
-自动从 git 提交历史（包含 diff 分析）生成结构化的 Obsidian 日报内容。
+从 Lode weekly change entries 和 git 提交统计生成结构化的 Obsidian 日报内容。
 
 ---
 
@@ -17,8 +25,8 @@ description: Generate or update structured Obsidian daily notes from git commit 
 |--------|------|------|
 | 1 | 项目根目录 `.lode/config.yaml` | 项目级覆盖 |
 | 2 | `~/.lode/config.yaml` | 全局配置 |
-| 3 | `$WEEKLY_PPT_PATH` 环境变量 | 向后兼容 |
-| 4 | `~/.weekly-ppt/` | 向后兼容默认值 |
+| 3 | `$WEEKLY_PPT_PATH` 环境变量 | legacy fallback |
+| 4 | `~/.weekly-ppt/` | legacy fallback 默认值 |
 
 > **迁移说明**：旧版 `.daily-note-config.yaml` 已废弃。日报设置现在统一在 `.lode/config.yaml` 的 `daily_note:` 子节点下。如果检测到旧配置文件，提示用户迁移。
 
@@ -53,7 +61,7 @@ daily_note:
 
 ### 配置合并规则
 
-项目级配置**覆盖**全局配置的同名字段。未配置的字段从全局配置继承。
+项目级配置**覆盖**全局配置的同名字段。未配置的字段从全局配置继承。此 skill 的主产物依赖 `{vault}` 或明确的 `daily_note.path`；如果无法解析路径，提示用户配置 `knowledge_vault`。
 
 ---
 
@@ -109,8 +117,8 @@ daily_note:
 ```
 1. 检查项目根目录 .lode/config.yaml
 2. 检查 ~/.lode/config.yaml
-3. 如果都不存在 → 回退到 $WEEKLY_PPT_PATH → ~/.weekly-ppt/
-4. 如果也没有 → 首次使用引导，创建全局配置
+3. 如果都不存在 → 回退到 legacy `$WEEKLY_PPT_PATH` → `~/.weekly-ppt/`
+4. 如果仍无法解析 → 首次使用引导，创建全局配置
 5. 合并配置（项目级覆盖全局级）
 6. 如果 config 中没有 repos，尝试从 {vault}/raw/projects.json 读取项目路径作为补充
 ```
@@ -122,7 +130,7 @@ daily_note:
 | `date` | 用户指定 | 今天 (YYYY-MM-DD) |
 | `date_end` | 用户指定 | 同 date（单天模式） |
 
-### Step 2: 读取 weekly-ppt JSON（主数据源）
+### Step 2: 读取 weekly change entries（主数据源）
 
 从 `{vault}/raw/weeks/{week}/{slug}.json` 读取当天已有的 change entries。
 
@@ -234,7 +242,7 @@ bash <skill-path>/scripts/git-stats.sh <repo_path> <date>
 
 **提交分析**:
 - [ ] 获取了当天所有提交（reflog 交叉验证）
-- [ ] 每个提交都获取了完整 diff
+- [ ] 每个补漏 commit 都有 subject + stat 信息
 - [ ] 量化了改动规模（+N/-M 行）
 
 **输出质量**:

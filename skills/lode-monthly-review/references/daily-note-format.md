@@ -1,6 +1,6 @@
 # Daily Note 格式约定
 
-本文档记录 Daily Note.md 的实际格式规范，供解析脚本和 Claude 参考。
+本文档记录 Daily Note.md 的实际格式规范，供解析脚本和 agent 参考。
 
 ## 标题层级结构
 

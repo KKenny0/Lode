@@ -1,0 +1,4 @@
+interface:
+  display_name: "Lode Daily Note"
+  short_description: "Generate daily notes from git activity"
+  default_prompt: "Use $lode-git-daily-note to update today's daily note from git activity."

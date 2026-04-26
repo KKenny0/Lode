@@ -17,19 +17,12 @@ description: >
 
 Convert **multiple projects' weekly git commits** into a structured Markdown PPT outline. Each project gets an independent narrative using a unified template. Cross-project themes appear only on the overview slide.
 
-## When to Use
-
-- Multiple projects running in parallel need a consolidated weekly report
-- User wants git history summarized into presentation format
-
-**Not for:** Actual .pptx generation, non-git-based reporting.
-
 ## Quick Reference
 
 | Phase | Executor | Input | Output |
 |-------|----------|-------|--------|
 | 0: Scope | Main dialog | User prompt | Git logs + params |
-| 1: Analysis | Subagent × N | Git logs + template | Structured JSON (with work_streams) |
+| 1: Analysis | Main dialog by default; optional parallel agents when explicitly allowed | Git logs + template | Structured JSON (with work_streams) |
 | 2: Stitching | Main dialog | JSONs | Markdown PPT outline |
 
 ## Inputs
@@ -45,11 +38,11 @@ Convert **multiple projects' weekly git commits** into a structured Markdown PPT
 
 **Priority (auto):** Sort by commit count descending. ≥10 commits → Core; 5-9 → Supporting; <5 → Exploratory. User override takes precedence.
 
-**Work streams:** The subagent identifies work streams from commit patterns — each stream is a narratively independent group of changes. Multi-project mode: one stream per project by default. Single-project mode: the subagent decides whether to split into streams based on commit clustering. See [references/subagent-prompt.md](references/subagent-prompt.md) for the detection criteria.
+**Work streams:** Analyze commit patterns to identify narratively independent groups of changes. Multi-project mode: one stream per project by default. Single-project mode: decide whether to split into streams based on commit clustering. See [references/subagent-prompt.md](references/subagent-prompt.md) for the reusable analysis template and detection criteria.
 
 ## Phase 0: Scope Gathering
 
-Parse the user's prompt and collect missing parameters before dispatching subagents.
+Parse the user's prompt and collect missing parameters before analysis.
 
 ### Date Calculation
 
@@ -70,14 +63,14 @@ For `last_week`, add `--until="<this_monday_date>"`. Dates are YYYY-MM-DD.
 - No commits in range → mark as "maintenance week"
 - All projects maintenance week → output overview slide only with a note
 
-Pass collected logs into Phase 1's subagent as `{git_logs}`.
+Pass collected logs into Phase 1 as `{git_logs}`.
 
-## Phase 1: Dispatch Subagents
+## Phase 1: Analyze Projects
 
-For each project, dispatch a subagent using the template in [references/subagent-prompt.md](references/subagent-prompt.md). Multiple projects run in parallel. The subagent returns a `work_streams` array — each stream is an independent narrative unit with its own technical approach.
+For each project, use the template in [references/subagent-prompt.md](references/subagent-prompt.md) to produce a structured analysis. By default, perform this in the main dialog. If the runtime supports parallel agents and the user explicitly requested or approved them, each project may be analyzed in a separate agent. The analysis returns a `work_streams` array — each stream is an independent narrative unit with its own technical approach.
 
 **Error handling:**
-- Subagent returns non-JSON → retry with "Return ONLY valid JSON, no markdown fencing"
+- Analysis returns non-JSON → retry with "Return ONLY valid JSON, no markdown fencing"
 - Missing required fields → fill from available data; impossible to infer → "待确认"
 
 ## Phase 2: PPT Stitching

@@ -10,14 +10,7 @@ description: >
 
 # Weekly Change Tracker
 
-Session-end change extraction. When the developer wraps up work, reads the conversation context and writes structured change entries to the shared weekly-ppt storage. These entries capture the **why** behind changes — intent and reasoning that git commits rarely convey.
-
-## When to Use
-
-- User signals end of work: "收工", "今天到这", "done", "wrap up", "that's it for today", "好了", "先这样"
-- User explicitly asks: "记录变更", "log changes", "记一下今天做了什么"
-
-**Not for:** generating reports, summarizing code, creating documentation — those are separate skills. This skill only writes raw change log entries.
+Session-end change extraction. When the developer wraps up work, read the conversation context and write structured change entries to Lode raw storage. These entries capture the **why** behind changes — intent and reasoning that git commits rarely convey.
 
 ## Configuration
 
@@ -27,10 +20,10 @@ Session-end change extraction. When the developer wraps up work, reads the conve
 |--------|------|------|
 | 1 | `.lode/config.yaml`（项目根目录） | 项目级覆盖 |
 | 2 | `~/.lode/config.yaml` | 全局配置 |
-| 3 | `$WEEKLY_PPT_PATH` 环境变量 | 向后兼容 |
-| 4 | `~/.weekly-ppt/` | 向后兼容默认值 |
+| 3 | `$WEEKLY_PPT_PATH` 环境变量 | legacy fallback |
+| 4 | `~/.weekly-ppt/` | legacy fallback 默认值 |
 
-项目级配置覆盖全局配置的同名字段。如果没有任何配置文件，提示用户提供知识库路径并写入 `~/.lode/config.yaml`。完整配置格式见 `references/weekly-ppt-convention.md`。
+项目级配置覆盖全局配置的同名字段。如果无法解析 `{vault}`，简短说明未写入 raw log，不要阻塞用户收工。完整配置格式见 `references/weekly-ppt-convention.md`。
 
 此 skill 的产出路径：
 - 写入：`{vault}/raw/weeks/{ISO-week}/{project-slug}.json`

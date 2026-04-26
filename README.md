@@ -26,7 +26,9 @@ All skills carry the `lode-` prefix to avoid collision with user-installed skill
 
 Lode is **not** a pipeline. These skills are independent — each triggered at its own time, for its own purpose. There is no sequential dependency between them. The shared identity is thematic, not procedural.
 
-## Information Flow
+## Reusable Data Map
+
+The skills can reuse each other's outputs when those files exist, but none of these steps is mandatory. The raw layer stores structured intermediate data; the wiki layer stores human-readable notes and summaries.
 
 ```
 开发过程中:
@@ -37,7 +39,7 @@ Lode is **not** a pipeline. These skills are independent — each triggered at i
   lode-git-daily-note ← {vault}/raw/weeks/ JSON + git log → {vault}/Daily Note.md
 
 每周:
-  lode-weekly-outline ← git commits + {vault}/raw/weeks/ → 周报大纲
+  lode-weekly-outline ← git commits + optional {vault}/raw/weeks/ → 周报大纲
 
 每月:
   lode-monthly-review ← Daily Note.md
@@ -54,7 +56,9 @@ All skills share a unified configuration system:
 knowledge_vault: /path/to/your/knowledge-vault
 ```
 
-Resolution: project `.lode/config.yaml` → `~/.lode/config.yaml` → `$WEEKLY_PPT_PATH` → `~/.weekly-ppt/` (legacy fallback).
+Resolution: project `.lode/config.yaml` → `~/.lode/config.yaml` → `$WEEKLY_PPT_PATH` → `~/.weekly-ppt/`.
+
+`$WEEKLY_PPT_PATH` and `~/.weekly-ppt/` are legacy fallbacks. New setups should use `knowledge_vault` in `.lode/config.yaml` or `~/.lode/config.yaml`.
 
 The knowledge vault is a git repo (typically an Obsidian vault) for cross-machine sync.
 
@@ -62,11 +66,11 @@ The knowledge vault is a git repo (typically an Obsidian vault) for cross-machin
 
 **Self-contained skills** — Each skill has its own copy of shared files in its `references/` directory. Skills work correctly when installed individually.
 
-**Silent failure** — If config doesn't exist or project slug can't be determined, skip the side-effect gracefully (with legacy fallback).
+**Explicit primary outputs, graceful side effects** — If a skill needs the vault for its main output, it asks for `knowledge_vault`. If a raw change entry is only a side effect, it can skip that write gracefully.
 
 **Convention sync** — The canonical convention lives at `references/weekly-ppt-convention.md`. After editing it, run `scripts/sync-convention.sh` to copy to all skill directories.
 
-**Scripts for deterministic work** — Python scripts handle parsing and aggregation; Claude only handles interpretation and writing.
+**Scripts for deterministic work** — Python scripts handle parsing and aggregation; the agent handles interpretation and writing.
 
 ## Installation
 
@@ -76,14 +80,44 @@ The knowledge vault is a git repo (typically an Obsidian vault) for cross-machin
 npx @lode/cli
 ```
 
+Equivalent explicit command:
+
+```bash
+npx @lode/cli setup
+```
+
 The interactive wizard will guide you through:
 1. Selecting target platform (Claude Code / Codex / Both)
 2. Setting knowledge vault path
 3. Installing skills automatically
 
+After installation, verify that the five official skills are present:
+
+- `lode-session-recap`
+- `lode-arch-doc`
+- `lode-git-daily-note`
+- `lode-weekly-outline`
+- `lode-monthly-review`
+
+Evaluation workspaces such as `lode-*-workspace/` and `evals/` are repository artifacts only; they are not installed as skills.
+
+### Local Development
+
+From this repository:
+
+```bash
+cd cli
+npm install
+npm run build
+npm run copy-skills
+node dist/index.js setup
+```
+
 ### Manual
 
-将本仓库克隆到 Claude Code 的 plugin marketplace 目录，或通过 `claude plugin add` 注册。详情参见 [Claude Code Skills 文档](https://docs.anthropic.com/en/docs/claude-code/skills)。
+**Codex:** copy the five official skill directories into your Codex skills directory, typically `~/.agents/skills/` for this installer setup.
+
+**Claude Code:** copy the five official skill directories into a Claude Code plugin marketplace directory and include `.claude-plugin/plugin.json`, or register the plugin with `claude plugin add`. See the [Claude Code Skills documentation](https://docs.anthropic.com/en/docs/claude-code/skills).
 
 ## License
 

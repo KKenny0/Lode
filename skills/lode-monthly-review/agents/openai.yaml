@@ -1,0 +1,4 @@
+interface:
+  display_name: "Lode Monthly Review"
+  short_description: "Summarize monthly work from daily notes"
+  default_prompt: "Use $lode-monthly-review to generate a monthly review from Daily Note.md."

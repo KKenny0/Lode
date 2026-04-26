@@ -16,7 +16,7 @@ description: >
 核心产物：
 
 - 月度归档（原始 Markdown，不改写）
-- 月度总结（由 Claude 撰写，事实优先，禁止脑补）
+- 月度总结（由 agent 撰写，事实优先，禁止脑补）
 - 中间数据（signals.json + skeleton.json，供二次消费）
 
 ## 设计原则
@@ -34,10 +34,10 @@ description: >
 |--------|------|------|
 | 1 | `.lode/config.yaml`（项目根目录） | 项目级覆盖 |
 | 2 | `~/.lode/config.yaml` | 全局配置 |
-| 3 | `$WEEKLY_PPT_PATH` 环境变量 | 向后兼容 |
-| 4 | `~/.weekly-ppt/` | 向后兼容默认值 |
+| 3 | `$WEEKLY_PPT_PATH` 环境变量 | legacy fallback |
+| 4 | `~/.weekly-ppt/` | legacy fallback 默认值 |
 
-项目级配置覆盖全局配置的同名字段。如果没有任何配置文件，提示用户提供知识库路径并写入 `~/.lode/config.yaml`。完整配置格式和合并规则见 `references/weekly-ppt-convention.md`。
+项目级配置覆盖全局配置的同名字段。此 skill 的主产物依赖 `{vault}`；如果无法解析路径，提示用户配置 `knowledge_vault`。完整配置格式和合并规则见 `references/weekly-ppt-convention.md`。
 
 此 skill 的路径映射：
 - 输入：`{vault}/Daily Note.md`
@@ -109,7 +109,7 @@ python scripts/prepare_monthly_data.py \
 - 自动识别真实项目（出现 >= 2 天的）
 - 输出 signals.json 和 skeleton.json
 
-### Step 4：Claude 撰写总结
+### Step 4：Agent 撰写总结
 
 读取 `references/worklog-summary-template.md` 模板、`skeleton.json` 骨架数据、原始月度归档 `YYYY-MM.md`。
 

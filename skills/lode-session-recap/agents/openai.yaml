@@ -1,0 +1,4 @@
+interface:
+  display_name: "Lode Session Recap"
+  short_description: "Record session changes for weekly reports"
+  default_prompt: "Use $lode-session-recap to record the key changes from this work session."

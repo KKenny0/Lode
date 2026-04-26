@@ -13,7 +13,7 @@ Lode uses a YAML configuration file to determine the knowledge vault location. T
 | 1 | `{project-root}/.lode/config.yaml` | Project-level override |
 | 2 | `~/.lode/config.yaml` | Global default |
 | 3 | `$WEEKLY_PPT_PATH` env var | Legacy fallback |
-| 4 | `~/.weekly-ppt/` | Legacy default |
+| 4 | `~/.weekly-ppt/` | Legacy fallback default |
 
 **Config file format** (see `references/lode-config-template.yaml` for full template):
 
@@ -22,7 +22,7 @@ knowledge_vault: /path/to/your/knowledge-vault
 # project_slug: my-project  # optional, defaults to git repo directory name
 ```
 
-All subsequent path references use `{vault}` as shorthand for the resolved knowledge vault path.
+All subsequent path references use `{vault}` as shorthand for the resolved knowledge vault path. If a skill's primary output depends on `{vault}` and no path can be resolved, ask the user to configure `knowledge_vault`. If writing a weekly change entry is only a side effect, skip that write gracefully when `{vault}` cannot be resolved.
 
 ## Storage Location
 
@@ -133,14 +133,14 @@ Pattern: `[Trigger/motivation]. [Approach chosen] → [expected impact or what i
 
 - **Append** new entries to the existing array (read → append → write)
 - Do not deduplicate or overwrite — the consumer handles merging
-- **Silent failure**: if the project slug cannot be determined or the write fails, skip silently. The primary deliverable of each skill is never the change entry — it is always a side effect.
+- **Side-effect failure**: if the project slug cannot be determined or the write fails, skip the change-entry write gracefully. The primary deliverable of each skill is never the change entry — it is always a side effect.
 - **Concurrent writes**: two sessions writing to the same `{slug}.json` simultaneously may lose data. This is acceptable for the intended use case (single developer, single machine). If concurrent access becomes a concern, the consumer should implement merge logic.
 
 ## Consumers
 
 Downstream tools read these files to get high-quality development context:
 
-- **weekly-multi-project-ppt-lite** — reads change entries as primary context for weekly report generation (user provides the path when invoking the skill)
+- **lode-weekly-outline** — reads change entries as optional context for weekly report generation when available
 - **lode-git-daily-note** — reads change entries as primary data source, with git log as fallback
 - **lode-monthly-review** — reads daily notes (produced by lode-git-daily-note) for monthly summaries
 - Any future reporting or review tool that needs structured change history

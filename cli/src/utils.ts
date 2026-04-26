@@ -21,17 +21,31 @@ export function getSkillsDir(): string {
   throw new Error('Cannot find skills directory. Run `npm run copy-skills` first.');
 }
 
-/** List all lode-* skill directories */
+const EXCLUDED_RESOURCE_DIRS = new Set(['evals']);
+
+function isSkillDirectory(dir: string, name: string): boolean {
+  if (!name.startsWith('lode-')) return false;
+  if (name.endsWith('-workspace')) return false;
+  const fullPath = path.join(dir, name);
+  return fs.statSync(fullPath).isDirectory() && fs.existsSync(path.join(fullPath, 'SKILL.md'));
+}
+
+function shouldSkipCopy(entryName: string): boolean {
+  return entryName.endsWith('-workspace') || EXCLUDED_RESOURCE_DIRS.has(entryName);
+}
+
+/** List all installable lode-* skill directories */
 export function listSkills(): string[] {
   const dir = getSkillsDir();
   return fs.readdirSync(dir)
-    .filter(name => name.startsWith('lode-') && fs.statSync(path.join(dir, name)).isDirectory());
+    .filter(name => isSkillDirectory(dir, name));
 }
 
 /** Copy a directory recursively */
 export function copyDir(src: string, dest: string): void {
   fs.mkdirSync(dest, { recursive: true });
   for (const entry of fs.readdirSync(src, { withFileTypes: true })) {
+    if (entry.isDirectory() && shouldSkipCopy(entry.name)) continue;
     const srcPath = path.join(src, entry.name);
     const destPath = path.join(dest, entry.name);
     if (entry.isDirectory()) {

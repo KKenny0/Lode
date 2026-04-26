@@ -1,6 +1,6 @@
-# Subagent Prompt Template
+# Project Analysis Prompt Template
 
-Fill in `{placeholders}` and send to each subagent. Dispatch multiple projects in parallel.
+Fill in `{placeholders}` and use this prompt to analyze each project. Run it in the main dialog by default. If the runtime supports parallel agents and the user explicitly requested or approved them, the same prompt may be sent to one agent per project.
 
 ```text
 You are a weekly report analyst. Analyze the following project's git commits for this week's report.

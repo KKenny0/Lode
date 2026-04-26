@@ -585,7 +585,7 @@ def build_review_skeleton(signals, summary_mode='project_focused', evidence_mode
         real_projects: 手动指定的真实项目列表（None 则自动检测）
         real_project_min_days: 自动检测的最少出现天数阈值
 
-    返回一个 dict，包含结构化的总结数据，供 Claude 生成 summary.md。
+    返回一个 dict，包含结构化的总结数据，供 agent 生成 summary.md。
     """
     entries = signals.get('entries', [])
     month = signals.get('month', 'unknown')

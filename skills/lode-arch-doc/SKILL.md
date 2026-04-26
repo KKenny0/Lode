@@ -40,13 +40,6 @@ Determine the mode from the user's request:
    - Ask the user: "需要生成 Stage 实现文档还是 Pipeline 架构文档？"
    - Do not guess.
 
-## When to Use
-
-- User asks to write/create/generate Stage implementation documentation
-- User asks to write/create/generate Pipeline architecture documentation
-- User wants to document architectural decisions, trade-offs, or evolution
-- User says "写技术文档" or "document the design" with a technical context
-
 ## Documentation Structure
 
 ### Stage Mode (13 sections, 0-12)
@@ -213,10 +206,10 @@ If the project slug cannot be determined, skip silently.
 |--------|------|------|
 | 1 | `.lode/config.yaml`（项目根目录） | 项目级覆盖 |
 | 2 | `~/.lode/config.yaml` | 全局配置 |
-| 3 | `$WEEKLY_PPT_PATH` 环境变量 | 向后兼容 |
-| 4 | `~/.weekly-ppt/` | 向后兼容默认值 |
+| 3 | `$WEEKLY_PPT_PATH` 环境变量 | legacy fallback |
+| 4 | `~/.weekly-ppt/` | legacy fallback 默认值 |
 
-项目级配置覆盖全局配置的同名字段。如果没有任何配置文件，提示用户提供知识库路径并写入 `~/.lode/config.yaml`。完整配置格式和合并规则见 `references/weekly-ppt-convention.md`。
+项目级配置覆盖全局配置的同名字段。文档输出不依赖 `{vault}`；如果无法解析配置，只跳过 raw change entry 副作用。完整配置格式和合并规则见 `references/weekly-ppt-convention.md`。
 
 此 skill 的产出路径：
 - 文档输出：`docs/{YYYY-WNN}/lode-stage-{name}-implementation-v{N}.md` 或 `docs/{YYYY-WNN}/lode-pipeline-evolution-v{N}.md`（项目仓库内）

@@ -10,6 +10,9 @@ CLAUDE.md
 DESIGN.md
 .claude-plugin/
 
+# Claude Code skills' evaluation results
+*-workspace/
+
 # CLI build artifacts
 cli/node_modules/
 cli/dist/

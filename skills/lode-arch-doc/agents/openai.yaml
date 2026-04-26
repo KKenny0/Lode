@@ -1,0 +1,4 @@
+interface:
+  display_name: "Lode Architecture Docs"
+  short_description: "Document stage and pipeline architecture"
+  default_prompt: "Use $lode-arch-doc to write architecture documentation for this stage or pipeline."
