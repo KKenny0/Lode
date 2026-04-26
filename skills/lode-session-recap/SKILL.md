@@ -46,7 +46,22 @@ Read the full conversation history for this session and identify:
 - **Why it changed** — the reasoning, the problem being solved, the design decision
 - **Impact** — what this means for the project, downstream effects, risks
 
-Group related work into logical units. A session that touched 15 files for one feature should produce **one** entry, not 15.
+Prioritize signals that can appear in a weekly report:
+
+- Shipped or meaningfully advanced capabilities
+- Technical decisions, trade-offs, and rejected alternatives
+- Risks, blockers, regressions, and follow-up work
+- Cross-module or cross-stage contract changes
+- Reliability, performance, migration, or validation improvements with clear impact
+
+Deprioritize process-only changes unless they explain a report-worthy signal:
+
+- File moves, formatting, comments, import cleanup
+- Small config tweaks without user/system impact
+- Intermediate experiments that were reverted or replaced
+- Tooling noise, generated files, or local setup changes
+
+Group related work into logical units. A session that touched 15 files for one feature should produce **one** entry, not 15. If several changes share the same user-facing or architecture goal, merge them into one entry even if they were implemented across multiple commits or files.
 
 ### Step 3: Generate Change Entries
 
@@ -72,7 +87,14 @@ The change entry JSON looks like this:
 - **source**: always `"session-recap"`
 - **timestamp**: current time in ISO 8601
 
-**Granularity**: Maximum 5 entries per session. If the session was complex, aggressively merge related changes. The goal is a concise log, not a detailed diary.
+**Weekly-friendly writing rules:**
+
+- **summary**: write the report-level outcome or decision, not the list of files touched
+- **context**: explain why the work mattered and what it enables, prevents, or changes
+- **related_docs**: include architecture docs, design docs, eval notes, or other durable evidence created or changed in the session
+- **type**: use `decision` for design choices even when implementation is still pending; use `risk` for discovered issues even when no fix landed
+
+**Granularity**: Maximum 5 entries per session. If the session was complex, aggressively merge related changes. A good default is 1-3 entries: one for the main outcome, one for an important decision, and one for a risk or follow-up if present. The goal is a concise weekly-report signal log, not a detailed diary.
 
 ### Step 4: Write to Weekly Log
 
@@ -103,3 +125,4 @@ No further action needed from the user.
 - **Don't fabricate** — only record what actually happened in the conversation. If the session was just reading code and discussing, say so honestly or skip entirely.
 - **Don't ask for confirmation** — this should be frictionless. Write the entries and show the summary. If the user wants to correct something, they'll say so.
 - **Don't split related work** — 3 commits that all serve one feature = 1 entry, not 3.
+- **Don't preserve process noise** — if an item only explains how the session unfolded, not what changed in the project, leave it out.

@@ -166,3 +166,29 @@ For weekly reporting, raw entries should carry the meaning of the work:
 - `source: arch-doc` entries should summarize the architectural change or decision, not merely state that a document was written.
 - `related_docs` are evidence and deep context; consumers should read them only when the raw entry is not enough to explain the technical approach.
 - Git commits are useful for coverage checks, but they should not override explicit raw-entry intent.
+
+## Producer Guidance
+
+Raw entries are weekly-report signals, not chronological diary items.
+
+### For `session-recap`
+
+Capture only signals that should survive into a weekly review:
+
+- Capabilities shipped or meaningfully advanced
+- Technical decisions and trade-offs
+- Risks, blockers, regressions, and follow-up work
+- Cross-module contracts, migrations, reliability improvements, or validation changes
+
+Merge related implementation steps into one entry. A feature implemented through several commits, fixes, and follow-up tweaks should usually become one `feature` entry with context that mentions the important repair or trade-off. Skip process-only work such as formatting, file moves, import cleanup, generated files, and local setup unless it explains a larger report-worthy change.
+
+### For `arch-doc`
+
+Capture the architecture knowledge made explicit by the document:
+
+- Stage or pipeline contract boundaries
+- Cross-stage dataflow or artifact evolution
+- Design decisions and trade-offs
+- Known risks, migration constraints, or source-of-truth changes
+
+Do not write entries whose only message is that a document was created or updated. Put the document path in `related_docs`; use `summary` and `context` for the architecture signal the document preserves.

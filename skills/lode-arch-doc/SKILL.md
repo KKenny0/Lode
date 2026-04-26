@@ -172,9 +172,9 @@ Architectural understanding depends heavily on visual structure. Use ASCII diagr
 
 See the Appendix in the relevant reference file (`stage-implementation-spec.md` or `pipeline-doc.md`) for character set, formatting rules, and per-type examples.
 
-## Step 5: Export Change Summary
+## Step 5: Export Weekly Signal
 
-After completing the document, append a change entry to `{vault}/raw/weeks/{current-ISO-week}/{project-slug}.json` following the schema in `references/weekly-ppt-convention.md`.
+After completing the document, append a report-friendly change entry to `{vault}/raw/weeks/{current-ISO-week}/{project-slug}.json` following the schema in `references/weekly-ppt-convention.md`.
 
 ```json
 {
@@ -192,9 +192,19 @@ Skill-specific values:
 - **source**: always `"arch-doc"`
 - **related_docs**: absolute path to the generated document
 
-**New document**: summary captures what was documented. Context explains why now.
+The entry must describe the architecture signal, not the documentation activity:
 
-**Updating existing**: summary describes what changed. Context explains why the update was needed.
+- **Do write**: "Documented the Parse stage contract split between normalized input, validation, and repair loops"
+- **Do not write**: "Generated Parse stage implementation document"
+- **summary**: capture the architecture change, technical decision, contract boundary, risk, or system behavior that the document makes explicit
+- **context**: explain why that architecture signal matters for future work, debugging, migration, weekly reporting, or cross-stage coordination
+- **related_docs**: keep the document path as evidence, not as the main message
+
+**New document**: summary captures the architecture/implementation knowledge newly made explicit. Context explains why that knowledge matters now.
+
+**Updating existing**: summary describes the actual architecture or contract change reflected in the update. Context explains why the previous document was stale or incomplete.
+
+If the document only records a simple component with no report-worthy architecture signal, skip the raw entry rather than writing a low-value "updated docs" entry.
 
 If the project slug cannot be determined, skip silently.
 
