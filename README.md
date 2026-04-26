@@ -78,22 +78,27 @@ The knowledge vault is a git repo (typically an Obsidian vault) for cross-machin
 
 ## Installation
 
-### Via CLI (Recommended)
+### Via CLI From Source
 
 ```bash
-npx @lode/cli
-```
-
-Equivalent explicit command:
-
-```bash
-npx @lode/cli setup
+npm --prefix cli install
+npm --prefix cli run build
+npm --prefix cli run copy-skills
+node cli/dist/index.js setup
 ```
 
 The interactive wizard will guide you through:
 1. Selecting target platform (Claude Code / Codex / Both)
 2. Setting knowledge vault path
 3. Installing skills automatically
+
+### Via npm
+
+```bash
+npx @lode/cli
+```
+
+This command works after `@lode/cli` has been published to the npm registry. Until then, use the source install above.
 
 After installation, verify that the five official skills are present:
 
