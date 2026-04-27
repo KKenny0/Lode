@@ -81,6 +81,22 @@ Read `references/pipeline-doc.md` for the full specification.
 
 ## Writing Workflow
 
+### Step -1: Resolve the Output Week Once
+
+Before checking or creating any `docs/{YYYY-WNN}/` directory, resolve the target week with the bundled helper and reuse that exact value for both the documentation path and the raw change entry:
+
+```bash
+python <this-skill>/scripts/lode_raw.py week
+```
+
+If the user explicitly requests a different target date, pass it to the helper:
+
+```bash
+python <this-skill>/scripts/lode_raw.py week --date YYYY-MM-DD
+```
+
+Do not calculate ISO weeks mentally or with ad hoc date logic. Treat the helper output as the single source of truth. For example, `2026-04-27` resolves to `2026-W18`.
+
 ### Step 0: Check for Existing Document
 
 Before writing, check if a document already exists in the target `docs/` directory.
@@ -143,7 +159,7 @@ docs/{YYYY-WNN}/lode-stage-{stage_name}-implementation-v{N}.md
 docs/{YYYY-WNN}/lode-pipeline-evolution-v{version}.md
 ```
 
-- `{YYYY-WNN}`: current ISO week (e.g. `2026-W17`)
+- `{YYYY-WNN}`: the exact week string returned by Step -1 (e.g. `2026-W18`)
 - Update existing documents by incrementing the version number, not by creating new filenames
 - The `lode-stage-*` / `lode-pipeline-*` prefix distinguishes the mode
 
@@ -182,7 +198,11 @@ python <this-skill>/scripts/lode_raw.py append-entry \
   --cwd "$PWD"
 ```
 
-The helper resolves config, calculates the current ISO week, resolves the project slug, validates required fields, creates the week directory, and appends to the existing project array.
+If Step -1 used `--date YYYY-MM-DD`, pass the same date to `append-entry --date YYYY-MM-DD`. The helper resolves config, calculates the same target week, resolves the project slug, validates required fields, creates the week directory, and appends to the existing project array.
+
+Resolve the generated document path to an absolute filesystem path before writing the entry. `related_docs` must contain the absolute path, not `docs/...` or any other relative path. If the helper rejects `related_docs`, fix the path and rerun the append instead of dropping the field.
+
+After the helper returns, compare its JSON `week` value with the `docs/{YYYY-WNN}/` directory used for the document. If they differ, fix the document path or rerun the append with the intended date before reporting completion. Never explain a mismatch as a calendar convention difference; it indicates inconsistent week resolution in the workflow.
 
 ```json
 {

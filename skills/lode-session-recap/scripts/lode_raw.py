@@ -191,6 +191,15 @@ def validate_entry(entry: Any) -> dict[str, Any]:
                 isinstance(item, str) for item in entry[field]
             ):
                 raise ValueError(f"entry {field} must be a list of strings when present")
+    if "related_docs" in entry:
+        relative_docs = [
+            item for item in entry["related_docs"] if not Path(item).expanduser().is_absolute()
+        ]
+        if relative_docs:
+            raise ValueError(
+                "entry related_docs must contain absolute paths: "
+                + ", ".join(relative_docs)
+            )
     for field in ("project_area", "work_stream", "impact"):
         if field in entry and (
             not isinstance(entry[field], str) or not entry[field].strip()
