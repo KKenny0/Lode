@@ -1,0 +1,28 @@
+[
+  {
+    "timestamp": "2026-04-28T16:20:00+08:00",
+    "type": "feature",
+    "summary": "Split storyboard validation into deterministic schema checks and LLM-assisted repair loops",
+    "context": "Single-pass validation hid recurring panel continuity failures until export time. The split gives weekly reporting a clear reliability story and gives future debugging a stable contract boundary.",
+    "related_docs": ["/Users/example/projects/storyboard-pipeline/docs/2026-W18/lode-stage-validation-implementation-v1.md"],
+    "source": "session-recap",
+    "status": "done",
+    "impact": "Weekly reporting can explain the reliability improvement without re-reading implementation commits.",
+    "project_area": "validation",
+    "work_stream": "Storyboard reliability",
+    "evidence_refs": ["abc1234", "eval:continuity-regression-07"]
+  },
+  {
+    "timestamp": "2026-04-29T11:45:00+08:00",
+    "type": "decision",
+    "summary": "Kept panel layout generation separate from dialogue generation to preserve independent retry boundaries",
+    "context": "Combining both stages made repair cheaper in the happy path but caused dialogue rewrites during layout-only failures. Separate contracts trade a small orchestration cost for more predictable retries.",
+    "related_docs": ["/Users/example/projects/storyboard-pipeline/docs/2026-W18/lode-pipeline-evolution-v1.md"],
+    "source": "arch-doc",
+    "status": "decision",
+    "impact": "Architecture docs now preserve the retry-boundary decision for future stage changes.",
+    "project_area": "pipeline orchestration",
+    "work_stream": "Stage contract design",
+    "evidence_refs": ["doc:pipeline-evolution-v1"]
+  }
+]

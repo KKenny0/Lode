@@ -14,7 +14,9 @@
     "build": "tsc",
     "prepublishOnly": "npm run build && npm run copy-skills && npm run check-skills",
     "copy-skills": "rm -rf ./skills && mkdir -p ./skills && find ../skills -maxdepth 1 -mindepth 1 -type d -name 'lode-*' ! -name '*-workspace' -exec sh -c 'for d do [ -f \"$d/SKILL.md\" ] && cp -R \"$d\" ./skills/; done' sh {} + && find ./skills -type d -name evals -prune -exec rm -rf {} +",
-    "check-skills": "node scripts/check-skills.mjs"
+    "check-skills": "node scripts/check-skills.mjs",
+    "test:doctor": "node scripts/test-doctor.mjs",
+    "test": "npm run build && npm run test:doctor"
   },
   "engines": {
     "node": ">=18.0.0"

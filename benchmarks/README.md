@@ -20,3 +20,4 @@ For each local benchmark run, record:
 ## Public Protocols
 
 - `weekly-outline.md` documents the quality bar for raw-first weekly outline generation.
+- `regression-fixtures.json` lists public, synthetic regression scenarios for behavior that should not regress.

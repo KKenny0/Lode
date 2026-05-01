@@ -139,6 +139,7 @@ Synthetic examples live in [`examples/`](examples/). They use a fictional projec
 - [`examples/weekly-outline.md`](examples/weekly-outline.md) — weekly outline sample
 - [`examples/monthly-summary.md`](examples/monthly-summary.md) — monthly review sample
 - [`examples/architecture-doc.md`](examples/architecture-doc.md) — stage/pipeline doc excerpt
+- [`examples/vault/`](examples/vault/) — end-to-end synthetic vault layout
 
 ## Installation
 

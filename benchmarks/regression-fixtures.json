@@ -1,0 +1,105 @@
+{
+  "fixtures": [
+    {
+      "id": "arch-doc-source-missing",
+      "skill": "lode-arch-doc",
+      "prompt": "为 Parse Stage 写完整实现文档，代码在 /tmp/storyboard-pipeline/src/stages/parse.py，但该路径不存在。",
+      "expected_behavior": "Do not generate a full implementation document. Return a blocked response naming the missing source path, or create only a clearly labeled structural skeleton if the user explicitly asks for a template.",
+      "assertions": [
+        {
+          "name": "no_fake_complete_doc",
+          "description": "The output is not presented as a completed stage implementation document."
+        },
+        {
+          "name": "missing_source_named",
+          "description": "The missing code path or source evidence is explicitly named."
+        },
+        {
+          "name": "no_invented_symbols",
+          "description": "The output does not invent function names, schemas, prompts, fields, or dataflow."
+        },
+        {
+          "name": "evidence_gap_visible",
+          "description": "If a skeleton is produced, it includes an evidence gap note near the top."
+        }
+      ]
+    },
+    {
+      "id": "weekly-outline-merge-session-and-arch-doc",
+      "skill": "lode-weekly-outline",
+      "prompt": "用 $lode-weekly-outline 写本周技术型周报。raw entries 同时包含 session-recap 和 arch-doc 对同一个 validation contract split 的记录；git log 也有同一变更的 commit。",
+      "fixture": {
+        "project": {
+          "name": "Storyboard Pipeline",
+          "slug": "storyboard-pipeline",
+          "path": "/tmp/storyboard-pipeline",
+          "priority": "core"
+        },
+        "raw_entries": [
+          {
+            "timestamp": "2026-04-28T16:20:00+08:00",
+            "type": "feature",
+            "summary": "Split storyboard validation into deterministic schema checks and LLM-assisted repair loops",
+            "context": "Single-pass validation hid recurring panel continuity failures until export time. The split gives future debugging a stable contract boundary.",
+            "source": "session-recap",
+            "status": "done",
+            "work_stream": "Storyboard reliability"
+          },
+          {
+            "timestamp": "2026-04-28T17:10:00+08:00",
+            "type": "decision",
+            "summary": "Defined validation-stage ownership between schema checks, repair loops, and export compatibility",
+            "context": "The architecture document makes validation ownership explicit so export remains a consumer rather than a hidden repair stage.",
+            "related_docs": ["/tmp/storyboard-pipeline/docs/2026-W18/lode-stage-validation-implementation-v1.md"],
+            "source": "arch-doc",
+            "status": "decision",
+            "work_stream": "Storyboard reliability"
+          }
+        ],
+        "fallback_git_logs": [
+          "abc1234 feat: split validation schema checks and repair loop",
+          "def5678 docs: document validation stage ownership"
+        ]
+      },
+      "expected_behavior": "Produce one Storyboard reliability work stream. Use the session entry for motivation, the arch-doc entry for evidence, and git commits only as coverage evidence.",
+      "assertions": [
+        {
+          "name": "single_work_stream",
+          "description": "The session-recap entry, arch-doc entry, and matching git commits do not become duplicate streams."
+        },
+        {
+          "name": "intent_and_evidence_combined",
+          "description": "The stream includes both motivation from session-recap and contract evidence from arch-doc."
+        },
+        {
+          "name": "git_not_primary",
+          "description": "Git commits are treated as coverage/evidence, not the main narrative source."
+        }
+      ]
+    },
+    {
+      "id": "weekly-outline-fallback-confidence",
+      "skill": "lode-weekly-outline",
+      "prompt": "用 $lode-weekly-outline 写本周周报。没有 raw entries，但 repo path 有效，请从 git log fallback 生成。",
+      "fixture": {
+        "raw_entries": [],
+        "fallback_git_logs": [
+          "aaa1111 feat: add validation retry loop",
+          "bbb2222 fix: handle empty panel list",
+          "ccc3333 chore: format markdown tables"
+        ]
+      },
+      "expected_behavior": "Generate a usable outline, filter chore noise, and mark fallback-only streams as lower confidence or evidence-limited.",
+      "assertions": [
+        {
+          "name": "fallback_only_labeled",
+          "description": "The output clearly marks the narrative as fallback-only, lower-confidence, or evidence-limited."
+        },
+        {
+          "name": "noise_filtered",
+          "description": "The chore-only commit is not promoted into a main work stream."
+        }
+      ]
+    }
+  ]
+}
