@@ -9,6 +9,15 @@ knowledge_vault: /path/to/your/knowledge-vault
 # 项目标识（可选，默认从 git repo 目录名推导）
 # project_slug: my-project
 
+# 周报大纲设置（可选）
+# weekly_outline:
+#   output_dir: /path/to/Work Diary/Weekly      # 默认 {vault}/Work Diary/Weekly
+#   # output_path: /path/to/custom-weekly.md    # 显式路径优先于 output_dir
+
+# 月度回顾设置（可选）
+# monthly_review:
+#   output_dir: /path/to/Work Diary/Monthly     # 默认 {vault}/Work Diary/Monthly
+
 # 日报设置（可选，原 .daily-note-config.yaml）
 # daily_note:
 #   path: /path/to/Daily Note.md      # 默认 {vault}/Daily Note.md

@@ -24,7 +24,7 @@ Convert **weekly Lode raw change entries** into a structured Markdown PPT outlin
 |-------|----------|-------|--------|
 | 0: Scope | Main dialog | User prompt + config | Raw entries + optional git coverage + params |
 | 1: Analysis | Main dialog by default; optional parallel agents when explicitly allowed | Raw entries + fallback git logs + template | Structured JSON (with work_streams) |
-| 2: Stitching | Main dialog | JSONs | Markdown PPT outline |
+| 2: Stitching | Main dialog | JSONs | Markdown PPT outline saved to `{vault}/Work Diary/Weekly/{YYYY-WNN}.md` |
 
 ## Inputs
 
@@ -33,6 +33,7 @@ Convert **weekly Lode raw change entries** into a structured Markdown PPT outlin
 | Time range | No | `this_week` | "本周" → this_week; "上周" → last_week |
 | Projects (name + repo path + slug) | No | `{vault}/raw/projects.json` or current repo | Prompt overrides project registry |
 | Mode: `tech` / `report` | No | `tech` | Infer from context |
+| Output path | No | `{vault}/Work Diary/Weekly/{YYYY-WNN}.md` | Prompt overrides config; config overrides default |
 | Priority order | No | Auto | By commit volume (see below) |
 
 **Mode:** `tech` = 6-part narrative with technical approach; `report` = 4-part focused on outcomes. See [references/slide-template.md](references/slide-template.md) for both structures.
@@ -40,6 +41,26 @@ Convert **weekly Lode raw change entries** into a structured Markdown PPT outlin
 **Priority (auto):** Prefer `projects.json` `priority` when present. Otherwise sort by raw entry count plus uncovered commit count: ≥5 signals → Core; 2-4 → Supporting; <2 → Exploratory. User override takes precedence.
 
 **Work streams:** Analyze raw entries first to identify narratively independent groups of changes. Use `summary`, `context`, `type`, `source`, and `related_docs` as the main semantic input. Use git commits only to fill gaps when raw entries are missing or incomplete. Multi-project mode: one stream per project by default. Single-project mode: decide whether to split into streams based on raw entry clustering. See [references/subagent-prompt.md](references/subagent-prompt.md) for the reusable analysis template and detection criteria.
+
+## Output Contract
+
+Primary output is a Markdown PPT outline in the knowledge vault wiki layer:
+
+```text
+{vault}/Work Diary/Weekly/{YYYY-WNN}.md
+```
+
+Resolve the output path in this order:
+1. User-provided explicit output path
+2. `weekly_outline.output_path` from `.lode/config.yaml`
+3. `weekly_outline.output_dir` from `.lode/config.yaml` plus `{YYYY-WNN}.md`
+4. Default path: `{vault}/Work Diary/Weekly/{YYYY-WNN}.md`
+
+Create the output directory if it does not exist. If the target file already exists, ask before overwriting unless the user explicitly requested update, rewrite, or overwrite behavior.
+
+If `{vault}` cannot be resolved and no explicit output path was provided, return the Markdown outline in the chat and tell the user to configure `knowledge_vault`.
+
+After writing the file, report the absolute output path.
 
 ## Phase 0: Scope Gathering
 
@@ -102,6 +123,8 @@ Raw entries are authoritative for intent and impact because they were produced a
 ## Phase 2: PPT Stitching
 
 Assemble the final Markdown PPT outline from collected JSONs. Each project's `work_streams` array drives the slide layout. Apply [references/slide-template.md](references/slide-template.md) per stream based on mode and priority.
+
+Write the assembled outline to the resolved output path from the Output Contract.
 
 **Slide budget per stream (by total stream count):**
 

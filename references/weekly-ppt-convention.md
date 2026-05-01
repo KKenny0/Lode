@@ -42,14 +42,25 @@ Data is organized in two layers following the raw/wiki pattern:
         signals.json              # Monthly extracted signals
         skeleton.json             # Monthly summary skeleton
   Daily Note.md                   # Wiki layer (daily notes)
-  Work Diary/                     # Wiki layer (monthly archives + summaries)
+  Work Diary/                     # Wiki layer (human-readable work outputs)
+    Weekly/
+      2026-W15.md                 # Weekly Markdown PPT outline
+      2026-W16.md
+    Monthly/
+      2026-04.md                  # Monthly archive
+      2026-04.summary.md          # Monthly summary
 ```
+
+Weekly outline consumers should write their primary human-readable output to
+`{vault}/Work Diary/Weekly/{YYYY-WNN}.md` unless the user or config provides an
+explicit output path.
 
 ## ISO Week
 
 Use `date +%Y-W%V` to calculate the current week string. Format: `YYYY-WNN` (zero-padded).
 
-If the `weeks/{week}/` directory does not exist, create it before writing.
+If the `raw/weeks/{week}/` or `Work Diary/Weekly/` directory does not exist,
+create it before writing.
 
 When a skill-local or repository helper script is available, prefer it over
 hand-written date logic:

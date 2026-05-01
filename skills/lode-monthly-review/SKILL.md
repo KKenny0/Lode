@@ -41,9 +41,9 @@ description: >
 
 此 skill 的路径映射：
 - 输入：`{vault}/Daily Note.md`
-- 归档输出：`{vault}/Work Diary/{YYYY-MM}.md`
+- 归档输出：`{vault}/Work Diary/Monthly/{YYYY-MM}.md`
 - 中间数据：`{vault}/raw/months/{YYYY-MM}/signals.json` 和 `skeleton.json`
-- 总结输出：`{vault}/Work Diary/{YYYY-MM}.summary.md`
+- 总结输出：`{vault}/Work Diary/Monthly/{YYYY-MM}.summary.md`
 
 ## 输入参数
 
@@ -52,7 +52,7 @@ description: >
 | 参数 | 说明 |
 |------|------|
 | `input_file` | Daily Note.md 的路径（默认从配置推导） |
-| `output_dir` | 输出目录路径（默认 `{vault}/Work Diary/`） |
+| `output_dir` | 输出目录路径（默认 `{vault}/Work Diary/Monthly/`） |
 
 ### 可选
 
@@ -84,7 +84,7 @@ evidence_mode: strict            # strict | best_effort
 
 ### Step 2：按月拆分归档
 
-运行 `scripts/split_daily_note.py`，将 Daily Note.md 拆分为 `YYYY-MM.md` 月度归档文件，保存到 `{vault}/Work Diary/`。
+运行 `scripts/split_daily_note.py`，将 Daily Note.md 拆分为 `YYYY-MM.md` 月度归档文件，保存到 `{vault}/Work Diary/Monthly/`。
 
 - 保留原始内容，不做改写
 - 缺少月级标题时自动从日期推断
@@ -96,7 +96,7 @@ evidence_mode: strict            # strict | best_effort
 
 ```bash
 python scripts/prepare_monthly_data.py \
-  --input {vault}/Work\ Diary/{YYYY-MM}.md \
+  --input {vault}/Work\ Diary/Monthly/{YYYY-MM}.md \
   --signals-output {vault}/raw/months/{YYYY-MM}/signals.json \
   --skeleton-output {vault}/raw/months/{YYYY-MM}/skeleton.json \
   --summary-mode project_focused \
@@ -113,7 +113,7 @@ python scripts/prepare_monthly_data.py \
 
 读取 `references/worklog-summary-template.md` 模板、`skeleton.json` 骨架数据、原始月度归档 `YYYY-MM.md`。
 
-按模板撰写 `{YYYY-MM}.summary.md`，保存到 `{vault}/Work Diary/`。
+按模板撰写 `{YYYY-MM}.summary.md`，保存到 `{vault}/Work Diary/Monthly/`。
 
 **重要约束：**
 
