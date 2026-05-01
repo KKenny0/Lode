@@ -42,6 +42,8 @@ Convert **weekly Lode raw change entries** into a structured Markdown PPT outlin
 
 **Work streams:** Analyze raw entries first to identify narratively independent groups of changes. Use `summary`, `context`, `type`, `source`, and `related_docs` as the main semantic input. Use git commits only to fill gaps when raw entries are missing or incomplete. Multi-project mode: one stream per project by default. Single-project mode: decide whether to split into streams based on raw entry clustering. See [references/subagent-prompt.md](references/subagent-prompt.md) for the reusable analysis template and detection criteria.
 
+Merge duplicate signals before analysis: if a `session-recap` entry and an `arch-doc` entry describe the same change, create one work stream. Use the session entry for motivation/intent and the arch-doc entry for technical evidence. Fallback git commits can add coverage notes, but must not create a duplicate stream for work already explained by raw entries.
+
 ## Output Contract
 
 Primary output is a Markdown PPT outline in the knowledge vault wiki layer:
@@ -104,7 +106,7 @@ Compare commit subjects against raw entry summaries/contexts. If a commit is cle
 
 **Edge cases:**
 - Raw entries exist and git path is missing/invalid → proceed from raw entries; mention that git coverage was skipped
-- No raw entries but repo path valid → fallback to git log analysis
+- No raw entries but repo path valid → fallback to git log analysis and mark resulting streams as lower-confidence / fallback-only
 - No raw entries and no valid git path → mark as "maintenance week" or ask user for project source
 - All projects maintenance week → output overview slide only with a note
 
@@ -114,7 +116,7 @@ Pass collected raw entries and uncovered git logs into Phase 1 as `{raw_entries}
 
 For each project, use the template in [references/subagent-prompt.md](references/subagent-prompt.md) to produce a structured analysis. By default, perform this in the main dialog. If the runtime supports parallel agents and the user explicitly requested or approved them, each project may be analyzed in a separate agent. The analysis returns a `work_streams` array — each stream is an independent narrative unit with its own technical approach.
 
-Raw entries are authoritative for intent and impact because they were produced at session/doc-writing time. Fallback git commits are lower-confidence evidence and should never override a clear raw entry.
+Raw entries are authoritative for intent and impact because they were produced at session/doc-writing time. `session-recap` entries are intent-rich; `arch-doc` entries are evidence-rich. Fallback git commits are lower-confidence evidence and should never override or duplicate a clear raw entry.
 
 **Error handling:**
 - Analysis returns non-JSON → retry with "Return ONLY valid JSON, no markdown fencing"

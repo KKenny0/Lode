@@ -1,0 +1,28 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: cli/package-lock.json
+      - name: Install CLI dependencies
+        run: npm --prefix cli ci
+      - name: Build CLI
+        run: npm --prefix cli run build
+      - name: Bundle skills
+        run: npm --prefix cli run copy-skills
+      - name: Check skills
+        run: npm --prefix cli run check-skills
+      - name: Run doctor smoke test
+        run: |
+          mkdir -p "$RUNNER_TEMP/lode-vault"
+          node cli/dist/index.js doctor --vault "$RUNNER_TEMP/lode-vault" --skip-install-check --json

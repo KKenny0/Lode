@@ -73,7 +73,7 @@ Group related work into logical units. A session that touched 15 files for one f
 
 ### Step 3: Generate Change Entries
 
-For each distinct change, produce an entry following the schema in `references/weekly-ppt-convention.md` (read this file for the full spec, including structured guidance on writing summary and context).
+For each distinct change, produce an entry following the schema in `references/weekly-ppt-convention.md` (read this file for the full spec, including structured guidance on writing summary, context, and quality levels). Prefer Good or Excellent raw entries: capture the durable engineering signal, not the fact that files changed.
 
 The change entry JSON looks like this:
 
@@ -108,6 +108,8 @@ The change entry JSON looks like this:
 - **related_docs**: include architecture docs, design docs, eval notes, or other durable evidence created or changed in the session
 - **type**: use `decision` for design choices even when implementation is still pending; use `risk` for discovered issues even when no fix landed
 - **recommended optional fields**: populate `status`, `impact`, and `evidence_refs` when naturally available; leave them absent rather than guessing
+
+**Quality target**: write entries that would still make sense in a weekly report a month later. "Updated docs" is bad; "Clarified validation and repair-loop ownership so future schema migrations have a source of truth" is excellent.
 
 **Granularity**: Maximum 5 entries per session. If the session was complex, aggressively merge related changes. A good default is 1-3 entries: one for the main outcome, one for an important decision, and one for a risk or follow-up if present. The goal is a concise weekly-report signal log, not a detailed diary.
 

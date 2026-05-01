@@ -167,6 +167,19 @@ Pattern: `[Trigger/motivation]. [Approach chosen] → [expected impact or what i
 - Good: "Character extraction was tightly coupled with parsing, blocking independent iteration. New isolation allows tuning extraction without risking parse stability."
 - Avoid: Repeating the summary / describing implementation details / vague statements like "improved quality"
 
+### Quality Levels
+
+Use these levels when judging whether a raw entry is worth keeping:
+
+| Level | Example | Problem / Value |
+|-------|---------|-----------------|
+| Bad | "Updated documentation" | Process log only; no durable work signal |
+| OK | "Updated Parse Stage documentation" | Names the artifact, but not the engineering meaning |
+| Good | "Clarified Parse Stage input validation and repair-loop responsibilities" | Captures the technical boundary |
+| Excellent | "Separated Parse Stage input validation, repair-loop ownership, and downstream output contracts so future schema migrations can debug failures without re-reading implementation commits" | Captures change, boundary, why it matters, and future reuse value |
+
+Prefer Good or Excellent entries. If an entry cannot rise above OK, skip it unless the user explicitly asked to preserve that process detail.
+
 ### Type Definitions
 
 - **feature** — New capability was built
@@ -215,6 +228,17 @@ For weekly reporting, raw entries should carry the meaning of the work:
 - `source: arch-doc` entries should summarize the architectural change or decision, not merely state that a document was written.
 - `related_docs` are evidence and deep context; consumers should read them only when the raw entry is not enough to explain the technical approach.
 - Git commits are useful for coverage checks, but they should not override explicit raw-entry intent.
+
+### Duplicate and Conflict Handling
+
+Consumers should merge semantically similar signals rather than repeat them:
+
+- Same project + same week + similar `summary` / `context` means the entries are candidates for one work stream.
+- `session-recap` entries are intent-rich: they often preserve why the work happened and what trade-off was made in conversation.
+- `arch-doc` entries are evidence-rich: they often preserve contract boundaries, source-of-truth paths, and architecture decisions.
+- If a `session-recap` entry and an `arch-doc` entry describe the same change, combine them into one work stream. Use the session entry for motivation and the arch-doc entry for technical evidence.
+- Fallback git commits fill coverage gaps only. They should not create a duplicate stream for work already explained by raw entries.
+- If two entries conflict, preserve the conflict explicitly in the weekly outline or daily note instead of silently choosing the more positive version.
 
 ## Producer Guidance
 

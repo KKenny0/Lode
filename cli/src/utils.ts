@@ -4,6 +4,14 @@ import { fileURLToPath } from 'node:url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
+export const OFFICIAL_SKILLS = [
+  'lode-session-recap',
+  'lode-arch-doc',
+  'lode-git-daily-note',
+  'lode-weekly-outline',
+  'lode-monthly-review',
+];
+
 /**
  * Path to the bundled skills directory.
  * In dev: ../skills (relative to dist/)

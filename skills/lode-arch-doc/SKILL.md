@@ -134,6 +134,13 @@ Before writing, collect relevant information by reading the source code and exis
 - Affected stages
 - Trigger reason (bad case? eval results? new requirements?)
 
+If the referenced code, source document, or system evidence cannot be accessed, do not generate a full implementation or architecture document. Either:
+
+- Return a blocked response explaining exactly which source is missing and what path/input is needed, or
+- Create a clearly labeled structural skeleton only when the user explicitly asked for a template.
+
+Never present a TBD-heavy or inferred document as complete. Any skeleton must include an evidence gap note near the top and must avoid invented function names, schemas, prompts, fields, or dataflow.
+
 ### Step 2: Read the Template
 
 - **Stage mode**: read `references/stage-implementation-spec.md`
@@ -149,6 +156,7 @@ Follow the specification from the relevant reference file. Write sections in ord
 - **Explain why** — reasoning behind design decisions
 - **Be honest** — document issues and limitations transparently
 - **JSON examples are mandatory** — for inputs/outputs
+- **No fake completeness** — missing source evidence blocks full docs rather than producing placeholder-heavy output
 
 ### Step 4: Output Format
 

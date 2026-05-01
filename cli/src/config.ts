@@ -11,6 +11,12 @@ export interface LodeConfig {
 const CONFIG_DIR = path.join(os.homedir(), '.lode');
 const CONFIG_FILE = path.join(CONFIG_DIR, 'config.yaml');
 
+export function expandHome(value: string): string {
+  if (value === '~') return os.homedir();
+  if (value.startsWith('~/')) return path.join(os.homedir(), value.slice(2));
+  return value;
+}
+
 export function getConfigPath(): string {
   return CONFIG_FILE;
 }
@@ -34,7 +40,7 @@ export function writeConfig(cfg: LodeConfig): void {
 }
 
 export function validateVaultPath(vaultPath: string): string | true {
-  const resolved = path.resolve(vaultPath);
+  const resolved = path.resolve(expandHome(vaultPath));
   if (!fs.existsSync(resolved)) {
     return `路径不存在: ${resolved}`;
   }

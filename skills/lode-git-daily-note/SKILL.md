@@ -105,6 +105,8 @@ the exact output format.
 
 **JSON entries 已经是高质量结构化数据**（有 summary + context，可能有 impact/status/project_area/evidence_refs），不需要再做 diff 分析或分类。优先使用 `impact` 写日报描述；`status: ongoing` 不写成已完成，`status: risk` 保留风险语气。直接进入 Step 5 的智能合并。
 
+If multiple raw entries describe the same work from different sources, merge them into one daily-note item instead of duplicating the same change. Prefer `session-recap` for intent and `arch-doc` for evidence/context. Preserve conflict or risk language explicitly when entries disagree.
+
 如果 `{vault}/raw/` 不存在或对应 week 目录不存在，跳过此步骤，全部走 Step 3 补漏。
 
 ### Step 3: Git log 补漏（次数据源）
@@ -136,7 +138,7 @@ fallback commits. Do not reclassify raw entries.
 
 ### Step 5: 智能合并
 
-**JSON entries（来自 Step 2）**：不合并，已经是高质量结构化数据。直接进入 Step 6。
+**JSON entries（来自 Step 2）**：只合并明显重复或同源的工作项，不重新分类、不重写事实。`session-recap` + `arch-doc` 同一变化合并为一条，保留 evidence/context。
 
 **补漏 commits（来自 Step 3-4）**：按原合并规则处理 — 同功能多 commit 可合并为一条。
 
