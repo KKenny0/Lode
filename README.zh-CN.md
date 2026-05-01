@@ -12,6 +12,10 @@ Lode 用来保存那些经常消失在聊天记录里的开发记忆：意图、
 
 Lode 这个名字来自英文里的 lode：矿脉，矿物在地下富集的地方。commits、sessions、diffs、code changes 是原矿，Lode 把它们提炼成值得长期保存的工作知识。
 
+<p align="center">
+  <img src="assets/lode-three-actions.png" alt="Lode workflow: Record, Synthesize, Review" width="860" />
+</p>
+
 ## 10 分钟跑通闭环
 
 ```bash

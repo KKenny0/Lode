@@ -12,6 +12,10 @@ Lode turns the parts of development that usually disappear from chat history int
 
 The name comes from **lode**: a vein of ore where valuable mineral is concentrated. Commits, sessions, diffs, and code changes are the ore. Lode concentrates them into work knowledge worth keeping.
 
+<p align="center">
+  <img src="assets/lode-three-actions.png" alt="Lode workflow: Record, Synthesize, Review" width="860" />
+</p>
+
 ## 10-Minute Loop
 
 ```bash
