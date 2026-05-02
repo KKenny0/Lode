@@ -4,78 +4,78 @@
 
 <h1 align="center">Lode</h1>
 
-<p align="center"><strong>Developer workflow memory for AI-assisted engineering work.</strong></p>
-<p align="center">面向 AI 编程工作流的开发记忆系统。</p>
-<p align="center"><a href="README.zh-CN.md">中文 README</a></p>
+<p align="center"><strong>面向 AI 编程工作流的开发记忆系统。</strong></p>
+<p align="center">Developer workflow memory for AI-assisted engineering work.</p>
+<p align="center"><a href="README.en.md">English README</a></p>
 
-Lode turns the parts of development that usually disappear from chat history into durable local memory: intent, decisions, risks, architecture signals, and the reasoning behind changes. Git records **what changed**. Issue trackers record **planned work**. Lode records **what the developer and AI figured out while doing the work**, then reuses that memory to produce daily notes, weekly outlines, monthly reviews, and architecture materials.
+Lode 用来保存那些经常消失在聊天记录里的开发记忆：意图、决策、风险、架构信号，以及每次改动背后的推理。Git 记录 **what changed**，issue tracker 记录 **planned work**，Lode 记录 **开发者和 AI 在实现过程中共同弄明白了什么**，再把这些记忆复用到日报、周报、月报和架构材料里。
 
-The name comes from **lode**: a vein of ore where valuable mineral is concentrated. Commits, sessions, diffs, and code changes are the ore. Lode concentrates them into work knowledge worth keeping.
+Lode 这个名字来自英文里的 lode：矿脉，矿物在地下富集的地方。commits、sessions、diffs、code changes 是原矿，Lode 把它们提炼成值得长期保存的工作知识。
 
 <p align="center">
   <img src="assets/lode-three-actions.png" alt="Lode workflow: Record, Synthesize, Review" width="860" />
 </p>
 
-## 10-Minute Loop
+## 10 分钟跑通闭环
 
 ```bash
-# 1. Install skills
+# 1. 安装 skills
 npx skills add KKenny0/Lode -g --all
 
-# 2. Configure vault path
+# 2. 配置知识库路径
 mkdir -p ~/.lode
 cat > ~/.lode/config.yaml <<EOF
 knowledge_vault: /path/to/your/knowledge-vault
 EOF
 
-# 3. Verify
+# 3. 验证
 npx @lode/cli doctor
 ```
 
-Then:
+然后：
 
-1. Work in any git repo.
-2. At the end of a session, tell Claude Code: `收工`.
-3. At the end of the week, tell it: `写本周周报`.
+1. 在任意 git repo 里正常开发。
+2. 一次工作结束时，对 Claude Code 说：`收工`。
+3. 一周结束时，说：`写本周周报`。
 
-You can start without a project registry. Lode falls back to the current repo and writes structured raw entries into the vault.
+不配置 `projects.json` 也可以开始。Lode 会使用当前 repo 推导项目 slug，并把结构化 raw entries 写入 vault。
 
-## Who It Is For
+## 适合谁
 
-Lode is a good fit if you:
+Lode 适合：
 
-- Work across multiple repos or long-lived engineering projects.
-- Use AI assistants for implementation, debugging, refactoring, or documentation.
-- Need weekly reports, monthly reviews, performance-review material, or project memory.
-- Care about preserving decisions, trade-offs, risks, and architecture context.
+- 同时维护多个 repo 或长期工程项目的人。
+- 使用 AI assistant 做实现、调试、重构、文档的人。
+- 需要周报、月报、绩效材料、项目复盘材料的人。
+- 需要长期保存设计决策、权衡、风险和架构上下文的人。
 
-Lode is not a good fit if you:
+Lode 不适合：
 
-- Do not use git.
-- Do not want to maintain a local knowledge vault.
-- Only need an issue tracker or release-note generator.
-- Never write daily notes, weekly reports, retrospectives, or project summaries.
+- 不使用 git 的工作流。
+- 不想维护本地 knowledge vault 的人。
+- 只需要 issue tracker 或 release-note generator 的人。
+- 从不写日报、周报、复盘或项目总结的人。
 
-## Skills
+## 五个 Skills
 
-| Skill | Purpose | Trigger timing |
+| Skill | 用途 | 触发时机 |
 |---|---|---|
-| `lode-session-recap` | Session-end change signal extraction | Per session, at wrap-up |
-| `lode-arch-doc` | Stage implementation docs + pipeline architecture docs | After architectural work |
-| `lode-git-daily-note` | Obsidian daily notes from raw entries and git history | Per day, on demand |
-| `lode-weekly-outline` | Raw-first multi-project weekly PPT outline | Per week, on demand |
-| `lode-monthly-review` | Monthly work review from daily notes | Per month, on demand |
+| `lode-session-recap` | 会话结束时提取变更信号 | 每次收工 |
+| `lode-arch-doc` | Stage 实现文档 + Pipeline 架构文档 | 架构工作之后 |
+| `lode-git-daily-note` | 从 raw entries 和 git history 更新 Obsidian 日报 | 每天按需 |
+| `lode-weekly-outline` | raw-first 多项目周报/PPT 大纲 | 每周按需 |
+| `lode-monthly-review` | 从 Daily Note 生成月度回顾 | 每月按需 |
 
-The skills are independent. Lode is not a strict pipeline. Each skill can run on its own, but they share one local storage convention so downstream reports can reuse earlier work.
+这些 skills 是独立的。Lode 不是一个强制流水线；每个 skill 都可以单独触发，只是它们共享同一套本地存储约定，所以后续报告可以复用之前沉淀的上下文。
 
-## Data Model
+## 数据模型
 
-The knowledge vault has two layers:
+knowledge vault 分为两层：
 
 ```text
 {vault}/
-  raw/                            # Raw layer: structured intermediate data
-    projects.json                 # Optional project registry
+  raw/                            # Raw layer: 结构化中间数据
+    projects.json                 # 可选项目注册表
     weeks/
       2026-W18/
         storyboard-pipeline.json  # Raw change entries
@@ -83,7 +83,7 @@ The knowledge vault has two layers:
       2026-04/
         signals.json
         skeleton.json
-  Daily Note.md                   # Wiki layer: human-readable notes
+  Daily Note.md                   # Wiki layer: 人类可读笔记
   Work Diary/
     Weekly/
       2026-W18.md
@@ -92,99 +92,99 @@ The knowledge vault has two layers:
       2026-04.summary.md
 ```
 
-Reusable flow:
+复用关系：
 
 ```text
-During development:
+开发过程中:
   lode-session-recap -> {vault}/raw/weeks/{week}/{slug}.json
   lode-arch-doc      -> {vault}/raw/weeks/{week}/{slug}.json
 
-Daily:
+每天:
   lode-git-daily-note <- raw entries + git log -> {vault}/Daily Note.md
 
-Weekly:
+每周:
   lode-weekly-outline <- raw entries + fallback git coverage -> weekly outline
 
-Monthly:
+每月:
   lode-monthly-review <- Daily Note.md -> monthly archive + summary
 ```
 
-## Configuration
+## 配置
 
-All skills use the same YAML config:
+所有 skills 使用同一份 YAML 配置：
 
 ```yaml
-# ~/.lode/config.yaml or {project}/.lode/config.yaml
+# ~/.lode/config.yaml 或 {project}/.lode/config.yaml
 knowledge_vault: /path/to/your/knowledge-vault
 ```
 
-Resolution order:
+解析优先级：
 
-1. Project `.lode/config.yaml`
-2. `~/.lode/config.yaml`
+1. 项目级 `.lode/config.yaml`
+2. 全局 `~/.lode/config.yaml`
 3. `$WEEKLY_PPT_PATH`
 4. `~/.weekly-ppt/`
 
-`$WEEKLY_PPT_PATH` and `~/.weekly-ppt/` are legacy fallbacks. New setups should use `knowledge_vault`.
+`$WEEKLY_PPT_PATH` 和 `~/.weekly-ppt/` 是 legacy fallback。新配置应使用 `knowledge_vault`。
 
-Run diagnostics after setup:
+安装后运行诊断：
 
 ```bash
 lode doctor
 ```
 
-`lode doctor` checks config parsing, vault writability, skill installation, project slug resolution, temporary raw-entry writes, and weekly output directory creation.
+`lode doctor` 会检查配置解析、vault 是否可写、skill 是否已安装、project slug 是否可推导、临时 raw entry 写入、weekly output 目录创建。
 
-## Privacy Model
+## 隐私模型
 
-Lode writes local Markdown and JSON files only. It does not add a remote service, account, sync backend, or hosted database. If your knowledge vault is a git repo, you control where it is pushed.
+Lode 只写本地 Markdown 和 JSON 文件。它不引入远程服务、账号、同步后端或托管数据库。如果你的 knowledge vault 是 git repo，是否 push、push 到哪里都由你控制。
 
-Your AI runtime may still see any context you ask it to process. Do not ask Lode skills to record secrets, credentials, private customer data, or anything that should not appear in your local vault.
+但你的 AI runtime 仍然会看到你要求它处理的上下文。不要让 Lode skills 记录 secrets、credentials、客户私有数据，或任何不应该出现在本地 vault 里的内容。
 
-## Examples
+## 示例
 
-Synthetic examples live in [`examples/`](examples/). They use a fictional project, `storyboard-pipeline`, and are safe to publish. Start with:
+合成示例放在 [`examples/`](examples/)。这些示例使用虚构项目 `storyboard-pipeline`，可以安全公开：
 
-- [`examples/raw-entry.json`](examples/raw-entry.json) — high-quality raw entry examples
-- [`examples/projects.json`](examples/projects.json) — optional project registry
-- [`examples/Daily Note.md`](<examples/Daily Note.md>) — daily note excerpt
-- [`examples/weekly-outline.md`](examples/weekly-outline.md) — weekly outline sample
-- [`examples/monthly-summary.md`](examples/monthly-summary.md) — monthly review sample
-- [`examples/architecture-doc.md`](examples/architecture-doc.md) — stage/pipeline doc excerpt
-- [`examples/vault/`](examples/vault/) — end-to-end synthetic vault layout
+- [`examples/raw-entry.json`](examples/raw-entry.json)：高质量 raw entry 示例
+- [`examples/projects.json`](examples/projects.json)：可选项目注册表
+- [`examples/Daily Note.md`](<examples/Daily Note.md>)：日报片段
+- [`examples/weekly-outline.md`](examples/weekly-outline.md)：周报大纲示例
+- [`examples/monthly-summary.md`](examples/monthly-summary.md)：月度总结示例
+- [`examples/architecture-doc.md`](examples/architecture-doc.md)：Stage/Pipeline 文档片段
+- [`examples/vault/`](examples/vault/)：端到端合成 vault 目录结构
 
-## Installation
+## 安装
 
-### Via skills CLI
+### skills CLI（推荐）
 
 ```bash
-# Install all Lode skills (global, recommended)
+# 安装全部 Lode skills（全局，推荐）
 npx skills add KKenny0/Lode -g --all
 
-# Install specific skills
+# 安装单个 skill
 npx skills add KKenny0/Lode -g --skill lode-session-recap
 
-# Install multiple skills
+# 安装多个指定 skill
 npx skills add KKenny0/Lode -g --skill lode-session-recap --skill lode-git-daily-note
 
-# List available skills
+# 查看可安装的 skills
 npx skills add KKenny0/Lode -l
 
-# Install to a specific agent (e.g. claude-code, codex)
+# 安装到指定 agent（如 claude-code、codex）
 npx skills add KKenny0/Lode -g -a claude-code --all
 ```
 
-**Options:**
+**参数说明：**
 
-| Option | Description |
+| 参数 | 作用 |
 | --- | --- |
-| `-g` | Global install to `~/<agent>/skills/` (recommended). Without it, installs to project `./<agent>/skills/` |
-| `--skill <name>` | Install a specific skill. Repeatable |
-| `--all` | Install all skills from the repo |
-| `-a <agent>` | Target specific agents (e.g. `claude-code`, `codex`, `cursor`) |
-| `-l` | List available skills without installing |
+| `-g` | 全局安装到 `~/<agent>/skills/`（推荐）。不加则装到当前项目 `./<agent>/skills/` |
+| `--skill <name>` | 指定安装某个 skill，可重复使用 |
+| `--all` | 安装仓库内全部 skills |
+| `-a <agent>` | 指定目标 agent（如 `claude-code`、`codex`、`cursor`） |
+| `-l` | 仅列出可用 skills，不安装 |
 
-After installing skills, configure the vault path:
+安装 skills 后，配置知识库路径：
 
 ```bash
 mkdir -p ~/.lode
@@ -193,19 +193,19 @@ knowledge_vault: /path/to/your/knowledge-vault
 EOF
 ```
 
-Then run diagnostics:
+然后运行诊断验证：
 
 ```bash
 npx @lode/cli doctor
 ```
 
-### Alternative: git clone
+### 替代方式：git clone
 
 ```bash
 git clone https://github.com/KKenny0/Lode.git ~/.claude/plugins/Lode
 ```
 
-### From Source (Development)
+### 源码安装（开发用）
 
 ```bash
 npm --prefix cli install
@@ -215,9 +215,9 @@ node cli/dist/index.js setup
 node cli/dist/index.js doctor
 ```
 
-## Development
+## 开发
 
-Important commands:
+常用命令：
 
 ```bash
 npm --prefix cli run build
@@ -225,17 +225,17 @@ npm --prefix cli run copy-skills
 npm --prefix cli run check-skills
 ```
 
-Design principles:
+设计原则：
 
-- **Self-contained skills**: each skill carries its own references so it can be installed individually.
-- **Raw-first reporting**: weekly reports use raw entries as the primary semantic source; git is fallback and coverage evidence.
-- **Graceful side effects**: when a raw write is only a side effect, failures do not block the primary deliverable.
-- **Deterministic helpers**: scripts handle path resolution, date calculation, parsing, and aggregation where consistency matters.
-- **Local evals, public protocols**: local fixtures stay ignored; public benchmark guidance lives under [`benchmarks/`](benchmarks/).
+- **Self-contained skills**：每个 skill 自带 references，可以独立安装。
+- **Raw-first reporting**：周报以 raw entries 作为主要语义来源，git 只做 fallback 和 coverage evidence。
+- **Graceful side effects**：raw write 如果只是副作用，失败时不阻塞主要产物。
+- **Deterministic helpers**：路径解析、日期计算、解析和聚合交给脚本处理。
+- **Local evals, public protocols**：本地 fixtures 保持 ignored，公开 benchmark 只保留协议和质量标准。
 
 ## Benchmarks
 
-Public benchmark protocols document the quality bar without publishing local fixtures:
+公开 benchmark protocol 只描述质量标准，不发布本地 fixtures：
 
 - [`benchmarks/README.md`](benchmarks/README.md)
 - [`benchmarks/weekly-outline.md`](benchmarks/weekly-outline.md)
