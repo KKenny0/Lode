@@ -19,16 +19,24 @@ The name comes from **lode**: a vein of ore where valuable mineral is concentrat
 ## 10-Minute Loop
 
 ```bash
-npx @lode/cli
+# 1. Install skills
+npx skills add KKenny0/Lode -g --all
+
+# 2. Configure vault path
+mkdir -p ~/.lode
+cat > ~/.lode/config.yaml <<EOF
+knowledge_vault: /path/to/your/knowledge-vault
+EOF
+
+# 3. Verify
+npx @lode/cli doctor
 ```
 
 Then:
 
-1. Choose Codex, Claude Code, or both.
-2. Point Lode at a local knowledge vault, usually an Obsidian vault in git.
-3. Work in any git repo.
-4. At the end of a session, tell Codex or Claude Code: `收工`.
-5. At the end of the week, tell it: `写本周周报`.
+1. Work in any git repo.
+2. At the end of a session, tell Claude Code: `收工`.
+3. At the end of the week, tell it: `写本周周报`.
 
 You can start without a project registry. Lode falls back to the current repo and writes structured raw entries into the vault.
 
@@ -147,15 +155,57 @@ Synthetic examples live in [`examples/`](examples/). They use a fictional projec
 
 ## Installation
 
-### Via npm
+### Via skills CLI
 
 ```bash
-npx @lode/cli
+# Install all Lode skills (global, recommended)
+npx skills add KKenny0/Lode -g --all
+
+# Install specific skills
+npx skills add KKenny0/Lode -g --skill lode-session-recap
+
+# Install multiple skills
+npx skills add KKenny0/Lode -g --skill lode-session-recap --skill lode-git-daily-note
+
+# List available skills
+npx skills add KKenny0/Lode -l
+
+# Install to a specific agent (e.g. claude-code, codex)
+npx skills add KKenny0/Lode -g -a claude-code --all
 ```
 
-This command works after `@lode/cli` has been published to the npm registry. Until then, use source installation.
+**Options:**
 
-### From Source
+| Option | Description |
+| --- | --- |
+| `-g` | Global install to `~/<agent>/skills/` (recommended). Without it, installs to project `./<agent>/skills/` |
+| `--skill <name>` | Install a specific skill. Repeatable |
+| `--all` | Install all skills from the repo |
+| `-a <agent>` | Target specific agents (e.g. `claude-code`, `codex`, `cursor`) |
+| `-l` | List available skills without installing |
+
+After installing skills, configure the vault path:
+
+```bash
+mkdir -p ~/.lode
+cat > ~/.lode/config.yaml <<EOF
+knowledge_vault: /path/to/your/knowledge-vault
+EOF
+```
+
+Then run diagnostics:
+
+```bash
+npx @lode/cli doctor
+```
+
+### Alternative: git clone
+
+```bash
+git clone https://github.com/KKenny0/Lode.git ~/.claude/plugins/Lode
+```
+
+### From Source (Development)
 
 ```bash
 npm --prefix cli install
@@ -164,13 +214,6 @@ npm --prefix cli run copy-skills
 node cli/dist/index.js setup
 node cli/dist/index.js doctor
 ```
-
-The wizard installs the five official skills for Codex, Claude Code, or both, and writes `~/.lode/config.yaml`.
-
-Manual install paths:
-
-- Codex installer target: `~/.agents/skills/`
-- Claude Code installer target: `~/.claude/plugins/marketplaces/lode/`
 
 ## Development
 
