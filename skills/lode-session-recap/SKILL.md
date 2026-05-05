@@ -10,49 +10,28 @@ description: >
 
 # Weekly Change Tracker
 
-Session-end change extraction. When the developer wraps up work, read the conversation context and write structured change entries to Lode raw storage. These entries capture the **why** behind changes — intent and reasoning that git commits rarely convey.
+Session-end change extraction. When the developer wraps up work, read the conversation context and produce structured change entries that capture the **why** behind changes — intent, exploration paths, and reasoning that git commits rarely convey.
 
-## Configuration
+## Zero-Config Mode
 
-此 skill 使用 Lode 统一配置系统。从以下位置解析知识库路径（`{vault}`），高优先级优先：
+This skill works with or without a configured knowledge vault:
 
-| 优先级 | 位置 | 说明 |
-|--------|------|------|
-| 1 | `.lode/config.yaml`（项目根目录） | 项目级覆盖 |
-| 2 | `~/.lode/config.yaml` | 全局配置 |
-| 3 | `$WEEKLY_PPT_PATH` 环境变量 | legacy fallback |
-| 4 | `~/.weekly-ppt/` | legacy fallback 默认值 |
+- **With vault**: entries are written to `{vault}/raw/weeks/{ISO-week}/{project-slug}.json` and a brief confirmation is shown.
+- **Without vault**: entries are rendered as structured Markdown directly in the conversation. No files written, no directories created. A one-line setup hint follows the output.
 
-项目级配置覆盖全局配置的同名字段。如果无法解析 `{vault}`，简短说明未写入 raw log，不要阻塞用户收工。完整配置格式见 `references/weekly-ppt-convention.md`。
-
-Use the repository helper for deterministic storage operations:
-
-```bash
-python <this-skill>/scripts/lode_raw.py append-entry --entry /tmp/lode-session-entries.json --cwd "$PWD"
-```
-
-此 skill 的产出路径：
-- 写入：`{vault}/raw/weeks/{ISO-week}/{project-slug}.json`
+The zero-config mode is the default first experience. Value before configuration.
 
 ## How It Works
 
-### Step 1: Identify the Project
-
-Determine which project was worked on during this session:
-
-Use `python <this-skill>/scripts/lode_raw.py project-slug --cwd "$PWD"` when the helper is available. It applies the shared resolution order:
-
-1. Check `.lode/config.yaml` (project-level then `~/.lode/config.yaml`) for `project_slug`
-2. If not set, check `{vault}/raw/projects.json` — match the current working directory against project `path` fields → use the corresponding `slug`
-3. If no match, derive a slug from the current working directory name (lowercase, replace spaces/underscores with hyphens)
-
-### Step 2: Analyze Conversation Context
+### Step 1: Analyze Conversation Context
 
 Read the full conversation history for this session and identify:
 
 - **What changed** — files modified, features built, bugs fixed, code restructured
 - **Why it changed** — the reasoning, the problem being solved, the design decision
+- **How it was explored** — approaches tried, alternatives rejected, paths abandoned
 - **Impact** — what this means for the project, downstream effects, risks
+- **Open questions** — what remains unresolved at session end
 
 Prioritize signals that can appear in a weekly report:
 
@@ -71,7 +50,7 @@ Deprioritize process-only changes unless they explain a report-worthy signal:
 
 Group related work into logical units. A session that touched 15 files for one feature should produce **one** entry, not 15. If several changes share the same user-facing or architecture goal, merge them into one entry even if they were implemented across multiple commits or files.
 
-### Step 3: Generate Change Entries
+### Step 2: Generate Change Entries
 
 For each distinct change, produce an entry following the schema in `references/weekly-ppt-convention.md` (read this file for the full spec, including structured guidance on writing summary, context, and quality levels). Prefer Good or Excellent raw entries: capture the durable engineering signal, not the fact that files changed.
 
@@ -87,33 +66,57 @@ The change entry JSON looks like this:
   "source": "session-recap",
   "status": "done | ongoing | risk | decision",
   "impact": "optional report-ready impact",
-  "evidence_refs": ["optional commit SHA, issue ID, eval ID, or doc path"]
+  "evidence_refs": ["optional commit SHA, issue ID, eval ID, or doc path"],
+  "motivation": "optional: trigger reason and goal for the change",
+  "exploration_paths": ["optional: approaches tried and outcomes"],
+  "abandoned_alternatives": ["optional: approaches rejected and why"],
+  "open_questions": ["optional: unresolved questions at session end"]
 }
 ```
+
+**Core fields**:
 
 - **type**: Classify as `feature` | `fix` | `refactor` | `decision` | `risk`
 - **summary**: 1 sentence, engineering-level — what was done, not how
 - **context**: 1-2 sentences — why it was done and what impact it has
-- **related_docs**: absolute paths to any docs that were created or modified during this session (stage-docs, pipeline-docs, design docs)
+- **related_docs**: absolute paths to any docs that were created or modified during this session
 - **source**: always `"session-recap"`
 - **timestamp**: current time in ISO 8601
 - **status**: recommended when clear — `done`, `ongoing`, `risk`, or `decision`
-- **impact**: recommended when the user/system/reporting impact is clear and can be stated without extra analysis
-- **evidence_refs**: recommended for already-known commit SHAs, issues, eval IDs, or doc paths
+- **impact**: recommended when the user/system/reporting impact is clear
 
-**Weekly-friendly writing rules:**
+**Decision-recording fields** (new, optional):
+
+- **motivation**: the trigger for this change — what problem was being solved, what constraint forced the change, or what goal was being pursued
+- **exploration_paths**: approaches tried during the session and their outcomes (e.g. "lazy loading → marginal gain on mobile first-screen")
+- **abandoned_alternatives**: approaches explicitly considered and rejected, with rejection reasons — valuable for future roadmap decisions
+- **open_questions**: unresolved decisions or questions at session end — entry points for the next session
+
+**Weekly-friendly writing rules**:
 
 - **summary**: write the report-level outcome or decision, not the list of files touched
 - **context**: explain why the work mattered and what it enables, prevents, or changes
 - **related_docs**: include architecture docs, design docs, eval notes, or other durable evidence created or changed in the session
 - **type**: use `decision` for design choices even when implementation is still pending; use `risk` for discovered issues even when no fix landed
-- **recommended optional fields**: populate `status`, `impact`, and `evidence_refs` when naturally available; leave them absent rather than guessing
 
 **Quality target**: write entries that would still make sense in a weekly report a month later. "Updated docs" is bad; "Clarified validation and repair-loop ownership so future schema migrations have a source of truth" is excellent.
 
 **Granularity**: Maximum 5 entries per session. If the session was complex, aggressively merge related changes. A good default is 1-3 entries: one for the main outcome, one for an important decision, and one for a risk or follow-up if present. The goal is a concise weekly-report signal log, not a detailed diary.
 
-### Step 4: Write to Weekly Log
+### Step 3: Output
+
+After generating entries, determine whether a knowledge vault is configured. Attempt to resolve `{vault}` using the standard priority order:
+
+| Priority | Location | Scope |
+|----------|----------|-------|
+| 1 | `.lode/config.yaml` (project root) | Project-level override |
+| 2 | `~/.lode/config.yaml` | Global default |
+| 3 | `$WEEKLY_PPT_PATH` env var | Legacy fallback |
+| 4 | `~/.weekly-ppt/` | Legacy fallback default |
+
+Use `python <this-skill>/scripts/lode_raw.py resolve-config --cwd "$PWD"` to check, or inspect the config files directly.
+
+#### 3A: Vault Configured — Write to Raw Log
 
 Write the generated entry object or array to a temporary JSON file, then call the shared helper:
 
@@ -125,21 +128,86 @@ python <this-skill>/scripts/lode_raw.py append-entry \
 
 The helper resolves `{vault}`, calculates the current ISO week, resolves the project slug, creates `{vault}/raw/weeks/{ISO-week}/`, validates required entry fields, and appends to the existing `{project-slug}.json` array.
 
-If the helper is unavailable or returns an error, briefly explain that the raw log was not written and do not block session wrap-up.
+If the helper is unavailable or returns an error, fall through to **Step 3B** (Markdown output) instead of blocking.
 
-### Step 5: Confirm
+#### 3B: No Vault — Markdown Output
 
-Print a brief confirmation, e.g.:
+Output the entries as structured Markdown directly in the conversation. This is the primary deliverable, not a degraded fallback.
+
+Use this template:
+
+```markdown
+## Session Recap — {project-dir-name} ({date})
+
+{if motivation is shared across entries, show it here; otherwise show per-entry}
+
+{for each entry:
+
+### {emoji} {type}: {summary}
+
+{context}
+
+{if motivation present and not shown above:
+**动机**: {motivation}
+}
+
+{if exploration_paths present:
+**探索路径**:
+{for each path:
+  - {path} → {outcome}
+}
+{if the chosen path is clear:
+  - 最终选择: {chosen approach}
+}
+}
+
+{if abandoned_alternatives present:
+**放弃的方案**: {join with '；'}
+}
+
+{if open_questions present:
+**开放问题**:
+{for each question:
+  - {question}
+}
+}
+
+---
+
+}
+```
+
+Type-to-emoji mapping: `feature` → ✨, `fix` → 🔧, `refactor` → ♻️, `decision` → ⚖️, `risk` → ⚠️
+
+**{date}** format: `YYYY-MM-DD`
+
+**{project-dir-name}**: the current working directory's folder name
+
+After the last entry, append a setup hint:
 
 ```
-记录了 3 条变更 → comic-automation (2026-W15)
-  写入: {vault}/raw/weeks/2026-W15/comic-automation.json
-  - [feature] Built scene composition system
-  - [fix] Fixed LLM timeout in narrative stage
-  - [decision] Chose constraint solver over manual layout
+💡 配置 knowledge vault 可以持久保存这些记录，并在周报、月报中自动复用：
+   mkdir -p ~/.lode && echo 'knowledge_vault: /your/path' > ~/.lode/config.yaml
 ```
 
-No further action needed from the user.
+### Step 4: Confirm
+
+#### 4A: Vault Mode
+
+Print a brief confirmation:
+
+```
+记录了 {N} 条变更 → {slug} ({week})
+  写入: {vault}/raw/weeks/{week}/{slug}.json
+  - [{type}] {summary}
+  - [{type}] {summary}
+```
+
+#### 4B: Zero-Config Mode
+
+The Markdown output from Step 3B already serves as confirmation. No additional summary needed — the user has already read the full recap.
+
+No further action needed from the user in either mode.
 
 ## Anti-Patterns
 
@@ -149,3 +217,4 @@ No further action needed from the user.
 - **Don't ask for confirmation** — this should be frictionless. Write the entries and show the summary. If the user wants to correct something, they'll say so.
 - **Don't split related work** — 3 commits that all serve one feature = 1 entry, not 3.
 - **Don't preserve process noise** — if an item only explains how the session unfolded, not what changed in the project, leave it out.
+- **Don't gate value behind configuration** — the zero-config Markdown output is the primary first experience. It should feel complete and valuable on its own.

@@ -10,7 +10,20 @@
     "impact": "Weekly reporting can explain the reliability improvement without re-reading implementation commits.",
     "project_area": "validation",
     "work_stream": "Storyboard reliability",
-    "evidence_refs": ["abc1234", "eval:continuity-regression-07"]
+    "evidence_refs": ["abc1234", "eval:continuity-regression-07"],
+    "motivation": "Panel continuity failures were only caught at export time, causing expensive re-runs of the entire pipeline",
+    "exploration_paths": [
+      "Tighter prompt constraints on LLM output → reduced creativity too much, panel layouts became repetitive",
+      "Post-hoc diff validation against ground truth → required manual ground truth maintenance, not scalable",
+      "Split into schema checks + repair loops → clean separation of concerns, deterministic fast path with LLM fallback"
+    ],
+    "abandoned_alternatives": [
+      "Post-hoc diff validation: required maintaining a ground truth corpus that would itself need validation"
+    ],
+    "open_questions": [
+      "What's the latency overhead of the repair loop on large (50+ panel) storyboards?",
+      "Should the repair loop have a max iteration cap, or trust the LLM to eventually converge?"
+    ]
   },
   {
     "timestamp": "2026-04-29T11:45:00+08:00",
@@ -23,6 +36,15 @@
     "impact": "Architecture docs now preserve the retry-boundary decision for future stage changes.",
     "project_area": "pipeline orchestration",
     "work_stream": "Stage contract design",
-    "evidence_refs": ["doc:pipeline-evolution-v1"]
+    "evidence_refs": ["doc:pipeline-evolution-v1"],
+    "motivation": "Layout failures were triggering unnecessary dialogue regeneration, wasting tokens and sometimes producing worse dialogue",
+    "exploration_paths": [
+      "Merged layout + dialogue stage → cheaper in happy path but cascading failures",
+      "Keep separate with shared context → 15% orchestration overhead but independent retries and no cascading"
+    ],
+    "abandoned_alternatives": [
+      "Merged stage with selective retry: retry logic became too complex and brittle"
+    ],
+    "open_questions": []
   }
 ]

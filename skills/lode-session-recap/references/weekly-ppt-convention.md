@@ -139,6 +139,10 @@ Consumers must tolerate these fields being absent. Producers should add them whe
 | `impact` | string | User, system, or engineering impact in report-friendly language |
 | `status` | enum | `done` \| `ongoing` \| `risk` \| `decision` |
 | `evidence_refs` | string[] | Commit SHAs, eval IDs, issue IDs, or doc paths supporting the entry |
+| `motivation` | string | Trigger reason and goal for the change — what problem was being solved |
+| `exploration_paths` | string[] | Approaches tried during the session and their outcomes |
+| `abandoned_alternatives` | string[] | Approaches explicitly rejected and why |
+| `open_questions` | string[] | Unresolved questions at session end; entry points for next session |
 
 Recommended producer behavior:
 
@@ -146,6 +150,10 @@ Recommended producer behavior:
 - Add `impact` when the entry has a clear user, system, reporting, reliability, migration, or developer-workflow effect. This should be more report-ready than `context`, not a duplicate.
 - Add `evidence_refs` for commit SHAs, issue IDs, eval IDs, or doc paths that are already known. Do not perform extra repository analysis only to populate this field.
 - Add `project_area` or `work_stream` when the natural module or narrative grouping is obvious. Leave them absent rather than guessing.
+- Add `motivation` when the trigger for the change is clear — the problem being solved, the constraint that forced the change, or the goal being pursued. This is the "why now" behind the change.
+- Add `exploration_paths` when the session involved trying multiple approaches. Each entry should describe the approach and its outcome (e.g. "lazy loading → marginal gain on mobile first-screen").
+- Add `abandoned_alternatives` when approaches were explicitly considered and rejected. Include the rejection reason — this is valuable for future roadmap decisions.
+- Add `open_questions` when the session ends with unresolved decisions or unanswered questions. These serve as entry points for the next session.
 
 ### Writing `summary`
 
