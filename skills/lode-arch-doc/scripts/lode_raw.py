@@ -240,7 +240,12 @@ def append_entries(
             raise ValueError(f"target file is not a JSON array: {target_file}")
         existing = existing_data
 
+    now_iso = dt.datetime.now().astimezone().isoformat()
+    for entry in entries:
+        entry["timestamp"] = now_iso
+
     existing.extend(entries)
+    existing.sort(key=lambda e: e.get("timestamp", ""))
     target_file.write_text(
         json.dumps(existing, ensure_ascii=False, indent=2) + "\n",
         encoding="utf-8",
