@@ -104,7 +104,16 @@ Before writing, check if a document already exists in the target `docs/` directo
 - **Stage mode**: look for `lode-stage-{stage_name}-implementation-v*.md`
 - **Pipeline mode**: look for `lode-pipeline-evolution-v*.md`
 
-**If it exists**: Read the existing document, compare against current code/system state, identify stale sections. Update affected sections, increment the version number in the filename, refresh `last_updated`. `created_date` stays unchanged. Add a new version entry.
+**If it exists**: Read the existing document, compare against current code/system state, identify what changed since the last version. Write a **delta document** (v{N+1}), not a full rewrite. The delta document contains only:
+
+1. A header linking to the base document:
+   `> **Base document:** [v{N}](previous-version-filename.md)`
+2. **Section 0 (Document Meta)** — updated version, last_updated, new commit reference
+3. **Changed sections only** — sections whose content differs from v{N}, using the same section numbers for cross-reference
+4. **Section 12 (Versioned Changes)** — append the new version entry
+5. **Section 13 (References)** — update if new files/commits are relevant
+
+Do not repeat unchanged sections. Readers consult the previous version for full context.
 
 **If not**: Proceed with full document creation (Steps 1-4).
 
@@ -169,6 +178,7 @@ docs/{YYYY-WNN}/lode-pipeline-evolution-v{version}.md
 
 - `{YYYY-WNN}`: the exact week string returned by Step -1 (e.g. `2026-W18`)
 - Update existing documents by incrementing the version number, not by creating new filenames
+- Version upgrades produce delta documents, not full rewrites — see Step 0 for delta format
 - The `lode-stage-*` / `lode-pipeline-*` prefix distinguishes the mode
 
 ## Visual Documentation
