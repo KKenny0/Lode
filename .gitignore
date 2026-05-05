@@ -5,6 +5,7 @@ ROADMAP.md
 TODO*.md
 *.plan.md
 *.design.md
+.taku/
 
 # Claude Code / plugin config — local only
 CLAUDE.md
