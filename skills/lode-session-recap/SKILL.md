@@ -139,15 +139,13 @@ Use this template:
 ```markdown
 ## Session Recap — {project-dir-name} ({date})
 
-{if motivation is shared across entries, show it here; otherwise show per-entry}
-
 {for each entry:
 
 ### {emoji} {type}: {summary}
 
 {context}
 
-{if motivation present and not shown above:
+{if motivation present:
 **动机**: {motivation}
 }
 
