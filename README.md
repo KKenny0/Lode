@@ -34,6 +34,7 @@ Each skill maps to a habit you already have. Activate it with a trigger phrase.
 | :--- | :--- | :--- |
 | `lode-session-recap` | Every session wrap-up | Extracts decision signals: motivation, exploration paths, abandoned alternatives, open questions |
 | `lode-arch-doc` | After architecture work | Generates Stage implementation docs or Pipeline architecture evolution docs |
+| `lode-decision-roadmap` | On demand | Generates a narrative decision roadmap from accumulated entries — shows how project decisions evolved, reassesses abandoned alternatives |
 | `lode-git-daily-note` | Daily, on demand | Updates Obsidian daily notes from raw entries and git history |
 | `lode-weekly-outline` | Weekly, on demand | Builds a multi-project weekly outline from accumulated raw entries |
 | `lode-monthly-review` | Monthly, on demand | Generates a monthly work review from daily notes |
@@ -56,7 +57,7 @@ EOF
 npx @lode/cli doctor
 ```
 
-Then work in any git repo as usual. Say `收工` at the end of a session, `写本周周报` at the end of the week.
+Then work in any git repo as usual. Say `收工` at the end of a session, `写本周周报` at the end of the week, `决策路线图` when you want to see how your project's decisions evolved.
 
 No vault? No problem — `收工` outputs structured Markdown directly in the conversation.
 

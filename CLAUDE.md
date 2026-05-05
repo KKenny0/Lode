@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What This Is
 
-**Lode** — a cross-runtime skill monorepo (Claude Code plugin + Codex skills) containing five declarative skills for development workflow recording: capturing context, generating docs, writing daily notes, producing weekly outlines, and generating monthly reviews.
+**Lode** — a cross-runtime skill monorepo (Claude Code plugin + Codex skills) containing six declarative skills for development workflow recording: capturing context, generating docs, generating decision roadmaps, writing daily notes, producing weekly outlines, and generating monthly reviews.
 
 The skills themselves are Markdown-first and dependency-light. The repository also includes a Node-based CLI installer under `cli/`, local-only eval fixtures, and public benchmark guidance.
 
@@ -48,6 +48,10 @@ skills/
     SKILL.md
     references/
       weekly-ppt-convention.md
+  lode-decision-roadmap/                # Narrative decision roadmap from accumulated entries
+    SKILL.md
+    references/
+      weekly-ppt-convention.md
   lode-git-daily-note/                  # Obsidian daily notes from git history
     SKILL.md
     scripts/git-stats.sh
@@ -83,6 +87,7 @@ skills/*-workspace/                     # Ignored benchmark workspaces/results
 |-------|---------|----------|
 | lode-arch-doc | Stage impl docs (13 sections) + Pipeline arch docs (14 sections) | "stage impl doc", "架构文档", "pipeline 架构演进" |
 | lode-session-recap | Session-end change log extraction | "收工", "done", "今天到这" |
+| lode-decision-roadmap | Narrative decision roadmap from accumulated entries | "决策路线图", "decision roadmap", "项目决策历史" |
 | lode-git-daily-note | Obsidian daily notes from git history | "更新日报", "日报", "daily note" |
 | lode-weekly-outline | Raw-first multi-project PPT outline from weekly change entries, with git fallback | "周报", "weekly PPT" |
 | lode-monthly-review | Monthly work review from daily notes | "月度回顾", "月报", "monthly review" |
@@ -95,6 +100,9 @@ Lode is not a strict pipeline. Skills are independently triggered, but they can 
 开发过程中:
   lode-session-recap ──→ {vault}/raw/weeks/{week}/{slug}.json
   lode-arch-doc ───────→ {vault}/raw/weeks/{week}/{slug}.json
+
+按需:
+  lode-decision-roadmap ← {vault}/raw/weeks/ → {vault}/Work Diary/Decision Roadmap.md
 
 每天:
   lode-git-daily-note ← {vault}/raw/weeks/ JSON + git log → {vault}/Daily Note.md

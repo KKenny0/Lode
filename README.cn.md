@@ -34,6 +34,7 @@ Lode 是第三层。它在每次 session 结束时捕获动机、探索路径、
 | :--- | :--- | :--- |
 | `lode-session-recap` | 每次收工 | 提取 session 中的决策信号：动机、探索路径、放弃的方案、开放问题 |
 | `lode-arch-doc` | 架构工作之后 | 生成 Stage 实现文档或 Pipeline 架构演进文档 |
+| `lode-decision-roadmap` | 按需 | 从积累的 entries 生成叙事性决策路线图 — 展示项目决策演变，重新评估放弃的方案 |
 | `lode-git-daily-note` | 每天按需 | 从 raw entries 和 git history 更新 Obsidian 日报 |
 | `lode-weekly-outline` | 每周按需 | 基于积累的 raw entries 生成多项目周报大纲 |
 | `lode-monthly-review` | 每月按需 | 从 Daily Notes 生成月度工作回顾 |
@@ -56,7 +57,7 @@ EOF
 npx @lode/cli doctor
 ```
 
-然后在任意 git repo 里正常开发。session 结束时说 `收工`，一周结束时说 `写本周周报`。
+然后在任意 git repo 里正常开发。session 结束时说 `收工`，一周结束时说 `写本周周报`，想回顾项目决策演变时说 `决策路线图`。
 
 不配置 vault 也可以开始 — `收工` 会直接在对话中输出结构化 Markdown。
 
