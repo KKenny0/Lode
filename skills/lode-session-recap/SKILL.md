@@ -25,13 +25,15 @@ The zero-config mode is the default first experience. Value before configuration
 
 ### Step 1: Analyze Conversation Context
 
-Read the full conversation history for this session and identify:
+Read the full conversation history for this session. **Start with the decision landscape** — understand what problems were being solved, what alternatives were considered, what trade-offs were accepted. The concrete changes (files, commits) are evidence for decisions, not the primary output.
 
+Extract in this order:
+
+- **Decision context** — motivations, constraints, goals, the problems driving changes
+- **Exploration paths** — approaches tried, alternatives rejected, reasons for rejection
 - **What changed** — files modified, features built, bugs fixed, code restructured
-- **Why it changed** — the reasoning, the problem being solved, the design decision
-- **How it was explored** — approaches tried, alternatives rejected, paths abandoned
-- **Impact** — what this means for the project, downstream effects, risks
-- **Open questions** — what remains unresolved at session end
+- **Impact** — downstream effects, risks, dependencies created or removed
+- **Open questions** — what remains unresolved at session end, entry points for next session
 
 Prioritize signals that can appear in a weekly report:
 
@@ -85,12 +87,17 @@ The change entry JSON looks like this:
 - **status**: recommended when clear — `done`, `ongoing`, `risk`, or `decision`
 - **impact**: recommended when the user/system/reporting impact is clear
 
-**Decision-recording fields** (new, optional):
+**Decision-recording fields** (fill when context is available; motivation is expected for every non-trivial entry):
 
-- **motivation**: the trigger for this change — what problem was being solved, what constraint forced the change, or what goal was being pursued
-- **exploration_paths**: approaches tried during the session and their outcomes (e.g. "lazy loading → marginal gain on mobile first-screen")
-- **abandoned_alternatives**: approaches explicitly considered and rejected, with rejection reasons — valuable for future roadmap decisions
-- **open_questions**: unresolved decisions or questions at session end — entry points for the next session
+- **motivation**: the trigger for this change — what problem was being solved, what constraint forced the change, or what goal was being pursued. **Expected for every entry that isn't a trivial fix.** An entry without motivation is a change log, not a decision record.
+- **exploration_paths**: approaches tried during the session and their outcomes (e.g. "lazy loading → marginal gain on mobile first-screen"). Fill when the session involved comparing approaches or backtracking.
+- **abandoned_alternatives**: approaches explicitly considered and rejected, with rejection reasons — valuable for future roadmap decisions. Fill when alternatives were discussed and ruled out.
+- **open_questions**: unresolved decisions or questions at session end — entry points for the next session. Fill when there are genuine unknowns remaining.
+
+**Quality gate** — before finalizing, check each entry:
+- Does it explain WHY, not just WHAT? If motivation is empty and the entry isn't a trivial fix, reconsider whether it's report-worthy.
+- Would someone who wasn't in this session understand the reasoning a month later?
+- Is the summary a decision-level abstraction, not a file-level description?
 
 **Weekly-friendly writing rules**:
 
@@ -216,3 +223,4 @@ No further action needed from the user in either mode.
 - **Don't split related work** — 3 commits that all serve one feature = 1 entry, not 3.
 - **Don't preserve process noise** — if an item only explains how the session unfolded, not what changed in the project, leave it out.
 - **Don't gate value behind configuration** — the zero-config Markdown output is the primary first experience. It should feel complete and valuable on its own.
+- **Don't skip motivation** — every non-trivial entry should explain why the change was needed. An entry without motivation is a change log, not a decision record.

@@ -232,7 +232,11 @@ After the helper returns, compare its JSON `week` value with the `docs/{YYYY-WNN
   "source": "arch-doc",
   "status": "done | ongoing | risk | decision",
   "impact": "optional report-ready impact",
-  "evidence_refs": ["optional doc path, commit SHA, issue ID, or eval ID"]
+  "evidence_refs": ["optional doc path, commit SHA, issue ID, or eval ID"],
+  "motivation": "expected: what problem or goal drove this architecture change",
+  "exploration_paths": ["optional: architectural approaches considered and outcomes"],
+  "abandoned_alternatives": ["optional: approaches rejected and why"],
+  "open_questions": ["optional: unresolved design questions or migration risks"]
 }
 ```
 
@@ -243,6 +247,12 @@ Skill-specific values:
 - **status**: recommended when clear — usually `done`, `decision`, or `risk`
 - **impact**: recommended when the architecture signal has a clear reporting, migration, reliability, or coordination impact
 - **evidence_refs**: recommended for the generated document path and any known commit, issue, or eval reference
+
+**Decision-recording fields** — architecture work is inherently decision-heavy. Fill these when context is available:
+- **motivation**: expected for every arch-doc entry — what problem demanded this architecture change?
+- **exploration_paths**: fill when multiple architectural approaches were considered
+- **abandoned_alternatives**: fill when specific patterns or structures were explicitly rejected
+- **open_questions**: fill when there are unresolved design questions or migration risks
 
 The entry must describe the architecture signal, not the documentation activity:
 
