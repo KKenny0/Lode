@@ -128,13 +128,16 @@ Assemble the final Markdown PPT outline from collected JSONs. Each project's `wo
 
 Write the assembled outline to the resolved output path from the Output Contract.
 
-**Slide budget per stream (by total stream count):**
+**Slide budget per stream (content-density driven):**
 
-| Stream count | Core stream | Supporting stream | Exploratory stream |
-|---|---|---|---|
-| 1 | 3-4 slides (full narrative) | 2-3 slides | 1-2 slides |
-| 2-3 | 2-3 slides (background + tech/approach combined) | 1-2 slides | 1 slide |
-| 4+ | 2 slides (key changes + results) | 1 slide | merge into overview |
+Evaluate each stream independently based on its raw entry count and evidence richness — never penalize a rich stream just because other streams exist.
+
+| Density | Criteria | Slides |
+|---|---|---|
+| Rich | 4+ raw entries, **or** arch-doc evidence + clear tech approach + diagrams | 3-4 |
+| Moderate | 2-3 entries, mixed session-recap and arch-doc | 2-3 |
+| Light | 1 entry, or fallback-only from git | 1-2 |
+| Empty | 0 meaningful changes after filtering | merge into overview |
 
 When streams share close context (e.g. a bug fix stream and the feature it fixes), consider merging their slides to avoid redundancy.
 

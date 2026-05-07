@@ -170,13 +170,14 @@ Include a commit table at the end for verification. Mark it clearly so the prese
 
 ## Slide Budget
 
-Slides per stream, tiered by how many streams the project has:
+Slides per stream, driven by each stream's content density (not total stream count):
 
-| Total streams | Core stream | Supporting stream | Exploratory stream |
-|---|---|---|---|
-| 1 | 3-4 (full narrative) | 2-3 | 1-2 |
-| 2-3 | 2-3 (background + tech combined) | 1-2 | 1 |
-| 4+ | 2 (key changes + results) | 1 | merge into overview |
+| Density | Criteria | Slides |
+|---|---|---|
+| Rich | 4+ raw entries, **or** arch-doc evidence + clear tech approach + diagrams | 3-4 |
+| Moderate | 2-3 entries, mixed session-recap and arch-doc | 2-3 |
+| Light | 1 entry, or fallback-only from git | 1-2 |
+| Empty | 0 meaningful changes after filtering | merge into overview |
 
 When streams share close context, consider merging their slides to avoid redundancy.
 
