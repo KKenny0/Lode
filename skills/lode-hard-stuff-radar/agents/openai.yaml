@@ -1,0 +1,4 @@
+interface:
+  display_name: "Lode Hard Stuff Radar"
+  short_description: "Find the real hard problems in project memory"
+  default_prompt: "Use $lode-hard-stuff-radar to surface recurring open questions, risks, abandoned alternatives, and hard problems from Lode memory."

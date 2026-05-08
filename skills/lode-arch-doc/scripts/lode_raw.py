@@ -26,6 +26,38 @@ VALID_TYPES = {"feature", "fix", "refactor", "decision", "risk"}
 VALID_SOURCES = {"session-recap", "arch-doc"}
 VALID_STATUSES = {"done", "ongoing", "risk", "decision"}
 REQUIRED_FIELDS = ("timestamp", "type", "summary", "context", "source")
+VALID_ARTIFACT_TYPES = {
+    "arch-doc",
+    "design-doc",
+    "plan-doc",
+    "agents-rule",
+    "prompt-contract",
+    "schema-contract",
+    "checklist",
+    "roadmap",
+    "review",
+    "other",
+}
+VALID_ARTIFACT_STATUSES = {"active", "draft", "superseded", "obsolete", "missing"}
+REQUIRED_ARTIFACT_FIELDS = (
+    "id",
+    "project_slug",
+    "artifact_type",
+    "title",
+    "path",
+    "created_at",
+    "updated_at",
+    "source",
+    "status",
+)
+ARTIFACT_LIST_FIELDS = (
+    "topics",
+    "decision_threads",
+    "open_questions",
+    "risk_refs",
+    "evidence_refs",
+    "supersedes",
+)
 
 
 def load_yaml_config(path: Path) -> dict[str, Any]:
@@ -185,7 +217,8 @@ def validate_entry(entry: Any) -> dict[str, Any]:
             raise ValueError(f"entry field must be a non-empty string: {field}")
     if "related_docs" in entry and not isinstance(entry["related_docs"], list):
         raise ValueError("entry related_docs must be a list when present")
-    for field in ("related_docs", "evidence_refs"):
+    for field in ("related_docs", "evidence_refs", "exploration_paths",
+                   "abandoned_alternatives", "open_questions"):
         if field in entry:
             if not isinstance(entry[field], list) or not all(
                 isinstance(item, str) for item in entry[field]
@@ -200,7 +233,7 @@ def validate_entry(entry: Any) -> dict[str, Any]:
                 "entry related_docs must contain absolute paths: "
                 + ", ".join(relative_docs)
             )
-    for field in ("project_area", "work_stream", "impact"):
+    for field in ("project_area", "work_stream", "impact", "motivation"):
         if field in entry and (
             not isinstance(entry[field], str) or not entry[field].strip()
         ):
@@ -260,6 +293,93 @@ def append_entries(
     }
 
 
+def validate_artifact(artifact: Any) -> dict[str, Any]:
+    if not isinstance(artifact, dict):
+        raise ValueError("artifact must be a JSON object")
+    missing = [field for field in REQUIRED_ARTIFACT_FIELDS if field not in artifact]
+    if missing:
+        raise ValueError(f"artifact missing required fields: {', '.join(missing)}")
+    for field in REQUIRED_ARTIFACT_FIELDS:
+        if field == "status":
+            continue
+        if not isinstance(artifact[field], str) or not artifact[field].strip():
+            raise ValueError(f"artifact field must be a non-empty string: {field}")
+    if artifact["artifact_type"] not in VALID_ARTIFACT_TYPES:
+        raise ValueError(
+            "artifact artifact_type must be one of: "
+            + ", ".join(sorted(VALID_ARTIFACT_TYPES))
+        )
+    if artifact["status"] not in VALID_ARTIFACT_STATUSES:
+        raise ValueError(
+            "artifact status must be one of: "
+            + ", ".join(sorted(VALID_ARTIFACT_STATUSES))
+        )
+    if not Path(artifact["path"]).expanduser().is_absolute():
+        raise ValueError(f"artifact path must be absolute: {artifact['path']}")
+    for field in ARTIFACT_LIST_FIELDS:
+        if field in artifact:
+            if not isinstance(artifact[field], list) or not all(
+                isinstance(item, str) for item in artifact[field]
+            ):
+                raise ValueError(f"artifact {field} must be a list of strings when present")
+    if "repo_relative_path" in artifact and (
+        not isinstance(artifact["repo_relative_path"], str)
+        or not artifact["repo_relative_path"].strip()
+    ):
+        raise ValueError("artifact repo_relative_path must be a non-empty string when present")
+    if "superseded_by" in artifact and artifact["superseded_by"] is not None:
+        if not isinstance(artifact["superseded_by"], str) or not artifact["superseded_by"].strip():
+            raise ValueError("artifact superseded_by must be a non-empty string or null")
+    return artifact
+
+
+def load_artifact(path: Path) -> dict[str, Any]:
+    return validate_artifact(json.loads(path.read_text(encoding="utf-8")))
+
+
+def upsert_artifact(
+    artifact_path: Path,
+    cwd: Path,
+    vault_override: Path | None,
+    slug_override: str | None,
+) -> dict[str, Any]:
+    cfg, _ = resolve_config(cwd)
+    vault = vault_override or Path(str(cfg["knowledge_vault"]))
+    artifact = load_artifact(artifact_path)
+    slug = slug_override or project_slug(cwd, vault)
+    target_dir = vault / "raw" / "artifacts"
+    target_dir.mkdir(parents=True, exist_ok=True)
+    target_file = target_dir / f"{slug}.json"
+
+    existing: list[Any] = []
+    if target_file.exists():
+        existing_data = json.loads(target_file.read_text(encoding="utf-8"))
+        if not isinstance(existing_data, list):
+            raise ValueError(f"target file is not a JSON array: {target_file}")
+        existing = existing_data
+
+    action = "created"
+    for index, item in enumerate(existing):
+        if isinstance(item, dict) and item.get("id") == artifact["id"]:
+            existing[index] = artifact
+            action = "updated"
+            break
+    else:
+        existing.append(artifact)
+
+    target_file.write_text(
+        json.dumps(existing, ensure_ascii=False, indent=2) + "\n",
+        encoding="utf-8",
+    )
+    return {
+        "slug": slug,
+        "path": str(target_file),
+        "artifact_id": artifact["id"],
+        "action": action,
+        "total_artifacts": len(existing),
+    }
+
+
 def print_json(data: Any) -> None:
     print(json.dumps(data, ensure_ascii=False, indent=2))
 
@@ -294,6 +414,18 @@ def command_append_entry(args: argparse.Namespace) -> int:
     return 0
 
 
+def command_upsert_artifact(args: argparse.Namespace) -> int:
+    vault = Path(args.vault).expanduser().resolve() if args.vault else None
+    result = upsert_artifact(
+        artifact_path=Path(args.artifact).expanduser().resolve(),
+        cwd=Path(args.cwd).expanduser().resolve(),
+        vault_override=vault,
+        slug_override=args.slug,
+    )
+    print_json(result)
+    return 0
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="Lode raw storage helper")
     subparsers = parser.add_subparsers(dest="command", required=True)
@@ -318,6 +450,13 @@ def build_parser() -> argparse.ArgumentParser:
     append_parser.add_argument("--vault", help="Knowledge vault override")
     append_parser.add_argument("--slug", help="Project slug override")
     append_parser.set_defaults(func=command_append_entry)
+
+    artifact_parser = subparsers.add_parser("upsert-artifact", help="Upsert artifact index JSON")
+    artifact_parser.add_argument("--artifact", required=True, help="Path to artifact JSON object")
+    artifact_parser.add_argument("--cwd", default=os.getcwd(), help="Project working directory")
+    artifact_parser.add_argument("--vault", help="Knowledge vault override")
+    artifact_parser.add_argument("--slug", help="Project slug override")
+    artifact_parser.set_defaults(func=command_upsert_artifact)
 
     return parser
 

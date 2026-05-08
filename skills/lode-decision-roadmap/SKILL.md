@@ -5,7 +5,7 @@ description: Generate a narrative decision roadmap from accumulated raw entries 
 
 # Decision Roadmap Generator
 
-Reads accumulated raw entries from the knowledge vault and synthesizes them into a narrative decision roadmap — a document organized by decision threads rather than time periods. Each thread tells the story of a key decision: what triggered it, what was explored, what was chosen, what was abandoned, and whether those abandonments still make sense.
+Reads accumulated raw entries from the knowledge vault and synthesizes them into a narrative decision roadmap — a document organized by decision threads rather than time periods. Each thread tells the story of a key decision: what triggered it, what was explored, what was chosen, what was abandoned, whether those abandonments still make sense, and which decisions were revised or superseded.
 
 Unlike weekly/monthly reports (organized by calendar period) or git history (organized by code changes), the decision roadmap is organized by **decision threads** — chains of related entries that reveal how a project's thinking evolved.
 
@@ -39,6 +39,8 @@ Read all matching raw entry files:
 ```
 
 Each file contains a JSON array of entries. Load all files in scope, flatten into a single list, and sort by `timestamp` ascending.
+
+If `{vault}/raw/artifacts/{slug}.json` exists, load it as optional source navigation. Artifact index entries can provide document links and topic hints, but they must not create decision facts by themselves.
 
 If no entries are found, tell the user and stop — there is nothing to build a roadmap from.
 
@@ -101,6 +103,13 @@ For each thread, extract:
 | Exploration paths | From `exploration_paths` field (strong) or inferred from before/after in `summary`+`context` (medium) |
 | Abandoned alternatives | From `abandoned_alternatives` field (strong) or from `context` describing rejected approaches (medium) |
 | Current status | Resolved / Ongoing / Has open questions |
+
+Also track lifecycle-like signals when entries explicitly support them:
+
+- revised decisions
+- superseded decisions
+- abandoned alternatives worth revisiting
+- stale open questions
 
 Aim for 3-7 threads. If you find more, merge loosely related ones. If you find fewer than 3, the data may be too thin for a meaningful roadmap — say so and show what you can.
 
@@ -184,6 +193,12 @@ For each abandoned alternative across all threads, reassess with current knowled
 |-------------|------|----------------|--------------|-----------------|
 | {name} | {date} | {why abandoned} | Yes / Partially / No | {what would make it worth reconsidering} |
 
+## Roadmap Correction
+
+Use this section when current evidence suggests a prior abandonment, decision,
+or open question should be revisited. Every correction must cite raw-entry
+evidence and label inferred conclusions.
+
 ---
 
 ## Open Questions Inventory
@@ -213,6 +228,10 @@ All unresolved questions across threads, organized by urgency:
 - For inferred exploration paths (not from explicit `exploration_paths` field), use dashed-style arrows or add "?" to the node label to distinguish inference from explicit data
 
 **Reassessment**: This is the highest-value section. For each abandoned alternative, honestly evaluate whether the original rejection reason still holds. The goal is to surface forgotten viable approaches — that's the Phase 3 validation criterion. When alternatives were inferred rather than explicitly recorded, note this: "Inferred alternative — original rejection reason reconstructed from context."
+
+**Roadmap correction**: Include revised/superseded decisions and alternatives
+worth revisiting. Do not invent corrections from artifact titles alone; artifact
+index is source navigation only.
 
 **Inference transparency**: The roadmap mixes explicit decision data with inferred signals. Readers need to know which is which. Use these conventions:
 - Decision points from explicit fields: stated as fact

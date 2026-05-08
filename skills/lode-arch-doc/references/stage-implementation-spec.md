@@ -358,6 +358,13 @@ shared_macros.j2 (共享宏库)
 ### 10.3 Open Questions（开放问题）
 - 尚未确定的设计方向
 
+Artifact index note:
+
+- If this section contains durable open questions, copy concise versions into
+  the `open_questions` field of the `lode-arch-doc` artifact index entry.
+- Use stable topic wording so future `开工` recall can surface the question
+  without reading the full document first.
+
 ---
 
 ## 11. Versioned Changes Since Previous Iteration（版本差异）

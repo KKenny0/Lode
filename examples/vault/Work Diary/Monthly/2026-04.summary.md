@@ -15,3 +15,13 @@ April focused on making storyboard generation more debuggable and reportable. Th
 
 - Continue watching continuity regression evals before declaring the validation split stable.
 - Reassess stage separation only if repair latency becomes more expensive than dialogue rewrite risk.
+
+## Decisions and Open Questions
+
+- Validation-stage repair ownership remains the current decision, but repair-loop latency is still an open measurement question.
+- Artifact index staleness emerged as a documentation risk: when stage contracts change, `同步意图` should update repo docs and artifact metadata before the next `开工`.
+
+## Habit and Data Quality
+
+- `收工` captured the validation split and retry-boundary decision well enough for weekly/monthly reuse.
+- `开工` should be used at the next session start to verify whether the indexed architecture doc still reflects the current contract.

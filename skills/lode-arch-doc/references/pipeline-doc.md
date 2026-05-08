@@ -255,6 +255,9 @@
 ### 要求
 - 必须具体
 - 不写泛化描述
+- 若风险或开放问题对未来召回有价值，将其短句化后写入
+  `lode-arch-doc` artifact index 的 `open_questions`、`risk_refs` 或
+  `topics` 字段，避免 future recall 必须先读取全文才能发现入口。
 
 ---
 

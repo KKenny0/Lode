@@ -152,6 +152,12 @@ Natural cross-project/cross-stream themes are fine here when they genuinely emer
 
 - **stream-a：** {narrative.risk_and_next}
 - **stream-b：** {narrative.risk_and_next}
+
+### 决策与开放问题
+
+| 信号 | 状态 | 下周影响 |
+|------|------|----------|
+| {decision/open question/risk} | carried-forward / revisited / resolved | {next-week planning impact} |
 ```
 
 ## Commit Appendix (Optional)
@@ -190,3 +196,8 @@ There's no hard character limit — the right amount of content depends on what 
 - **Background & Problems slides** should be lean — set the stage, don't write the documentation.
 - **Key Changes & Technical Approach** slides carry the weight — this is where depth is appropriate.
 - **If a section feels like a wall of text**, ask: can this be a diagram? Can parts move to the appendix?
+- **Compounding matters**: include decisions revisited, open questions carried
+  forward, and hard problems that alter next-week planning. Weekly output should
+  change what the team does next, not only summarize what happened.
+- **Lower confidence**: label fallback git-only streams as lower confidence when
+  raw entries are absent.

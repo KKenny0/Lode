@@ -16,7 +16,7 @@ description: >
 
 ## Overview
 
-Convert **weekly Lode raw change entries** into a structured Markdown PPT outline, using git commits only as coverage checks and fallback evidence. Each project gets an independent narrative using a unified template. Cross-project themes appear only on the overview slide.
+Convert **weekly Lode raw change entries** into a structured Markdown PPT outline, using git commits only as coverage checks and fallback evidence. The weekly outline is Lode's week-level compounding layer: it should explain what changed, what decisions carried forward, which open questions remain, and how hard problems changed next-week planning. Each project gets an independent narrative using a unified template. Cross-project themes appear only on the overview slide.
 
 ## Quick Reference
 
@@ -89,8 +89,11 @@ Primary fields:
 - `type`: category and risk/decision signal
 - `source`: distinguish session recap from architecture documentation
 - `related_docs`: optional deep evidence for technical approach
+- `open_questions`, `abandoned_alternatives`, `status`, `impact`: compounding signals for next-week planning
 
 If `related_docs` points to an existing architecture document, read it only when the raw entry is not enough to explain the technical approach. Do not read every related document by default.
+
+Read `{vault}/raw/artifacts/{slug}.json` when present. Use artifact index metadata as optional source navigation for high-value docs. Missing artifact index must not block output. Do not invent decision facts from artifact titles alone.
 
 ### Git Coverage Check
 
@@ -117,6 +120,10 @@ Pass collected raw entries and uncovered git logs into Phase 1 as `{raw_entries}
 For each project, use the template in [references/subagent-prompt.md](references/subagent-prompt.md) to produce a structured analysis. By default, perform this in the main dialog. If the runtime supports parallel agents and the user explicitly requested or approved them, each project may be analyzed in a separate agent. The analysis returns a `work_streams` array — each stream is an independent narrative unit with its own technical approach.
 
 Raw entries are authoritative for intent and impact because they were produced at session/doc-writing time. `session-recap` entries are intent-rich; `arch-doc` entries are evidence-rich. Fallback git commits are lower-confidence evidence and should never override or duplicate a clear raw entry.
+
+The analysis must preserve decisions revisited, open questions carried forward,
+and hard problems that changed next-week planning. Fallback-only streams must be
+marked lower confidence in the narrative or next steps.
 
 **Error handling:**
 - Analysis returns non-JSON → retry with "Return ONLY valid JSON, no markdown fencing"

@@ -11,6 +11,9 @@ Mode: {tech_or_report}
 Raw entries:
 {raw_entries}
 
+Artifact index metadata for source navigation:
+{artifact_index}
+
 Fallback git logs for uncovered commits:
 {fallback_git_logs}
 
@@ -19,6 +22,10 @@ Execute these 4 steps in order:
 **Step 1: Classify signals**
 - Treat raw entries as authoritative semantic signals.
 - Use each raw entry's `summary`, `context`, `type`, `source`, and `related_docs`.
+- Preserve `open_questions`, `abandoned_alternatives`, `status`, and `impact`
+  as compounding signals for next-week planning.
+- Use artifact index metadata only to find source documents when raw entries are
+  insufficient. Do not invent decision facts from artifact titles alone.
 - Map `type` directly: feature/fix/refactor/decision/risk.
 - Use fallback git commits only when they are not clearly covered by a raw entry.
 - Drop fallback commits that are only chore, docs, style, or formatting noise.
@@ -57,6 +64,10 @@ Tech mode (6-part): Goal(Why) → Problems(Pain) → KeyChanges(What) → TechAp
 Report mode (4-part): Goal(Why) → KeyChanges → Result(Impact) → NextSteps
 
 Sparse data (0-1 raw entries and no meaningful fallback commits): combine into a single "Status Update" stream.
+
+Risk&Next must include decisions revisited, open questions carried forward, and
+hard problems that change next-week planning when the raw entries support them.
+Fallback-only streams must say they are lower confidence.
 
 **For TechApproach:**
 - This is the most important section — it's where reviewers understand HOW the work was done

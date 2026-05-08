@@ -1,0 +1,4 @@
+interface:
+  display_name: "Lode Experience Distillation"
+  short_description: "Turn repeated lessons into reusable rules"
+  default_prompt: "Use $lode-experience-distillation to turn repeated project lessons into rules, checklists, or skill ideas."

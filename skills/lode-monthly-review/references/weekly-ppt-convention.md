@@ -20,18 +20,42 @@ Lode uses a YAML configuration file to determine the knowledge vault location. T
 ```yaml
 knowledge_vault: /path/to/your/knowledge-vault
 # project_slug: my-project  # optional, defaults to git repo directory name
+
+# arch_doc:
+#   output_dir: docs
+#   mirror_to_vault: false
+#
+# artifact_index:
+#   enabled: true
 ```
 
 All subsequent path references use `{vault}` as shorthand for the resolved knowledge vault path. If a skill's primary output depends on `{vault}` and no path can be resolved, ask the user to configure `knowledge_vault`. If writing a weekly change entry is only a side effect, skip that write gracefully when `{vault}` cannot be resolved.
 
 ## Storage Location
 
-Data is organized in two layers following the raw/wiki pattern:
+Lode uses four storage surfaces. Store the full artifact where it is maintained,
+then store enough structured metadata for future skills to find and reuse it:
+
+- **Project repo**: code-adjacent artifacts that evolve with implementation,
+  such as `arch-doc`, `DESIGN.md`, `PLAN.md`, `AGENTS.md`, prompt contracts,
+  and schema contracts.
+- **Vault raw layer**: machine-readable memory and indexes, such as weekly raw
+  entries, artifact index entries, decision thread indexes, open question
+  indexes, and monthly signals.
+- **Vault wiki layer**: human-readable synthesis outputs, such as daily notes,
+  weekly outlines, monthly reviews, and decision roadmaps.
+- **Conversation fallback**: zero-config immediate value when no durable storage
+  exists, such as Markdown session recap output.
+
+The knowledge vault itself is organized in two layers following the raw/wiki
+pattern:
 
 ```
 {vault}/
   raw/                            # Raw layer (immutable intermediate data)
     projects.json                 # Optional project registry
+    artifacts/
+      my-project.json             # Array of durable artifact index entries
     weeks/
       2026-W15/
         my-project.json           # Array of change entries
@@ -54,6 +78,73 @@ Data is organized in two layers following the raw/wiki pattern:
 Weekly outline consumers should write their primary human-readable output to
 `{vault}/Work Diary/Weekly/{YYYY-WNN}.md` unless the user or config provides an
 explicit output path.
+
+## Artifact Index
+
+Raw entries record chronological semantic work signals. Artifact index entries
+record durable artifact metadata and recall navigation. Do not overload weekly
+raw entries as a document catalog.
+
+Each `{vault}/raw/artifacts/{slug}.json` file contains a JSON array of artifacts:
+
+```json
+[
+  {
+    "id": "storyboard-pipeline:arch-doc:parse-stage:v1",
+    "project_slug": "storyboard-pipeline",
+    "artifact_type": "arch-doc",
+    "title": "Parse Stage Implementation",
+    "path": "/Users/dev/projects/storyboard-pipeline/docs/2026-W18/lode-stage-parse-implementation-v1.md",
+    "repo_relative_path": "docs/2026-W18/lode-stage-parse-implementation-v1.md",
+    "created_at": "2026-05-08T10:00:00+08:00",
+    "updated_at": "2026-05-08T10:00:00+08:00",
+    "source": "lode-arch-doc",
+    "topics": ["parse-stage", "validation", "repair-loop"],
+    "decision_threads": ["schema-validation-boundary"],
+    "open_questions": ["whether repair-loop ownership should move upstream"],
+    "evidence_refs": ["doc:lode-stage-parse-implementation-v1"],
+    "status": "active",
+    "supersedes": [],
+    "superseded_by": null
+  }
+]
+```
+
+### Artifact Fields
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `id` | string | Yes | Stable unique id within the vault |
+| `project_slug` | string | Yes | Same slug resolution as weekly raw entries |
+| `artifact_type` | enum | Yes | `arch-doc` \| `design-doc` \| `plan-doc` \| `agents-rule` \| `prompt-contract` \| `schema-contract` \| `checklist` \| `roadmap` \| `review` \| `other` |
+| `title` | string | Yes | Human-readable artifact title |
+| `path` | string | Yes | Absolute path to the local artifact when available |
+| `created_at` | ISO 8601 | Yes | First indexed time |
+| `updated_at` | ISO 8601 | Yes | Last indexed time |
+| `source` | string | Yes | Producing skill or workflow |
+| `status` | enum | Yes | `active` \| `draft` \| `superseded` \| `obsolete` \| `missing` |
+| `repo_relative_path` | string | No | Path relative to the project repo when the artifact lives inside the repo |
+| `topics` | string[] | No | Stable recall tags, not prose summaries |
+| `decision_threads` | string[] | No | Stable narrative threads used by roadmap and recall |
+| `open_questions` | string[] | No | Questions preserved by the artifact |
+| `risk_refs` | string[] | No | Risk ids or short risk labels |
+| `evidence_refs` | string[] | No | Commit SHAs, eval ids, issue ids, or doc refs |
+| `supersedes` | string[] | No | Artifact ids this artifact replaces |
+| `superseded_by` | string or null | No | Artifact id that replaces this artifact |
+
+When `scripts/lode_raw.py` supports artifact indexing, producers should write
+the artifact object to a temporary JSON file and delegate validation and upsert
+behavior to the helper:
+
+```bash
+python <skill-or-repo>/scripts/lode_raw.py upsert-artifact \
+  --artifact /tmp/lode-artifact.json \
+  --cwd "$PWD"
+```
+
+Consumers must tolerate missing artifact indexes. Artifact index metadata helps
+find source documents; it must not be treated as a replacement for raw-entry
+facts.
 
 ## ISO Week
 
@@ -196,6 +287,25 @@ Prefer Good or Excellent entries. If an entry cannot rise above OK, skip it unle
 - **decision** — Architectural or design decision (even if not yet implemented)
 - **risk** — Issue identified that could affect future work
 
+## Lifecycle Signals
+
+Lode does not mutate historical raw entries. When a later skill learns that an
+open question, risk, or decision changed state, it should append a new raw entry
+that states the lifecycle transition explicitly.
+
+Supported lifecycle language:
+
+```text
+open_question: open -> answered -> obsolete -> promoted_to_decision
+risk: identified -> mitigated -> accepted -> obsolete
+decision: proposed -> chosen -> revised -> superseded
+artifact: draft -> active -> superseded -> obsolete; active -> missing
+```
+
+Future consumers may derive current state by reading entries in timestamp order.
+Producers must not pretend lifecycle state is fully managed if they only have a
+new raw signal.
+
 ## Write Behavior
 
 - **Append** new entries to the existing array (read → append → write)
@@ -225,6 +335,9 @@ Downstream tools read these files to get high-quality development context:
 - **lode-weekly-outline** — reads change entries as the primary semantic source for weekly report generation. Git logs are only fallback and coverage evidence when raw entries are missing or incomplete.
 - **lode-git-daily-note** — reads change entries as primary data source, with git log as fallback
 - **lode-monthly-review** — reads daily notes (produced by lode-git-daily-note) for monthly summaries
+- **lode-session-start-recall** — reads recent raw entries first and uses artifact index entries as optional source navigation
+- **lode-hard-stuff-radar** — derives hard problems from raw entries and lifecycle-like signals; artifact index entries provide supporting source links
+- **lode-experience-distillation** — proposes reusable rules from repeated raw-entry evidence and artifact metadata
 - Any future reporting or review tool that needs structured change history
 
 ## Weekly Report Consumption
@@ -235,6 +348,9 @@ For weekly reporting, raw entries should carry the meaning of the work:
 - `context` should explain why it mattered and what changed as a result.
 - `source: arch-doc` entries should summarize the architectural change or decision, not merely state that a document was written.
 - `related_docs` are evidence and deep context; consumers should read them only when the raw entry is not enough to explain the technical approach.
+- Artifact index entries are optional source navigation. Consumers may use them
+  to find durable repo-local docs, but must not invent decision facts from
+  artifact titles alone.
 - Git commits are useful for coverage checks, but they should not override explicit raw-entry intent.
 
 ### Duplicate and Conflict Handling

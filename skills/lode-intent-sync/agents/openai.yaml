@@ -1,0 +1,4 @@
+interface:
+  display_name: "Lode Intent Sync"
+  short_description: "Keep specs aligned with implementation learning"
+  default_prompt: "Use $lode-intent-sync to compare session learning against repo docs and propose the smallest safe spec updates."

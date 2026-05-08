@@ -57,6 +57,12 @@ Daily notes are human work logs, not code review records.
 - For `status: ongoing`, avoid wording that implies completion.
 - For `status: risk`, keep the risk visible instead of converting it into a
   success statement.
+- Preserve `open_questions`, `abandoned_alternatives`, and `type/status:
+  decision` as next-session context when present. A daily note should help
+  tomorrow's `开工` recall, not only describe today's output.
+- If artifact index metadata points to a high-value source document, link the
+  artifact title or path concisely. Do not paste long architecture docs into the
+  daily note.
 
 ## Merge Rules
 
@@ -87,6 +93,7 @@ Do not merge unrelated commits only because they happened on the same day.
 		- 【类别】
 			- [x] （模块A → 模块B）语义化描述（+N/-M 行）
 				- 详细说明
+				- 明日衔接：开放问题 / 风险 / 需要读取的 artifact link
 ```
 
 Module labels:

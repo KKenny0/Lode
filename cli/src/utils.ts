@@ -7,6 +7,11 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 export const OFFICIAL_SKILLS = [
   'lode-session-recap',
   'lode-arch-doc',
+  'lode-session-start-recall',
+  'lode-intent-sync',
+  'lode-hard-stuff-radar',
+  'lode-experience-distillation',
+  'lode-decision-roadmap',
   'lode-git-daily-note',
   'lode-weekly-outline',
   'lode-monthly-review',

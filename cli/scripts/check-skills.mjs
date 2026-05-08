@@ -14,6 +14,11 @@ const canonicalConvention = path.join(repoRoot, 'references', 'weekly-ppt-conven
 const officialSkills = [
   'lode-session-recap',
   'lode-arch-doc',
+  'lode-session-start-recall',
+  'lode-intent-sync',
+  'lode-hard-stuff-radar',
+  'lode-experience-distillation',
+  'lode-decision-roadmap',
   'lode-git-daily-note',
   'lode-weekly-outline',
   'lode-monthly-review',
@@ -22,9 +27,19 @@ const officialSkills = [
 const conventionCopies = [
   path.join(sourceSkillsDir, 'lode-session-recap', 'references', 'weekly-ppt-convention.md'),
   path.join(sourceSkillsDir, 'lode-arch-doc', 'references', 'weekly-ppt-convention.md'),
+  path.join(sourceSkillsDir, 'lode-session-start-recall', 'references', 'weekly-ppt-convention.md'),
+  path.join(sourceSkillsDir, 'lode-intent-sync', 'references', 'weekly-ppt-convention.md'),
+  path.join(sourceSkillsDir, 'lode-hard-stuff-radar', 'references', 'weekly-ppt-convention.md'),
+  path.join(sourceSkillsDir, 'lode-experience-distillation', 'references', 'weekly-ppt-convention.md'),
+  path.join(sourceSkillsDir, 'lode-decision-roadmap', 'references', 'weekly-ppt-convention.md'),
   path.join(sourceSkillsDir, 'lode-monthly-review', 'references', 'weekly-ppt-convention.md'),
   path.join(bundledSkillsDir, 'lode-session-recap', 'references', 'weekly-ppt-convention.md'),
   path.join(bundledSkillsDir, 'lode-arch-doc', 'references', 'weekly-ppt-convention.md'),
+  path.join(bundledSkillsDir, 'lode-session-start-recall', 'references', 'weekly-ppt-convention.md'),
+  path.join(bundledSkillsDir, 'lode-intent-sync', 'references', 'weekly-ppt-convention.md'),
+  path.join(bundledSkillsDir, 'lode-hard-stuff-radar', 'references', 'weekly-ppt-convention.md'),
+  path.join(bundledSkillsDir, 'lode-experience-distillation', 'references', 'weekly-ppt-convention.md'),
+  path.join(bundledSkillsDir, 'lode-decision-roadmap', 'references', 'weekly-ppt-convention.md'),
   path.join(bundledSkillsDir, 'lode-monthly-review', 'references', 'weekly-ppt-convention.md'),
 ];
 
@@ -51,7 +66,7 @@ function walk(dir, predicate, matches = []) {
 function parseSkillFrontmatter(skillPath) {
   const skillFile = path.join(skillPath, 'SKILL.md');
   const raw = fs.readFileSync(skillFile, 'utf-8');
-  const match = raw.match(/^---\n([\s\S]*?)\n---\n/);
+  const match = raw.match(/^---\r?\n([\s\S]*?)\r?\n---\r?\n/);
   assert(Boolean(match), `${skillFile} is missing YAML frontmatter`);
   if (!match) return null;
   return yaml.load(match[1]);

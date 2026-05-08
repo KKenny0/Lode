@@ -4,7 +4,7 @@ This file provides guidance to Codex (Codex.ai/code) when working with code in t
 
 ## What This Is
 
-**Lode** — a cross-runtime skill monorepo (Codex skills + Claude Code plugin) containing five declarative skills for development workflow recording: capturing context, generating docs, writing daily notes, producing weekly outlines, and generating monthly reviews.
+**Lode** — a cross-runtime skill monorepo (Codex skills + Claude Code plugin) containing declarative skills for the agentic coding habit loop: session-start recall, context capture, intent sync, architecture docs, hard-problem radar, experience distillation, daily notes, weekly outlines, decision roadmaps, and monthly reviews.
 
 The skills themselves are Markdown-first and dependency-light. The repository also includes a Node-based CLI installer under `cli/`, local-only eval fixtures, and public benchmark guidance.
 
@@ -24,6 +24,17 @@ Resolution: project `.lode/config.yaml` → `~/.lode/config.yaml` → `$WEEKLY_P
 `$WEEKLY_PPT_PATH` and `~/.weekly-ppt/` are legacy fallbacks. New setups should use `knowledge_vault` in `.lode/config.yaml` or `~/.lode/config.yaml`.
 
 See `references/lode-config-template.yaml` for full template including daily-note-specific settings.
+
+Artifact governance options:
+
+```yaml
+arch_doc:
+  output_dir: docs
+  mirror_to_vault: false
+
+artifact_index:
+  enabled: true
+```
 
 ## Repository Structure
 
@@ -45,6 +56,34 @@ skills/
       pipeline-doc.md
       weekly-ppt-convention.md
   lode-session-recap/                   # Session-end change log extraction
+    SKILL.md
+    references/
+      weekly-ppt-convention.md
+  lode-session-start-recall/            # Session-start project memory recall
+    SKILL.md
+    scripts/recall_context.py
+    references/
+      recall-output-template.md
+      weekly-ppt-convention.md
+  lode-intent-sync/                     # Keep repo-local intent docs current
+    SKILL.md
+    scripts/intent_targets.py
+    references/
+      intent-sync-contract.md
+      weekly-ppt-convention.md
+  lode-hard-stuff-radar/                # Surface hard problems from memory
+    SKILL.md
+    scripts/derive_lifecycle.py
+    references/
+      radar-output-template.md
+      weekly-ppt-convention.md
+  lode-experience-distillation/         # Distill repeated lessons into rules
+    SKILL.md
+    scripts/distill_candidates.py
+    references/
+      distillation-contract.md
+      weekly-ppt-convention.md
+  lode-decision-roadmap/                # Narrative decision history
     SKILL.md
     references/
       weekly-ppt-convention.md
@@ -82,6 +121,10 @@ skills/*-workspace/                     # Ignored benchmark workspaces/results
 | Skill | Purpose | Triggers |
 |-------|---------|----------|
 | lode-arch-doc | Stage impl docs (13 sections) + Pipeline arch docs (14 sections) | "stage impl doc", "架构文档", "pipeline 架构演进" |
+| lode-session-start-recall | Session-start recall from raw entries + artifact index | "开工", "session start", "继续上次" |
+| lode-intent-sync | Compare session learning against repo-local specs before updating them | "同步意图", "spec sync", "让文档跟实现对齐" |
+| lode-hard-stuff-radar | Surface recurring open questions, risks, and hard problems | "看看难点", "hard stuff radar" |
+| lode-experience-distillation | Distill repeated lessons into rules, checklists, playbooks, or skill ideas | "沉淀经验", "distill experience" |
 | lode-session-recap | Session-end change log extraction | "收工", "done", "今天到这" |
 | lode-git-daily-note | Obsidian daily notes from git history | "更新日报", "日报", "daily note" |
 | lode-weekly-outline | Raw-first multi-project PPT outline from weekly change entries, with git fallback | "周报", "weekly PPT" |
@@ -93,8 +136,13 @@ Lode is not a strict pipeline. Skills are independently triggered, but they can 
 
 ```
 开发过程中:
+  lode-session-start-recall ← {vault}/raw/weeks/ + {vault}/raw/artifacts/ → 开工上下文
   lode-session-recap ──→ {vault}/raw/weeks/{week}/{slug}.json
-  lode-arch-doc ───────→ {vault}/raw/weeks/{week}/{slug}.json
+  lode-arch-doc ───────→ project docs/ + {vault}/raw/weeks/{week}/{slug}.json
+                     └─→ {vault}/raw/artifacts/{slug}.json
+  lode-intent-sync ────→ repo specs + raw lifecycle signals
+  lode-hard-stuff-radar ← raw entries + artifact index + lifecycle derivation
+  lode-experience-distillation ← repeated raw/radar signals → AGENTS/checklists/skills proposals
 
 每天:
   lode-git-daily-note ← {vault}/raw/weeks/ JSON + git log → {vault}/Daily Note.md
@@ -111,10 +159,17 @@ Lode is not a strict pipeline. Skills are independently triggered, but they can 
 
 Data is organized in two layers within the knowledge vault:
 
-- **Raw layer** (`{vault}/raw/`): immutable intermediate data (JSON entries, signals, skeletons)
+- **Raw layer** (`{vault}/raw/`): immutable intermediate data (JSON entries, artifact indexes, signals, skeletons)
 - **Wiki layer** (`{vault}/Daily Note.md`, `{vault}/Work Diary/`): human-readable outputs
 
 The knowledge vault is a git repo (typically an Obsidian vault), enabling cross-machine sync via git push/pull.
+
+Lode uses four storage surfaces:
+
+- **Project repo**: code-adjacent artifacts that evolve with implementation, such as arch docs, `DESIGN.md`, `PLAN.md`, `AGENTS.md`, prompt contracts, and schema contracts
+- **Vault raw layer**: machine-readable memory and indexes, including weekly raw entries and `{vault}/raw/artifacts/{slug}.json`
+- **Vault wiki layer**: human-readable synthesis outputs such as Daily Note, weekly outline, monthly review, and decision roadmap
+- **Conversation fallback**: zero-config immediate value when durable storage is unavailable
 
 ## Key Design Decisions
 
@@ -122,6 +177,7 @@ The knowledge vault is a git repo (typically an Obsidian vault), enabling cross-
 - **Convention sync**: the canonical version lives at `references/weekly-ppt-convention.md`; after editing it, run `scripts/sync-convention.sh` to copy to all skill directories that need it
 - **Unified config**: all skills read vault path from `.lode/config.yaml`; project-level config overrides global
 - **Explicit primary outputs, graceful side effects**: if a skill needs the vault for its main output, it asks for `knowledge_vault`; if a raw change entry is only a side effect, it can skip that write gracefully
+- **Artifact governance**: full repo-local artifacts stay near code by default; vault artifact indexes make them discoverable without turning weekly raw entries into a document catalog
 - **Raw-first weekly reporting**: `lode-weekly-outline` consumes weekly raw change entries as the primary semantic source; git logs are fallback and coverage evidence only
 - **Weekly-report-quality raw entries**: `lode-session-recap` and `lode-arch-doc` should write report-worthy signals, decisions, risks, contracts, and impact rather than process logs or "updated docs" entries
 - **Local evals, public benchmarks**: `skills/*/evals/` and `*-workspace/` stay local; public benchmark guidance lives under `benchmarks/`

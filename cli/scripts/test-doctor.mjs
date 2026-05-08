@@ -44,6 +44,16 @@ function assertResult(results, name, ok) {
   return result;
 }
 
+function writeConfig(home, content) {
+  const configDir = path.join(home, '.lode');
+  fs.mkdirSync(configDir, { recursive: true });
+  fs.writeFileSync(path.join(configDir, 'config.yaml'), content, 'utf-8');
+}
+
+function homeEnv(home) {
+  return { HOME: home, USERPROFILE: home };
+}
+
 const tempDirs = [];
 
 try {
@@ -59,7 +69,7 @@ try {
 
   const cleanHome = mkTempDir('doctor-home');
   tempDirs.push(cleanHome);
-  const noConfig = runDoctor(['--skip-install-check', '--no-write', '--json'], { HOME: cleanHome });
+  const noConfig = runDoctor(['--skip-install-check', '--no-write', '--json'], homeEnv(cleanHome));
   assert(noConfig.status !== 0, 'Expected no-config doctor to fail');
   const noConfigJson = parseJson(noConfig.stdout);
   assert(noConfigJson.ok === false, 'Expected no-config doctor ok=false');
@@ -69,11 +79,58 @@ try {
   const missingInstallHome = mkTempDir('doctor-install-home');
   const missingInstallVault = mkTempDir('doctor-install-vault');
   tempDirs.push(missingInstallHome, missingInstallVault);
-  const missingInstall = runDoctor(['--vault', missingInstallVault, '--no-write', '--json'], { HOME: missingInstallHome });
+  const missingInstall = runDoctor(['--vault', missingInstallVault, '--no-write', '--json'], homeEnv(missingInstallHome));
   assert(missingInstall.status !== 0, 'Expected missing-install doctor to fail');
   const missingInstallJson = parseJson(missingInstall.stdout);
   const installResult = assertResult(missingInstallJson.results, 'skill installation', false);
   assert(installResult.message.includes('Missing skills'), 'Expected missing-install message');
+
+  const minimalConfigHome = mkTempDir('doctor-minimal-config-home');
+  const minimalConfigVault = mkTempDir('doctor-minimal-config-vault');
+  tempDirs.push(minimalConfigHome, minimalConfigVault);
+  writeConfig(minimalConfigHome, `knowledge_vault: ${minimalConfigVault.replaceAll('\\', '/')}\n`);
+  const minimalConfig = runDoctor(['--skip-install-check', '--no-write', '--json'], homeEnv(minimalConfigHome));
+  assert(minimalConfig.status === 0, `Expected minimal config doctor to pass, got ${minimalConfig.status}\n${minimalConfig.stderr}`);
+  const minimalConfigJson = parseJson(minimalConfig.stdout);
+  assertResult(minimalConfigJson.results, 'arch doc output dir', true);
+  const minimalArtifactIndex = assertResult(minimalConfigJson.results, 'artifact index', true);
+  assert(minimalArtifactIndex.message.includes('enabled'), 'Expected artifact index to default to enabled');
+
+  const governanceConfigHome = mkTempDir('doctor-governance-config-home');
+  const governanceConfigVault = mkTempDir('doctor-governance-config-vault');
+  tempDirs.push(governanceConfigHome, governanceConfigVault);
+  writeConfig(governanceConfigHome, [
+    `knowledge_vault: ${governanceConfigVault.replaceAll('\\', '/')}`,
+    'arch_doc:',
+    '  output_dir: ../architecture-notes',
+    '  mirror_to_vault: false',
+    'artifact_index:',
+    '  enabled: false',
+    '',
+  ].join('\n'));
+  const governanceConfig = runDoctor(['--skip-install-check', '--no-write', '--json'], homeEnv(governanceConfigHome));
+  assert(governanceConfig.status === 0, `Expected governance config doctor to pass, got ${governanceConfig.status}\n${governanceConfig.stderr}`);
+  const governanceConfigJson = parseJson(governanceConfig.stdout);
+  const archDocResult = assertResult(governanceConfigJson.results, 'arch doc output dir', true);
+  assert(archDocResult.message.includes('architecture-notes'), 'Expected arch doc output dir to be reported');
+  const artifactIndexResult = assertResult(governanceConfigJson.results, 'artifact index', true);
+  assert(artifactIndexResult.message.includes('disabled'), 'Expected artifact index disabled setting to be reported');
+
+  const projectConfigHome = mkTempDir('doctor-project-config-home');
+  const projectConfigVault = mkTempDir('doctor-project-config-vault');
+  const projectCwd = mkTempDir('doctor-project-cwd');
+  tempDirs.push(projectConfigHome, projectConfigVault, projectCwd);
+  writeConfig(projectCwd, [
+    `knowledge_vault: ${projectConfigVault.replaceAll('\\', '/')}`,
+    'arch_doc:',
+    '  output_dir: project-docs',
+    '',
+  ].join('\n'));
+  const projectConfig = runDoctor(['--cwd', projectCwd, '--skip-install-check', '--no-write', '--json'], homeEnv(projectConfigHome));
+  assert(projectConfig.status === 0, `Expected project config doctor to pass, got ${projectConfig.status}\n${projectConfig.stderr}`);
+  const projectConfigJson = parseJson(projectConfig.stdout);
+  const projectArchDoc = assertResult(projectConfigJson.results, 'arch doc output dir', true);
+  assert(projectArchDoc.message.endsWith(path.join(projectCwd, 'project-docs')), 'Expected project-level arch_doc.output_dir to resolve from --cwd');
 
   console.log('Doctor tests passed.');
 } finally {

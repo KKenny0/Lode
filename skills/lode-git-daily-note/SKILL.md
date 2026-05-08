@@ -13,7 +13,7 @@ description: >
 
 # Git 日报更新器
 
-从 Lode weekly change entries 和 git 提交统计生成结构化的 Obsidian 日报内容。
+从 Lode weekly change entries 和 git 提交统计生成结构化的 Obsidian 日报内容。日报是 Lode habit loop 的日级复利层：不只记录今天做了什么，也保留明天开工时应该记得的决策、风险、开放问题和高价值 source links。
 
 ---
 
@@ -107,6 +107,13 @@ the exact output format.
 
 If multiple raw entries describe the same work from different sources, merge them into one daily-note item instead of duplicating the same change. Prefer `session-recap` for intent and `arch-doc` for evidence/context. Preserve conflict or risk language explicitly when entries disagree.
 
+Compounding requirements:
+- Preserve raw-entry decisions, risks, open questions, and follow-up signals.
+- Link high-value artifacts from `{vault}/raw/artifacts/{slug}.json` when metadata is present.
+- Do not duplicate full architecture docs into the Daily Note.
+- Include what should matter tomorrow when an entry has `open_questions`, `status: risk`, or lifecycle language.
+- Missing artifact index is acceptable and must not block output.
+
 如果 `{vault}/raw/` 不存在或对应 week 目录不存在，跳过此步骤，全部走 Step 3 补漏。
 
 ### Step 3: Git log 补漏（次数据源）
@@ -179,6 +186,8 @@ Use the exact output format and module label rules in `references/daily-note-wri
 - [ ] 语义化描述（意图/效果，非函数名/字段名）
 - [ ] 每条改动标注了模块归属
 - [ ] raw entry 的 `impact` / `status` 已正确反映在日报措辞中（如存在）
+- [ ] raw entry 的 open questions / risks / decisions 已保留为明日衔接信号（如存在）
+- [ ] artifact index 中的高价值 source links 已按需引用，未把全文复制进日报
 - [ ] 格式与现有日报一致
 - [ ] 已检查当天是否有重复条目
 - [ ] 相关 commit 已智能合并

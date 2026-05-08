@@ -6,6 +6,13 @@ import yaml from 'js-yaml';
 export interface LodeConfig {
   knowledge_vault: string;
   project_slug?: string;
+  arch_doc?: {
+    output_dir?: string;
+    mirror_to_vault?: boolean;
+  };
+  artifact_index?: {
+    enabled?: boolean;
+  };
 }
 
 const CONFIG_DIR = path.join(os.homedir(), '.lode');
@@ -28,6 +35,55 @@ export function readConfig(): LodeConfig | null {
     return yaml.load(raw) as LodeConfig;
   } catch {
     return null;
+  }
+}
+
+function findProjectConfig(cwd: string): string | null {
+  let current = path.resolve(cwd);
+  while (true) {
+    const candidate = path.join(current, '.lode', 'config.yaml');
+    if (fs.existsSync(candidate)) return candidate;
+    const parent = path.dirname(current);
+    if (parent === current) return null;
+    current = parent;
+  }
+}
+
+function mergeConfigs(globalCfg: LodeConfig | null, projectCfg: LodeConfig | null): LodeConfig | null {
+  if (!globalCfg && !projectCfg) return null;
+  const merged = { ...(globalCfg || {}) } as LodeConfig;
+  const mergedRecord = merged as unknown as Record<string, unknown>;
+  for (const [key, value] of Object.entries(projectCfg || {})) {
+    const existing = mergedRecord[key];
+    if (
+      value &&
+      typeof value === 'object' &&
+      !Array.isArray(value) &&
+      existing &&
+      typeof existing === 'object' &&
+      !Array.isArray(existing)
+    ) {
+      mergedRecord[key] = {
+        ...(existing as Record<string, unknown>),
+        ...(value as Record<string, unknown>),
+      };
+    } else {
+      mergedRecord[key] = value;
+    }
+  }
+  return merged;
+}
+
+export function readConfigForCwd(cwd: string): LodeConfig | null {
+  const globalCfg = readConfig();
+  const projectPath = findProjectConfig(cwd);
+  if (!projectPath) return globalCfg;
+  try {
+    const raw = fs.readFileSync(projectPath, 'utf-8');
+    const projectCfg = yaml.load(raw) as LodeConfig;
+    return mergeConfigs(globalCfg, projectCfg);
+  } catch {
+    return globalCfg;
   }
 }
 

@@ -1,7 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import chalk from 'chalk';
-import { readConfig, getConfigPath, expandHome } from './config.js';
+import { readConfigForCwd, getConfigPath, expandHome, type LodeConfig } from './config.js';
 import { OFFICIAL_SKILLS } from './utils.js';
 import * as codex from './installers/codex.js';
 import * as claudeCode from './installers/claude-code.js';
@@ -83,14 +83,13 @@ function checkSkillInstallation(skipInstallCheck: boolean | undefined): CheckRes
   );
 }
 
-function resolveVault(options: DoctorOptions, results: CheckResult[]): string | null {
+function resolveVault(options: DoctorOptions, results: CheckResult[], cfg: LodeConfig | null): string | null {
   if (options.vault) {
     const resolved = path.resolve(expandHome(options.vault));
     results.push(pass('config', `Using --vault override: ${resolved}`));
     return resolved;
   }
 
-  const cfg = readConfig();
   if (!cfg || !cfg.knowledge_vault) {
     results.push(fail(
       'config',
@@ -100,8 +99,27 @@ function resolveVault(options: DoctorOptions, results: CheckResult[]): string | 
     return null;
   }
 
-  results.push(pass('config', `Loaded ${getConfigPath()}`));
+  results.push(pass('config', 'Loaded Lode config'));
   return path.resolve(expandHome(cfg.knowledge_vault));
+}
+
+function resolveArchDocOutputDir(cfg: LodeConfig | null, cwd: string): string {
+  const configured = cfg?.arch_doc?.output_dir || 'docs';
+  const expanded = expandHome(configured);
+  return path.isAbsolute(expanded) ? path.resolve(expanded) : path.resolve(cwd, expanded);
+}
+
+function artifactIndexEnabled(cfg: LodeConfig | null): boolean {
+  return cfg?.artifact_index?.enabled !== false;
+}
+
+function checkArtifactGovernanceConfig(cfg: LodeConfig | null, cwd: string): CheckResult[] {
+  const archDocDir = resolveArchDocOutputDir(cfg, cwd);
+  const artifactState = artifactIndexEnabled(cfg) ? 'enabled' : 'disabled';
+  return [
+    pass('arch doc output dir', archDocDir),
+    pass('artifact index', `${artifactState}${cfg?.artifact_index ? ' by config' : ' by default'}`),
+  ];
 }
 
 function checkTemporaryWrite(vault: string, cwd: string, noWrite: boolean | undefined): CheckResult[] {
@@ -150,7 +168,8 @@ function checkTemporaryWrite(vault: string, cwd: string, noWrite: boolean | unde
 export async function runDoctor(options: DoctorOptions = {}): Promise<void> {
   const results: CheckResult[] = [];
   const cwd = path.resolve(options.cwd || process.cwd());
-  const vault = resolveVault(options, results);
+  const cfg = readConfigForCwd(cwd);
+  const vault = resolveVault(options, results, cfg);
 
   if (!fs.existsSync(cwd) || !fs.statSync(cwd).isDirectory()) {
     results.push(fail('current directory', `Not a directory: ${cwd}`, 'Run doctor from a project directory or pass --cwd.'));
@@ -174,6 +193,8 @@ export async function runDoctor(options: DoctorOptions = {}): Promise<void> {
       }
     }
   }
+
+  results.push(...checkArtifactGovernanceConfig(cfg, cwd));
 
   results.push(checkSkillInstallation(options.skipInstallCheck));
 

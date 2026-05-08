@@ -1,0 +1,41 @@
+[
+  {
+    "timestamp": "2026-05-05T18:10:00+08:00",
+    "type": "decision",
+    "summary": "Kept validation repair loops inside the validation stage while preserving orchestration-level retry boundaries",
+    "context": "Moving repair ownership upstream would make orchestration aware of validation internals. Keeping ownership local preserves stage encapsulation, while artifact index metadata gives future recall a stable document entry point.",
+    "related_docs": ["D:/VibeProject/skills/Lode/examples/architecture-doc.md"],
+    "source": "arch-doc",
+    "status": "decision",
+    "impact": "Future session-start recall can point directly to the validation-stage architecture doc instead of re-reading all weekly entries.",
+    "project_area": "validation",
+    "work_stream": "Stage contract design",
+    "evidence_refs": ["doc:validation-stage-v1"],
+    "motivation": "Repair ownership was becoming ambiguous between validation and orchestration.",
+    "exploration_paths": [
+      "Move repair ownership upstream into orchestration -> centralizes retries but leaks validation internals",
+      "Keep repair ownership inside validation -> preserves encapsulation and narrower retry scope"
+    ],
+    "abandoned_alternatives": [
+      "Orchestration-level repair ownership: rejected because it would make orchestration depend on validation internals"
+    ],
+    "open_questions": [
+      "Should repair-loop latency be tracked at validation-stage level or orchestration level?"
+    ]
+  },
+  {
+    "timestamp": "2026-05-06T09:30:00+08:00",
+    "type": "risk",
+    "summary": "Identified stale architecture docs as a recall risk when stage contracts change without re-indexing",
+    "context": "Session-start recall can only be trusted if indexed docs remain tied to current contracts. Intent sync should flag outdated docs after implementation changes.",
+    "source": "session-recap",
+    "status": "risk",
+    "impact": "Hard-stuff radar can surface stale indexed docs before they mislead future sessions.",
+    "project_area": "documentation",
+    "work_stream": "Artifact governance",
+    "motivation": "Artifact index introduces a new source navigation layer that can become stale.",
+    "open_questions": [
+      "What signal should mark an indexed artifact as stale: file mtime, raw entry lifecycle, or explicit intent sync?"
+    ]
+  }
+]

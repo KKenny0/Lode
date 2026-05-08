@@ -15,6 +15,7 @@ DESIGN.md
 # Claude Code skills' evaluation results
 *-workspace/
 skills/*/evals/
+skills/**/__pycache__/
 
 # CLI build artifacts
 cli/node_modules/

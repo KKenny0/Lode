@@ -169,7 +169,13 @@ Follow the specification from the relevant reference file. Write sections in ord
 
 ### Step 4: Output Format
 
-Save documentation with mode-prefixed filenames, organized by ISO week:
+Save documentation with mode-prefixed filenames, organized by ISO week. By
+default the output directory is project-local `docs/`. If Lode config contains
+`arch_doc.output_dir`, resolve that first:
+
+- Relative `arch_doc.output_dir` is resolved from the project root.
+- Absolute `arch_doc.output_dir` is used as-is.
+- If the config cannot be read, fall back to project-local `docs/`.
 
 ```
 docs/{YYYY-WNN}/lode-stage-{stage_name}-implementation-v{N}.md
@@ -271,6 +277,52 @@ If the document only records a simple component with no report-worthy architectu
 
 If the helper is unavailable, config cannot be resolved, or the write fails, skip the raw entry side effect silently. The generated architecture document is the primary deliverable.
 
+## Step 6: Index Durable Artifact
+
+After the document path is known, upsert a durable artifact index entry to
+`{vault}/raw/artifacts/{project-slug}.json` when a vault is configured and
+`artifact_index.enabled` is not `false`.
+
+Generate an artifact JSON object, save it to a temporary file, and call:
+
+```bash
+python <this-skill>/scripts/lode_raw.py upsert-artifact \
+  --artifact /tmp/lode-arch-doc-artifact.json \
+  --cwd "$PWD"
+```
+
+Required artifact fields:
+
+```json
+{
+  "id": "project-slug:arch-doc:stage-or-pipeline-name:vN",
+  "project_slug": "project-slug",
+  "artifact_type": "arch-doc",
+  "title": "Human-readable document title",
+  "path": "/absolute/path/to/generated-doc.md",
+  "repo_relative_path": "docs/2026-WNN/generated-doc.md",
+  "created_at": "ISO 8601",
+  "updated_at": "ISO 8601",
+  "source": "lode-arch-doc",
+  "topics": ["stage-name", "contract", "risk-or-topic"],
+  "decision_threads": ["stable-decision-thread-name"],
+  "open_questions": ["unresolved question from the document, if any"],
+  "evidence_refs": ["/absolute/path/to/generated-doc.md"],
+  "status": "active",
+  "supersedes": [],
+  "superseded_by": null
+}
+```
+
+If the document is inside the current repo, include `repo_relative_path`.
+If it is outside the repo because `arch_doc.output_dir` is absolute, omit
+`repo_relative_path`. Use document sections 10/11 and section 12/13 references
+to populate `open_questions`, `topics`, and `evidence_refs`.
+
+Artifact index writes are side effects. If config cannot be resolved,
+`artifact_index.enabled` is `false`, the helper is unavailable, or the write
+fails, skip the artifact index write and report only the generated document path.
+
 ## Configuration
 
 此 skill 使用 Lode 统一配置系统。从以下位置解析知识库路径（`{vault}`），高优先级优先：
@@ -285,8 +337,9 @@ If the helper is unavailable, config cannot be resolved, or the write fails, ski
 项目级配置覆盖全局配置的同名字段。文档输出不依赖 `{vault}`；如果无法解析配置，只跳过 raw change entry 副作用。完整配置格式、合并规则和 helper 命令见 `references/weekly-ppt-convention.md`。
 
 此 skill 的产出路径：
-- 文档输出：`docs/{YYYY-WNN}/lode-stage-{name}-implementation-v{N}.md` 或 `docs/{YYYY-WNN}/lode-pipeline-evolution-v{N}.md`（项目仓库内）
+- 文档输出：默认 `docs/{YYYY-WNN}/lode-stage-{name}-implementation-v{N}.md` 或 `docs/{YYYY-WNN}/lode-pipeline-evolution-v{N}.md`（项目仓库内）；可通过 `arch_doc.output_dir` 覆盖
 - Change entry 写入：`{vault}/raw/weeks/{ISO-week}/{project-slug}.json`
+- Artifact index 写入：`{vault}/raw/artifacts/{project-slug}.json`（当 vault 可用且 `artifact_index.enabled` 未关闭）
 
 ## Shared Storage Convention
 
