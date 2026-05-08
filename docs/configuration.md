@@ -19,6 +19,20 @@ knowledge_vault: /path/to/your/knowledge-vault
   - 必须是目录，且必须存在（技能不会自动创建）
   - 建议设置为 git 仓库以支持版本控制
   - 建议使用 Obsidian vault 结构
+- `project_slug`: 项目标识（可选）
+  - 默认从 git repo 目录名推导
+  - 可用于稳定多机器或多路径下的项目身份
+- `arch_doc.output_dir`: 架构文档输出目录（可选）
+  - 默认 `docs`，相对于项目根目录解析
+  - 可以设置为绝对路径，例如 vault 中的 `Project Docs/{slug}`
+  - 用于适配不希望在项目 repo 内保存 `docs/` 的仓库
+- `arch_doc.mirror_to_vault`: 预留字段（可选）
+  - 默认 `false`
+  - 当前不启用自动镜像，仅保留未来兼容空间
+- `artifact_index.enabled`: 是否写入 artifact index（可选）
+  - 默认 `true`
+  - 当 vault 可用时，producer skills 可写入 `{vault}/raw/artifacts/{slug}.json`
+  - 关闭后，primary output 仍然生成，只跳过 artifact index side effect
 
 ## 配置解析优先级
 
@@ -97,6 +111,29 @@ knowledge_vault: /Users/username/knowledge-vault
 ```yaml
 # my-project/.lode/config.yaml
 knowledge_vault: /Users/username/projects/my-project-vault
+```
+
+### Artifact governance 配置示例
+
+```yaml
+knowledge_vault: /Users/username/knowledge-vault
+project_slug: storyboard-pipeline
+
+arch_doc:
+  output_dir: docs
+  mirror_to_vault: false
+
+artifact_index:
+  enabled: true
+```
+
+如果项目策略不允许写入 repo 内的 `docs/`，可以把架构文档输出到 vault 或其他本地目录：
+
+```yaml
+knowledge_vault: /Users/username/knowledge-vault
+
+arch_doc:
+  output_dir: /Users/username/knowledge-vault/Project Docs/storyboard-pipeline
 ```
 
 ## 最佳实践
