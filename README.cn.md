@@ -1,10 +1,10 @@
 <p align="center">
-  <img src="assets/logo.png" alt="Lode" width="180" />
+  <img src="assets/mark.svg" alt="Lode" width="132" />
 </p>
 
 <h1 align="center">Lode</h1>
 
-<p align="center"><strong>The knowledge vein in your codebase.</strong></p>
+<p align="center"><strong>把 AI 编程过程沉淀成可复用的项目记忆。</strong></p>
 
 <p align="center">
   <a href="README.md">English</a>
@@ -12,13 +12,13 @@
 
 ## Why
 
-你和 AI 一起做开发。一次 session 里，你们探索了好几条路径 — 试过什么方案、放弃过什么、为什么放弃、哪些风险被识别、哪些设计在权衡之后确定。这些知识是项目最有价值的部分。
+AI 让软件探索变便宜，也让上下文延续变困难。
 
-Session 结束，它们就消失了。
+一次 coding session 里，你可能会比较多个设计、放弃看似可行的路径、发现隐藏约束、更新 prompts、修改 schemas，并做出只有结合探索过程才说得清的决策。Git 记录最终 diff。Issue tracker 记录计划中的工作。它们都不会保存让这次工作成立的推理过程。
 
-Git 记录 **what changed**。Issue tracker 记录 **planned work**。但 **你在这个过程中学到了什么**，没有人记录。
+Session 结束，这些上下文通常就消失了。
 
-Lode 是第三层。它在每次 session 结束时捕获动机、探索路径、放弃的方案和悬而未决的问题，再把这些记忆复用到日报、周报、月报和架构文档里。
+Lode 是一个本地优先的 AI coding habit toolbox。它捕获决策、风险、放弃路径、开放问题、架构产物和重复经验，并在下一次开工、同步项目意图、准备汇报、重看难点、沉淀团队规则时复用这些项目记忆。
 
 ## See it
 
@@ -28,7 +28,7 @@ Lode 是第三层。它在每次 session 结束时捕获动机、探索路径、
 
 ## Habit Loop
 
-Lode 围绕一个高频 agentic coding loop 组织：
+Lode 围绕一个应该被反复使用、直到变成习惯的 agentic coding loop 组织：
 
 ```text
 开工 -> 实现探索 -> 同步意图 -> 收工 -> 周期复盘 -> 沉淀经验
@@ -79,7 +79,7 @@ npx @lode/cli doctor
 
 ## Background
 
-Lode 这个名字来自英文里的 lode：矿脉，矿物在地下富集的地方。commits、sessions、diffs 是原矿，Lode 把它们提炼成值得长期保存的工作知识。这个词和 load 同源，也和中文的载（zài，承载、记录）同源。
+Lode 这个名字来自英文里的 lode：矿脉，矿物在地下富集的地方。commits、sessions、diffs 是原矿，Lode 把它们提炼成值得长期保存的工作知识。这个词和 load 同源，也和中文的载（zài，承载、记录）同源。原来的标语 "the knowledge vein in your codebase" 仍然描述这个隐喻；现在更明确的产品承诺是：为 agentic coding 提供可复用的项目记忆。
 
 Lode 只写本地 Markdown 和 JSON。和代码强绑定的架构文档默认留在项目 repo；共享记忆、索引和报告放在你的 knowledge vault。不引入远程服务、账号、同步后端或托管数据库。如果你的 knowledge vault 是 git repo，push 到哪里由你控制。
 

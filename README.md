@@ -1,10 +1,10 @@
 <p align="center">
-  <img src="assets/logo.png" alt="Lode" width="180" />
+  <img src="assets/mark.svg" alt="Lode" width="132" />
 </p>
 
 <h1 align="center">Lode</h1>
 
-<p align="center"><strong>The knowledge vein in your codebase.</strong></p>
+<p align="center"><strong>Turn agentic coding sessions into reusable project memory.</strong></p>
 
 <p align="center">
   <a href="README.cn.md">中文</a>
@@ -12,13 +12,13 @@
 
 ## Why
 
-You build software with an AI assistant. During a session, you explore multiple paths — what you tried, what you abandoned, why you abandoned it, which risks surfaced, which design choices were made after weighing trade-offs. This knowledge is the most valuable part of the project.
+AI makes software exploration cheap. It also makes continuity expensive.
 
-When the session ends, it vanishes.
+In one coding session, you can compare multiple designs, reject plausible paths, discover hidden constraints, update prompts, change schemas, and make decisions that only make sense because of everything you tried along the way. Git records the final diff. Issue trackers record planned work. Neither keeps the reasoning that made the work possible.
 
-Git records **what changed**. Issue trackers record **planned work**. But **what you learned along the way** — nobody records that.
+When the session ends, that context usually disappears.
 
-Lode is the third layer. At the end of each session it captures motivations, exploration paths, abandoned alternatives, and open questions — then reuses that memory for daily notes, weekly outlines, monthly reviews, and architecture documentation.
+Lode is a local habit toolbox for durable AI coding context. It captures decisions, risks, abandoned paths, open questions, architecture artifacts, and recurring lessons, then reuses that memory when you start the next session, sync project intent, prepare reports, revisit hard problems, or distill team rules.
 
 ## See it
 
@@ -28,14 +28,13 @@ A single `收工` is enough to see the value — no configuration, no waiting fo
 
 ## Habit Loop
 
-Lode is organized around a high-frequency agentic coding loop:
+Lode is organized around the loop you want to repeat until it becomes automatic:
 
 ```text
 开工 -> 实现探索 -> 同步意图 -> 收工 -> 周期复盘 -> 沉淀经验
 ```
 
-Daily, weekly, monthly, and roadmap outputs are compounding layers on top of
-that loop, not the main product story.
+Daily, weekly, monthly, and roadmap outputs are compounding layers on top of that loop, not the main product story.
 
 ## Skills
 
@@ -80,7 +79,7 @@ For configuration details see [docs/configuration.md](docs/configuration.md). Fo
 
 ## Background
 
-The name comes from **lode**: a vein of ore where valuable mineral is concentrated. Commits, sessions, diffs, code changes — that is the ore. Lode refines it into work knowledge worth keeping. The word shares its root with *load* and with the Chinese character 载 (zài, to carry, to record).
+The name comes from **lode**: a vein of ore where valuable mineral is concentrated. Commits, sessions, diffs, code changes — that is the ore. Lode refines it into work knowledge worth keeping. The word shares its root with *load* and with the Chinese character 载 (zài, to carry, to record). The original tagline, "the knowledge vein in your codebase", still describes the metaphor; the product promise is reusable project memory for agentic coding.
 
 Lode writes local Markdown and JSON only. Code-adjacent artifacts such as architecture docs stay in the project repo by default; shared memory, indexes, and reports live in your knowledge vault. No remote services, accounts, sync backends, or hosted databases. If your knowledge vault is a git repo, you control where it gets pushed.
 

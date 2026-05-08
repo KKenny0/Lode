@@ -1,7 +1,7 @@
 {
   "name": "@lode/cli",
   "version": "0.1.0",
-  "description": "CLI installer for Lode skills — guided setup for Claude Code and Codex",
+  "description": "Project memory for agentic coding — guided setup for Lode skills",
   "type": "module",
   "bin": {
     "lode": "dist/index.js"
