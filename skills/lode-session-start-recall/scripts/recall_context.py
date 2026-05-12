@@ -18,6 +18,11 @@ except Exception:  # pragma: no cover
 
 
 SKIP_DIRS = {".git", "node_modules", "dist", "__pycache__"}
+INTENT_ARTIFACT_RE = re.compile(
+    r"\b(DESIGN\.md|PLAN\.md|AGENTS\.md|README(?:\.cn)?\.md)\b|"
+    r"(design|plan|architecture|prompt|schema|contract|migration|config)",
+    re.IGNORECASE,
+)
 
 
 def load_yaml_config(path: Path) -> dict[str, Any]:
@@ -190,6 +195,45 @@ def extract_risks(entries: list[dict[str, Any]]) -> list[dict[str, str]]:
     return risks
 
 
+def extract_intent_artifact_flags(entries: list[dict[str, Any]], limit: int) -> list[dict[str, str]]:
+    flags: list[dict[str, str]] = []
+    for entry in entries:
+        explicit = entry.get("sync_suggestions")
+        if isinstance(explicit, list):
+            for item in explicit:
+                if isinstance(item, str) and item.strip():
+                    flags.append({
+                        "timestamp": parse_timestamp(entry),
+                        "summary": str(entry.get("summary", "")),
+                        "reason": item.strip(),
+                        "source": "sync_suggestions",
+                    })
+        searchable = " ".join(
+            str(value)
+            for key, value in entry.items()
+            if key in {"summary", "context", "motivation", "impact"}
+        )
+        related_docs = entry.get("related_docs")
+        if isinstance(related_docs, list):
+            searchable = f"{searchable} {' '.join(str(item) for item in related_docs)}"
+        if INTENT_ARTIFACT_RE.search(searchable):
+            flags.append({
+                "timestamp": parse_timestamp(entry),
+                "summary": str(entry.get("summary", "")),
+                "reason": "Recent raw entry mentions an intent artifact or contract-like change; review for possible staleness.",
+                "source": "presence_match",
+            })
+    seen: set[tuple[str, str, str]] = set()
+    unique: list[dict[str, str]] = []
+    for flag in flags:
+        key = (flag["timestamp"], flag["summary"], flag["reason"])
+        if key in seen:
+            continue
+        seen.add(key)
+        unique.append(flag)
+    return unique[:limit]
+
+
 def read_artifacts(vault: Path, slug: str) -> tuple[list[dict[str, Any]], list[dict[str, str]]]:
     artifacts = read_json_array(vault / "raw" / "artifacts" / f"{slug}.json")
     missing: list[dict[str, str]] = []
@@ -215,6 +259,7 @@ def build_context(cwd: Path, vault_override: str | None, slug_override: str | No
             "abandoned_alternatives": [],
             "decisions": [],
             "artifacts": [],
+            "intent_artifact_flags": [],
             "missing_sources": [{"type": "vault", "path": str(vault) if vault else ""}],
         }
 
@@ -230,6 +275,7 @@ def build_context(cwd: Path, vault_override: str | None, slug_override: str | No
         "abandoned_alternatives": extract_list(entries, "abandoned_alternatives")[:limit],
         "decisions": extract_decisions(entries)[:limit],
         "artifacts": artifacts[:limit],
+        "intent_artifact_flags": extract_intent_artifact_flags(entries, limit),
         "missing_sources": missing_artifacts,
     }
 

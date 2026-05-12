@@ -158,6 +158,14 @@ Natural cross-project/cross-stream themes are fine here when they genuinely emer
 | 信号 | 状态 | 下周影响 |
 |------|------|----------|
 | {decision/open question/risk} | carried-forward / revisited / resolved | {next-week planning impact} |
+
+### 本周难点
+
+仅当本周 raw entries 支持至少一个风险、反复开放问题、陈旧线程或值得重看的放弃方案时出现。没有证据时整段省略。
+
+| 难点 | 证据 | 下周动作 |
+|------|------|----------|
+| {risk/open question/stale thread} | {raw timestamp or entry summary} | {planning impact} |
 ```
 
 ## Commit Appendix (Optional)

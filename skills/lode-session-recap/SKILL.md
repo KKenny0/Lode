@@ -72,7 +72,8 @@ The change entry JSON looks like this:
   "motivation": "optional: trigger reason and goal for the change",
   "exploration_paths": ["optional: approaches tried and outcomes"],
   "abandoned_alternatives": ["optional: approaches rejected and why"],
-  "open_questions": ["optional: unresolved questions at session end"]
+  "open_questions": ["optional: unresolved questions at session end"],
+  "sync_suggestions": ["optional: intent artifacts that may need review"]
 }
 ```
 
@@ -93,6 +94,29 @@ The change entry JSON looks like this:
 - **exploration_paths**: approaches tried during the session and their outcomes (e.g. "lazy loading → marginal gain on mobile first-screen"). Fill when the session involved comparing approaches or backtracking.
 - **abandoned_alternatives**: approaches explicitly considered and rejected, with rejection reasons — valuable for future roadmap decisions. Fill when alternatives were discussed and ruled out.
 - **open_questions**: unresolved decisions or questions at session end — entry points for the next session. Fill when there are genuine unknowns remaining.
+- **sync_suggestions**: lightweight intent-artifact review hints. Fill when the entry mentions decisions, contract changes, prompt/schema changes, or repo-local intent artifacts such as `DESIGN.md`, `PLAN.md`, `AGENTS.md`, README, architecture docs, prompt contracts, or schema contracts. This is presence-based flagging only; do not propose semantic diffs or rewrite files from this skill.
+
+### Lightweight Sync Suggestions
+
+The standalone intent-sync skill has been absorbed into this wrap-up step as a
+small review signal. During Step 1, scan the session for intent artifacts and
+contract-changing language:
+
+- `DESIGN.md`, `PLAN.md`, `AGENTS.md`, `README.md`, `README.cn.md`
+- files or sections named design, plan, architecture, prompt, schema, contract,
+  migration, or config
+- raw-entry content that says a decision, interface, prompt, schema, or
+  orchestration rule changed
+
+When found, add `sync_suggestions` to the relevant raw entry. Each suggestion
+should be one concise string:
+
+```text
+Review DESIGN.md because the session changed the retry/fallback contract.
+```
+
+Keep v1 conservative. A sync suggestion means "this file may need review", not
+"this file is stale" and not "apply this diff".
 
 **Quality gate** — before finalizing, check each entry:
 - Does it explain WHY, not just WHAT? If motivation is empty and the entry isn't a trivial fix, reconsider whether it's report-worthy.
@@ -174,6 +198,13 @@ Use this template:
 **开放问题**:
 {for each question:
   - {question}
+}
+}
+
+{if sync_suggestions present:
+**需要同步检查**:
+{for each suggestion:
+  - {suggestion}
 }
 }
 

@@ -19,7 +19,7 @@ April focused on making storyboard generation more debuggable and reportable. Th
 ## Decisions and Open Questions
 
 - Validation-stage repair ownership remains the current decision, but repair-loop latency is still an open measurement question.
-- Artifact index staleness emerged as a documentation risk: when stage contracts change, `同步意图` should update repo docs and artifact metadata before the next `开工`.
+- Artifact index staleness emerged as a documentation risk: when stage contracts change, session recap should record a sync suggestion so the next `开工` can flag repo docs and artifact metadata for review.
 
 ## Habit and Data Quality
 

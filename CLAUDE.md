@@ -4,7 +4,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What This Is
 
-**Lode** — a cross-runtime skill monorepo (Claude Code plugin + Codex skills) containing six declarative skills for development workflow recording: capturing context, generating docs, generating decision roadmaps, writing daily notes, producing weekly outlines, and generating monthly reviews.
+**Lode** — a cross-runtime skill monorepo (Claude Code plugin + Codex skills) for agentic coding's persistent memory. It contains seven declarative skills for session-start recall, context capture, architecture docs, decision roadmaps, daily notes, weekly outlines, and monthly reviews.
+
+Lode is positioned as a reporting and decision-replay engine, not a generic memory layer. Capture/retrieval is the input; structured weekly outlines, monthly reviews, and decision roadmaps are the product.
 
 The skills themselves are Markdown-first and dependency-light. The repository also includes a Node-based CLI installer under `cli/`, local-only eval fixtures, and public benchmark guidance.
 
@@ -48,6 +50,12 @@ skills/
     SKILL.md
     references/
       weekly-ppt-convention.md
+  lode-session-start-recall/            # Session-start project memory recall
+    SKILL.md
+    scripts/recall_context.py
+    references/
+      recall-output-template.md
+      weekly-ppt-convention.md
   lode-decision-roadmap/                # Narrative decision roadmap from accumulated entries
     SKILL.md
     references/
@@ -86,11 +94,12 @@ skills/*-workspace/                     # Ignored benchmark workspaces/results
 | Skill | Purpose | Triggers |
 |-------|---------|----------|
 | lode-arch-doc | Stage impl docs (13 sections) + Pipeline arch docs (14 sections) | "stage impl doc", "架构文档", "pipeline 架构演进" |
-| lode-session-recap | Session-end change log extraction | "收工", "done", "今天到这" |
-| lode-decision-roadmap | Narrative decision roadmap from accumulated entries | "决策路线图", "decision roadmap", "项目决策历史" |
+| lode-session-start-recall | Session-start recall from raw entries + artifact index | "开工", "session start", "继续上次" |
+| lode-session-recap | Session-end change log extraction plus lightweight sync suggestions | "收工", "done", "今天到这" |
+| lode-decision-roadmap | Narrative decision roadmap with risk accumulation and recurring open questions | "决策路线图", "decision roadmap", "项目决策历史" |
 | lode-git-daily-note | Obsidian daily notes from git history | "更新日报", "日报", "daily note" |
-| lode-weekly-outline | Raw-first multi-project PPT outline from weekly change entries, with git fallback | "周报", "weekly PPT" |
-| lode-monthly-review | Monthly work review from daily notes | "月度回顾", "月报", "monthly review" |
+| lode-weekly-outline | Raw-first weekly PPT outline with conditional hard-stuff section | "周报", "weekly PPT" |
+| lode-monthly-review | Monthly work review with candidate rules from repeated evidence | "月度回顾", "月报", "monthly review" |
 
 ## Reusable Data Map
 
@@ -98,31 +107,42 @@ Lode is not a strict pipeline. Skills are independently triggered, but they can 
 
 ```
 开发过程中:
+  lode-session-start-recall ← {vault}/raw/weeks/ + {vault}/raw/artifacts/ → 开工上下文
   lode-session-recap ──→ {vault}/raw/weeks/{week}/{slug}.json
-  lode-arch-doc ───────→ {vault}/raw/weeks/{week}/{slug}.json
+                     └─→ lightweight sync suggestions for DESIGN/PLAN/AGENTS/README review
+  lode-arch-doc ───────→ project docs/ + {vault}/raw/weeks/{week}/{slug}.json
+                     └─→ {vault}/raw/artifacts/{slug}.json
 
 按需:
-  lode-decision-roadmap ← {vault}/raw/weeks/ → {vault}/Work Diary/Decision Roadmap.md
+  lode-decision-roadmap ← {vault}/raw/weeks/ → decisions + accumulating risks + recurring questions
 
 每天:
   lode-git-daily-note ← {vault}/raw/weeks/ JSON + git log → {vault}/Daily Note.md
 
 每周:
-  lode-weekly-outline ← {vault}/raw/weeks/ + fallback git coverage → 周报大纲
+  lode-weekly-outline ← {vault}/raw/weeks/ + fallback git coverage → 周报大纲 + hard stuff when supported
 
 每月:
   lode-monthly-review ← Daily Note.md → {vault}/raw/months/{MM}/ (signals + skeleton)
                                           {vault}/Work Diary/ (archive + summary)
+                                     └─→ candidate rules (proposal-only)
 ```
 
 ## Storage Convention
 
 Data is organized in two layers within the knowledge vault:
 
-- **Raw layer** (`{vault}/raw/`): immutable intermediate data (JSON entries, signals, skeletons)
+- **Raw layer** (`{vault}/raw/`): immutable intermediate data (JSON entries, artifact indexes, signals, skeletons)
 - **Wiki layer** (`{vault}/Daily Note.md`, `{vault}/Work Diary/`): human-readable outputs
 
 The knowledge vault is a git repo (typically an Obsidian vault), enabling cross-machine sync via git push/pull.
+
+Lode uses four storage surfaces:
+
+- **Project repo**: code-adjacent artifacts that evolve with implementation, such as arch docs, `DESIGN.md`, `PLAN.md`, `AGENTS.md`, prompt contracts, and schema contracts
+- **Vault raw layer**: machine-readable memory and indexes, including weekly raw entries and `{vault}/raw/artifacts/{slug}.json`
+- **Vault wiki layer**: human-readable synthesis outputs such as Daily Note, weekly outline, monthly review, and decision roadmap
+- **Conversation fallback**: zero-config immediate value when durable storage is unavailable
 
 ## Key Design Decisions
 
@@ -130,6 +150,7 @@ The knowledge vault is a git repo (typically an Obsidian vault), enabling cross-
 - **Convention sync**: the canonical version lives at `references/weekly-ppt-convention.md`; after editing it, run `scripts/sync-convention.sh` to copy to all skill directories that need it
 - **Unified config**: all skills read vault path from `.lode/config.yaml`; project-level config overrides global
 - **Explicit primary outputs, graceful side effects**: if a skill needs the vault for its main output, it asks for `knowledge_vault`; if a raw change entry is only a side effect, it can skip that write gracefully
+- **Artifact governance**: full repo-local artifacts stay near code by default; vault artifact indexes make them discoverable without turning weekly raw entries into a document catalog
 - **Raw-first weekly reporting**: `lode-weekly-outline` consumes weekly raw change entries as the primary semantic source; git logs are fallback and coverage evidence only
 - **Weekly-report-quality raw entries**: `lode-session-recap` and `lode-arch-doc` should write report-worthy signals, decisions, risks, contracts, and impact rather than process logs or "updated docs" entries
 - **Local evals, public benchmarks**: `skills/*/evals/` and `*-workspace/` stay local; public benchmark guidance lives under `benchmarks/`

@@ -48,40 +48,13 @@ try {
     }
   }
 
-  Run "Validate intent target discovery" {
-    $targets = python "skills/lode-intent-sync/scripts/intent_targets.py" --cwd "." | ConvertFrom-Json
-    Assert-LastExit "intent target discovery"
-    $paths = @($targets.targets | ForEach-Object { $_.repo_relative_path })
-    foreach ($required in @("DESIGN.md", "PLAN.md", "AGENTS.md", "README.md")) {
-      if ($paths -notcontains $required) {
-        throw "Intent targets missing $required"
-      }
-    }
-  }
-
-  Run "Validate lifecycle derivation" {
-    $state = python "skills/lode-hard-stuff-radar/scripts/derive_lifecycle.py" --vault "examples/vault" --slug "storyboard-pipeline" | ConvertFrom-Json
-    Assert-LastExit "lifecycle derivation"
-    if ($state.open_questions.Count -lt 1 -or $state.active_risks.Count -lt 1) {
-      throw "Lifecycle derivation did not find expected open questions and risks"
-    }
-  }
-
-  Run "Validate distillation candidates" {
-    $distill = python "skills/lode-experience-distillation/scripts/distill_candidates.py" --vault "examples/vault" --slug "storyboard-pipeline" | ConvertFrom-Json
-    Assert-LastExit "distillation candidates"
-    if ($distill.candidates.Count -lt 1) {
-      throw "Expected at least one distillation candidate"
-    }
-  }
-
   Run "Validate static roadmap contracts" {
-    rg -n "开工 -> 实现探索 -> 同步意图 -> 收工 -> 周期复盘 -> 沉淀经验" README.md README.cn.md docs/roadmap.md | Out-Null
+    rg -n "开工 -> 实现探索 -> 收工 -> 周期复盘" README.md README.cn.md docs/roadmap.md | Out-Null
     Assert-LastExit "habit loop grep"
     rg -n "raw/artifacts|artifact index|Artifact Index" references docs skills | Out-Null
     Assert-LastExit "artifact governance grep"
-    rg -n "lode-session-start-recall|lode-intent-sync|lode-hard-stuff-radar|lode-experience-distillation" README.md README.cn.md AGENTS.md cli/src/utils.ts cli/scripts/check-skills.mjs | Out-Null
-    Assert-LastExit "new skill registration grep"
+    rg -n "sync_suggestions|Potentially Stale Intent Artifacts|Accumulating Risks|hard stuff this week|Candidate Rules" skills references | Out-Null
+    Assert-LastExit "absorbed behavior grep"
   }
 
   Run "Validate CLI build and skill packaging" {

@@ -4,7 +4,9 @@ This file provides guidance to Codex (Codex.ai/code) when working with code in t
 
 ## What This Is
 
-**Lode** — a cross-runtime skill monorepo (Codex skills + Claude Code plugin) containing declarative skills for the agentic coding habit loop: session-start recall, context capture, intent sync, architecture docs, hard-problem radar, experience distillation, daily notes, weekly outlines, decision roadmaps, and monthly reviews.
+**Lode** — a cross-runtime skill monorepo (Codex skills + Claude Code plugin) for agentic coding's persistent memory. It contains seven declarative skills for session-start recall, context capture, architecture docs, decision roadmaps, daily notes, weekly outlines, and monthly reviews.
+
+Lode is positioned as a reporting and decision-replay engine, not a generic memory layer. Capture/retrieval is the input; structured weekly outlines, monthly reviews, and decision roadmaps are the product.
 
 The skills themselves are Markdown-first and dependency-light. The repository also includes a Node-based CLI installer under `cli/`, local-only eval fixtures, and public benchmark guidance.
 
@@ -65,24 +67,6 @@ skills/
     references/
       recall-output-template.md
       weekly-ppt-convention.md
-  lode-intent-sync/                     # Keep repo-local intent docs current
-    SKILL.md
-    scripts/intent_targets.py
-    references/
-      intent-sync-contract.md
-      weekly-ppt-convention.md
-  lode-hard-stuff-radar/                # Surface hard problems from memory
-    SKILL.md
-    scripts/derive_lifecycle.py
-    references/
-      radar-output-template.md
-      weekly-ppt-convention.md
-  lode-experience-distillation/         # Distill repeated lessons into rules
-    SKILL.md
-    scripts/distill_candidates.py
-    references/
-      distillation-contract.md
-      weekly-ppt-convention.md
   lode-decision-roadmap/                # Narrative decision history
     SKILL.md
     references/
@@ -122,13 +106,10 @@ skills/*-workspace/                     # Ignored benchmark workspaces/results
 |-------|---------|----------|
 | lode-arch-doc | Stage impl docs (13 sections) + Pipeline arch docs (14 sections) | "stage impl doc", "架构文档", "pipeline 架构演进" |
 | lode-session-start-recall | Session-start recall from raw entries + artifact index | "开工", "session start", "继续上次" |
-| lode-intent-sync | Compare session learning against repo-local specs before updating them | "同步意图", "spec sync", "让文档跟实现对齐" |
-| lode-hard-stuff-radar | Surface recurring open questions, risks, and hard problems | "看看难点", "hard stuff radar" |
-| lode-experience-distillation | Distill repeated lessons into rules, checklists, playbooks, or skill ideas | "沉淀经验", "distill experience" |
-| lode-session-recap | Session-end change log extraction | "收工", "done", "今天到这" |
+| lode-session-recap | Session-end change log extraction plus lightweight sync suggestions | "收工", "done", "今天到这" |
 | lode-git-daily-note | Obsidian daily notes from git history | "更新日报", "日报", "daily note" |
-| lode-weekly-outline | Raw-first multi-project PPT outline from weekly change entries, with git fallback | "周报", "weekly PPT" |
-| lode-monthly-review | Monthly work review from daily notes | "月度回顾", "月报", "monthly review" |
+| lode-weekly-outline | Raw-first weekly PPT outline with conditional hard-stuff section | "周报", "weekly PPT" |
+| lode-monthly-review | Monthly work review with candidate rules from repeated evidence | "月度回顾", "月报", "monthly review" |
 
 ## Reusable Data Map
 
@@ -138,21 +119,21 @@ Lode is not a strict pipeline. Skills are independently triggered, but they can 
 开发过程中:
   lode-session-start-recall ← {vault}/raw/weeks/ + {vault}/raw/artifacts/ → 开工上下文
   lode-session-recap ──→ {vault}/raw/weeks/{week}/{slug}.json
+                     └─→ lightweight sync suggestions for DESIGN/PLAN/AGENTS/README review
   lode-arch-doc ───────→ project docs/ + {vault}/raw/weeks/{week}/{slug}.json
                      └─→ {vault}/raw/artifacts/{slug}.json
-  lode-intent-sync ────→ repo specs + raw lifecycle signals
-  lode-hard-stuff-radar ← raw entries + artifact index + lifecycle derivation
-  lode-experience-distillation ← repeated raw/radar signals → AGENTS/checklists/skills proposals
+  lode-decision-roadmap ← raw entries + artifact index → decisions + accumulating risks + recurring questions
 
 每天:
   lode-git-daily-note ← {vault}/raw/weeks/ JSON + git log → {vault}/Daily Note.md
 
 每周:
-  lode-weekly-outline ← {vault}/raw/weeks/ + fallback git coverage → 周报大纲
+  lode-weekly-outline ← {vault}/raw/weeks/ + fallback git coverage → 周报大纲 + hard stuff when supported
 
 每月:
   lode-monthly-review ← Daily Note.md → {vault}/raw/months/{MM}/ (signals + skeleton)
                                           {vault}/Work Diary/ (archive + summary)
+                                     └─→ candidate rules (proposal-only)
 ```
 
 ## Storage Convention

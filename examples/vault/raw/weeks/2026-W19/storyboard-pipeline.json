@@ -27,15 +27,18 @@
     "timestamp": "2026-05-06T09:30:00+08:00",
     "type": "risk",
     "summary": "Identified stale architecture docs as a recall risk when stage contracts change without re-indexing",
-    "context": "Session-start recall can only be trusted if indexed docs remain tied to current contracts. Intent sync should flag outdated docs after implementation changes.",
+    "context": "Session-start recall can only be trusted if indexed docs remain tied to current contracts. Session recap should record sync suggestions after implementation changes.",
     "source": "session-recap",
     "status": "risk",
-    "impact": "Hard-stuff radar can surface stale indexed docs before they mislead future sessions.",
+    "impact": "Decision roadmap and weekly outline can surface stale indexed docs before they mislead future sessions.",
     "project_area": "documentation",
     "work_stream": "Artifact governance",
     "motivation": "Artifact index introduces a new source navigation layer that can become stale.",
     "open_questions": [
-      "What signal should mark an indexed artifact as stale: file mtime, raw entry lifecycle, or explicit intent sync?"
+      "What signal should mark an indexed artifact as stale: file mtime, raw entry lifecycle, or explicit sync suggestion?"
+    ],
+    "sync_suggestions": [
+      "Review architecture docs and artifact metadata when stage contracts change."
     ]
   }
 ]

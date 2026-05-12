@@ -150,6 +150,13 @@ When streams share close context (e.g. a bug fix stream and the feature it fixes
 
 **Overview slide:** 1 sentence per stream. Natural cross-stream themes are fine when they genuinely emerge, but don't force them.
 
+**Hard stuff this week:** Add this section to the summary slide only when raw
+entries contain at least one supported risk, recurring open question, stale
+thread, or abandoned alternative worth revisiting. Omit the section entirely
+when empty. This is the absorbed hard-stuff radar behavior for weekly planning;
+it must cite raw-entry evidence and must not invent concerns from git subjects
+or artifact titles alone.
+
 **Summary slide:** Aggregate next steps and status from all streams into one table.
 
 ## Anti-Patterns

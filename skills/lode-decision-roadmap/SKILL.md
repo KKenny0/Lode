@@ -110,6 +110,8 @@ Also track lifecycle-like signals when entries explicitly support them:
 - superseded decisions
 - abandoned alternatives worth revisiting
 - stale open questions
+- accumulating risks
+- recurring open questions
 
 Aim for 3-7 threads. If you find more, merge loosely related ones. If you find fewer than 3, the data may be too thin for a meaningful roadmap — say so and show what you can.
 
@@ -199,6 +201,25 @@ Use this section when current evidence suggests a prior abandonment, decision,
 or open question should be revisited. Every correction must cite raw-entry
 evidence and label inferred conclusions.
 
+## Accumulating Risks
+
+List risks that appear across multiple entries, remain unresolved, or become
+more consequential over time. Each item must cite source timestamps and say
+whether the risk is explicit or inferred.
+
+| Risk | Evidence | Current Pressure | Suggested Review |
+|------|----------|------------------|------------------|
+| {risk} | {timestamps} | low / medium / high | {what to inspect next} |
+
+## Recurring Open Questions
+
+Group repeated or long-lived open questions by decision thread. Omit this section
+if there are no supported recurring questions.
+
+| Question | First Seen | Repeated In | Why It Matters |
+|----------|------------|-------------|----------------|
+| {question} | {timestamp} | {timestamps} | {planning or architecture impact} |
+
 ---
 
 ## Open Questions Inventory
@@ -232,6 +253,11 @@ All unresolved questions across threads, organized by urgency:
 **Roadmap correction**: Include revised/superseded decisions and alternatives
 worth revisiting. Do not invent corrections from artifact titles alone; artifact
 index is source navigation only.
+
+**Accumulating risks and recurring questions**: This absorbs the useful part of
+hard-stuff radar. Only include a risk or question when supported by raw entries.
+Use "inferred" language when grouping is based on similarity rather than an
+explicit repeated label.
 
 **Inference transparency**: The roadmap mixes explicit decision data with inferred signals. Readers need to know which is which. Use these conventions:
 - Decision points from explicit fields: stated as fact

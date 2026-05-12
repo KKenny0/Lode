@@ -234,6 +234,7 @@ Consumers must tolerate these fields being absent. Producers should add them whe
 | `exploration_paths` | string[] | Approaches tried during the session and their outcomes |
 | `abandoned_alternatives` | string[] | Approaches explicitly rejected and why |
 | `open_questions` | string[] | Unresolved questions at session end; entry points for next session |
+| `sync_suggestions` | string[] | Presence-based hints that repo-local intent artifacts may need review |
 
 Recommended producer behavior:
 
@@ -245,6 +246,11 @@ Recommended producer behavior:
 - Add `exploration_paths` when the session involved trying multiple approaches. Each entry should describe the approach and its outcome (e.g. "lazy loading → marginal gain on mobile first-screen").
 - Add `abandoned_alternatives` when approaches were explicitly considered and rejected. Include the rejection reason — this is valuable for future roadmap decisions.
 - Add `open_questions` when the session ends with unresolved decisions or unanswered questions. These serve as entry points for the next session.
+- Add `sync_suggestions` when the entry mentions a decision, prompt/schema
+  contract, orchestration rule, or intent artifact that may require follow-up in
+  `DESIGN.md`, `PLAN.md`, `AGENTS.md`, README, architecture docs, prompt
+  contracts, or schema contracts. This is lightweight flagging only; producers
+  must not claim semantic diffing or automatic doc updates.
 
 ### Writing `summary`
 
@@ -336,8 +342,8 @@ Downstream tools read these files to get high-quality development context:
 - **lode-git-daily-note** — reads change entries as primary data source, with git log as fallback
 - **lode-monthly-review** — reads daily notes (produced by lode-git-daily-note) for monthly summaries
 - **lode-session-start-recall** — reads recent raw entries first and uses artifact index entries as optional source navigation
-- **lode-hard-stuff-radar** — derives hard problems from raw entries and lifecycle-like signals; artifact index entries provide supporting source links
-- **lode-experience-distillation** — proposes reusable rules from repeated raw-entry evidence and artifact metadata
+- **lode-decision-roadmap** — derives decision threads, accumulating risks, and
+  recurring open questions from raw entries
 - Any future reporting or review tool that needs structured change history
 
 ## Weekly Report Consumption
