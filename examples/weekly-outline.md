@@ -47,4 +47,4 @@ The pipeline keeps a small orchestration cost but avoids rewriting dialogue when
 |---|---|---|
 | Validation owns repair-loop behavior | Carried forward | Keep orchestration insulated from validation internals |
 | Repair-loop latency tracking | Open question | Decide whether latency belongs to validation metrics or orchestration metrics |
-| Indexed architecture docs can become stale | Risk | Run intent sync after contract changes so recall does not point to outdated docs |
+| Indexed architecture docs can become stale | Risk | Record sync suggestions after contract changes so recall does not point to outdated docs |

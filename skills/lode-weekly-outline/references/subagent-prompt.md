@@ -69,6 +69,12 @@ Risk&Next must include decisions revisited, open questions carried forward, and
 hard problems that change next-week planning when the raw entries support them.
 Fallback-only streams must say they are lower confidence.
 
+If the week's raw entries contain supported risks, recurring open questions,
+stale threads, or abandoned alternatives worth revisiting, include them in a
+`hard_stuff_this_week` field inside the stream narrative. Omit that field when
+there is no evidence. Do not derive hard-stuff claims from artifact titles or
+fallback git subjects alone.
+
 **For TechApproach:**
 - This is the most important section — it's where reviewers understand HOW the work was done
 - Prefer structured ASCII diagrams (flow charts, before/after comparisons, decision trees) over prose
@@ -92,7 +98,8 @@ Fallback-only streams must say they are lower confidence.
         "key_changes": "abstracted engineering changes for this stream",
         "technical_approach": "how it was done — detailed, with ASCII diagrams (omit in report mode)",
         "result": "impact and outcomes",
-        "risk_and_next": "risks and next steps"
+        "risk_and_next": "risks and next steps",
+        "hard_stuff_this_week": "optional; only when raw-entry evidence supports a risk/open question/stale thread"
       }
     }
   ]

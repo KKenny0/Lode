@@ -46,6 +46,7 @@ The response must include:
 - Open questions
 - Risks to check before implementation
 - Repo-local docs worth reading
+- Potentially stale intent artifacts
 - Suggested entry point for the current session
 
 If there is no vault or no raw data, say that Lode has no durable memory for the
@@ -57,6 +58,9 @@ gap with git history or assumptions.
 - Cite raw entry timestamps for decisions, risks, abandoned alternatives, and
   open questions.
 - Cite artifact ids for docs worth reading.
+- Treat `intent_artifact_flags` as read-only staleness hints. Phrase them as
+  "may need review" rather than facts. Do not write or propose diffs from this
+  skill.
 - Use "Inferred" wording when the helper returns weak or old-schema entries.
 - Missing artifact index is acceptable and must not block output.
 
@@ -68,3 +72,14 @@ This skill reads:
 - `{vault}/raw/artifacts/{project-slug}.json` when present
 
 This skill writes no files.
+
+## Absorbed Intent-Artifact Flagging
+
+The old standalone intent-sync behavior is now a lightweight recall section.
+When recent raw entries include `sync_suggestions`, or mention intent artifacts
+and contract-like terms such as design, plan, architecture, prompt, schema,
+contract, migration, or config, include a "Potentially stale intent artifacts"
+section.
+
+This section is read-only. Its job is to tell the next session what to inspect,
+not to decide that a document is stale and not to modify the document.

@@ -61,8 +61,14 @@ Agent 读取原始月度归档后，按本模板的格式和规则撰写总结�
 
 ## 习惯与数据质量
 
-- `开工` / `收工` / `同步意图` 等 Lode habit loop 的使用情况。
+- `开工` / `收工` / sync suggestions 等 Lode habit loop 的使用情况。
 - 哪些上下文缺失导致总结只能低置信度推断。
+
+## Candidate Rules
+
+- 从本月重复出现的失败模式、风险、开放问题或工作习惯中提炼候选规则。
+- 每条必须写清证据、适用范围、过拟合风险和建议目标（AGENTS rule / checklist / playbook / skill idea）。
+- 只提出，不自动写入目标文件。
 
 ## 数据说明
 
@@ -122,4 +128,5 @@ Agent 读取原始月度归档后，按本模板的格式和规则撰写总结�
 - **决策与开放问题**：列出 recurring open questions、stale threads、revised/superseded decisions
 - **下月衔接**：每个条目一行
 - **习惯与数据质量**：指出下月应该改变的记录习惯或 sync 习惯
+- **Candidate Rules**：列出有重复证据的候选规则；单次弱信号只能写成观察
 - **总行数目标**：80-120 行（取决于项目数和工作量）

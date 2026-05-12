@@ -1,7 +1,7 @@
 {
   "name": "@lode/cli",
   "version": "0.1.0",
-  "description": "Project memory for agentic coding — guided setup for Lode skills",
+  "description": "Persistent memory and decision replay for agentic coding — guided setup for Lode skills",
   "type": "module",
   "bin": {
     "lode": "dist/index.js"

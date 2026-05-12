@@ -114,7 +114,7 @@ Artifact index 回答“有哪些长期可召回资料”：
 - 是否仍然 active，是否被 supersede；
 - future recall 是否值得读取它。
 
-Weekly raw entries 不应承担文档目录的职责。Artifact index 是未来 `开工召回`、`难点雷达` 和 `沉淀经验` 的 source navigation layer。
+Weekly raw entries 不应承担文档目录的职责。Artifact index 是 `开工召回`、决策路线图、周报和月度回顾的 source navigation layer。
 
 ## 生命周期语义
 
@@ -135,7 +135,7 @@ artifact:
   active -> missing
 ```
 
-第一阶段只要求 producer 清楚写出 lifecycle signal；当前状态可以由后续 `hard-stuff-radar` 或 `monthly-review` 从 raw entries 和 artifact index 推导。
+第一阶段只要求 producer 清楚写出 lifecycle signal；当前状态可以由 `decision-roadmap`、`weekly-outline` 或 `monthly-review` 从 raw entries 和 artifact index 推导。
 
 ### 数据流说明
 

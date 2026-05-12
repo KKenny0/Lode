@@ -18,6 +18,7 @@ description: >
 - 月度归档（原始 Markdown，不改写）
 - 月度总结（由 agent 撰写，事实优先，禁止脑补）
 - 中间数据（signals.json + skeleton.json，供二次消费）
+- 候选规则（candidate rules，只建议，不自动写入 AGENTS/checklists/skills）
 
 ## 设计原则
 
@@ -132,6 +133,7 @@ python scripts/prepare_monthly_data.py \
 - 如果同一主题同时包含完成项、风险项、决策项，按"完成了什么 + 保留了什么风险/决策"组织，避免只写成功叙事
 - 识别 recurring open questions、stale threads、unresolved risks，并说明它们如何影响下月计划
 - 总结 `开工` / `收工` 等 Lode habit loop 的使用情况：哪些 session 有记录，哪些上下文可能缺失
+- 输出 candidate rules：从重复证据中提出可能值得固化的 AGENTS rules、checklists、playbooks 或 skill ideas。单次弱信号只能写成观察或 checklist 建议，不能升级成强规则。
 
 ### Step 5：输出执行摘要
 
@@ -157,7 +159,9 @@ python scripts/prepare_monthly_data.py \
 
 此 skill **不负责**：改写原始 Daily Note、写汇报文案、生成绩效表述、判断工作价值。
 
-此 skill **只负责**：拆分 → 归档 → 提炼 → 结构化输出。
+此 skill **只负责**：拆分 → 归档 → 提炼 → 结构化输出 → 提出候选规则。
+
+Candidate rules 是 proposal-only：除非用户明确要求并批准写入目标文件，否则不得自动修改 AGENTS.md、checklists、playbooks 或 skills。
 
 ## 错误处理
 

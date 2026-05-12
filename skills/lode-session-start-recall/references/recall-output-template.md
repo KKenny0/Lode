@@ -21,6 +21,9 @@
 ### Docs Worth Reading
 - {artifact_id}: {title} — {path or repo_relative_path}
 
+### Potentially Stale Intent Artifacts
+- {timestamp}: {reason} — {summary}
+
 ### Suggested Entry Point
 {one short recommendation grounded in the recalled evidence}
 ```
