@@ -28,12 +28,12 @@ try {
 
   Run "Validate artifact index upsert create/update" {
     New-Item -ItemType Directory -Force -Path $tempVault | Out-Null
-    $first = python "skills/lode-arch-doc/scripts/lode_raw.py" upsert-artifact --artifact "examples/artifact-index.json" --cwd "." --vault $tempVault | ConvertFrom-Json
+    $first = python "scripts/lode_raw.py" upsert-artifact --artifact "examples/artifact-index.json" --cwd "." --vault $tempVault | ConvertFrom-Json
     Assert-LastExit "artifact upsert create"
     if ($first.action -ne "created" -or $first.total_artifacts -ne 1) {
       throw "Expected first artifact upsert to create one entry"
     }
-    $second = python "skills/lode-arch-doc/scripts/lode_raw.py" upsert-artifact --artifact "examples/artifact-index.json" --cwd "." --vault $tempVault | ConvertFrom-Json
+    $second = python "scripts/lode_raw.py" upsert-artifact --artifact "examples/artifact-index.json" --cwd "." --vault $tempVault | ConvertFrom-Json
     Assert-LastExit "artifact upsert update"
     if ($second.action -ne "updated" -or $second.total_artifacts -ne 1) {
       throw "Expected second artifact upsert to update without duplicating"

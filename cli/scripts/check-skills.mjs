@@ -13,7 +13,6 @@ const canonicalConvention = path.join(repoRoot, 'references', 'weekly-ppt-conven
 
 const officialSkills = [
   'lode-session-recap',
-  'lode-arch-doc',
   'lode-session-start-recall',
   'lode-decision-roadmap',
   'lode-git-daily-note',
@@ -23,12 +22,10 @@ const officialSkills = [
 
 const conventionCopies = [
   path.join(sourceSkillsDir, 'lode-session-recap', 'references', 'weekly-ppt-convention.md'),
-  path.join(sourceSkillsDir, 'lode-arch-doc', 'references', 'weekly-ppt-convention.md'),
   path.join(sourceSkillsDir, 'lode-session-start-recall', 'references', 'weekly-ppt-convention.md'),
   path.join(sourceSkillsDir, 'lode-decision-roadmap', 'references', 'weekly-ppt-convention.md'),
   path.join(sourceSkillsDir, 'lode-monthly-review', 'references', 'weekly-ppt-convention.md'),
   path.join(bundledSkillsDir, 'lode-session-recap', 'references', 'weekly-ppt-convention.md'),
-  path.join(bundledSkillsDir, 'lode-arch-doc', 'references', 'weekly-ppt-convention.md'),
   path.join(bundledSkillsDir, 'lode-session-start-recall', 'references', 'weekly-ppt-convention.md'),
   path.join(bundledSkillsDir, 'lode-decision-roadmap', 'references', 'weekly-ppt-convention.md'),
   path.join(bundledSkillsDir, 'lode-monthly-review', 'references', 'weekly-ppt-convention.md'),
