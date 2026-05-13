@@ -1,4 +1,4 @@
-# Weekly PPT Shared Convention (v2.0)
+# Weekly PPT Shared Convention (v2.1)
 
 This file defines the shared data schema and storage convention used by all skills in this monorepo. When generating change entries, follow this spec exactly so downstream consumers can reliably read them.
 
@@ -21,10 +21,6 @@ Lode uses a YAML configuration file to determine the knowledge vault location. T
 knowledge_vault: /path/to/your/knowledge-vault
 # project_slug: my-project  # optional, defaults to git repo directory name
 
-# arch_doc:
-#   output_dir: docs
-#   mirror_to_vault: false
-#
 # artifact_index:
 #   enabled: true
 ```
@@ -37,8 +33,8 @@ Lode uses four storage surfaces. Store the full artifact where it is maintained,
 then store enough structured metadata for future skills to find and reuse it:
 
 - **Project repo**: code-adjacent artifacts that evolve with implementation,
-  such as `arch-doc`, `DESIGN.md`, `PLAN.md`, `AGENTS.md`, prompt contracts,
-  and schema contracts.
+  such as `DESIGN.md`, `PLAN.md`, `AGENTS.md`, prompt contracts, schema
+  contracts, migration notes, and architecture notes.
 - **Vault raw layer**: machine-readable memory and indexes, such as weekly raw
   entries, artifact index entries, decision thread indexes, open question
   indexes, and monthly signals.
@@ -90,15 +86,15 @@ Each `{vault}/raw/artifacts/{slug}.json` file contains a JSON array of artifacts
 ```json
 [
   {
-    "id": "storyboard-pipeline:arch-doc:parse-stage:v1",
+    "id": "storyboard-pipeline:design-doc:parse-stage:v1",
     "project_slug": "storyboard-pipeline",
-    "artifact_type": "arch-doc",
+    "artifact_type": "design-doc",
     "title": "Parse Stage Implementation",
     "path": "/Users/dev/projects/storyboard-pipeline/docs/2026-W18/lode-stage-parse-implementation-v1.md",
     "repo_relative_path": "docs/2026-W18/lode-stage-parse-implementation-v1.md",
     "created_at": "2026-05-08T10:00:00+08:00",
     "updated_at": "2026-05-08T10:00:00+08:00",
-    "source": "lode-arch-doc",
+    "source": "lode-session-recap",
     "topics": ["parse-stage", "validation", "repair-loop"],
     "decision_threads": ["schema-validation-boundary"],
     "open_questions": ["whether repair-loop ownership should move upstream"],
@@ -196,14 +192,25 @@ Each `{vault}/raw/weeks/{week}/{slug}.json` file contains a **JSON array** of en
 [
   {
     "timestamp": "2026-04-11T14:30:00+08:00",
+    "archetype": "build",
     "type": "feature",
     "summary": "Built scene composition system with auto-layout and overlap resolution",
     "context": "Replaced manual positioning with constraint solver. Resolves 3 bad cases from v2.3 batch eval.",
     "related_docs": ["/Users/dev/projects/my-project/docs/stage-composition-implementation.md"],
     "source": "session-recap",
     "status": "done",
+    "motivation": "Manual positioning caused recurring panel overlap failures during export.",
     "impact": "Weekly outline can explain the shipped layout capability without re-reading implementation commits.",
-    "evidence_refs": ["abc1234", "/Users/dev/projects/my-project/docs/stage-composition-implementation.md"]
+    "evidence_refs": ["abc1234", "/Users/dev/projects/my-project/docs/stage-composition-implementation.md"],
+    "artifact_context": [
+      {
+        "artifact_path": "/Users/dev/projects/my-project/DESIGN.md",
+        "scope": "Scene composition layout contract and ownership.",
+        "delta": "Recorded the auto-layout boundary and overlap-resolution responsibility.",
+        "open_questions": ["Whether dense panels need a separate export fallback."],
+        "source_of_truth": ["src/composition/layout.ts", "tests/composition-layout.test.ts"]
+      }
+    ]
   }
 ]
 ```
@@ -213,11 +220,12 @@ Each `{vault}/raw/weeks/{week}/{slug}.json` file contains a **JSON array** of en
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
 | `timestamp` | ISO 8601 | Yes | When the change was made or recorded |
+| `archetype` | enum | Recommended for new entries | `decision` \| `build` \| `investigation` \| `repair` \| `maintenance`; describes the session shape |
 | `type` | enum | Yes | `feature` \| `fix` \| `refactor` \| `decision` \| `risk` |
 | `summary` | string | Yes | 1 sentence, engineering-level abstraction |
 | `context` | string | Yes | 1-2 sentences explaining why and impact |
 | `related_docs` | string[] | No | Absolute paths to relevant documentation files |
-| `source` | enum | Yes | `session-recap` \| `arch-doc` |
+| `source` | enum | Yes | `session-recap` for new entries; `arch-doc` is legacy-only historical data |
 
 ### Recommended Optional Fields
 
@@ -234,11 +242,64 @@ Consumers must tolerate these fields being absent. Producers should add them whe
 | `exploration_paths` | string[] | Approaches tried during the session and their outcomes |
 | `abandoned_alternatives` | string[] | Approaches explicitly rejected and why |
 | `open_questions` | string[] | Unresolved questions at session end; entry points for next session |
+| `root_cause` | string | Repair archetype root cause; 1-2 sentences |
+| `artifact_context` | object[] | Durable artifact scope/delta/source-of-truth blocks embedded in the raw entry |
 | `sync_suggestions` | string[] | Presence-based hints that repo-local intent artifacts may need review |
+
+### `type` vs `archetype`
+
+`archetype` describes the shape of the session. `type` describes the reporting
+category of the entry. They are independent axes:
+
+- A `build` archetype normally produces `type: "feature"`.
+- A `repair` archetype normally produces `type: "fix"`.
+- A `decision` archetype normally produces `type: "decision"`, but can produce
+  `type: "feature"` when the chosen approach was implemented in the same
+  session.
+
+New `session-recap` entries should include `archetype`. Historical entries
+without it are valid and must be treated as legacy raw signals.
+
+### Archetype Expectations
+
+The adaptive-depth helper logs warnings for missing archetype fields; it does
+not reject the entry. Zero-config Markdown output follows the same best-effort
+rule.
+
+| Archetype | Expected fields when known |
+|---|---|
+| `decision` | `motivation`, `exploration_paths`; `abandoned_alternatives` when discussed |
+| `build` | `motivation`, `impact` |
+| `investigation` | `exploration_paths`, `open_questions` |
+| `repair` | `motivation`, `root_cause` |
+| `maintenance` | Core fields only |
+
+### `artifact_context`
+
+Use `artifact_context` when a session created or materially changed a durable
+artifact such as `DESIGN.md`, `PLAN.md`, `AGENTS.md`, README, prompt contracts,
+schema contracts, migration notes, or architecture notes.
+
+Each object has this shape:
+
+```json
+{
+  "artifact_path": "/absolute/path/to/artifact",
+  "scope": "What this artifact governs",
+  "delta": "What changed in this session",
+  "open_questions": ["unresolved artifact question"],
+  "source_of_truth": ["path/to/implementation", "path/to/tests"]
+}
+```
+
+`artifact_path`, `scope`, `delta`, and `source_of_truth` are required when the
+object is present. `artifact_path` must be absolute.
 
 Recommended producer behavior:
 
 - Add `status` whenever it can be inferred from the session: `done` for completed work, `ongoing` for partially completed work, `risk` for open risk entries, and `decision` for design decisions.
+- Add `archetype` for new `session-recap` entries using the adaptive-depth
+  classification rules from the skill.
 - Add `impact` when the entry has a clear user, system, reporting, reliability, migration, or developer-workflow effect. This should be more report-ready than `context`, not a duplicate.
 - Add `evidence_refs` for commit SHAs, issue IDs, eval IDs, or doc paths that are already known. Do not perform extra repository analysis only to populate this field.
 - Add `project_area` or `work_stream` when the natural module or narrative grouping is obvious. Leave them absent rather than guessing.
@@ -352,8 +413,15 @@ For weekly reporting, raw entries should carry the meaning of the work:
 
 - `summary` should describe the engineering change at report granularity.
 - `context` should explain why it mattered and what changed as a result.
-- `source: arch-doc` entries should summarize the architectural change or decision, not merely state that a document was written.
-- `related_docs` are evidence and deep context; consumers should read them only when the raw entry is not enough to explain the technical approach.
+- `archetype` should control treatment depth: decisions emphasize trade-offs,
+  repairs emphasize root cause, investigations emphasize open questions, and
+  builds emphasize impact.
+- `artifact_context` is embedded technical evidence. Consumers should use its
+  scope, delta, and source-of-truth fields before reading files from disk.
+- `source: arch-doc` is legacy historical data. Treat it as high-confidence
+  architecture evidence, but do not expect new entries from that source.
+- `related_docs` are evidence and deep context; consumers should read them only
+  when the raw entry is not enough to explain the technical approach.
 - Artifact index entries are optional source navigation. Consumers may use them
   to find durable repo-local docs, but must not invent decision facts from
   artifact titles alone.
@@ -365,8 +433,13 @@ Consumers should merge semantically similar signals rather than repeat them:
 
 - Same project + same week + similar `summary` / `context` means the entries are candidates for one work stream.
 - `session-recap` entries are intent-rich: they often preserve why the work happened and what trade-off was made in conversation.
-- `arch-doc` entries are evidence-rich: they often preserve contract boundaries, source-of-truth paths, and architecture decisions.
-- If a `session-recap` entry and an `arch-doc` entry describe the same change, combine them into one work stream. Use the session entry for motivation and the arch-doc entry for technical evidence.
+- Legacy `arch-doc` entries are evidence-rich: they often preserve contract
+  boundaries, source-of-truth paths, and architecture decisions.
+- If a `session-recap` entry and a legacy `arch-doc` entry describe the same
+  change, combine them into one work stream. Use the session entry for
+  motivation and the legacy arch-doc entry for technical evidence.
+- If a new `session-recap` entry includes `artifact_context`, treat it as
+  equivalent signal strength to the older session-recap plus arch-doc pair.
 - Fallback git commits fill coverage gaps only. They should not create a duplicate stream for work already explained by raw entries.
 - If two entries conflict, preserve the conflict explicitly in the weekly outline or daily note instead of silently choosing the more positive version.
 
@@ -385,13 +458,9 @@ Capture only signals that should survive into a weekly review:
 
 Merge related implementation steps into one entry. A feature implemented through several commits, fixes, and follow-up tweaks should usually become one `feature` entry with context that mentions the important repair or trade-off. Skip process-only work such as formatting, file moves, import cleanup, generated files, and local setup unless it explains a larger report-worthy change.
 
-### For `arch-doc`
+### Legacy `arch-doc` Entries
 
-Capture the architecture knowledge made explicit by the document:
-
-- Stage or pipeline contract boundaries
-- Cross-stage dataflow or artifact evolution
-- Design decisions and trade-offs
-- Known risks, migration constraints, or source-of-truth changes
-
-Do not write entries whose only message is that a document was created or updated. Put the document path in `related_docs`; use `summary` and `context` for the architecture signal the document preserves.
+Historical raw data may still contain `source: "arch-doc"`. Consumers must keep
+reading those entries as architecture evidence. New producers must not write
+`source: "arch-doc"`; adaptive-depth `session-recap` entries with
+`artifact_context` replace that signal path.

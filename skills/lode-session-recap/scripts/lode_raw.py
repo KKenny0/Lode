@@ -26,6 +26,14 @@ VALID_TYPES = {"feature", "fix", "refactor", "decision", "risk"}
 VALID_SOURCES = {"session-recap", "arch-doc"}
 VALID_STATUSES = {"done", "ongoing", "risk", "decision"}
 REQUIRED_FIELDS = ("timestamp", "type", "summary", "context", "source")
+VALID_ARCHETYPES = {"decision", "build", "investigation", "repair", "maintenance"}
+ARCHETYPE_REQUIRED_FIELDS = {
+    "decision": ("motivation", "exploration_paths"),
+    "build": ("motivation", "impact"),
+    "investigation": ("exploration_paths", "open_questions"),
+    "repair": ("motivation", "root_cause"),
+    "maintenance": (),
+}
 VALID_ARTIFACT_TYPES = {
     "arch-doc",
     "design-doc",
@@ -202,6 +210,63 @@ def project_slug(cwd: Path, vault: Path | None = None) -> str:
     return slugify(cwd.resolve().name)
 
 
+def warn(message: str) -> None:
+    print(f"warning: {message}", file=sys.stderr)
+
+
+def has_value(entry: dict[str, Any], field: str) -> bool:
+    value = entry.get(field)
+    if isinstance(value, str):
+        return bool(value.strip())
+    if isinstance(value, list):
+        return len(value) > 0
+    return value is not None
+
+
+def validate_string_list(entry: dict[str, Any], field: str) -> None:
+    if field in entry:
+        if not isinstance(entry[field], list) or not all(
+            isinstance(item, str) for item in entry[field]
+        ):
+            raise ValueError(f"entry {field} must be a list of strings when present")
+
+
+def validate_artifact_context(entry: dict[str, Any]) -> None:
+    if "artifact_context" not in entry:
+        return
+    contexts = entry["artifact_context"]
+    if not isinstance(contexts, list):
+        raise ValueError("entry artifact_context must be a list when present")
+    required = ("artifact_path", "scope", "delta", "source_of_truth")
+    for index, context in enumerate(contexts):
+        if not isinstance(context, dict):
+            raise ValueError(f"entry artifact_context[{index}] must be an object")
+        missing = [field for field in required if field not in context]
+        if missing:
+            raise ValueError(
+                f"entry artifact_context[{index}] missing required fields: "
+                + ", ".join(missing)
+            )
+        for field in ("artifact_path", "scope", "delta"):
+            if not isinstance(context[field], str) or not context[field].strip():
+                raise ValueError(
+                    f"entry artifact_context[{index}].{field} must be a non-empty string"
+                )
+        if not Path(context["artifact_path"]).expanduser().is_absolute():
+            raise ValueError(
+                f"entry artifact_context[{index}].artifact_path must be absolute: "
+                + context["artifact_path"]
+            )
+        for field in ("open_questions", "source_of_truth"):
+            if field in context:
+                if not isinstance(context[field], list) or not all(
+                    isinstance(item, str) for item in context[field]
+                ):
+                    raise ValueError(
+                        f"entry artifact_context[{index}].{field} must be a list of strings"
+                    )
+
+
 def validate_entry(entry: Any) -> dict[str, Any]:
     if not isinstance(entry, dict):
         raise ValueError("entry must be a JSON object")
@@ -215,15 +280,9 @@ def validate_entry(entry: Any) -> dict[str, Any]:
     for field in ("timestamp", "summary", "context", "source", "type"):
         if not isinstance(entry[field], str) or not entry[field].strip():
             raise ValueError(f"entry field must be a non-empty string: {field}")
-    if "related_docs" in entry and not isinstance(entry["related_docs"], list):
-        raise ValueError("entry related_docs must be a list when present")
     for field in ("related_docs", "evidence_refs", "exploration_paths",
-                   "abandoned_alternatives", "open_questions"):
-        if field in entry:
-            if not isinstance(entry[field], list) or not all(
-                isinstance(item, str) for item in entry[field]
-            ):
-                raise ValueError(f"entry {field} must be a list of strings when present")
+                   "abandoned_alternatives", "open_questions", "sync_suggestions"):
+        validate_string_list(entry, field)
     if "related_docs" in entry:
         relative_docs = [
             item for item in entry["related_docs"] if not Path(item).expanduser().is_absolute()
@@ -233,13 +292,27 @@ def validate_entry(entry: Any) -> dict[str, Any]:
                 "entry related_docs must contain absolute paths: "
                 + ", ".join(relative_docs)
             )
-    for field in ("project_area", "work_stream", "impact", "motivation"):
+    for field in ("project_area", "work_stream", "impact", "motivation", "root_cause"):
         if field in entry and (
             not isinstance(entry[field], str) or not entry[field].strip()
         ):
             raise ValueError(f"entry {field} must be a non-empty string when present")
     if "status" in entry and entry["status"] not in VALID_STATUSES:
         raise ValueError(f"entry status must be one of: {', '.join(sorted(VALID_STATUSES))}")
+    if "archetype" in entry and entry["archetype"] not in VALID_ARCHETYPES:
+        raise ValueError(
+            f"entry archetype must be one of: {', '.join(sorted(VALID_ARCHETYPES))}"
+        )
+    validate_artifact_context(entry)
+    if entry["source"] == "arch-doc":
+        warn("entry source 'arch-doc' is legacy-only; new producers should use 'session-recap'")
+    if entry["source"] == "session-recap" and "archetype" not in entry:
+        warn("session-recap entry missing archetype; adaptive-depth consumers may treat it as legacy")
+    archetype = entry.get("archetype")
+    if isinstance(archetype, str) and archetype in ARCHETYPE_REQUIRED_FIELDS:
+        for field in ARCHETYPE_REQUIRED_FIELDS[archetype]:
+            if not has_value(entry, field):
+                warn(f"{archetype} entry missing recommended field: {field}")
     return entry
 
 
@@ -272,10 +345,6 @@ def append_entries(
         if not isinstance(existing_data, list):
             raise ValueError(f"target file is not a JSON array: {target_file}")
         existing = existing_data
-
-    now_iso = dt.datetime.now().astimezone().isoformat()
-    for entry in entries:
-        entry["timestamp"] = now_iso
 
     existing.extend(entries)
     existing.sort(key=lambda e: e.get("timestamp", ""))
