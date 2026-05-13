@@ -34,7 +34,7 @@ Lode is organized around the loop you want to repeat until it becomes automatic:
 开工 -> 实现探索 -> 收工 -> 周期复盘
 ```
 
-Weekly, monthly, and roadmap outputs are compounding layers on top of that loop. Lightweight sync suggestions, hard-stuff signals, and candidate rules are absorbed into the surviving skills instead of living as separate triggers.
+Weekly, monthly, and roadmap outputs are compounding layers on top of that loop. Adaptive-depth recap, lightweight sync suggestions, hard-stuff signals, and candidate rules are absorbed into the surviving skills instead of living as separate triggers.
 
 ## Skills
 
@@ -42,8 +42,7 @@ Each skill maps to a habit you already have. Activate it with a trigger phrase.
 
 | Skill | When | What it does |
 | :--- | :--- | :--- |
-| `lode-session-recap` | Every session wrap-up | Extracts decision signals and flags intent artifacts that may need review |
-| `lode-arch-doc` | After architecture work | Generates Stage implementation docs or Pipeline architecture evolution docs |
+| `lode-session-recap` | Every session wrap-up | Classifies the session archetype, captures decision/build/repair depth, and indexes durable artifacts when relevant |
 | `lode-session-start-recall` | Session start | Recalls recent decisions, risks, open questions, abandoned alternatives, relevant docs, and possible stale intent artifacts |
 | `lode-decision-roadmap` | On demand | Generates a narrative decision roadmap, including accumulating risks and recurring open questions |
 | `lode-git-daily-note` | Daily, on demand | Updates Obsidian daily notes from raw entries and git history |
@@ -93,7 +92,8 @@ Design principles:
 
 - **Self-contained skills**: each skill carries its own references so it can be installed individually.
 - **Raw-first reporting**: weekly reports use raw entries as the primary semantic source; git is fallback and coverage evidence.
-- **Artifact governance**: full repo-local docs stay near the code, while vault indexes make them discoverable for recall and reports.
+- **Adaptive-depth recap**: session wrap-up entries carry archetype-specific fields so reports can explain decisions, repairs, investigations, and builds without a second write skill.
+- **Artifact governance**: full repo-local docs stay near the code, while recap-owned vault indexes make them discoverable for recall and reports.
 - **Graceful side effects**: when a raw write is only a side effect, failures do not block the primary deliverable.
 - **Deterministic helpers**: scripts handle path resolution, date calculation, parsing, and aggregation where consistency matters.
 - **Local evals, public protocols**: local fixtures stay ignored; public benchmark guidance lives under [`benchmarks/`](benchmarks/).

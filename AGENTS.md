@@ -4,7 +4,7 @@ This file provides guidance to Codex (Codex.ai/code) when working with code in t
 
 ## What This Is
 
-**Lode** — a cross-runtime skill monorepo (Codex skills + Claude Code plugin) for agentic coding's persistent memory. It contains seven declarative skills for session-start recall, context capture, architecture docs, decision roadmaps, daily notes, weekly outlines, and monthly reviews.
+**Lode** — a cross-runtime skill monorepo (Codex skills + Claude Code plugin) for agentic coding's persistent memory. It contains six declarative skills for session-start recall, adaptive-depth context capture, decision roadmaps, daily notes, weekly outlines, and monthly reviews.
 
 Lode is positioned as a reporting and decision-replay engine, not a generic memory layer. Capture/retrieval is the input; structured weekly outlines, monthly reviews, and decision roadmaps are the product.
 
@@ -30,10 +30,6 @@ See `references/lode-config-template.yaml` for full template including daily-not
 Artifact governance options:
 
 ```yaml
-arch_doc:
-  output_dir: docs
-  mirror_to_vault: false
-
 artifact_index:
   enabled: true
 ```
@@ -51,14 +47,9 @@ cli/                                     # Installer CLI for Codex / Claude Code
   src/
   package.json
 skills/
-  lode-arch-doc/                        # Stage impl + Pipeline arch docs
-    SKILL.md
-    references/
-      stage-implementation-spec.md
-      pipeline-doc.md
-      weekly-ppt-convention.md
   lode-session-recap/                   # Session-end change log extraction
     SKILL.md
+    scripts/lode_raw.py
     references/
       weekly-ppt-convention.md
   lode-session-start-recall/            # Session-start project memory recall
@@ -104,9 +95,8 @@ skills/*-workspace/                     # Ignored benchmark workspaces/results
 
 | Skill | Purpose | Triggers |
 |-------|---------|----------|
-| lode-arch-doc | Stage impl docs (13 sections) + Pipeline arch docs (14 sections) | "stage impl doc", "架构文档", "pipeline 架构演进" |
 | lode-session-start-recall | Session-start recall from raw entries + artifact index | "开工", "session start", "继续上次" |
-| lode-session-recap | Session-end change log extraction plus lightweight sync suggestions | "收工", "done", "今天到这" |
+| lode-session-recap | Adaptive-depth session recap plus artifact context and sync suggestions | "收工", "done", "今天到这" |
 | lode-git-daily-note | Obsidian daily notes from git history | "更新日报", "日报", "daily note" |
 | lode-weekly-outline | Raw-first weekly PPT outline with conditional hard-stuff section | "周报", "weekly PPT" |
 | lode-monthly-review | Monthly work review with candidate rules from repeated evidence | "月度回顾", "月报", "monthly review" |
@@ -119,9 +109,9 @@ Lode is not a strict pipeline. Skills are independently triggered, but they can 
 开发过程中:
   lode-session-start-recall ← {vault}/raw/weeks/ + {vault}/raw/artifacts/ → 开工上下文
   lode-session-recap ──→ {vault}/raw/weeks/{week}/{slug}.json
+                     ├─→ artifact_context embedded in raw entries
+                     ├─→ {vault}/raw/artifacts/{slug}.json when durable artifacts change
                      └─→ lightweight sync suggestions for DESIGN/PLAN/AGENTS/README review
-  lode-arch-doc ───────→ project docs/ + {vault}/raw/weeks/{week}/{slug}.json
-                     └─→ {vault}/raw/artifacts/{slug}.json
   lode-decision-roadmap ← raw entries + artifact index → decisions + accumulating risks + recurring questions
 
 每天:
@@ -160,7 +150,9 @@ Lode uses four storage surfaces:
 - **Explicit primary outputs, graceful side effects**: if a skill needs the vault for its main output, it asks for `knowledge_vault`; if a raw change entry is only a side effect, it can skip that write gracefully
 - **Artifact governance**: full repo-local artifacts stay near code by default; vault artifact indexes make them discoverable without turning weekly raw entries into a document catalog
 - **Raw-first weekly reporting**: `lode-weekly-outline` consumes weekly raw change entries as the primary semantic source; git logs are fallback and coverage evidence only
-- **Weekly-report-quality raw entries**: `lode-session-recap` and `lode-arch-doc` should write report-worthy signals, decisions, risks, contracts, and impact rather than process logs or "updated docs" entries
+- **Adaptive-depth recap**: `lode-session-recap` classifies sessions as decision/build/investigation/repair/maintenance and writes archetype-specific signals for downstream reports
+- **Legacy arch-doc compatibility**: historical `source: arch-doc` raw entries remain readable, but new write output uses `source: session-recap`
+- **Weekly-report-quality raw entries**: `lode-session-recap` should write report-worthy signals, decisions, risks, contracts, and impact rather than process logs or "updated docs" entries
 - **Local evals, public benchmarks**: `skills/*/evals/` and `*-workspace/` stay local; public benchmark guidance lives under `benchmarks/`
 - **Scripts for deterministic work**: lode-monthly-review uses Python scripts for parsing and aggregation; the agent handles interpretation and writing
 

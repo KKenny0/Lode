@@ -34,7 +34,7 @@ Lode 围绕一个应该被反复使用、直到变成习惯的 agentic coding lo
 开工 -> 实现探索 -> 收工 -> 周期复盘
 ```
 
-周报、月报和决策路线图是这个 loop 之上的周期复利层。轻量 sync suggestions、难点信号和 candidate rules 被吸收到保留的 skills 里，不再作为独立触发。
+周报、月报和决策路线图是这个 loop 之上的周期复利层。自适应深度 recap、轻量 sync suggestions、难点信号和 candidate rules 被吸收到保留的 skills 里，不再作为独立触发。
 
 ## Skills
 
@@ -42,8 +42,7 @@ Lode 围绕一个应该被反复使用、直到变成习惯的 agentic coding lo
 
 | Skill | When | What it does |
 | :--- | :--- | :--- |
-| `lode-session-recap` | 每次收工 | 提取 session 决策信号，并提示可能需要检查的 intent artifacts |
-| `lode-arch-doc` | 架构工作之后 | 生成 Stage 实现文档或 Pipeline 架构演进文档 |
+| `lode-session-recap` | 每次收工 | 识别 session archetype，按 decision/build/repair 等类型捕获深度信号，并在需要时索引 durable artifacts |
 | `lode-session-start-recall` | 每次开工 | 召回最近决策、风险、开放问题、放弃方案、相关 docs 和可能过期的 intent artifacts |
 | `lode-decision-roadmap` | 按需 | 生成叙事性决策路线图，并汇总累积风险与反复开放问题 |
 | `lode-git-daily-note` | 每天按需 | 从 raw entries 和 git history 更新 Obsidian 日报 |
@@ -93,7 +92,8 @@ Design principles:
 
 - **Self-contained skills**: each skill carries its own references so it can be installed individually.
 - **Raw-first reporting**: weekly reports use raw entries as the primary semantic source; git is fallback and coverage evidence.
-- **Artifact governance**: full repo-local docs stay near the code, while vault indexes make them discoverable for recall and reports.
+- **Adaptive-depth recap**: 收工条目携带 archetype-specific fields，让周报能解释 decisions、repairs、investigations 和 builds，而不需要第二个写入 skill。
+- **Artifact governance**: full repo-local docs stay near the code, while recap-owned vault indexes make them discoverable for recall and reports.
 - **Graceful side effects**: when a raw write is only a side effect, failures do not block the primary deliverable.
 - **Deterministic helpers**: scripts handle path resolution, date calculation, parsing, and aggregation where consistency matters.
 - **Local evals, public protocols**: local fixtures stay ignored; public benchmark guidance lives under [`benchmarks/`](benchmarks/).
