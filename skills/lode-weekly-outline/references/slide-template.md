@@ -188,8 +188,8 @@ Slides per stream, driven by each stream's content density (not total stream cou
 
 | Density | Criteria | Slides |
 |---|---|---|
-| Rich | 4+ raw entries, **or** arch-doc evidence + clear tech approach + diagrams | 3-4 |
-| Moderate | 2-3 entries, mixed session-recap and arch-doc | 2-3 |
+| Rich | 4+ raw entries, **or** adaptive-depth entries with artifact_context / exploration paths / clear tech approach | 3-4 |
+| Moderate | 2-3 entries with some archetype depth or legacy arch-doc evidence | 2-3 |
 | Light | 1 entry, or fallback-only from git | 1-2 |
 | Empty | 0 meaningful changes after filtering | merge into overview |
 

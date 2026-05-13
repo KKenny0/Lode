@@ -23,8 +23,8 @@ Raw entries exist for the target week and project.
 
 Expected behavior:
 
-- Build the weekly narrative from `summary`, `context`, `type`, `source`, and
-  `related_docs`.
+- Build the weekly narrative from `summary`, `context`, `archetype`, `type`,
+  `artifact_context`, and `related_docs`.
 - Use git log only to check whether obvious commits are missing from raw entries.
 - Avoid duplicate work streams based on commit subjects already covered by raw.
 - Use `projects.json` priority when present.
@@ -40,18 +40,29 @@ Expected behavior:
 - Mark fallback-only streams as lower confidence or evidence-limited.
 - Still produce a usable Markdown PPT outline.
 
-### 3. Raw With Related Architecture Docs
+### 3. Adaptive Raw With Artifact Context
 
-Raw entries include `source: arch-doc` and `related_docs`.
+Raw entries include `source: session-recap`, `archetype`, and
+`artifact_context`.
 
 Expected behavior:
 
-- Treat `arch-doc` entries as high-confidence technical signals.
-- Discuss the architecture change, contract boundary, decision, or risk; do not
-  say only that a document was written.
-- Read related docs only when raw entry text is not enough to explain the
-  technical approach.
+- Treat `artifact_context` as high-confidence technical signal.
+- Discuss the architecture change, contract boundary, decision, repair root
+  cause, or risk; do not flatten the entry into a file update.
+- Read related docs only when raw entry text and `artifact_context` are not
+  enough to explain the technical approach.
 - Preserve risks and migration constraints in the final summary or next steps.
+
+### 4. Legacy Arch-Doc Compatibility
+
+Historical raw entries may include `source: arch-doc` and `related_docs`.
+
+Expected behavior:
+
+- Treat legacy `arch-doc` entries as high-confidence technical evidence.
+- Merge legacy `arch-doc` entries with matching `session-recap` entries instead
+  of duplicating work streams.
 
 ## Pass Criteria
 
@@ -64,7 +75,8 @@ A run passes when the output:
   chronologically.
 - Includes an overview slide and a summary/next-steps slide.
 - Keeps `decision` and `risk` entries visible.
-- Uses `related_docs` as evidence, not as the message itself.
+- Uses `artifact_context` and `related_docs` as evidence, not as the message
+  itself.
 
 ## Suggested Run Record
 
@@ -84,4 +96,4 @@ Run this benchmark after changes to:
 - `skills/lode-weekly-outline/SKILL.md`
 - `skills/lode-weekly-outline/references/subagent-prompt.md`
 - `references/weekly-ppt-convention.md`
-- `lode-session-recap` or `lode-arch-doc` raw entry production rules
+- `lode-session-recap` raw entry production rules

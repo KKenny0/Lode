@@ -40,9 +40,9 @@ Convert **weekly Lode raw change entries** into a structured Markdown PPT outlin
 
 **Priority (auto):** Prefer `projects.json` `priority` when present. Otherwise sort by raw entry count plus uncovered commit count: ≥5 signals → Core; 2-4 → Supporting; <2 → Exploratory. User override takes precedence.
 
-**Work streams:** Analyze raw entries first to identify narratively independent groups of changes. Use `summary`, `context`, `type`, `source`, and `related_docs` as the main semantic input. Use git commits only to fill gaps when raw entries are missing or incomplete. Multi-project mode: one stream per project by default. Single-project mode: decide whether to split into streams based on raw entry clustering. See [references/subagent-prompt.md](references/subagent-prompt.md) for the reusable analysis template and detection criteria.
+**Work streams:** Analyze raw entries first to identify narratively independent groups of changes. Use `summary`, `context`, `archetype`, `type`, `artifact_context`, and `related_docs` as the main semantic input. Use git commits only to fill gaps when raw entries are missing or incomplete. Multi-project mode: one stream per project by default. Single-project mode: decide whether to split into streams based on raw entry clustering. See [references/subagent-prompt.md](references/subagent-prompt.md) for the reusable analysis template and detection criteria.
 
-Merge duplicate signals before analysis: if a `session-recap` entry and an `arch-doc` entry describe the same change, create one work stream. Use the session entry for motivation/intent and the arch-doc entry for technical evidence. Fallback git commits can add coverage notes, but must not create a duplicate stream for work already explained by raw entries.
+Merge duplicate signals before analysis. New adaptive-depth `session-recap` entries may contain both motivation and technical evidence through `artifact_context`. Historical `arch-doc` entries are legacy evidence; if one describes the same change as a `session-recap` entry, combine them into one work stream. Fallback git commits can add coverage notes, but must not create a duplicate stream for work already explained by raw entries.
 
 ## Output Contract
 
@@ -86,12 +86,14 @@ For each project, read `{vault}/raw/weeks/{week}/{slug}.json` and filter entries
 
 Primary fields:
 - `summary` + `context`: main narrative signal
+- `archetype`: session shape and treatment depth
 - `type`: category and risk/decision signal
-- `source`: distinguish session recap from architecture documentation
+- `source`: distinguish current session recap from legacy architecture documentation
+- `artifact_context`: embedded scope/delta/source-of-truth evidence for technical approach
 - `related_docs`: optional deep evidence for technical approach
-- `open_questions`, `abandoned_alternatives`, `status`, `impact`: compounding signals for next-week planning
+- `motivation`, `exploration_paths`, `root_cause`, `open_questions`, `abandoned_alternatives`, `status`, `impact`: compounding signals for next-week planning
 
-If `related_docs` points to an existing architecture document, read it only when the raw entry is not enough to explain the technical approach. Do not read every related document by default.
+Use `artifact_context` before reading files from disk. If `related_docs` points to an existing architecture or design document, read it only when the raw entry is not enough to explain the technical approach. Do not read every related document by default.
 
 Read `{vault}/raw/artifacts/{slug}.json` when present. Use artifact index metadata as optional source navigation for high-value docs. Missing artifact index must not block output. Do not invent decision facts from artifact titles alone.
 
@@ -119,7 +121,7 @@ Pass collected raw entries and uncovered git logs into Phase 1 as `{raw_entries}
 
 For each project, use the template in [references/subagent-prompt.md](references/subagent-prompt.md) to produce a structured analysis. By default, perform this in the main dialog. If the runtime supports parallel agents and the user explicitly requested or approved them, each project may be analyzed in a separate agent. The analysis returns a `work_streams` array — each stream is an independent narrative unit with its own technical approach.
 
-Raw entries are authoritative for intent and impact because they were produced at session/doc-writing time. `session-recap` entries are intent-rich; `arch-doc` entries are evidence-rich. Fallback git commits are lower-confidence evidence and should never override or duplicate a clear raw entry.
+Raw entries are authoritative for intent and impact because they were produced at session wrap-up time. Adaptive-depth `session-recap` entries may be both intent-rich and evidence-rich. Legacy `arch-doc` entries remain valid evidence. Fallback git commits are lower-confidence evidence and should never override or duplicate a clear raw entry.
 
 The analysis must preserve decisions revisited, open questions carried forward,
 and hard problems that changed next-week planning. Fallback-only streams must be
@@ -141,8 +143,8 @@ Evaluate each stream independently based on its raw entry count and evidence ric
 
 | Density | Criteria | Slides |
 |---|---|---|
-| Rich | 4+ raw entries, **or** arch-doc evidence + clear tech approach + diagrams | 3-4 |
-| Moderate | 2-3 entries, mixed session-recap and arch-doc | 2-3 |
+| Rich | 4+ raw entries, **or** adaptive-depth entries with artifact_context / exploration paths / clear tech approach | 3-4 |
+| Moderate | 2-3 entries with some archetype depth or legacy arch-doc evidence | 2-3 |
 | Light | 1 entry, or fallback-only from git | 1-2 |
 | Empty | 0 meaningful changes after filtering | merge into overview |
 

@@ -21,15 +21,22 @@ Execute these 4 steps in order:
 
 **Step 1: Classify signals**
 - Treat raw entries as authoritative semantic signals.
-- Use each raw entry's `summary`, `context`, `type`, `source`, and `related_docs`.
-- Preserve `open_questions`, `abandoned_alternatives`, `status`, and `impact`
-  as compounding signals for next-week planning.
+- Use each raw entry's `summary`, `context`, `archetype`, `type`,
+  `artifact_context`, and `related_docs`.
+- Preserve `motivation`, `exploration_paths`, `root_cause`,
+  `open_questions`, `abandoned_alternatives`, `status`, and `impact` as
+  compounding signals for next-week planning.
+- Use archetype to set treatment depth: `decision` emphasizes trade-offs,
+  `build` emphasizes impact, `investigation` emphasizes findings and open
+  questions, `repair` emphasizes root cause, and `maintenance` stays brief.
+- Use `artifact_context` scope/delta/source_of_truth as direct technical
+  evidence before reading related files.
 - Use artifact index metadata only to find source documents when raw entries are
   insufficient. Do not invent decision facts from artifact titles alone.
 - Map `type` directly: feature/fix/refactor/decision/risk.
 - Use fallback git commits only when they are not clearly covered by a raw entry.
 - Drop fallback commits that are only chore, docs, style, or formatting noise.
-- Output: change_blocks list with { type, source, summary, context, related_docs, confidence }
+- Output: change_blocks list with { archetype, type, source, summary, context, artifact_context, related_docs, confidence }
 
 If 0 change_blocks after filtering → "maintenance week". Output empty results and note it.
 
@@ -81,7 +88,10 @@ fallback git subjects alone.
 - Each major change should have its own diagram with enough detail to stand on its own
 - Include version tags if commit messages reference them (e.g. v2.7, v2.14)
 - Don't compress multiple distinct approaches into one terse block — give each the space it needs
-- Treat `source: arch-doc` entries and `related_docs` as stronger technical-approach evidence than bare commit subjects.
+- Treat adaptive-depth `session-recap` entries with `artifact_context`,
+  `exploration_paths`, or `root_cause` as strong technical-approach evidence.
+- Treat `source: arch-doc` as legacy high-confidence architecture evidence, not
+  as a current producer path.
 
 **Return ONLY this JSON (no other commentary):**
 
