@@ -1,0 +1,13 @@
+{
+  "$schema": "https://anthropic.com/claude-code/plugin.schema.json",
+  "name": "lode",
+  "version": "0.1.0",
+  "description": "Agentic coding persistent memory: capture the why, then compound it into reports, reviews, and decision roadmaps.",
+  "author": {
+    "name": "Kennywu",
+    "email": "jdlow@live.cn"
+  },
+  "license": "MIT",
+  "repository": "https://github.com/KKenny0/Lode",
+  "homepage": "https://github.com/KKenny0/Lode"
+}

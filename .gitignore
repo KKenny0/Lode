@@ -11,6 +11,9 @@ TODO*.md
 CLAUDE.md
 DESIGN.md
 .claude-plugin/
+!.claude-plugin/
+!.claude-plugin/plugin.json
+!.claude-plugin/marketplace.json
 
 # Claude Code skills' evaluation results
 *-workspace/
