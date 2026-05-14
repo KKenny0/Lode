@@ -24,3 +24,8 @@ skills/**/__pycache__/
 cli/node_modules/
 cli/dist/
 cli/skills/
+
+# VitePress site build artifacts
+site/node_modules/
+site/.vitepress/cache/
+site/.vitepress/dist/
