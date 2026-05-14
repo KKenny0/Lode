@@ -2,7 +2,7 @@
   "fixtures": [
     {
       "id": "session-recap-adaptive-depth-repair",
-      "skill": "lode-session-recap",
+      "skill": "capture",
       "prompt": "收工。本 session 修复了 validation repair-loop 漏掉 empty panel list 的问题，根因是 schema guard 在 export 前才运行；我们比较过 export fallback 和 upfront validation，最后选择把 deterministic schema check 前移。",
       "expected_behavior": "Classify the session as repair, produce a source=session-recap raw entry with motivation, root_cause, exploration_paths, and impact when inferable. Do not ask the user extra questions only to satisfy optional fields.",
       "assertions": [
@@ -22,8 +22,8 @@
     },
     {
       "id": "weekly-outline-adaptive-artifact-context",
-      "skill": "lode-weekly-outline",
-      "prompt": "用 $lode-weekly-outline 写本周技术型周报。raw entries 包含 archetype-tagged session-recap，并带 artifact_context 描述 validation contract split；git log 也有同一变更的 commit。",
+      "skill": "weekly",
+      "prompt": "用 $weekly 写本周技术型周报。raw entries 包含 archetype-tagged session-recap，并带 artifact_context 描述 validation contract split；git log 也有同一变更的 commit。",
       "fixture": {
         "project": {
           "name": "Storyboard Pipeline",
@@ -81,8 +81,8 @@
     },
     {
       "id": "weekly-outline-fallback-confidence",
-      "skill": "lode-weekly-outline",
-      "prompt": "用 $lode-weekly-outline 写本周周报。没有 raw entries，但 repo path 有效，请从 git log fallback 生成。",
+      "skill": "weekly",
+      "prompt": "用 $weekly 写本周周报。没有 raw entries，但 repo path 有效，请从 git log fallback 生成。",
       "fixture": {
         "raw_entries": [],
         "fallback_git_logs": [

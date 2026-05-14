@@ -19,13 +19,19 @@ Lode uses a YAML configuration file to determine the knowledge vault location. T
 
 ```yaml
 knowledge_vault: /path/to/your/knowledge-vault
-# project_slug: my-project  # optional, defaults to git repo directory name
+project_slug: my-project  # optional, defaults to git repo directory name
 
-# artifact_index:
-#   enabled: true
+profile:
+  project_name: My Project
+  report_language: mixed   # zh | en | mixed
+  weekly_mode: tech        # tech | report
+  team_context: solo       # solo | team | mixed
+
+artifact_index:
+  enabled: true
 ```
 
-All subsequent path references use `{vault}` as shorthand for the resolved knowledge vault path. If a skill's primary output depends on `{vault}` and no path can be resolved, ask the user to configure `knowledge_vault`. If writing a weekly change entry is only a side effect, skip that write gracefully when `{vault}` cannot be resolved.
+All subsequent path references use `{vault}` as shorthand for the resolved knowledge vault path. `profile.*` fields are optional preferences written by `/lode:cold-start-interview`; consumers should use them to choose language, report framing, and project labels when present, and fall back to local inference when absent. If a skill's primary output depends on `{vault}` and no path can be resolved, tell the user to run `/lode:cold-start-interview` or configure `knowledge_vault`. If writing a weekly change entry is only a side effect, skip that write gracefully when `{vault}` cannot be resolved.
 
 ## Storage Location
 
@@ -94,7 +100,7 @@ Each `{vault}/raw/artifacts/{slug}.json` file contains a JSON array of artifacts
     "repo_relative_path": "docs/2026-W18/lode-stage-parse-implementation-v1.md",
     "created_at": "2026-05-08T10:00:00+08:00",
     "updated_at": "2026-05-08T10:00:00+08:00",
-    "source": "lode-session-recap",
+    "source": "capture",
     "topics": ["parse-stage", "validation", "repair-loop"],
     "decision_threads": ["schema-validation-boundary"],
     "open_questions": ["whether repair-loop ownership should move upstream"],
@@ -399,11 +405,11 @@ containing `week`, `slug`, `path`, `entries_appended`, and `total_entries`.
 
 Downstream tools read these files to get high-quality development context:
 
-- **lode-weekly-outline** — reads change entries as the primary semantic source for weekly report generation. Git logs are only fallback and coverage evidence when raw entries are missing or incomplete.
-- **lode-git-daily-note** — reads change entries as primary data source, with git log as fallback
-- **lode-monthly-review** — reads daily notes (produced by lode-git-daily-note) for monthly summaries
-- **lode-session-start-recall** — reads recent raw entries first and uses artifact index entries as optional source navigation
-- **lode-decision-roadmap** — derives decision threads, accumulating risks, and
+- **weekly** — reads change entries as the primary semantic source for weekly report generation. Git logs are only fallback and coverage evidence when raw entries are missing or incomplete.
+- **daily** — reads change entries as primary data source, with git log as fallback
+- **monthly** — reads daily notes (produced by daily) for monthly summaries
+- **recall** — reads recent raw entries first and uses artifact index entries as optional source navigation
+- **roadmap** — derives decision threads, accumulating risks, and
   recurring open questions from raw entries
 - Any future reporting or review tool that needs structured change history
 

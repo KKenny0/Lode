@@ -41,7 +41,7 @@ try {
   }
 
   Run "Validate recall context helper" {
-    $recall = python "skills/lode-session-start-recall/scripts/recall_context.py" --cwd "." --vault "examples/vault" --slug "storyboard-pipeline" --limit 5 | ConvertFrom-Json
+    $recall = python "skills/recall/scripts/recall_context.py" --cwd "." --vault "examples/vault" --slug "storyboard-pipeline" --limit 5 | ConvertFrom-Json
     Assert-LastExit "recall context helper"
     if ($recall.open_questions.Count -lt 1 -or $recall.artifacts.Count -lt 1) {
       throw "Recall context did not include open questions and artifacts"

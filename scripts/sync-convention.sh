@@ -10,10 +10,10 @@ if [ ! -f "$CANONICAL" ]; then
 fi
 
 TARGETS=(
-  "$REPO_ROOT/skills/lode-session-recap/references/"
-  "$REPO_ROOT/skills/lode-session-start-recall/references/"
-  "$REPO_ROOT/skills/lode-decision-roadmap/references/"
-  "$REPO_ROOT/skills/lode-monthly-review/references/"
+  "$REPO_ROOT/skills/capture/references/"
+  "$REPO_ROOT/skills/recall/references/"
+  "$REPO_ROOT/skills/roadmap/references/"
+  "$REPO_ROOT/skills/monthly/references/"
 )
 
 for target in "${TARGETS[@]}"; do

@@ -7,16 +7,18 @@
 knowledge_vault: /path/to/your/knowledge-vault
 
 # 项目标识（可选，默认从 git repo 目录名推导）
-# project_slug: my-project
+project_slug: my-project
 
-# 架构文档设置（可选）
-# arch_doc:
-#   output_dir: docs                 # 默认项目根目录下的 docs；可设置为绝对路径
-#   mirror_to_vault: false           # 预留字段，默认 false
+# 用户与报告偏好（由 /lode:cold-start-interview 写入）
+profile:
+  project_name: My Project
+  report_language: mixed             # zh | en | mixed
+  weekly_mode: tech                  # tech | report
+  team_context: solo                 # solo | team | mixed
 
 # Artifact index 设置（可选）
-# artifact_index:
-#   enabled: true                    # 默认 true；当 vault 存在时写入 raw/artifacts/{slug}.json
+artifact_index:
+  enabled: true                      # 默认 true；当 vault 存在时写入 raw/artifacts/{slug}.json
 
 # 周报大纲设置（可选）
 # weekly_outline:

@@ -8,7 +8,7 @@
     "repo_relative_path": "examples/architecture-doc.md",
     "created_at": "2026-04-29T11:45:00+08:00",
     "updated_at": "2026-04-29T11:45:00+08:00",
-    "source": "lode-arch-doc",
+    "source": "capture",
     "topics": ["validation-stage", "repair-loop", "schema-contract"],
     "decision_threads": ["validation-repair-boundary", "stage-retry-boundaries"],
     "open_questions": [

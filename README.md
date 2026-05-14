@@ -38,36 +38,38 @@ Weekly, monthly, and roadmap outputs are compounding layers on top of that loop.
 
 ## Skills
 
-Each skill maps to a habit you already have. Activate it with a trigger phrase.
+Each skill maps to a habit you already have. In plugin form, activate it with a
+namespaced command.
 
 | Skill | When | What it does |
 | :--- | :--- | :--- |
-| `lode-session-recap` | Every session wrap-up | Classifies the session archetype, captures decision/build/repair depth, and indexes durable artifacts when relevant |
-| `lode-session-start-recall` | Session start | Recalls recent decisions, risks, open questions, abandoned alternatives, relevant docs, and possible stale intent artifacts |
-| `lode-decision-roadmap` | On demand | Generates a narrative decision roadmap, including accumulating risks and recurring open questions |
-| `lode-git-daily-note` | Daily, on demand | Updates Obsidian daily notes from raw entries and git history |
-| `lode-weekly-outline` | Weekly, on demand | Builds a weekly outline from raw entries, with a conditional hard-stuff section when evidence exists |
-| `lode-monthly-review` | Monthly, on demand | Generates a monthly review and candidate rules from repeated evidence |
+| `/lode:cold-start-interview` | First run | Creates `~/.lode/config.yaml` with vault path, project identity, language, and report preferences |
+| `/lode:capture` | Every session wrap-up | Classifies the session archetype, captures decision/build/repair depth, and indexes durable artifacts when relevant |
+| `/lode:recall` | Session start | Recalls recent decisions, risks, open questions, abandoned alternatives, relevant docs, and possible stale intent artifacts |
+| `/lode:daily` | Daily, on demand | Updates Obsidian daily notes from raw entries and git history |
+| `/lode:weekly` | Weekly, on demand | Builds a weekly outline from raw entries, with a conditional hard-stuff section when evidence exists |
+| `/lode:monthly` | Monthly, on demand | Generates a monthly review and candidate rules from repeated evidence |
+| `/lode:roadmap` | On demand | Generates a narrative decision roadmap, including accumulating risks and recurring open questions |
 
 Skills are independent. Lode is not a strict pipeline — each skill works on its own, but they share one local storage convention so downstream reports can reuse earlier context.
 
 ## Install
 
 ```bash
-# 1. Install all skills
-npx skills add KKenny0/Lode -g --all
+# Codex Git-backed marketplace
+codex plugin marketplace add KKenny0/Lode
 
-# 2. Configure vault path
-mkdir -p ~/.lode
-cat > ~/.lode/config.yaml <<EOF
-knowledge_vault: /path/to/your/knowledge-vault
-EOF
+# Or local development marketplace
+codex plugin marketplace add ./path/to/Lode
 
-# 3. Verify
+# CLI verification remains available
 npx @lode/cli doctor
 ```
 
-Then work in any git repo as usual. Say `开工` at the start of a session, `收工` at the end of a session, and `决策路线图` when you want to see how your project's decisions evolved.
+Then run `/lode:cold-start-interview` once. Work in any git repo as usual:
+say `开工` or `/lode:recall` at the start of a session, `收工` or
+`/lode:capture` at the end, and `/lode:roadmap` when you want to see how your
+project's decisions evolved.
 
 No vault? No problem — `收工` outputs structured Markdown directly in the conversation.
 

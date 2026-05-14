@@ -7,7 +7,7 @@
   "repo_relative_path": "examples/architecture-doc.md",
   "created_at": "2026-05-08T10:00:00+08:00",
   "updated_at": "2026-05-08T10:00:00+08:00",
-  "source": "lode-session-recap",
+  "source": "capture",
   "topics": ["artifact-governance", "raw-artifacts", "recall-navigation"],
   "decision_threads": ["artifact-governance-boundary"],
   "open_questions": [

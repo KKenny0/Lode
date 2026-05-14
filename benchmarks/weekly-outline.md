@@ -1,14 +1,14 @@
 # Weekly Outline Benchmark
 
-This benchmark documents the quality bar for `lode-weekly-outline`.
+This benchmark documents the quality bar for `weekly`.
 
-The actual eval fixtures may live locally under `skills/lode-weekly-outline/evals/`.
+The actual eval fixtures may live locally under `skills/weekly/evals/`.
 That directory is intentionally ignored by git so local benchmark runs can keep raw
 examples, transcripts, and grading notes without publishing them.
 
 ## Goal
 
-Verify that `lode-weekly-outline` stays raw-first:
+Verify that `weekly` stays raw-first:
 
 - Use Lode raw change entries as the primary semantic source.
 - Use git logs only for coverage checks and fallback evidence.
@@ -93,7 +93,7 @@ Record each benchmark run locally with:
 
 Run this benchmark after changes to:
 
-- `skills/lode-weekly-outline/SKILL.md`
-- `skills/lode-weekly-outline/references/subagent-prompt.md`
+- `skills/weekly/SKILL.md`
+- `skills/weekly/references/subagent-prompt.md`
 - `references/weekly-ppt-convention.md`
-- `lode-session-recap` raw entry production rules
+- `capture` raw entry production rules

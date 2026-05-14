@@ -1,6 +1,6 @@
 # Lode Architecture Doc Excerpt - Storyboard Pipeline
 
-This synthetic excerpt shows the level of specificity expected from `lode-arch-doc`.
+This synthetic excerpt shows the level of specificity expected from capture-owned artifact context.
 
 ## Stage: Validation
 

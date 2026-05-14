@@ -38,36 +38,37 @@ Lode 围绕一个应该被反复使用、直到变成习惯的 agentic coding lo
 
 ## Skills
 
-每个 skill 对应一个你已经有的工作习惯，用一个触发词激活。
+每个 skill 对应一个你已经有的工作习惯。插件形态下，用统一的
+namespaced command 激活。
 
 | Skill | When | What it does |
 | :--- | :--- | :--- |
-| `lode-session-recap` | 每次收工 | 识别 session archetype，按 decision/build/repair 等类型捕获深度信号，并在需要时索引 durable artifacts |
-| `lode-session-start-recall` | 每次开工 | 召回最近决策、风险、开放问题、放弃方案、相关 docs 和可能过期的 intent artifacts |
-| `lode-decision-roadmap` | 按需 | 生成叙事性决策路线图，并汇总累积风险与反复开放问题 |
-| `lode-git-daily-note` | 每天按需 | 从 raw entries 和 git history 更新 Obsidian 日报 |
-| `lode-weekly-outline` | 每周按需 | 基于 raw entries 生成周报大纲，有证据时加入本周难点 |
-| `lode-monthly-review` | 每月按需 | 生成月度工作回顾，并从重复证据中提出 candidate rules |
+| `/lode:cold-start-interview` | 首次使用 | 创建包含 vault path、项目身份、语言和报告偏好的 `~/.lode/config.yaml` |
+| `/lode:capture` | 每次收工 | 识别 session archetype，按 decision/build/repair 等类型捕获深度信号，并在需要时索引 durable artifacts |
+| `/lode:recall` | 每次开工 | 召回最近决策、风险、开放问题、放弃方案、相关 docs 和可能过期的 intent artifacts |
+| `/lode:daily` | 每天按需 | 从 raw entries 和 git history 更新 Obsidian 日报 |
+| `/lode:weekly` | 每周按需 | 基于 raw entries 生成周报大纲，有证据时加入本周难点 |
+| `/lode:monthly` | 每月按需 | 生成月度工作回顾，并从重复证据中提出 candidate rules |
+| `/lode:roadmap` | 按需 | 生成叙事性决策路线图，并汇总累积风险与反复开放问题 |
 
 Skills 是独立的。Lode 不是一个强制流水线 — 每个 skill 可以单独使用，但它们共享同一套本地存储约定，所以后续报告可以复用之前沉淀的上下文。
 
 ## Install
 
 ```bash
-# 1. Install all skills
-npx skills add KKenny0/Lode -g --all
+# Codex Git-backed marketplace
+codex plugin marketplace add KKenny0/Lode
 
-# 2. Configure vault path
-mkdir -p ~/.lode
-cat > ~/.lode/config.yaml <<EOF
-knowledge_vault: /path/to/your/knowledge-vault
-EOF
+# 本地开发 marketplace
+codex plugin marketplace add ./path/to/Lode
 
-# 3. Verify
+# CLI verification remains available
 npx @lode/cli doctor
 ```
 
-然后在任意 git repo 里正常开发。session 开始时说 `开工`，session 结束时说 `收工`，想回顾项目决策演变时说 `决策路线图`。
+然后先运行一次 `/lode:cold-start-interview`。之后在任意 git repo 里正常开发：
+session 开始时说 `开工` 或 `/lode:recall`，session 结束时说 `收工` 或
+`/lode:capture`，想回顾项目决策演变时运行 `/lode:roadmap`。
 
 不配置 vault 也可以开始 — `收工` 会直接在对话中输出结构化 Markdown。
 
