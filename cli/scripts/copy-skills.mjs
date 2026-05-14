@@ -9,6 +9,16 @@ const repoRoot = path.resolve(cliRoot, '..');
 const sourceSkillsDir = path.join(repoRoot, 'skills');
 const bundledSkillsDir = path.join(cliRoot, 'skills');
 
+const officialSkills = [
+  'capture',
+  'recall',
+  'daily',
+  'weekly',
+  'monthly',
+  'roadmap',
+  'cold-start-interview',
+];
+
 function shouldSkip(name) {
   return name === 'evals' || name.endsWith('-workspace') || name === '__pycache__';
 }
@@ -30,12 +40,10 @@ function copyDir(src, dest) {
 fs.rmSync(bundledSkillsDir, { recursive: true, force: true });
 fs.mkdirSync(bundledSkillsDir, { recursive: true });
 
-for (const entry of fs.readdirSync(sourceSkillsDir, { withFileTypes: true })) {
-  if (!entry.isDirectory()) continue;
-  if (!entry.name.startsWith('lode-') || entry.name.endsWith('-workspace')) continue;
-  const skillPath = path.join(sourceSkillsDir, entry.name);
+for (const skill of officialSkills) {
+  const skillPath = path.join(sourceSkillsDir, skill);
   if (!fs.existsSync(path.join(skillPath, 'SKILL.md'))) continue;
-  copyDir(skillPath, path.join(bundledSkillsDir, entry.name));
+  copyDir(skillPath, path.join(bundledSkillsDir, skill));
 }
 
 console.log(`Copied skills to ${bundledSkillsDir}`);

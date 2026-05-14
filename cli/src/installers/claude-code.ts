@@ -8,12 +8,12 @@ import { getSkillsDir, listSkills, copyDir, removeDir } from '../utils.js';
 const CLAUDE_PLUGINS_DIR = path.join(os.homedir(), '.claude', 'plugins');
 const MARKETPLACE_DIR = path.join(CLAUDE_PLUGINS_DIR, 'marketplaces', 'lode');
 const PLUGIN_SUBDIR = path.join(MARKETPLACE_DIR, 'lode');
-const CACHE_DIR = path.join(CLAUDE_PLUGINS_DIR, 'cache', 'lode', 'lode', '1.0.0');
+const CACHE_DIR = path.join(CLAUDE_PLUGINS_DIR, 'cache', 'lode', 'lode', '0.1.0');
 const KNOWN_MARKETPLACES_FILE = path.join(CLAUDE_PLUGINS_DIR, 'known_marketplaces.json');
 const INSTALLED_PLUGINS_FILE = path.join(CLAUDE_PLUGINS_DIR, 'installed_plugins.json');
 
-const PLUGIN_VERSION = '1.0.0';
-const PLUGIN_DESCRIPTION = '从开发活动中开采值得留下的东西：变更追踪、文档生成、日报更新、周报大纲、月度回顾';
+const PLUGIN_VERSION = '0.1.0';
+const PLUGIN_DESCRIPTION = 'Agentic coding persistent memory: capture session context and compound it into daily notes, weekly outlines, monthly reviews, and decision roadmaps.';
 const AUTHOR = { name: 'Kennywu', email: 'jdlow@live.cn' };
 
 interface InstallResult {
@@ -48,7 +48,7 @@ export function install(): InstallResult {
       plugins: [
         {
           name: 'lode',
-          description: 'Development workflow skills: session recap, daily notes, weekly outlines, monthly reviews, and architecture docs',
+          description: PLUGIN_DESCRIPTION,
           version: PLUGIN_VERSION,
           author: AUTHOR,
           source: './lode',
@@ -60,7 +60,7 @@ export function install(): InstallResult {
 
   // 3. Create plugin subdirectory with plugin.json + skills/
   //    marketplaces/lode/lode/.claude-plugin/plugin.json
-  //    marketplaces/lode/lode/skills/lode-*/
+  //    marketplaces/lode/lode/skills/*
   const pluginMetaDir = path.join(PLUGIN_SUBDIR, '.claude-plugin');
   fs.mkdirSync(pluginMetaDir, { recursive: true });
   fs.writeFileSync(

@@ -6,6 +6,12 @@ import yaml from 'js-yaml';
 export interface LodeConfig {
   knowledge_vault: string;
   project_slug?: string;
+  profile?: {
+    project_name?: string;
+    report_language?: 'zh' | 'en' | 'mixed';
+    weekly_mode?: 'tech' | 'report';
+    team_context?: 'solo' | 'team' | 'mixed';
+  };
   arch_doc?: {
     output_dir?: string;
     mirror_to_vault?: boolean;

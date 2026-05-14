@@ -12,23 +12,24 @@ const bundledSkillsDir = path.join(cliRoot, 'skills');
 const canonicalConvention = path.join(repoRoot, 'references', 'weekly-ppt-convention.md');
 
 const officialSkills = [
-  'lode-session-recap',
-  'lode-session-start-recall',
-  'lode-decision-roadmap',
-  'lode-git-daily-note',
-  'lode-weekly-outline',
-  'lode-monthly-review',
+  'capture',
+  'recall',
+  'daily',
+  'weekly',
+  'monthly',
+  'roadmap',
+  'cold-start-interview',
 ];
 
 const conventionCopies = [
-  path.join(sourceSkillsDir, 'lode-session-recap', 'references', 'weekly-ppt-convention.md'),
-  path.join(sourceSkillsDir, 'lode-session-start-recall', 'references', 'weekly-ppt-convention.md'),
-  path.join(sourceSkillsDir, 'lode-decision-roadmap', 'references', 'weekly-ppt-convention.md'),
-  path.join(sourceSkillsDir, 'lode-monthly-review', 'references', 'weekly-ppt-convention.md'),
-  path.join(bundledSkillsDir, 'lode-session-recap', 'references', 'weekly-ppt-convention.md'),
-  path.join(bundledSkillsDir, 'lode-session-start-recall', 'references', 'weekly-ppt-convention.md'),
-  path.join(bundledSkillsDir, 'lode-decision-roadmap', 'references', 'weekly-ppt-convention.md'),
-  path.join(bundledSkillsDir, 'lode-monthly-review', 'references', 'weekly-ppt-convention.md'),
+  path.join(sourceSkillsDir, 'capture', 'references', 'weekly-ppt-convention.md'),
+  path.join(sourceSkillsDir, 'recall', 'references', 'weekly-ppt-convention.md'),
+  path.join(sourceSkillsDir, 'roadmap', 'references', 'weekly-ppt-convention.md'),
+  path.join(sourceSkillsDir, 'monthly', 'references', 'weekly-ppt-convention.md'),
+  path.join(bundledSkillsDir, 'capture', 'references', 'weekly-ppt-convention.md'),
+  path.join(bundledSkillsDir, 'recall', 'references', 'weekly-ppt-convention.md'),
+  path.join(bundledSkillsDir, 'roadmap', 'references', 'weekly-ppt-convention.md'),
+  path.join(bundledSkillsDir, 'monthly', 'references', 'weekly-ppt-convention.md'),
 ];
 
 const errors = [];

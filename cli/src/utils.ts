@@ -5,13 +5,16 @@ import { fileURLToPath } from 'node:url';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 export const OFFICIAL_SKILLS = [
-  'lode-session-recap',
-  'lode-session-start-recall',
-  'lode-decision-roadmap',
-  'lode-git-daily-note',
-  'lode-weekly-outline',
-  'lode-monthly-review',
+  'capture',
+  'recall',
+  'daily',
+  'weekly',
+  'monthly',
+  'roadmap',
+  'cold-start-interview',
 ];
+
+const OFFICIAL_SKILL_SET = new Set(OFFICIAL_SKILLS);
 
 /**
  * Path to the bundled skills directory.
@@ -33,7 +36,7 @@ export function getSkillsDir(): string {
 const EXCLUDED_RESOURCE_DIRS = new Set(['evals']);
 
 function isSkillDirectory(dir: string, name: string): boolean {
-  if (!name.startsWith('lode-')) return false;
+  if (!OFFICIAL_SKILL_SET.has(name)) return false;
   if (name.endsWith('-workspace')) return false;
   const fullPath = path.join(dir, name);
   return fs.statSync(fullPath).isDirectory() && fs.existsSync(path.join(fullPath, 'SKILL.md'));
@@ -43,11 +46,10 @@ function shouldSkipCopy(entryName: string): boolean {
   return entryName.endsWith('-workspace') || EXCLUDED_RESOURCE_DIRS.has(entryName);
 }
 
-/** List all installable lode-* skill directories */
+/** List all installable Lode skill directories in stable product order. */
 export function listSkills(): string[] {
   const dir = getSkillsDir();
-  return fs.readdirSync(dir)
-    .filter(name => isSkillDirectory(dir, name));
+  return OFFICIAL_SKILLS.filter(name => isSkillDirectory(dir, name));
 }
 
 /** Copy a directory recursively */

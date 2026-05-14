@@ -45,7 +45,10 @@ export async function runWizard(): Promise<void> {
   }]);
 
   // Step 4: Write config
-  const config: LodeConfig = { knowledge_vault: vaultPath };
+  const config: LodeConfig = {
+    ...(existing || {}),
+    knowledge_vault: vaultPath,
+  };
   writeConfig(config);
   console.log(chalk.gray(`  Config saved to ~/.lode/config.yaml\n`));
 
