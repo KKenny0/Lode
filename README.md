@@ -7,7 +7,7 @@
 <p align="center"><strong>Agentic coding's persistent memory: capture the why, then compound it into reports, reviews, and decision roadmaps.</strong></p>
 
 <p align="center">
-  <a href="README.cn.md">中文</a>
+  <a href="https://kkenny0.github.io/Lode/">Documentation</a> · <a href="README.cn.md">中文</a>
 </p>
 
 ## Why
@@ -19,12 +19,6 @@ In one coding session, you can compare multiple designs, reject plausible paths,
 When the session ends, that context usually disappears.
 
 Lode is a local habit toolbox for agentic coding's persistent memory. It captures decisions, risks, abandoned paths, open questions, and architecture artifacts, then compounds them into weekly outlines, monthly reviews, and decision roadmaps. The differentiator is not another memory layer; it is structured decision replay that tells the story of what happened and why.
-
-## See it
-
-<img src="assets/lode-demo.gif" alt="Lode demo: session recap to weekly report" width="800" />
-
-A single `收工` is enough to see the value — no configuration, no waiting for data to accumulate.
 
 ## Habit Loop
 

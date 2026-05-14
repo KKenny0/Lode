@@ -7,7 +7,7 @@
 <p align="center"><strong>Agentic coding 的 persistent memory：记录为什么，复利成周报、月报和决策路线图。</strong></p>
 
 <p align="center">
-  <a href="README.md">English</a>
+  <a href="https://kkenny0.github.io/Lode/zh/">文档</a> · <a href="README.md">English</a>
 </p>
 
 ## Why
@@ -19,12 +19,6 @@ AI 让软件探索变便宜，也让上下文延续变困难。
 Session 结束，这些上下文通常就消失了。
 
 Lode 是一个本地优先的 agentic coding persistent memory 工具箱。它捕获决策、风险、放弃路径、开放问题和架构产物，再把它们复利成周报、月报和决策路线图。它的差异化不是再做一个 memory layer，而是把原始 session 记忆变成可阅读、可复盘、可分享的 decision replay。
-
-## See it
-
-<img src="assets/lode-demo.gif" alt="Lode demo: session recap to weekly report" width="800" />
-
-一次 `收工` 就能看到价值 — 不需要配置，不需要等待积累。
 
 ## Habit Loop
 
