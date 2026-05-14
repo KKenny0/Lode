@@ -1,0 +1,13 @@
+# Lode Configuration Template
+
+knowledge_vault: /path/to/your/knowledge-vault
+project_slug: my-project
+
+profile:
+  project_name: My Project
+  report_language: mixed
+  weekly_mode: tech
+  team_context: solo
+
+artifact_index:
+  enabled: true

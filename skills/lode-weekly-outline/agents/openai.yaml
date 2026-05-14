@@ -1,4 +1,0 @@
-interface:
-  display_name: "Lode Weekly Outline"
-  short_description: "Create weekly outlines from raw change entries"
-  default_prompt: "Use $lode-weekly-outline to create a weekly report outline from Lode raw entries."
