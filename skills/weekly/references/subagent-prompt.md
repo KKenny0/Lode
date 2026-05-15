@@ -56,11 +56,51 @@ Keep as one stream when:
 
 Name each stream concisely — a phrase that captures its essence (e.g. "跨集滚动 Pipeline 架构演进").
 
+**Assess narrative density per stream:**
+
+For each identified stream, assess its narrative density. Archetype depth
+matters more than entry count — a single repair entry with root_cause +
+exploration_paths + open_questions carries more narrative material than three
+maintenance entries.
+
+- **Rich**: 4+ raw entries, OR any entry with `artifact_context` /
+  `exploration_paths` / `root_cause` + `abandoned_alternatives`
+- **Moderate**: 2-3 entries with some archetype depth, OR 1 entry with
+  `root_cause` + `open_questions` (repair/investigation singletons)
+- **Light**: 1 maintenance entry without archetype depth, or fallback-only from
+  git with no archetype fields
+- **Empty**: 0 meaningful changes after filtering
+
+Never classify a single repair/investigation/decision entry as Light just
+because the count is 1.
+
+**Sub-phases (optional):**
+
+When a single stream spans multiple distinct phases (e.g. a 4-day iterative
+build where each day addresses a different problem), declare sub-phases within
+the stream. Each sub-phase gets its own key_changes and technical_approach.
+Sub-phases share the stream's unified goal. Use sub-phases when:
+- The phases address different problems or use different approaches
+- A reviewer would discuss them as sequential milestones
+
 **Step 3: Abstract into engineering semantics (per stream)**
 
-For each work stream, group related change blocks into abstracted changes. Example: "add auto-layout" + "fix overlap" + "add positioning" → ONE key_change: "Built scene composition system with auto-layout and dense-panel overlap resolution"
+For each work stream, group related change blocks into key_changes. Each
+key_change should capture one distinct engineering decision or capability.
 
-Clarity first: list as many key_changes as needed to cover the work, but merge items that overlap in scope or audience. The test is: can a reviewer understand each item as a distinct piece of work? If two items would be explained the same way in a meeting, merge them.
+Merge only when two blocks describe the exact same change at different
+granularities (e.g. "add auto-layout" and "add auto-layout tests"). Do NOT
+merge changes that address different problems, touch different modules, or use
+different technical approaches — even if they contribute to the same high-level
+goal.
+
+Example: "add auto-layout" + "fix overlap" → keep as TWO key_changes (different
+problem + different approach). But "add auto-layout v1" + "refine auto-layout
+v2" → merge into ONE (same thing, iterative refinement).
+
+Clarity first: list as many key_changes as needed to cover the work. The test
+is: can a reviewer understand each item as a distinct piece of work? If two
+items would be explained the same way in a meeting, merge them.
 
 When raw entry info is insufficient: consult `related_docs` if available, then fallback git logs. When truly impossible → mark as "待确认". Do NOT fabricate.
 
@@ -102,6 +142,7 @@ fallback git subjects alone.
     {
       "name": "concise stream name",
       "priority": "core | supporting | exploratory",
+      "density": "rich | moderate | light",
       "narrative": {
         "goal": "1 sentence — why this stream's work matters",
         "problems": "core pain points this stream addresses",
@@ -110,7 +151,8 @@ fallback git subjects alone.
         "result": "impact and outcomes",
         "risk_and_next": "risks and next steps",
         "hard_stuff_this_week": "optional; only when raw-entry evidence supports a risk/open question/stale thread"
-      }
+      },
+      "sub_phases": "optional array of { name, date_range, key_changes, technical_approach } — use when the stream spans distinct milestones"
     }
   ]
 }

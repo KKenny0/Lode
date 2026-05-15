@@ -138,18 +138,27 @@ Assemble the final Markdown PPT outline from collected JSONs. Each project's `wo
 
 Write the assembled outline to the resolved output path from the Output Contract.
 
-**Slide budget per stream (content-density driven):**
+**Slide budget per stream (narrative-density driven):**
 
-Evaluate each stream independently based on its raw entry count and evidence richness — never penalize a rich stream just because other streams exist.
+Evaluate each stream independently based on its narrative density — archetype depth matters more than entry count. Never penalize a rich stream just because other streams exist.
 
-| Density | Criteria | Slides |
-|---|---|---|
-| Rich | 4+ raw entries, **or** adaptive-depth entries with artifact_context / exploration paths / clear tech approach | 3-4 |
-| Moderate | 2-3 entries with some archetype depth or legacy arch-doc evidence | 2-3 |
-| Light | 1 entry, or fallback-only from git | 1-2 |
-| Empty | 0 meaningful changes after filtering | merge into overview |
+| Density | Criteria | Slides | Layout |
+|---|---|---|---|
+| Rich | 4+ raw entries, **or** any entry with `artifact_context` / `exploration_paths` / `root_cause` + `abandoned_alternatives` — these carry full narrative arcs even in a single entry | 3-4 | Full |
+| Moderate | 2-3 entries with some archetype depth, **or** 1 entry with `root_cause` + `open_questions` (repair/investigation singletons) | 2 | Standard |
+| Light | 1 maintenance entry without archetype depth, or fallback-only from git | 2 | Standard |
+| Empty | 0 meaningful changes after filtering | merge into overview | — |
 
-When streams share close context (e.g. a bug fix stream and the feature it fixes), consider merging their slides to avoid redundancy.
+Never classify a single repair/investigation/decision entry as Light just because the count is 1.
+
+**Total slide range:** For a week with N non-trivial streams:
+- 1 stream: 6-8 slides (title + overview + 3-4 content + summary)
+- 2-3 streams: 9-14 slides
+- 4+ streams: 12-18 slides
+
+Do NOT compress individual streams to stay under 10 slides. Each stream deserves a complete narrative arc. The slide count should reflect the week's actual work density.
+
+When streams share close context (e.g. a bug fix stream and the feature it fixes), consider merging their slides to avoid redundancy — but do not merge purely to reduce slide count.
 
 **Overview slide:** 1 sentence per stream. Natural cross-stream themes are fine when they genuinely emerge, but don't force them.
 

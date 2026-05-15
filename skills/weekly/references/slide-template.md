@@ -54,12 +54,13 @@ Slide numbering starts from 1. The title page is Slide 1, overview is Slide 2, a
 {narrative.risk_and_next}
 ```
 
-### Compact layout (2-3 streams — 2-3 slides each)
+### Standard layout (multi-stream default — 2 slides each)
 
-Background and problems are merged into the key changes slide to save space. Technical approach retains its own section with full diagrams.
+The default for most streams in a multi-stream week. Separates context+approach
+from results+next. Every non-trivial stream gets at least this layout.
 
 ```markdown
-## Slide N: {stream} — 背景 & 关键改动
+## Slide N: {stream} — 背景 & 方案
 
 ### 背景
 {narrative.goal}
@@ -70,16 +71,41 @@ Background and problems are merged into the key changes slide to save space. Tec
 ### 关键改动
 {narrative.key_changes}
 
+### 技术方案
+{narrative.technical_approach}
+
 ---
 
-## Slide N+1: {stream} — 技术方案 & 成果
+## Slide N+1: {stream} — 成果 & 下一步
+
+### 成果
+{narrative.result}
+
+### 风险 & 下一步
+{narrative.risk_and_next}
+```
+
+### Compact layout (5+ streams — 2 slides each)
+
+For weeks with many streams where each needs to stay concise.
+Background and problems are merged into the key changes section.
+Technical approach is inline rather than diagram-heavy.
+
+```markdown
+## Slide N: {stream} — 背景 & 关键改动
+
+### 背景
+{narrative.goal}
+
+### 关键改动
+{narrative.key_changes}
 
 ### 技术方案
 {narrative.technical_approach}
 
 ---
 
-## Slide N+2: {stream} — 成果 & 下一步
+## Slide N+1: {stream} — 成果 & 下一步
 
 ### 成果
 {narrative.result}
@@ -184,16 +210,46 @@ Include a commit table at the end for verification. Mark it clearly so the prese
 
 ## Slide Budget
 
-Slides per stream, driven by each stream's content density (not total stream count):
+Slides per stream, driven by each stream's narrative density (not total stream count):
 
-| Density | Criteria | Slides |
-|---|---|---|
-| Rich | 4+ raw entries, **or** adaptive-depth entries with artifact_context / exploration paths / clear tech approach | 3-4 |
-| Moderate | 2-3 entries with some archetype depth or legacy arch-doc evidence | 2-3 |
-| Light | 1 entry, or fallback-only from git | 1-2 |
-| Empty | 0 meaningful changes after filtering | merge into overview |
+| Density | Criteria | Slides | Layout |
+|---|---|---|---|
+| Rich | 4+ raw entries, **or** any entry with `artifact_context` / `exploration_paths` / `root_cause` + `abandoned_alternatives` — these carry full narrative arcs even in a single entry | 3-4 | Full |
+| Moderate | 2-3 entries with some archetype depth, **or** 1 entry with `root_cause` + `open_questions` (repair/investigation singletons) | 2 | Standard |
+| Light | 1 maintenance entry without archetype depth, or fallback-only from git | 2 | Standard |
+| Empty | 0 meaningful changes after filtering | merge into overview | — |
 
-When streams share close context, consider merging their slides to avoid redundancy.
+Never classify a single repair/investigation/decision entry as Light just
+because the count is 1. Archetype depth (root_cause, exploration_paths,
+abandoned_alternatives, artifact_context) matters more than entry count.
+
+When streams share close context (e.g. a bug fix stream and the feature it
+fixes), consider merging their slides to avoid redundancy — but do not merge
+purely to reduce slide count.
+
+### Sub-phase pattern (within a stream)
+
+When a rich stream spans multiple phases (e.g. a 4-day iterative build with
+distinct milestones), use sub-headings within the key_changes and
+technical_approach sections instead of creating separate streams:
+
+```markdown
+## Slide N: {stream} — 关键改动
+
+### Phase 1: {sub-phase name} ({date range})
+{phase 1 key_changes}
+
+### Phase 2: {sub-phase name} ({date range})
+{phase 2 key_changes}
+```
+
+Use sub-phases when:
+- The phases address different problems or use different approaches
+- A reviewer would discuss them as sequential milestones
+- Splitting into separate streams would lose the unified goal
+
+Sub-phases share the stream's goal but each has its own key_changes and
+technical_approach.
 
 ## Content Density Guide
 
