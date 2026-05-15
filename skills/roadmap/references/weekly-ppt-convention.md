@@ -188,7 +188,13 @@ python <skill-or-repo>/scripts/lode_raw.py project-slug --cwd "$PWD"
 ]
 ```
 
-This file is created and maintained manually. Skills should work correctly whether or not it exists.
+This file is maintained by the `register-project` helper. The cold-start interview calls it automatically during setup. The `capture` skill may also update it as a best-effort side effect. Skills should work correctly whether or not it exists — when absent, the project slug is derived from config or directory name.
+
+Helper command:
+
+```bash
+python <skill-or-repo>/scripts/lode_raw.py register-project --cwd "$PWD" [--name "My Project"] [--slug my-project] [--priority core]
+```
 
 ## Change Entry Schema
 

@@ -56,7 +56,13 @@ def resolve_config(cwd: Path) -> dict[str, Any]:
     project_path = find_project_config(cwd)
     project_cfg = load_yaml_config(project_path) if project_path else {}
     cfg = dict(global_cfg)
-    cfg.update(project_cfg)
+    for key, value in project_cfg.items():
+        if isinstance(value, dict) and isinstance(cfg.get(key), dict):
+            nested = dict(cfg[key])
+            nested.update(value)
+            cfg[key] = nested
+        else:
+            cfg[key] = value
     if "knowledge_vault" not in cfg:
         env_vault = os.environ.get("WEEKLY_PPT_PATH")
         if env_vault:

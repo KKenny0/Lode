@@ -1,43 +1,47 @@
-# Lode Configuration Template
-# 全局配置: ~/.lode/config.yaml
-# 项目配置: {project-root}/.lode/config.yaml (覆盖全局)
+# === Global Config: ~/.lode/config.yaml ===
+# User preferences shared across all projects.
 
-# 知识库路径（必填）
-# 所有 Lode skill 的数据存储根目录，应为一个 git repo 以支持跨机器同步
+# Knowledge vault path (required)
+# All Lode skill data is stored here. Should be a git repo for cross-machine sync.
 knowledge_vault: /path/to/your/knowledge-vault
 
-# 项目标识（可选，默认从 git repo 目录名推导）
-project_slug: my-project
-
-# 用户与报告偏好（由 /lode:cold-start-interview 写入）
+# User reporting preferences (shared defaults, overridable per-project)
 profile:
-  project_name: My Project
   report_language: mixed             # zh | en | mixed
   weekly_mode: tech                  # tech | report
   team_context: solo                 # solo | team | mixed
 
-# Artifact index 设置（可选）
+# Artifact index settings (optional)
 artifact_index:
-  enabled: true                      # 默认 true；当 vault 存在时写入 raw/artifacts/{slug}.json
+  enabled: true                      # default true; writes raw/artifacts/{slug}.json when vault exists
 
-# 周报大纲设置（可选）
+# Weekly outline settings (optional)
 # weekly_outline:
-#   output_dir: /path/to/Work Diary/Weekly      # 默认 {vault}/Work Diary/Weekly
-#   # output_path: /path/to/custom-weekly.md    # 显式路径优先于 output_dir
+#   output_dir: /path/to/Work Diary/Weekly      # default {vault}/Work Diary/Weekly
+#   # output_path: /path/to/custom-weekly.md    # explicit path overrides output_dir
 
-# 月度回顾设置（可选）
+# Monthly review settings (optional)
 # monthly_review:
-#   output_dir: /path/to/Work Diary/Monthly     # 默认 {vault}/Work Diary/Monthly
+#   output_dir: /path/to/Work Diary/Monthly     # default {vault}/Work Diary/Monthly
 
-# 日报设置（可选，原 .daily-note-config.yaml）
+# Daily note settings (optional)
 # daily_note:
-#   path: /path/to/Daily Note.md      # 默认 {vault}/Daily Note.md
-#   repos:                             # 工作仓库列表
+#   path: /path/to/Daily Note.md      # default {vault}/Daily Note.md
+#   repos:                             # repo list; falls back to projects.json
 #     - /path/to/repo1
 #     - /path/to/repo2
-#   categories:                        # 自定义类别
+#   categories:                        # custom categories
 #     - name: 【安全加固】
 #       patterns: ["security", "auth", "permission"]
-#     - name: 【性能优化】
-#       patterns: ["perf", "optimize", "speed"]
-#   enable_smart_classify: false        # LLM 语义分类（默认 false）
+#   enable_smart_classify: false        # LLM semantic classification (default false)
+
+# === Per-Project Config: {project-root}/.lode/config.yaml ===
+# Project identity and per-project preference overrides.
+# The cold-start interview creates this when run inside a project directory.
+
+# project_slug: my-project           # optional; defaults to directory name
+# profile:
+#   project_name: My Project         # human-readable project name
+#   # Override any global preference for this project:
+#   # report_language: en
+#   # weekly_mode: report

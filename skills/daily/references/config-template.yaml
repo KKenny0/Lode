@@ -1,17 +1,13 @@
-# Lode Configuration Template
-# 全局配置: ~/.lode/config.yaml
-# 项目配置: {project-root}/.lode/config.yaml (覆盖全局)
+# Lode 配置模板
+# === 全局配置: ~/.lode/config.yaml ===
+# 跨项目共享的用户偏好。
 
 # 知识库路径（必填）
 # 所有 Lode skill 的数据存储根目录，应为一个 git repo 以支持跨机器同步
 knowledge_vault: /path/to/your/knowledge-vault
 
-# 项目标识（可选，默认从 git repo 目录名推导）
-project_slug: my-project
-
-# 用户与报告偏好（由 /lode:cold-start-interview 写入）
+# 用户报告偏好（共享默认值，可被项目级配置覆盖）
 profile:
-  project_name: My Project
   report_language: mixed             # zh | en | mixed
   weekly_mode: tech                  # tech | report
   team_context: solo                 # solo | team | mixed
@@ -29,10 +25,10 @@ artifact_index:
 # monthly_review:
 #   output_dir: /path/to/Work Diary/Monthly     # 默认 {vault}/Work Diary/Monthly
 
-# 日报设置（可选，原 .daily-note-config.yaml）
+# 日报设置（可选）
 # daily_note:
 #   path: /path/to/Daily Note.md      # 默认 {vault}/Daily Note.md
-#   repos:                             # 工作仓库列表
+#   repos:                             # 仓库列表；缺省时回退到 projects.json
 #     - /path/to/repo1
 #     - /path/to/repo2
 #   categories:                        # 自定义类别
@@ -41,3 +37,14 @@ artifact_index:
 #     - name: 【性能优化】
 #       patterns: ["perf", "optimize", "speed"]
 #   enable_smart_classify: false        # LLM 语义分类（默认 false）
+
+# === 项目级配置: {project-root}/.lode/config.yaml ===
+# 项目标识和项目级偏好覆盖。
+# 在项目目录内运行 /lode:cold-start-interview 时自动创建。
+
+# project_slug: my-project           # 可选；默认从目录名推导
+# profile:
+#   project_name: My Project         # 人类可读的项目名
+#   # 为此项目覆盖全局偏好：
+#   # report_language: en
+#   # weekly_mode: report

@@ -280,8 +280,14 @@ def validate_entry(entry: Any) -> dict[str, Any]:
     for field in ("timestamp", "summary", "context", "source", "type"):
         if not isinstance(entry[field], str) or not entry[field].strip():
             raise ValueError(f"entry field must be a non-empty string: {field}")
-    for field in ("related_docs", "evidence_refs", "exploration_paths",
-                   "abandoned_alternatives", "open_questions", "sync_suggestions"):
+    for field in (
+        "related_docs",
+        "evidence_refs",
+        "exploration_paths",
+        "abandoned_alternatives",
+        "open_questions",
+        "sync_suggestions",
+    ):
         validate_string_list(entry, field)
     if "related_docs" in entry:
         relative_docs = [
@@ -347,7 +353,6 @@ def append_entries(
         existing = existing_data
 
     existing.extend(entries)
-    existing.sort(key=lambda e: e.get("timestamp", ""))
     target_file.write_text(
         json.dumps(existing, ensure_ascii=False, indent=2) + "\n",
         encoding="utf-8",
@@ -449,6 +454,66 @@ def upsert_artifact(
     }
 
 
+def register_project(
+    cwd: Path,
+    vault_override: Path | None,
+    name: str | None,
+    slug_override: str | None,
+    priority: str | None,
+) -> dict[str, Any]:
+    cfg, _ = resolve_config(cwd)
+    vault = vault_override or Path(str(cfg["knowledge_vault"]))
+    slug = slug_override or project_slug(cwd, vault)
+    project_name = name or slug.replace("-", " ").title()
+    project_path = str(cwd.resolve())
+
+    target_dir = vault / "raw"
+    target_dir.mkdir(parents=True, exist_ok=True)
+    target_file = target_dir / "projects.json"
+
+    existing: list[dict[str, Any]] = []
+    if target_file.exists():
+        try:
+            data = json.loads(target_file.read_text(encoding="utf-8"))
+            if isinstance(data, list):
+                existing = data
+        except json.JSONDecodeError:
+            existing = []
+
+    updated = False
+    for index, item in enumerate(existing):
+        if isinstance(item, dict) and same_path(str(item.get("path", "")), cwd):
+            existing[index]["name"] = project_name
+            existing[index]["slug"] = slug
+            existing[index]["path"] = project_path
+            if priority:
+                existing[index]["priority"] = priority
+            updated = True
+            break
+
+    if not updated:
+        entry: dict[str, Any] = {
+            "name": project_name,
+            "slug": slug,
+            "path": project_path,
+        }
+        if priority:
+            entry["priority"] = priority
+        existing.append(entry)
+
+    target_file.write_text(
+        json.dumps(existing, ensure_ascii=False, indent=2) + "\n",
+        encoding="utf-8",
+    )
+    return {
+        "action": "updated" if updated else "registered",
+        "name": project_name,
+        "slug": slug,
+        "path": project_path,
+        "total_projects": len(existing),
+    }
+
+
 def print_json(data: Any) -> None:
     print(json.dumps(data, ensure_ascii=False, indent=2))
 
@@ -495,6 +560,19 @@ def command_upsert_artifact(args: argparse.Namespace) -> int:
     return 0
 
 
+def command_register_project(args: argparse.Namespace) -> int:
+    vault = Path(args.vault).expanduser().resolve() if args.vault else None
+    result = register_project(
+        cwd=Path(args.cwd).expanduser().resolve(),
+        vault_override=vault,
+        name=args.name,
+        slug_override=args.slug,
+        priority=args.priority,
+    )
+    print_json(result)
+    return 0
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="Lode raw storage helper")
     subparsers = parser.add_subparsers(dest="command", required=True)
@@ -526,6 +604,14 @@ def build_parser() -> argparse.ArgumentParser:
     artifact_parser.add_argument("--vault", help="Knowledge vault override")
     artifact_parser.add_argument("--slug", help="Project slug override")
     artifact_parser.set_defaults(func=command_upsert_artifact)
+
+    register_parser = subparsers.add_parser("register-project", help="Register project in projects.json")
+    register_parser.add_argument("--cwd", default=os.getcwd(), help="Project working directory")
+    register_parser.add_argument("--vault", help="Knowledge vault override")
+    register_parser.add_argument("--name", help="Human-readable project name")
+    register_parser.add_argument("--slug", help="Project slug override")
+    register_parser.add_argument("--priority", choices=["core", "supporting", "exploratory"])
+    register_parser.set_defaults(func=command_register_project)
 
     return parser
 

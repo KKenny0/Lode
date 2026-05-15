@@ -194,6 +194,19 @@ python <this-skill>/scripts/lode_raw.py upsert-artifact \
 If any helper call fails, fall back to Markdown output instead of blocking the
 recap.
 
+### Auto-registration
+
+After successfully appending entries, ensure the project is registered in the
+knowledge vault:
+
+```bash
+python <this-skill>/scripts/lode_raw.py register-project --cwd "$PWD"
+```
+
+This is a best-effort side effect that keeps `{vault}/raw/projects.json` current
+for weekly and daily multi-project discovery. If the helper is unavailable or the
+call fails, do not block the recap.
+
 ## Markdown Output Template
 
 Use this template in zero-config mode or helper-failure fallback:

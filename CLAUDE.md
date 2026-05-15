@@ -14,21 +14,25 @@ The name comes from **lode**: a vein of ore where valuable mineral is concentrat
 
 ## Configuration
 
-All skills share a unified configuration system:
+All skills share a two-layer configuration system:
 
 ```yaml
-# ~/.lode/config.yaml (global) or {project}/.lode/config.yaml (project-level)
+# ~/.lode/config.yaml (global) — user preferences shared across projects
 knowledge_vault: /path/to/your/knowledge-vault
-project_slug: my-project
-
 profile:
-  project_name: My Project
   report_language: mixed
   weekly_mode: tech
   team_context: solo
+
+# {project}/.lode/config.yaml (project-level) — project identity + overrides
+project_slug: my-project
+profile:
+  project_name: My Project
 ```
 
 Resolution: project `.lode/config.yaml` → `~/.lode/config.yaml` → `$WEEKLY_PPT_PATH` → `~/.weekly-ppt/`.
+
+Global config stores shared preferences (vault path, reporting language, mode). Project config stores project identity (slug, name) and can override any global preference via nested merge. The cold-start interview writes to the appropriate layer based on context.
 
 `$WEEKLY_PPT_PATH` and `~/.weekly-ppt/` are legacy fallbacks. New setups should use `knowledge_vault` in `.lode/config.yaml` or `~/.lode/config.yaml`.
 
@@ -53,6 +57,7 @@ cli/                                     # Installer CLI for Claude Code / Codex
 skills/
   cold-start-interview/       # First-run config setup
     SKILL.md
+    scripts/lode_raw.py
     references/
       lode-config-template.yaml
   capture/                   # Session-end change log extraction
@@ -103,7 +108,7 @@ skills/*-workspace/                     # Ignored benchmark workspaces/results
 
 | Skill | Purpose | Triggers |
 |-------|---------|----------|
-| cold-start-interview | First-run setup for `~/.lode/config.yaml` | `/lode:cold-start-interview`, "configure Lode" |
+| cold-start-interview | Two-layer config setup (global prefs + project identity) + project registry | `/lode:cold-start-interview`, "configure Lode" |
 | capture | Adaptive-depth session recap plus artifact context and sync suggestions | `/lode:capture`, "收工", "done", "今天到这" |
 | recall | Session-start recall from raw entries + artifact index | `/lode:recall`, "开工", "session start", "继续上次" |
 | daily | Obsidian daily notes from git history | `/lode:daily`, "更新日报", "日报", "daily note" |
@@ -117,7 +122,9 @@ Lode is not a strict pipeline. Skills are independently triggered, but they can 
 
 ```
 首次配置:
-  cold-start-interview → ~/.lode/config.yaml (vault path + project/report profile)
+  cold-start-interview → ~/.lode/config.yaml (global prefs)
+                      → {project}/.lode/config.yaml (project identity)
+                      → {vault}/raw/projects.json (project registry)
 
 开发过程中:
   recall ← {vault}/raw/weeks/ + {vault}/raw/artifacts/ → 开工上下文
@@ -162,6 +169,8 @@ Lode uses four storage surfaces:
 - **Self-contained skills**: each skill has its own copy of shared files in its `references/` directory, so skills work correctly when installed individually. Skills cannot reference files outside their directory via `../`
 - **Convention sync**: the canonical version lives at `references/weekly-ppt-convention.md`; after editing it, run `scripts/sync-convention.sh` to copy to all skill directories that need it
 - **Unified config**: all skills read vault path from `.lode/config.yaml`; project-level config overrides global
+- **Config layering**: global config holds user preferences (`knowledge_vault`, `report_language`, `weekly_mode`, `team_context`); project-level config holds project identity (`project_slug`, `project_name`) and can override any global preference via nested merge. The cold-start interview writes to the appropriate layer based on context.
+- **Auto-maintained project registry**: `{vault}/raw/projects.json` is created and updated by the `register-project` helper (called during cold-start and as a best-effort side effect during capture). Weekly and daily skills use it for multi-project discovery.
 - **Explicit primary outputs, graceful side effects**: if a skill needs the vault for its main output, it asks for `knowledge_vault`; if a raw change entry is only a side effect, it can skip that write gracefully
 - **Artifact governance**: full repo-local artifacts stay near code by default; vault artifact indexes make them discoverable without turning weekly raw entries into a document catalog
 - **Raw-first weekly reporting**: `weekly` consumes weekly raw change entries as the primary semantic source; git logs are fallback and coverage evidence only
