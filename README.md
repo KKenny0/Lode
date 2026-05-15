@@ -49,15 +49,32 @@ Skills are independent. Lode is not a strict pipeline — each skill works on it
 
 ## Install
 
+### Claude Code
+
+```bash
+# GitHub marketplace (recommended)
+claude plugin marketplace add KKenny0/Lode
+
+# Or local development
+claude plugin marketplace add ./path/to/Lode
+```
+
+After installation the namespaced commands (`/lode:capture`, `/lode:recall`, etc.) are available in every Claude Code session.
+
+CLI verification is also available:
+
+```bash
+npx @lode/cli doctor
+```
+
+### Codex
+
 ```bash
 # Codex Git-backed marketplace
 codex plugin marketplace add KKenny0/Lode
 
 # Or local development marketplace
 codex plugin marketplace add ./path/to/Lode
-
-# CLI verification remains available
-npx @lode/cli doctor
 ```
 
 Then run `/lode:cold-start-interview` once. Work in any git repo as usual:
