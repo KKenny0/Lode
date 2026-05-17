@@ -4,7 +4,6 @@
 from __future__ import annotations
 
 import argparse
-import datetime as dt
 import json
 import os
 from pathlib import Path
@@ -16,6 +15,11 @@ try:
 except Exception:  # pragma: no cover
     yaml = None
 
+from decision_replay import (
+    read_or_rebuild_decision_context,
+    validate_project_slug,
+)
+
 
 SKIP_DIRS = {".git", "node_modules", "dist", "__pycache__"}
 INTENT_ARTIFACT_RE = re.compile(
@@ -23,49 +27,6 @@ INTENT_ARTIFACT_RE = re.compile(
     r"(design|plan|architecture|prompt|schema|contract|migration|config)",
     re.IGNORECASE,
 )
-STOPWORDS = {
-    "about",
-    "after",
-    "and",
-    "are",
-    "because",
-    "before",
-    "build",
-    "changed",
-    "changes",
-    "context",
-    "decision",
-    "did",
-    "for",
-    "from",
-    "have",
-    "into",
-    "project",
-    "session",
-    "should",
-    "source",
-    "that",
-    "the",
-    "this",
-    "using",
-    "was",
-    "were",
-    "what",
-    "when",
-    "where",
-    "which",
-    "while",
-    "why",
-    "with",
-    "without",
-}
-EXPLICIT_DECISION_FIELDS = (
-    "motivation",
-    "exploration_paths",
-    "abandoned_alternatives",
-    "open_questions",
-)
-SAFE_SLUG_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]*$")
 
 
 def load_yaml_config(path: Path) -> dict[str, Any]:
@@ -117,14 +78,6 @@ def slugify(name: str) -> str:
     slug = re.sub(r"[\s_]+", "-", name.strip().lower())
     slug = re.sub(r"[^a-z0-9-]+", "-", slug)
     return re.sub(r"-+", "-", slug).strip("-") or "project"
-
-
-def validate_project_slug(slug: str) -> str:
-    if not SAFE_SLUG_RE.fullmatch(slug):
-        raise ValueError(
-            "project slug must be a filename-safe value using letters, numbers, dots, underscores, or hyphens"
-        )
-    return slug
 
 
 def same_path(left: str, right: Path) -> bool:
@@ -184,23 +137,6 @@ def parse_timestamp(entry: dict[str, Any]) -> str:
     return value if isinstance(value, str) else ""
 
 
-def parse_datetime(value: Any) -> dt.datetime | None:
-    if not isinstance(value, str) or not value.strip():
-        return None
-    try:
-        parsed = dt.datetime.fromisoformat(value.replace("Z", "+00:00"))
-    except ValueError:
-        return None
-    if parsed.tzinfo is None:
-        parsed = parsed.replace(tzinfo=dt.timezone.utc)
-    return parsed
-
-
-def max_entry_datetime(entries: list[dict[str, Any]]) -> dt.datetime | None:
-    parsed = [item for item in (parse_datetime(entry.get("timestamp")) for entry in entries) if item is not None]
-    return max(parsed) if parsed else None
-
-
 def signal_score(entry: dict[str, Any]) -> int:
     score = 0
     if entry.get("type") == "decision":
@@ -241,317 +177,6 @@ def read_entries(vault: Path, slug: str) -> list[dict[str, Any]]:
 
 def public_entry(entry: dict[str, Any]) -> dict[str, Any]:
     return {key: value for key, value in entry.items() if not key.startswith("_")}
-
-
-def as_string_list(value: Any) -> list[str]:
-    if isinstance(value, list):
-        return [item.strip() for item in value if isinstance(item, str) and item.strip()]
-    if isinstance(value, str) and value.strip():
-        return [value.strip()]
-    return []
-
-
-def text_value(entry: dict[str, Any], field: str) -> str | None:
-    value = entry.get(field)
-    if isinstance(value, str) and value.strip():
-        return value.strip()
-    return None
-
-
-def dedupe(values: list[str]) -> list[str]:
-    result: list[str] = []
-    seen: set[str] = set()
-    for value in values:
-        normalized = value.strip()
-        if not normalized or normalized in seen:
-            continue
-        seen.add(normalized)
-        result.append(normalized)
-    return result
-
-
-def keyword_tokens(text: str) -> list[str]:
-    tokens = [
-        token
-        for token in re.findall(r"[a-zA-Z][a-zA-Z0-9-]{2,}", text.lower())
-        if token not in STOPWORDS and not token.isdigit()
-    ]
-    return dedupe(tokens)
-
-
-def has_explicit_decision_signal(entry: dict[str, Any]) -> bool:
-    if entry.get("type") == "decision" or entry.get("archetype") == "decision":
-        return True
-    return any(as_string_list(entry.get(field)) or text_value(entry, field) for field in EXPLICIT_DECISION_FIELDS)
-
-
-def chosen_path(entry: dict[str, Any]) -> str | None:
-    paths = as_string_list(entry.get("exploration_paths"))
-    chosen_markers = (
-        "chosen",
-        "selected",
-        "adopted",
-        "kept",
-        "switched to",
-        "replaced",
-        "use ",
-        "using ",
-    )
-    chosen = [path for path in paths if any(marker in path.lower() for marker in chosen_markers)]
-    if chosen:
-        return chosen[0]
-    if has_explicit_decision_signal(entry):
-        return text_value(entry, "summary")
-    return None
-
-
-def split_option_reason(value: str) -> dict[str, str]:
-    for separator in (" -> ", ": ", " because ", " — ", " - "):
-        if separator in value:
-            option, reason = value.split(separator, 1)
-            return {"option": option.strip(), "reason": reason.strip()}
-    return {"option": value.strip(), "reason": ""}
-
-
-def rejected_paths(entry: dict[str, Any]) -> list[dict[str, str]]:
-    rejected = as_string_list(entry.get("abandoned_alternatives"))
-    for path in as_string_list(entry.get("exploration_paths")):
-        lowered = path.lower()
-        if any(marker in lowered for marker in ("rejected", "abandoned", "did not", "deferred")):
-            rejected.append(path)
-    return [split_option_reason(item) for item in dedupe(rejected)]
-
-
-def artifact_refs_from_entry(entry: dict[str, Any]) -> list[str]:
-    refs: list[str] = []
-    refs.extend(as_string_list(entry.get("related_docs")))
-    for context in entry.get("artifact_context", []):
-        if not isinstance(context, dict):
-            continue
-        artifact_path = context.get("artifact_path")
-        if isinstance(artifact_path, str) and artifact_path.strip():
-            refs.append(artifact_path.strip())
-        refs.extend(as_string_list(context.get("source_of_truth")))
-    return dedupe(refs)
-
-
-def artifact_hints_for_entry(
-    entry: dict[str, Any], artifacts: list[dict[str, Any]]
-) -> tuple[list[str], list[str]]:
-    entry_refs = set(artifact_refs_from_entry(entry))
-    if not entry_refs:
-        return [], []
-
-    artifact_ids: list[str] = []
-    thread_hints: list[str] = []
-    for artifact in artifacts:
-        artifact_path = artifact.get("path")
-        repo_path = artifact.get("repo_relative_path")
-        candidates = [item for item in (artifact_path, repo_path, artifact.get("id")) if isinstance(item, str)]
-        if not entry_refs.intersection(candidates):
-            continue
-        artifact_id = artifact.get("id")
-        if isinstance(artifact_id, str) and artifact_id.strip():
-            artifact_ids.append(artifact_id.strip())
-        thread_hints.extend(as_string_list(artifact.get("decision_threads")))
-        thread_hints.extend(as_string_list(artifact.get("topics")))
-    return dedupe(artifact_ids), dedupe(thread_hints)
-
-
-def topic_keys(entry: dict[str, Any], artifact_thread_hints: list[str]) -> list[str]:
-    keys: list[str] = []
-    for field in ("project_area", "work_stream"):
-        value = text_value(entry, field)
-        if value:
-            keys.append(slugify(value))
-    keys.extend(slugify(item) for item in artifact_thread_hints)
-    for context in entry.get("artifact_context", []):
-        if not isinstance(context, dict):
-            continue
-        for field in ("scope", "delta"):
-            value = text_value(context, field)
-            if value:
-                keys.extend(keyword_tokens(value)[:4])
-    keys.extend(keyword_tokens(" ".join([str(entry.get("summary", "")), str(entry.get("context", ""))]))[:6])
-    return dedupe([key for key in keys if key])
-
-
-def thread_id_for(keys: list[str], entry: dict[str, Any]) -> str:
-    for key in keys:
-        if key:
-            return f"thread:{slugify(key)}"
-    summary = text_value(entry, "summary") or f"entry-{entry.get('_source_index', 0)}"
-    words = keyword_tokens(summary)
-    return f"thread:{'-'.join(words[:3]) or slugify(summary)[:48]}"
-
-
-def entry_ref(entry: dict[str, Any]) -> dict[str, Any]:
-    return {
-        "week": entry.get("_source_week", ""),
-        "path": entry.get("_source_path", ""),
-        "timestamp": entry.get("timestamp"),
-        "entry_index": entry.get("_source_index", 0),
-    }
-
-
-def decision_node_from_entry(
-    entry: dict[str, Any], ordinal: int, slug: str, artifacts: list[dict[str, Any]]
-) -> dict[str, Any]:
-    artifact_ids, artifact_thread_hints = artifact_hints_for_entry(entry, artifacts)
-    artifact_refs = dedupe([*artifact_refs_from_entry(entry), *artifact_ids])
-    explicit = has_explicit_decision_signal(entry)
-    keys = topic_keys(entry, artifact_thread_hints)
-    inference_notes: list[str] = []
-    if not explicit:
-        inference_notes.append("Decision content inferred from summary/context because explicit decision fields were sparse.")
-    return {
-        "id": f"{slug}:{entry.get('_source_week', 'unknown-week')}:{ordinal:03d}",
-        "timestamp": entry.get("timestamp"),
-        "week": entry.get("_source_week", ""),
-        "confidence": "explicit" if explicit else "inferred",
-        "source_entry_refs": [entry_ref(entry)],
-        "summary": text_value(entry, "summary") or "Untitled raw entry",
-        "decision": text_value(entry, "summary") or "Untitled raw entry",
-        "why": text_value(entry, "motivation") or text_value(entry, "context"),
-        "chosen": chosen_path(entry),
-        "rejected": rejected_paths(entry),
-        "open_questions": as_string_list(entry.get("open_questions")),
-        "impact": text_value(entry, "impact"),
-        "topic_keys": keys,
-        "artifact_refs": artifact_refs,
-        "evidence_refs": as_string_list(entry.get("evidence_refs")),
-        "thread_id": thread_id_for(keys, entry),
-        "inference_notes": inference_notes,
-    }
-
-
-def build_decision_nodes_from_entries(
-    entries: list[dict[str, Any]], slug: str, artifacts: list[dict[str, Any]]
-) -> list[dict[str, Any]]:
-    chronological = sorted(entries, key=parse_timestamp)
-    nodes: list[dict[str, Any]] = []
-    for entry in chronological:
-        if not isinstance(entry.get("summary"), str) or not isinstance(entry.get("context"), str):
-            continue
-        nodes.append(decision_node_from_entry(entry, len(nodes) + 1, slug, artifacts))
-    return nodes
-
-
-def shared_values(left: list[str], right: list[str]) -> list[str]:
-    return sorted(set(left).intersection(right))
-
-
-def build_edges(nodes: list[dict[str, Any]]) -> list[dict[str, Any]]:
-    edges: list[dict[str, Any]] = []
-    seen: set[tuple[str, str, str]] = set()
-    by_thread: dict[str, list[dict[str, Any]]] = {}
-    for node in nodes:
-        by_thread.setdefault(str(node.get("thread_id", "")), []).append(node)
-    for thread_id, thread_nodes in by_thread.items():
-        if not thread_id or len(thread_nodes) < 2:
-            continue
-        for left, right in zip(thread_nodes, thread_nodes[1:]):
-            key = (str(left.get("id")), str(right.get("id")), "same_thread")
-            if key in seen:
-                continue
-            seen.add(key)
-            edges.append(
-                {
-                    "id": f"edge:{len(edges) + 1:04d}",
-                    "from": left.get("id"),
-                    "to": right.get("id"),
-                    "type": "same_thread",
-                    "confidence": "heuristic",
-                    "reason": f"Consecutive entries in {thread_id}.",
-                    "evidence_refs": [left["source_entry_refs"][0], right["source_entry_refs"][0]],
-                }
-            )
-    for index, left in enumerate(nodes):
-        for right in nodes[index + 1 :]:
-            shared_artifacts = shared_values(left.get("artifact_refs", []), right.get("artifact_refs", []))
-            if not shared_artifacts:
-                continue
-            key = (str(left.get("id")), str(right.get("id")), "touches_artifact")
-            if key in seen:
-                continue
-            seen.add(key)
-            edges.append(
-                {
-                    "id": f"edge:{len(edges) + 1:04d}",
-                    "from": left.get("id"),
-                    "to": right.get("id"),
-                    "type": "touches_artifact",
-                    "confidence": "heuristic",
-                    "reason": "Entries reference shared artifact(s): " + ", ".join(shared_artifacts[:3]),
-                    "artifact_refs": shared_artifacts,
-                    "evidence_refs": [left["source_entry_refs"][0], right["source_entry_refs"][0]],
-                }
-            )
-    return edges
-
-
-def write_decision_index(
-    vault: Path,
-    slug: str,
-    entries: list[dict[str, Any]],
-    artifacts: list[dict[str, Any]],
-    artifact_path: str | None,
-    path: Path,
-) -> dict[str, Any]:
-    nodes = build_decision_nodes_from_entries(entries, slug, artifacts)
-    source_paths = dedupe([
-        str(entry.get("_source_path", ""))
-        for entry in entries
-        if isinstance(entry.get("_source_path"), str)
-    ])
-    source: dict[str, Any] = {
-        "kind": "roadmap",
-        "raw_entry_count": len(entries),
-        "raw_glob": str(vault / "raw" / "weeks" / "*" / f"{slug}.json"),
-        "raw_paths": source_paths,
-        "node_count": len(nodes),
-    }
-    if artifact_path:
-        source["artifact_index_path"] = artifact_path
-        source["artifact_index_use"] = "navigation_and_edge_hints_only"
-    index = {
-        "schema_version": "lode.decision_replay.v1",
-        "project_slug": slug,
-        "generated_at": dt.datetime.now(dt.timezone.utc).astimezone().isoformat(timespec="seconds"),
-        "source": source,
-        "nodes": nodes,
-        "edges": build_edges(nodes),
-    }
-    path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(json.dumps(index, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
-    return index
-
-
-def rebuild_decision_context(
-    vault: Path,
-    slug: str,
-    entries: list[dict[str, Any]],
-    artifacts: list[dict[str, Any]],
-    artifact_path: str | None,
-    limit: int,
-    path: Path,
-    status: dict[str, Any],
-) -> tuple[list[dict[str, Any]], dict[str, Any]]:
-    try:
-        index = write_decision_index(vault, slug, entries, artifacts, artifact_path, path)
-        status["index_generated_at"] = index.get("generated_at")
-        nodes = [item for item in index.get("nodes", []) if isinstance(item, dict)]
-    except OSError as exc:
-        status["write_error"] = str(exc)
-        nodes = build_decision_nodes_from_entries(entries, slug, artifacts)
-    nodes.sort(
-        key=lambda item: (
-            str(item.get("timestamp", "")),
-            str(item.get("id", "")),
-        ),
-        reverse=True,
-    )
-    return nodes[:limit], status
 
 
 def extract_list(entries: list[dict[str, Any]], field: str) -> list[dict[str, str]]:
@@ -629,7 +254,7 @@ def extract_intent_artifact_flags(entries: list[dict[str, Any]], limit: int) -> 
     return unique[:limit]
 
 
-def read_artifacts(vault: Path, slug: str) -> tuple[list[dict[str, Any]], list[dict[str, str]], str | None]:
+def read_artifacts(vault: Path, slug: str) -> tuple[list[dict[str, Any]], list[dict[str, str]]]:
     path = vault / "raw" / "artifacts" / f"{slug}.json"
     artifacts = read_json_array(path)
     missing: list[dict[str, str]] = []
@@ -640,87 +265,24 @@ def read_artifacts(vault: Path, slug: str) -> tuple[list[dict[str, Any]], list[d
                 "artifact_id": str(artifact.get("id", "")),
                 "path": path_value,
             })
-    return artifacts, missing, str(path) if path.exists() else None
+    return artifacts, missing
 
 
 def read_decision_context(
     vault: Path,
     slug: str,
-    entries: list[dict[str, Any]],
-    artifacts: list[dict[str, Any]],
-    artifact_path: str | None,
     limit: int,
 ) -> tuple[list[dict[str, Any]], dict[str, Any]]:
-    path = vault / "raw" / "decisions" / f"{slug}.json"
-    raw_latest = max_entry_datetime(entries)
-    status: dict[str, Any] = {
-        "path": str(path),
-        "rebuilt": False,
-        "reason": "current",
-        "raw_latest_timestamp": raw_latest.isoformat() if raw_latest else None,
-    }
-    data: Any = None
-    reason = "missing_index"
-    generated_at: dt.datetime | None = None
-    if not path.exists():
-        status["reason"] = reason
-        status["rebuilt"] = True
-        return rebuild_decision_context(vault, slug, entries, artifacts, artifact_path, limit, path, status)
-    try:
-        data = json.loads(path.read_text(encoding="utf-8"))
-    except json.JSONDecodeError:
-        reason = "invalid_index_json"
-        status["reason"] = reason
-        status["rebuilt"] = True
-        return rebuild_decision_context(vault, slug, entries, artifacts, artifact_path, limit, path, status)
-    if isinstance(data, dict):
-        generated_at = parse_datetime(data.get("generated_at"))
-        status["index_generated_at"] = data.get("generated_at")
-    if raw_latest is not None and (generated_at is None or generated_at < raw_latest):
-        reason = "stale_index"
-        status["reason"] = reason
-        status["rebuilt"] = True
-        return rebuild_decision_context(vault, slug, entries, artifacts, artifact_path, limit, path, status)
-    if isinstance(data, list):
-        items = data
-    elif isinstance(data, dict):
-        nodes = data.get("nodes")
-        if isinstance(nodes, list):
-            items = nodes
-        else:
-            value = data.get("decision_context")
-            if isinstance(value, list):
-                items = value
-            else:
-                items = []
-    else:
-        items = []
-
-    decisions = [item for item in items if isinstance(item, dict)]
-    if not decisions and entries:
-        status["reason"] = "empty_index"
-        status["rebuilt"] = True
-        return rebuild_decision_context(vault, slug, entries, artifacts, artifact_path, limit, path, status)
-    decisions.sort(
-        key=lambda item: (
-            str(item.get("timestamp", "")),
-            str(item.get("id", "")),
-        ),
-        reverse=True,
-    )
-    return decisions[:limit], status
+    return read_or_rebuild_decision_context(vault, slug, limit, write=True)
 
 
 def add_decision_context(
     context: dict[str, Any],
     vault: Path,
     slug: str,
-    entries: list[dict[str, Any]],
-    artifacts: list[dict[str, Any]],
-    artifact_path: str | None,
     limit: int,
 ) -> dict[str, Any]:
-    decision_context, source = read_decision_context(vault, slug, entries, artifacts, artifact_path, limit)
+    decision_context, source = read_decision_context(vault, slug, limit)
     context["decision_context_source"] = source
     if decision_context:
         context["decision_context"] = decision_context
@@ -746,7 +308,7 @@ def build_context(cwd: Path, vault_override: str | None, slug_override: str | No
     entries = read_entries(vault, slug)
     ranked = sorted(entries, key=lambda entry: (signal_score(entry), parse_timestamp(entry)), reverse=True)
     recent_entries = [public_entry(entry) for entry in ranked[:limit]]
-    artifacts, missing_artifacts, artifact_path = read_artifacts(vault, slug)
+    artifacts, missing_artifacts = read_artifacts(vault, slug)
     context: dict[str, Any] = {
         "project_slug": slug,
         "recent_entries": recent_entries,
@@ -758,7 +320,7 @@ def build_context(cwd: Path, vault_override: str | None, slug_override: str | No
         "intent_artifact_flags": extract_intent_artifact_flags(entries, limit),
         "missing_sources": missing_artifacts,
     }
-    return add_decision_context(context, vault, slug, entries, artifacts, artifact_path, limit)
+    return add_decision_context(context, vault, slug, limit)
 
 
 def main() -> int:

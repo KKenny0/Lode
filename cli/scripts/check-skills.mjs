@@ -10,6 +10,7 @@ const repoRoot = path.resolve(cliRoot, '..');
 const sourceSkillsDir = path.join(repoRoot, 'skills');
 const bundledSkillsDir = path.join(cliRoot, 'skills');
 const canonicalConvention = path.join(repoRoot, 'references', 'weekly-ppt-convention.md');
+const canonicalDecisionReplay = path.join(repoRoot, 'references', 'decision_replay.py');
 
 const officialSkills = [
   'capture',
@@ -42,6 +43,15 @@ const syncedScriptPairs = [
     path.join(bundledSkillsDir, 'roadmap', 'scripts', 'decision_graph.py'),
     path.join(bundledSkillsDir, 'query', 'scripts', 'decision_graph.py'),
   ],
+];
+
+const decisionReplayCopies = [
+  path.join(sourceSkillsDir, 'query', 'scripts', 'decision_replay.py'),
+  path.join(sourceSkillsDir, 'roadmap', 'scripts', 'decision_replay.py'),
+  path.join(sourceSkillsDir, 'recall', 'scripts', 'decision_replay.py'),
+  path.join(bundledSkillsDir, 'query', 'scripts', 'decision_replay.py'),
+  path.join(bundledSkillsDir, 'roadmap', 'scripts', 'decision_replay.py'),
+  path.join(bundledSkillsDir, 'recall', 'scripts', 'decision_replay.py'),
 ];
 
 const errors = [];
@@ -121,6 +131,18 @@ if (canonical) {
     if (exists(copy)) {
       const content = fs.readFileSync(copy, 'utf-8');
       assert(content === canonical, `Convention copy is stale: ${copy}`);
+    }
+  }
+}
+
+const decisionReplay = exists(canonicalDecisionReplay) ? fs.readFileSync(canonicalDecisionReplay, 'utf-8') : null;
+assert(Boolean(decisionReplay), 'Canonical decision_replay.py is missing');
+if (decisionReplay) {
+  for (const copy of decisionReplayCopies) {
+    assert(exists(copy), `Decision replay copy is missing: ${copy}`);
+    if (exists(copy)) {
+      const content = fs.readFileSync(copy, 'utf-8');
+      assert(content === decisionReplay, `Decision replay copy is stale: ${copy}`);
     }
   }
 }

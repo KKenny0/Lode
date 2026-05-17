@@ -46,12 +46,14 @@ artifact_index:
 ```
 references/
   weekly-ppt-convention.md             # Shared schema + storage rules (canonical source)
+  decision_replay.py                    # Canonical decision replay graph/query helper
   lode-config-template.yaml             # Config file template
 .codex-plugin/plugin.json               # Codex plugin manifest
 .claude-plugin/plugin.json              # Claude Code plugin manifest
 .claude-plugin/marketplace.json         # Claude-style marketplace metadata
 .agents/plugins/marketplace.json        # Codex repo marketplace metadata
 scripts/sync-convention.sh              # Sync convention to skill directories
+scripts/sync-decision-replay.sh         # Sync decision replay helper to skill directories
 benchmarks/
   weekly-outline.md                     # Public benchmark guidance (fixtures stay local)
 cli/                                     # Installer CLI for Codex / Claude Code
@@ -70,15 +72,18 @@ skills/
   recall/            # Session-start project memory recall
     SKILL.md
     scripts/recall_context.py
+    scripts/decision_replay.py
     references/
       recall-output-template.md
       weekly-ppt-convention.md
   query/             # Targeted decision replay queries
     SKILL.md
     scripts/decision_graph.py
+    scripts/decision_replay.py
   roadmap/                # Narrative decision history
     SKILL.md
     scripts/decision_graph.py
+    scripts/decision_replay.py
     references/
       weekly-ppt-convention.md
   daily/                  # Obsidian daily notes from git history
@@ -173,6 +178,7 @@ Lode uses four storage surfaces:
 
 - **Self-contained skills**: each skill has its own copy of shared files in its `references/` directory, so skills work correctly when installed individually. Skills cannot reference files outside their directory via `../`
 - **Convention sync**: the canonical version lives at `references/weekly-ppt-convention.md`; after editing it, run `scripts/sync-convention.sh` to copy to all skill directories that need it
+- **Decision replay helper sync**: the canonical implementation lives at `references/decision_replay.py`; after editing it, run `scripts/sync-decision-replay.sh` so `query`, `roadmap`, and `recall` keep identical local copies
 - **Unified config**: all skills read vault path from `.lode/config.yaml`; project-level config overrides global
 - **Explicit primary outputs, graceful side effects**: if a skill needs the vault for its main output, it asks for `knowledge_vault`; if a raw change entry is only a side effect, it can skip that write gracefully
 - **Artifact governance**: full repo-local artifacts stay near code by default; vault artifact indexes make them discoverable without turning weekly raw entries into a document catalog
