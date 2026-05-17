@@ -1,6 +1,337 @@
+/* ═══════════════════════════════════════════════════════════════
+   Lode — Mineral Editorial Theme
+
+   Stone facets from mark.svg:  #0B0D11 → #111318 → #14171D → #191C22 → #242832
+   Gold vein from mark.svg:     #F8C846 / #D4A82C / #B87908
+   Mineral dust text:           #E8E4DD / #9E9889 / #6B665C
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ─── Light Mode Variables ─── */
 :root {
-  --vp-c-brand-1: #25636A;
-  --vp-c-brand-2: #1d4f54;
-  --vp-c-brand-3: #153b3f;
-  --vp-c-brand-soft: rgba(37, 99, 106, 0.14);
+  --vp-c-brand-1: #B87908;
+  --vp-c-brand-2: #9A6306;
+  --vp-c-brand-3: #7C4E05;
+  --vp-c-brand-soft: rgba(184, 121, 8, 0.10);
+
+  --vp-home-hero-name-color: #B87908;
+
+  --vp-button-brand-bg: #B87908;
+  --vp-button-brand-hover-bg: #9A6306;
+  --vp-button-brand-active-bg: #7C4E05;
+  --vp-button-brand-text: #fff;
+  --vp-button-brand-hover-text: #fff;
+  --vp-button-brand-active-text: #fff;
+
+  --vp-button-alt-bg: transparent;
+  --vp-button-alt-hover-bg: rgba(184, 121, 8, 0.06);
+  --vp-button-alt-active-bg: rgba(184, 121, 8, 0.10);
+  --vp-button-alt-text: var(--vp-c-text-2);
+  --vp-button-alt-hover-text: var(--vp-c-text-1);
+  --vp-button-alt-active-text: var(--vp-c-text-1);
+  --vp-button-alt-border: rgba(184, 121, 8, 0.15);
+  --vp-button-alt-hover-border: rgba(184, 121, 8, 0.30);
+  --vp-button-alt-active-border: rgba(184, 121, 8, 0.25);
+
+  --vp-code-bg: rgba(184, 121, 8, 0.04);
+  --vp-code-color: #9A6306;
+
+  --vp-custom-block-info-border: rgba(184, 121, 8, 0.15);
+  --vp-custom-block-tip-border: rgba(184, 121, 8, 0.20);
+  --vp-custom-block-warning-border: #B87908;
+
+  --vp-nav-bg-color: rgba(255, 255, 255, 0.85);
+
+  /* Lode custom tokens */
+  --lode-accent-border: rgba(184, 121, 8, 0.12);
+  --lode-accent-glow: rgba(184, 121, 8, 0.06);
+  --lode-selection-bg: rgba(184, 121, 8, 0.15);
+  --lode-code-border: rgba(184, 121, 8, 0.10);
+  --lode-code-bg-alt: var(--vp-c-bg-soft);
+  --lode-scrollbar: rgba(184, 121, 8, 0.12);
+  --lode-scrollbar-hover: rgba(184, 121, 8, 0.22);
+  --lode-hero-line: #B87908;
+  --lode-hero-glow: rgba(184, 121, 8, 0.03);
+  --lode-card-bg: var(--vp-c-bg-soft);
+}
+
+/* ─── Dark Mode Variables ─── */
+html.dark {
+  --vp-c-brand-1: #F8C846;
+  --vp-c-brand-2: #D4A82C;
+  --vp-c-brand-3: #B87908;
+  --vp-c-brand-soft: rgba(248, 200, 70, 0.12);
+
+  --vp-c-bg: #0B0D11;
+  --vp-c-bg-soft: #111318;
+  --vp-c-bg-mute: #191C22;
+  --vp-c-bg-alt: #14171D;
+
+  --vp-c-text-1: #E8E4DD;
+  --vp-c-text-2: #9E9889;
+  --vp-c-text-3: #6B665C;
+
+  --vp-c-border: rgba(248, 200, 70, 0.08);
+  --vp-c-divider: rgba(248, 200, 70, 0.10);
+  --vp-c-gutter: rgba(248, 200, 70, 0.06);
+
+  --vp-home-hero-name-color: #F8C846;
+
+  --vp-button-brand-bg: #B87908;
+  --vp-button-brand-hover-bg: #D4A82C;
+  --vp-button-brand-active-bg: #9A6306;
+  --vp-button-brand-text: #0B0D11;
+  --vp-button-brand-hover-text: #0B0D11;
+  --vp-button-brand-active-text: #0B0D11;
+
+  --vp-button-alt-bg: transparent;
+  --vp-button-alt-hover-bg: rgba(248, 200, 70, 0.08);
+  --vp-button-alt-active-bg: rgba(248, 200, 70, 0.12);
+  --vp-button-alt-text: #9E9889;
+  --vp-button-alt-hover-text: #E8E4DD;
+  --vp-button-alt-active-text: #E8E4DD;
+  --vp-button-alt-border: rgba(248, 200, 70, 0.2);
+  --vp-button-alt-hover-border: rgba(248, 200, 70, 0.4);
+  --vp-button-alt-active-border: rgba(248, 200, 70, 0.3);
+
+  --vp-custom-block-info-bg: rgba(248, 200, 70, 0.04);
+  --vp-custom-block-info-border: rgba(248, 200, 70, 0.2);
+  --vp-custom-block-tip-bg: rgba(248, 200, 70, 0.04);
+  --vp-custom-block-tip-border: rgba(248, 200, 70, 0.25);
+  --vp-custom-block-warning-bg: rgba(248, 200, 70, 0.05);
+  --vp-custom-block-warning-border: #D4A82C;
+  --vp-custom-block-danger-bg: rgba(220, 80, 60, 0.05);
+  --vp-custom-block-danger-border: #DC503C;
+
+  --vp-code-bg: rgba(248, 200, 70, 0.04);
+  --vp-code-color: #D4A82C;
+
+  --vp-nav-bg-color: rgba(11, 13, 17, 0.85);
+  --vp-nav-screen-bg-color: #0B0D11;
+  --vp-sidebar-bg-color: #0F1115;
+  --vp-local-nav-bg-color: rgba(11, 13, 17, 0.85);
+
+  --lode-accent-border: rgba(248, 200, 70, 0.10);
+  --lode-accent-glow: rgba(248, 200, 70, 0.06);
+  --lode-selection-bg: rgba(248, 200, 70, 0.25);
+  --lode-code-border: rgba(248, 200, 70, 0.06);
+  --lode-code-bg-alt: #111318;
+  --lode-scrollbar: rgba(248, 200, 70, 0.12);
+  --lode-scrollbar-hover: rgba(248, 200, 70, 0.22);
+  --lode-hero-line: #F8C846;
+  --lode-hero-glow: rgba(248, 200, 70, 0.03);
+  --lode-card-bg: #111318;
+}
+
+/* ─── Selection ─── */
+::selection {
+  background: var(--lode-selection-bg);
+}
+
+/* ─── Hero ─── */
+.VPHero .name {
+  font-size: clamp(80px, 12vw, 140px) !important;
+  max-width: none !important;
+  letter-spacing: -0.05em;
+  line-height: 1 !important;
+}
+
+.VPHero .text {
+  font-size: 18px !important;
+  line-height: 1.7 !important;
+  color: var(--vp-c-text-1) !important;
+  max-width: 560px;
+}
+
+.VPHero .tagline {
+  font-size: 15px !important;
+  color: var(--vp-c-text-2) !important;
+  max-width: none !important;
+}
+
+.VPHero {
+  position: relative;
+}
+
+.VPHero::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 160px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--lode-hero-line), transparent);
+  opacity: 0.4;
+}
+
+.VPHero::after {
+  content: '';
+  position: absolute;
+  top: 40%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 600px;
+  height: 400px;
+  background: radial-gradient(ellipse, var(--lode-hero-glow) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+/* ─── Features ─── */
+.VPFeature .box {
+  border-left: 2px solid var(--lode-accent-border);
+  background: var(--lode-card-bg);
+  border-radius: 8px;
+  padding: 24px !important;
+  transition: border-color 0.3s, box-shadow 0.3s;
+}
+
+.VPFeature:hover .box {
+  border-left-color: var(--vp-c-brand-1);
+  box-shadow: -2px 0 24px var(--lode-accent-glow);
+}
+
+.VPFeature .icon {
+  font-size: 28px;
+  opacity: 0.85;
+}
+
+/* ─── Tables ─── */
+table {
+  border-collapse: separate;
+  border-spacing: 0;
+  width: 100%;
+}
+
+th {
+  background: var(--vp-c-bg-soft);
+  color: var(--vp-c-brand-1);
+  border-bottom: 1px solid var(--lode-accent-border);
+  font-weight: 600;
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+td {
+  border-bottom: 1px solid var(--vp-c-border);
+}
+
+tr:hover td {
+  background: var(--vp-c-brand-soft);
+}
+
+/* ─── Code Blocks ─── */
+div[class*='language-'] {
+  background: var(--lode-code-bg-alt) !important;
+  border: 1px solid var(--lode-code-border);
+  border-radius: 8px;
+}
+
+div[class*='language-'] > button {
+  opacity: 0.3;
+  transition: opacity 0.2s;
+}
+
+div[class*='language-']:hover > button {
+  opacity: 0.8;
+}
+
+:not(pre) > code {
+  background: var(--vp-code-bg);
+  border: 1px solid var(--lode-code-border);
+  border-radius: 4px;
+  padding: 2px 6px;
+  font-size: 0.9em;
+  color: var(--vp-code-color);
+}
+
+/* ─── Headings ─── */
+h2 {
+  border-bottom-color: var(--lode-accent-border);
+  margin-top: 3rem;
+}
+
+/* ─── Nav ─── */
+.VPNav {
+  border-bottom-color: var(--lode-accent-border);
+}
+
+/* ─── Sidebar ─── */
+.VPSidebar {
+  border-right-color: var(--lode-accent-border);
+}
+
+/* ─── Footer ─── */
+.VPFooter {
+  background: var(--vp-c-bg-soft);
+  border-top-color: var(--lode-accent-border);
+}
+
+/* ─── Scrollbar ─── */
+html {
+  scrollbar-color: var(--lode-scrollbar) transparent;
+  scrollbar-width: thin;
+}
+
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--lode-scrollbar);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--lode-scrollbar-hover);
+}
+
+/* ─── Content Width ─── */
+.VPDoc .content-container {
+  max-width: 780px !important;
+}
+
+/* ─── Home Page Content Sections ─── */
+.VPHome h2 {
+  margin-top: 4rem;
+  margin-bottom: 1.5rem;
+  font-size: 1.2rem;
+  letter-spacing: 0.02em;
+  color: var(--vp-c-text-2);
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid var(--lode-accent-border);
+}
+
+.VPHome pre code {
+  color: var(--vp-code-color);
+}
+
+/* ─── Responsive ─── */
+@media (max-width: 768px) {
+  .VPHero .name {
+    font-size: clamp(56px, 16vw, 80px) !important;
+  }
+
+  .VPHero .text {
+    font-size: 16px !important;
+  }
+
+  .VPHero .tagline {
+    font-size: 14px !important;
+  }
+
+  .VPFeature .box {
+    border-left-width: 1px;
+  }
+}
+
+@media (max-width: 480px) {
+  .VPHero .name {
+    font-size: 48px !important;
+  }
 }

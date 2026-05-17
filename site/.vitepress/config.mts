@@ -6,6 +6,7 @@ export default defineConfig({
   base: '/Lode/',
   cleanUrls: true,
   lastUpdated: true,
+  appearance: 'dark',
 
   sitemap: {
     hostname: 'https://kkenny0.github.io/Lode/'
@@ -24,7 +25,7 @@ export default defineConfig({
     root: {
       label: 'English',
       lang: 'en',
-      description: "Agentic coding's persistent memory — capture the why, then compound it into reports, reviews, and decision roadmaps.",
+      description: 'Git tells you what changed. Lode tells your next coding agent why.',
       themeConfig: {
         nav: [
           { text: 'Skills', link: '/skills' },
@@ -42,7 +43,7 @@ export default defineConfig({
       label: '简体中文',
       lang: 'zh-CN',
       link: '/zh/',
-      description: 'Agentic coding 的持久记忆 — 记录为什么，然后将其积累为报告、回顾和决策路线图。',
+      description: 'Git 记录了改了什么。Lode 让下一个 coding agent 知道为什么。',
       themeConfig: {
         nav: [
           { text: '技能', link: '/zh/skills' },
