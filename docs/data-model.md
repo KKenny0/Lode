@@ -2,7 +2,7 @@
 
 [返回主 README](../README.md)
 
-Knowledge vault 采用双层架构设计，将结构化数据与人类可读文档分层存储，实现机器可读性与人类可理解性的平衡。
+Knowledge vault 采用双层架构设计，将结构化数据与人类可读文档分层存储，实现机器可读性与人类可理解性的平衡。数据模型优先服务 Decision Replay Loop：capture 记录一次 session 的决策证据，query 用带引用的本地证据回答一个具体 decision。
 
 ## 双层存储结构
 
@@ -67,7 +67,8 @@ Knowledge vault 内部分为 raw/wiki 两层：
 
 ## 数据复用关系
 
-各技能通过共享的数据模型实现上下文复用：
+各技能通过共享的数据模型实现上下文复用。第一条有效路径是
+`install -> demo -> capture one session -> query one decision`：
 
 ```
 开发过程中:
@@ -75,6 +76,11 @@ Knowledge vault 内部分为 raw/wiki 两层：
                 -> {vault}/raw/artifacts/{slug}.json when durable artifacts change
   /lode:query   <- {vault}/raw/decisions/{slug}.json + raw weekly fallback
                 -> cited decision replay answer
+
+已有历史后:
+  /lode:recall  <- raw/weeks/ + raw/artifacts/ + raw/decisions/
+                -> session-start Decision Context
+  /lode:roadmap <- raw entries + decision indexes -> narrative decision roadmap
 
 每天:
   /lode:daily <- raw entries + git log -> {vault}/Daily Note.md
@@ -84,10 +90,10 @@ Knowledge vault 内部分为 raw/wiki 两层：
 
 每月:
   /lode:monthly <- Daily Note.md -> monthly archive + summary
-
-按需:
-  /lode:roadmap <- raw entries + decision indexes -> narrative decision roadmap
 ```
+
+日报、周报和月报是 compounding outputs。它们复用 capture/query 产生的证据，
+但不应取代 decision replay 作为第一优先级。
 
 ## Artifact Ownership Matrix
 
@@ -124,7 +130,7 @@ Artifact index 回答“有哪些长期可召回资料”：
 
 Weekly raw entries 不应承担文档目录的职责。Artifact index 是 `开工召回`、决策路线图、周报和月度回顾的 source navigation layer。
 
-Decision replay index 回答“某条选择为什么发生”：
+Decision replay index 回答“某条选择为什么发生”。这是 Lode 的主要查询面：
 
 - decision slug 和当前摘要；
 - chosen path、rejected/deferred alternatives；
@@ -159,6 +165,7 @@ artifact:
 
 1. **Raw Entry 生成**
    - `/lode:capture`: 每次工作结束时生成结构化的变更信号
+   - 优先记录 chosen path、rejected/deferred alternatives、constraints、risk、open questions、impact 和 source references
    - durable artifacts 变化时，写入或建议更新 `{vault}/raw/artifacts/{slug}.json`
    - weekly raw entry 写入 `{vault}/raw/weeks/{week}/{slug}.json`
 
@@ -166,25 +173,32 @@ artifact:
    - `/lode:query` 优先读取 `{vault}/raw/decisions/{slug}.json`
    - 没有派生索引时 fallback 到 weekly raw entries
    - 仅在有 `source_entry_refs` 或明确本地证据时回答
+   - 支持 `why`、`alternatives`、`revisit`、`impact` 等定向问题
 
-3. **日报生成**
+3. **Session Start / Roadmap**
+   - `/lode:recall` 在已有历史后输出 compact Decision Context
+   - `/lode:roadmap` 把多次 decision replay evidence 串成叙事性决策历史
+   - 二者都读取证据，不重写历史 raw entries
+
+4. **日报生成**
    - `/lode:daily` 读取 weekly raw entries
    - 结合 git log 补充上下文
    - 生成或更新 `{vault}/Daily Note.md`
 
-4. **周报生成**
+5. **周报生成**
    - `/lode:weekly` 消费 weekly raw entries
    - 使用 git 作为 fallback 和 coverage 补充
    - 生成结构化的周报大纲
 
-5. **月度回顾**
+6. **月度回顾**
    - `/lode:monthly` 基于 Daily Note.md
    - 拆分月度档案并生成总结
    - 输出到 `{vault}/Work Diary/Monthly/`
 
 ## 设计优势
 
-- **原始优先**: 周报以 raw entries 为主要语义来源，确保信息质量
+- **Decision replay first**: capture/query 是第一条价值路径，报告和路线图在其后复利
+- **原始优先**: raw entries 是主要语义来源，git 只作为 fallback 和 coverage evidence
 - **决策可回放**: `raw/decisions/` 保持查询路径短而可引用，同时不改变 raw entries 的事实源地位
 - **灵活架构**: 技能可以独立运行，但通过共享数据模型增强协作
 - **双向流动**: Raw entries 既可向上生成报告，也可向下补充日报

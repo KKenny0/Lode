@@ -97,6 +97,22 @@ Follow `references/weekly-ppt-convention.md`. The change entry JSON shape is:
   "related_docs": ["/absolute/path/to/doc"],
   "impact": "report-ready user, system, reliability, or workflow impact",
   "evidence_refs": ["commit SHA, issue ID, eval ID, or doc path"],
+  "decision_threads": ["stable-decision-thread"],
+  "lifecycle_transition": {
+    "subject": "decision:stable-decision-thread",
+    "from": "proposed",
+    "to": "chosen",
+    "reason": "Why this session changed the lifecycle state"
+  },
+  "source_refs": [
+    {
+      "type": "commit | issue | eval | doc | conversation | other",
+      "ref": "stable source id",
+      "path": "/absolute/path/when-local",
+      "url": "https://example.com/when-remote",
+      "note": "short evidence note"
+    }
+  ],
   "motivation": "why this work was needed now",
   "exploration_paths": ["approach tried -> observed outcome"],
   "abandoned_alternatives": ["approach rejected -> reason"],
@@ -127,6 +143,19 @@ Follow `references/weekly-ppt-convention.md`. The change entry JSON shape is:
 
 These are adaptive-depth expectations. In vault mode the helper logs warnings
 for missing archetype fields; it does not reject the entry.
+
+### Decision Tracking Fields
+
+Add `decision_threads` when the entry belongs to a durable decision topic. Use
+stable slug-like terms; decision replay treats these as stronger than artifact
+hints or keyword-derived topics when assigning `thread_id`.
+
+Add `lifecycle_transition` only when the session explicitly changes the state of
+an open question, risk, decision, or artifact. Use `subject`, `from`, `to`, and
+`reason` when known; leave the field absent instead of guessing.
+
+Add `source_refs` when evidence needs typed structure. Each object must include
+`type` and `ref`; optional fields are `path`, `url`, `note`, and `timestamp`.
 
 ### Artifact Context
 

@@ -1,6 +1,9 @@
 # Skills
 
-Lode ships eight skills. Each is independent — install individually or use them all. They share one local storage convention so downstream reports can reuse earlier context.
+Lode ships eight skills. The primary path is `capture -> query`: preserve one
+session's decision evidence, then replay one decision with citations. The other
+skills compound that record into session-start context, roadmap narrative, and
+reports.
 
 ## Cold Start Interview
 
@@ -14,23 +17,11 @@ First-run setup. Creates `~/.lode/config.yaml` with:
 
 Run this once. After that, all other skills read config automatically.
 
-## Recall
-
-**Trigger:** `/lode:recall`, `开工`, `session start`, `继续上次`
-
-Session-start context recall. Reads recent raw entries and artifact indexes from your knowledge vault to surface:
-- Recent decisions and their rationale
-- Open risks and unresolved questions
-- Abandoned alternatives worth remembering
-- Stale intent artifacts that may need attention
-
-Works without a vault — falls back to conversation-only context.
-
 ## Query
 
 **Trigger:** `/lode:query`, `why did we choose this?`, `为什么当时这么选`
 
-The main public wedge: targeted decision replay. Reads
+The primary value path: targeted decision replay. Reads
 `{vault}/raw/decisions/` first, then falls back to raw weekly entries to answer
 specific project-history questions:
 - Why a path was chosen
@@ -56,6 +47,20 @@ Adaptive-depth session recap. Classifies your session as one of five archetypes:
 Writes report-worthy signals (decisions, risks, contracts, impact) rather than process logs. Also generates lightweight sync suggestions for architecture docs, plans, and README files.
 
 Zero-config mode: outputs structured Markdown directly in the conversation without writing to any vault.
+
+## Recall
+
+**Trigger:** `/lode:recall`, `开工`, `session start`, `继续上次`
+
+Session-start context recall for projects with history. Reads recent raw
+entries, decision indexes, and artifact indexes from your knowledge vault to
+surface:
+- Recent decisions and their rationale
+- Open risks and unresolved questions
+- Abandoned alternatives worth remembering
+- Stale intent artifacts that may need attention
+
+Works without a vault — falls back to conversation-only context.
 
 ## Daily
 

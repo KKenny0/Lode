@@ -4,7 +4,7 @@ layout: home
 hero:
   name: Lode
   text: Git tells you what changed. Lode tells your next coding agent why.
-  tagline: Capture decisions at every wrap-up. Recall them at session start. Compound into reports, reviews, and roadmaps.
+  tagline: Install, run the demo, capture one session, then query one decision with cited local evidence.
   actions:
     - theme: brand
       text: Get Started
@@ -18,10 +18,10 @@ features:
     details: Ask why a path was chosen and get cited evidence from local entries and derived decision indexes.
     icon: 🔍
   - title: Persistent Memory
-    details: Capture decisions, abandoned paths, risks, and open questions at every wrap-up. Recall them automatically at session start.
+    details: Capture decisions, abandoned paths, risks, and open questions at wrap-up. Recall them after history exists.
     icon: 💎
-  - title: Compounding Reports
-    details: Raw entries compound into weekly outlines, monthly reviews, and candidate rules. Each layer builds on the last.
+  - title: Compounding Outputs
+    details: The same raw entries later compound into recall context, roadmaps, weekly outlines, and monthly reviews.
     icon: 📈
   - title: Zero-Config Start
     details: One command captures your first session. No vault required. Structured Markdown appears right in the conversation.
@@ -35,21 +35,23 @@ Each skill maps to a habit you already have. Activate it with a namespaced comma
 | Skill | When | What it does |
 | :--- | :--- | :--- |
 | `/lode:cold-start-interview` | First run | Creates `~/.lode/config.yaml` with vault path, project identity, and report preferences |
-| `/lode:recall` | Session start | Recalls recent decisions, risks, open questions, and relevant docs |
 | `/lode:capture` | Every wrap-up | Classifies session archetype, captures decision/repair depth, indexes artifacts |
 | `/lode:query` | Targeted follow-up | Answers "why did we choose this?" with cited decision replay evidence |
+| `/lode:recall` | Session start, after history exists | Recalls recent decisions, risks, open questions, and relevant docs |
+| `/lode:roadmap` | After multiple decisions | Generates narrative decision roadmap with accumulating risks |
 | `/lode:daily` | Daily, on demand | Updates Obsidian daily notes from raw entries and git history |
 | `/lode:weekly` | Weekly, on demand | Builds weekly outline from raw entries with conditional hard-stuff section |
 | `/lode:monthly` | Monthly, on demand | Generates monthly review and candidate rules from repeated evidence |
-| `/lode:roadmap` | On demand | Generates narrative decision roadmap with accumulating risks |
 
-## The Habit Loop
+## The Replay Loop
 
 ```text
-开工 (recall) → 实现探索 (work) → 收工 (capture) → 周期复盘 (review)
+install → demo → capture one session → query one decision
 ```
 
-Weekly, monthly, and roadmap outputs are compounding layers on top of that loop. Skills are independent: each works on its own, but they share one local storage convention so downstream reports reuse earlier context.
+This is the first value path. Weekly, monthly, recall, and roadmap outputs are
+compounding layers on top of the same local record. Skills are independent, but
+they share one storage convention so downstream views reuse earlier evidence.
 
 ## Decision Replay
 
@@ -60,13 +62,11 @@ See the [dogfood proof on GitHub](https://github.com/KKenny0/Lode/blob/main/exam
 ## Install
 
 ```bash
-# Codex Git-backed marketplace
+# Register the marketplace, then follow README.md for cache/config steps.
 codex plugin marketplace add KKenny0/Lode
-
-# CLI verification
-npx @lode/cli doctor
 ```
 
-Then run `/lode:cold-start-interview` once. Say `开工` at the start of a session, `收工` at the end, and use `/lode:query` when an agent needs cited decision evidence.
+Then run the demo, run `/lode:cold-start-interview` once, capture one real
+session with `收工`, and query one decision with `/lode:query`.
 
 No vault? No problem. `收工` outputs structured Markdown directly in the conversation.

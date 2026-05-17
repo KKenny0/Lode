@@ -1,19 +1,24 @@
 # 快速开始
 
-## 安装
+## 1. 安装
 
 ```bash
-# Codex Git-backed marketplace
+# 先注册 marketplace，再按 README.md 完成 cache/config 步骤
 codex plugin marketplace add KKenny0/Lode
-
-# 或本地开发
-codex plugin marketplace add ./path/to/Lode
-
-# 验证安装
-npx @lode/cli doctor
 ```
 
-## 首次运行
+## 2. 运行 Demo
+
+配置 vault 前，先运行确定性的 replay fixture：
+
+```bash
+node examples/decision-replay-demo.mjs
+```
+
+它会打印 `/lode:query` 应该返回的证据包形状：answerability metadata、top
+decision node、raw source references、matched terms，以及 rejected alternatives。
+
+## 3. 首次运行
 
 运行一次冷启动访谈来配置 Lode：
 
@@ -23,46 +28,18 @@ npx @lode/cli doctor
 
 这会创建 `~/.lode/config.yaml`，包含你的 vault 路径、项目标识、语言和报告偏好。
 
-## 日常使用
+## 4. Capture 一次 Session
 
-**开始会话：**
-
-```
-开工
-```
-
-或
-
-```
-/lode:recall
-```
-
-Lode 会从你的 vault 中呈现最近的决策、风险、开放问题和相关文档。
-
-**结束会话：**
+在一次真实 coding session 结束时，说：
 
 ```
 收工
 ```
 
-或
+或运行 `/lode:capture`。Lode 会分类会话原型，并捕获重要内容：决策、风险、
+放弃的方案、制品变更和 source references。
 
-```
-/lode:capture
-```
-
-Lode 会分类会话原型并捕获重要内容 — 决策、风险、放弃的方案、制品变更。
-
-## 试用 Decision Replay
-
-先运行确定性的 demo：
-
-```bash
-node examples/decision-replay-demo.mjs
-```
-
-它会打印 `/lode:query` 应该返回的证据包形状：answerability metadata、top
-decision node、raw source references、matched terms，以及 rejected alternatives。
+## 5. Query 一个 Decision
 
 完成一次 capture 后，问一个具体问题：
 
@@ -72,12 +49,18 @@ decision node、raw source references、matched terms，以及 rejected alternat
 
 通过标准是带引用的回答：匹配到的 decision node ids、`source_entry_refs`、已有记录中的 rejected alternatives，以及在缺少证据时明确返回证据不足。
 
-## 周期复盘
+## 之后：Recall 和 Reports
+
+有历史之后，用 `开工` 或 `/lode:recall` 开始 session。积累多个 decision 后用
+`/lode:roadmap`。raw record 足够厚之后，再生成日报、周报和月报。
+
+## 复利输出
 
 | 命令 | 何时 | 输出 |
 | :--- | :--- | :--- |
 | `/lode:query` | 随时 | 针对具体历史决策问题给出带引用的回答 |
-| `/lode:roadmap` | 随时 | 叙事性决策路线图，包含累积风险 |
+| `/lode:recall` | 已有历史后的开工 | 紧凑 Decision Context |
+| `/lode:roadmap` | 多个决策之后 | 叙事性决策路线图，包含累积风险 |
 | `/lode:daily` | 每天 | 从原始条目 + git 历史生成 Obsidian 日报 |
 | `/lode:weekly` | 每周 | 周报大纲，包含条件性困难章节 |
 | `/lode:monthly` | 每月 | 月度回顾 + 从重复证据生成的候选规则 |
@@ -107,6 +90,6 @@ profile:
 
 ## 零配置
 
-完全跳过 vault。`capture` 直接在对话中输出结构化 Markdown。`recall` 仅使用对话上下文。你从第一个会话就能获得即时价值。
+完全跳过 vault。`capture` 直接在对话中输出结构化 Markdown，所以第一个会话仍然有即时价值。等你希望 `/lode:recall`、`/lode:query` 或报告跨会话复用记录时，再配置 vault。
 
 等你需要积累报告时再配置 vault。

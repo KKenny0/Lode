@@ -18,17 +18,19 @@ AI 让软件探索变便宜，也让上下文延续变困难。
 
 Session 结束，这些上下文通常就消失了。
 
-Lode 是一个本地优先、依赖很轻的 agentic coding persistent memory 工具箱。它的 public wedge 是 decision replay：捕获决策、风险、放弃路径、开放问题和 durable artifacts，之后用带引用的证据回放当时为什么这么选。周报、月报和路线图都是同一份 raw record 之上的复利视图。
+Lode 是一个本地优先、依赖很轻的 agentic coding persistent memory 工具箱。它的主要价值路径是 decision replay：捕获决策、风险、放弃路径、开放问题和 durable artifacts，之后用带引用的证据回放当时为什么这么选。周报、月报和路线图都是同一份 raw record 之上的复利视图。
 
-## Habit Loop
+## Decision Replay Loop
 
-Lode 围绕一个应该被反复使用、直到变成习惯的 agentic coding loop 组织：
+Lode 围绕一条主要价值路径打包：
 
 ```text
-开工 -> 实现探索 -> 收工 -> 周期复盘
+安装 -> demo -> capture 一次 session -> query 一个 decision
 ```
 
-周报、月报和决策路线图是这个 loop 之上的周期复利层。自适应深度 recap、轻量 sync suggestions、难点信号和 candidate rules 被吸收到保留的 skills 里，不再作为独立触发。
+这条 loop 证明产品价值：coding agent 可以追问某个选择为什么发生，并得到带引用
+的本地证据，而不是普通 recap。`recall`、`roadmap`、日报、周报、月报都是同一份
+raw record 之上的复利视图，放在后面使用。
 
 ## Skills
 
@@ -39,12 +41,12 @@ namespaced command 激活。
 | :--- | :--- | :--- |
 | `/lode:cold-start-interview` | 首次使用 | 创建包含 vault path、项目身份、语言和报告偏好的 `~/.lode/config.yaml` |
 | `/lode:capture` | 每次收工 | 识别 session archetype，按 decision/build/repair 等类型捕获深度信号，并在需要时索引 durable artifacts |
-| `/lode:recall` | 每次开工 | 召回最近决策、风险、开放问题、放弃方案、相关 docs 和可能过期的 intent artifacts |
 | `/lode:query` | 定向追问 | 用带引用的 decision replay evidence 回答“当时为什么这么选？” |
+| `/lode:recall` | 已有历史后的开工 | 召回最近决策、风险、开放问题、放弃方案、相关 docs 和可能过期的 intent artifacts |
+| `/lode:roadmap` | 多个决策之后按需 | 生成叙事性决策路线图，并汇总累积风险与反复开放问题 |
 | `/lode:daily` | 每天按需 | 从 raw entries 和 git history 更新 Obsidian 日报 |
 | `/lode:weekly` | 每周按需 | 基于 raw entries 生成周报大纲，有证据时加入本周难点 |
 | `/lode:monthly` | 每月按需 | 生成月度工作回顾，并从重复证据中提出 candidate rules |
-| `/lode:roadmap` | 按需 | 生成叙事性决策路线图，并汇总累积风险与反复开放问题 |
 
 Skills 是独立的。Lode 不是一个强制流水线 — 每个 skill 可以单独使用，但它们共享同一套本地存储约定，所以后续报告可以复用之前沉淀的上下文。
 
@@ -56,9 +58,10 @@ Lode 把“当时为什么这么选？”变成一条明确工作流。raw entri
 里面包含一次真实的 Lode-on-Lode dogfood，以及一个在缺少决策历史时正确返回
 无答案的负例查询。
 
-### 3 分钟试出 aha moment
+### 第一条有效路径
 
-先运行确定性的 fixture：
+1. 安装 Lode。
+2. 运行确定性的 fixture：
 
 ```bash
 node examples/decision-replay-demo.mjs
@@ -68,31 +71,90 @@ node examples/decision-replay-demo.mjs
 metadata、top decision node、raw `source_entry_refs`、matched terms，以及
 rejected alternatives。
 
-1. 安装 Lode，并先运行一次 `/lode:cold-start-interview`。
-2. 在一次真实 coding session 结束时，说 `收工` 或运行 `/lode:capture`。
-3. 下次开工时问：`/lode:query why did we choose <the decision>?`
+3. 运行一次 `/lode:cold-start-interview`。
+4. 在一次真实 coding session 结束时，说 `收工` 或运行 `/lode:capture`。
+5. 追问：`/lode:query why did we choose <the decision>?`
 
 有价值的结果不是普通总结，而是带引用的回答：包含匹配到的 decision nodes、
 `source_entry_refs`、被记录下来的 rejected alternatives；如果 vault 里没有这段历史，
 它应该明确说证据不足，而不是编答案。
+这条 loop 跑通之后，再用 `/lode:recall`、`/lode:roadmap`、`/lode:daily`、
+`/lode:weekly` 和 `/lode:monthly` 让同一份记录继续复利。
 
 ## Install
 
+`codex plugin marketplace add` 只会注册 marketplace source，不会把插件本体安装并启用。
+如果要纯命令行安装，需要再把插件复制到 Codex plugin cache，并写入
+`~/.codex/config.toml` 启用 `lode@lode-marketplace`。
+
 ```bash
-# Codex Git-backed marketplace
+# 1. 添加 Git-backed marketplace
 codex plugin marketplace add KKenny0/Lode
+export CODEX_HOME="${CODEX_HOME:-$HOME/.codex}"
+export LODE_MARKETPLACE="lode-marketplace"
+export LODE_PLUGIN="lode"
+export LODE_MARKETPLACE_ROOT="$CODEX_HOME/.tmp/marketplaces/$LODE_MARKETPLACE"
 
-# 本地开发 marketplace
-codex plugin marketplace add ./path/to/Lode
+# 本地开发版本用下面两行替代上面的 GitHub source：
+# codex plugin marketplace add ./path/to/Lode
+# export LODE_MARKETPLACE_ROOT="$(cd ./path/to/Lode && pwd)"
 
-# CLI verification remains available
-npx @lode/cli doctor
+# 2. 复制插件 payload 到 Codex plugin cache
+export LODE_VERSION="$(node -p "require('$LODE_MARKETPLACE_ROOT/.codex-plugin/plugin.json').version")"
+export LODE_CACHE="$CODEX_HOME/plugins/cache/$LODE_MARKETPLACE/$LODE_PLUGIN/$LODE_VERSION"
+rm -rf "$LODE_CACHE"
+mkdir -p "$(dirname "$LODE_CACHE")"
+cp -R "$LODE_MARKETPLACE_ROOT" "$LODE_CACHE"
+
+# 3. 启用 plugins feature 和 Lode plugin
+python3 - "$CODEX_HOME/config.toml" "$LODE_PLUGIN@$LODE_MARKETPLACE" <<'PY'
+from pathlib import Path
+import sys
+
+config_path = Path(sys.argv[1]).expanduser()
+plugin_key = sys.argv[2]
+lines = config_path.read_text().splitlines() if config_path.exists() else []
+
+def set_table_key(input_lines, header, key, value):
+    out = []
+    inside = False
+    seen = False
+    has_key = False
+    for line in input_lines:
+        stripped = line.strip()
+        if stripped.startswith("[") and stripped.endswith("]"):
+            if inside and not has_key:
+                out.append(f"{key} = {value}")
+            inside = stripped == header
+            seen = seen or inside
+            has_key = False
+        if inside and "=" in stripped and stripped.split("=", 1)[0].strip() == key:
+            out.append(f"{key} = {value}")
+            has_key = True
+        else:
+            out.append(line)
+    if inside and not has_key:
+        out.append(f"{key} = {value}")
+    if not seen:
+        if out and out[-1] != "":
+            out.append("")
+        out.extend([header, f"{key} = {value}"])
+    return out
+
+lines = set_table_key(lines, "[features]", "plugins", "true")
+lines = set_table_key(lines, f'[plugins."{plugin_key}"]', "enabled", "true")
+config_path.parent.mkdir(parents=True, exist_ok=True)
+config_path.write_text("\n".join(lines).rstrip() + "\n")
+PY
 ```
 
-然后先运行一次 `/lode:cold-start-interview`。之后在任意 git repo 里正常开发：
-session 开始时说 `开工` 或 `/lode:recall`，session 结束时说 `收工` 或
-`/lode:capture`，agent 需要追问历史选择时运行 `/lode:query`，想回顾项目
-决策演变时运行 `/lode:roadmap`。
+如果 Codex 已经打开，重启 Codex，然后开一个新 thread。此时应该能看到
+`/lode:capture`、`/lode:recall`、`/lode:query` 等 Lode plugin skills。
+
+然后先证明 replay loop：运行 demo，运行一次 `/lode:cold-start-interview`，
+用 `收工` 或 `/lode:capture` 捕获一次真实 session，再用 `/lode:query`
+追问一个 decision。跑通之后，再在 session 开始时用 `开工` 或 `/lode:recall`，
+用 `/lode:roadmap` 回顾决策演变，在 raw record 足够厚之后生成报告。
 
 不配置 vault 也可以开始 — `收工` 会直接在对话中输出结构化 Markdown。
 

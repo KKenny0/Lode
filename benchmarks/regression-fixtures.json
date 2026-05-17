@@ -183,6 +183,45 @@
       ]
     },
     {
+      "id": "decision-replay-explicit-thread-metadata",
+      "execution": {
+        "kind": "query-positive"
+      },
+      "skill": "query",
+      "prompt": "用 /lode:query 回答：why retry budget policy",
+      "fixture": {
+        "vault": "examples/vault",
+        "project_slug": "storyboard-pipeline",
+        "query": "why retry budget policy",
+        "mode": "why",
+        "expected_top_node": "storyboard-pipeline:2026-W20:005",
+        "expected_thread_id": "thread:retry-budget-policy",
+        "expected_topic_key_prefix": [
+          "retry-budget-policy"
+        ],
+        "expected_lifecycle_subject": "decision:retry-budget-policy",
+        "expected_source_ref_type": "conversation",
+        "expected_matched_terms": [
+          "retry",
+          "budget",
+          "policy"
+        ],
+        "expected_rejected_option": "Artifact-derived retry thread",
+        "expected_rejected_reason": "artifact governance hints"
+      },
+      "expected_behavior": "A raw entry with explicit `decision_threads` drives the derived node's `thread_id` and leading `topic_keys`, even when project area, work stream, and artifact context suggest broader topics. The query pack preserves lifecycle and typed source reference metadata on the top node.",
+      "assertions": [
+        {
+          "name": "explicit_decision_thread_preferred",
+          "description": "`decision_threads[0]` becomes the leading topic key and `thread_id`, ahead of artifact hints and keyword fallback."
+        },
+        {
+          "name": "top_node_metadata_preserved",
+          "description": "The top query node includes `lifecycle_transition` and typed `source_refs` from the raw entry."
+        }
+      ]
+    },
+    {
       "id": "decision-replay-query-negative",
       "execution": {
         "kind": "query-negative"

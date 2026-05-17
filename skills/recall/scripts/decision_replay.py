@@ -273,6 +273,18 @@ def as_string_list(value: Any) -> list[str]:
     return []
 
 
+def as_object_list(value: Any) -> list[dict[str, Any]]:
+    if not isinstance(value, list):
+        return []
+    return [dict(item) for item in value if isinstance(item, dict)]
+
+
+def as_object(value: Any) -> dict[str, Any] | None:
+    if isinstance(value, dict):
+        return dict(value)
+    return None
+
+
 def text_value(entry: dict[str, Any], field: str) -> str | None:
     value = entry.get(field)
     if isinstance(value, str) and value.strip():
@@ -282,6 +294,8 @@ def text_value(entry: dict[str, Any], field: str) -> str | None:
 
 def has_explicit_decision_signal(entry: dict[str, Any]) -> bool:
     if entry.get("type") == "decision" or entry.get("archetype") == "decision":
+        return True
+    if as_string_list(entry.get("decision_threads")):
         return True
     return any(as_string_list(entry.get(field)) or text_value(entry, field) for field in EXPLICIT_FIELDS)
 
@@ -353,6 +367,7 @@ def search_tokens(text: str) -> set[str]:
 
 def topic_keys(entry: dict[str, Any], artifact_thread_hints: list[str]) -> list[str]:
     keys: list[str] = []
+    keys.extend(slugify(item) for item in as_string_list(entry.get("decision_threads")))
     for field in ("project_area", "work_stream"):
         value = text_value(entry, field)
         if value:
@@ -424,6 +439,9 @@ def node_from_entry(
     explicit = has_explicit_decision_signal(entry)
     why = text_value(entry, "motivation") or text_value(entry, "context")
     week = str(entry.get("_source_week", "unknown-week"))
+    decision_threads = as_string_list(entry.get("decision_threads"))
+    source_refs = as_object_list(entry.get("source_refs"))
+    lifecycle_transition = as_object(entry.get("lifecycle_transition"))
     inference_notes = []
     if not explicit:
         inference_notes.append("Decision content inferred from summary/context because explicit decision fields were sparse.")
@@ -440,9 +458,12 @@ def node_from_entry(
         "rejected": rejected_paths(entry),
         "open_questions": as_string_list(entry.get("open_questions")),
         "impact": text_value(entry, "impact"),
+        "decision_threads": decision_threads,
+        "lifecycle_transition": lifecycle_transition,
         "topic_keys": keys,
         "artifact_refs": artifact_refs,
         "evidence_refs": as_string_list(entry.get("evidence_refs")),
+        "source_refs": source_refs,
         "thread_id": thread_id_for(keys, entry),
         "inference_notes": inference_notes,
     }
@@ -729,6 +750,7 @@ def node_search_text(node: dict[str, Any], mode: str) -> str:
             node.get("impact"),
             rejected_text,
             " ".join(as_string_list(node.get("open_questions"))),
+            " ".join(as_string_list(node.get("decision_threads"))),
             " ".join(as_string_list(node.get("topic_keys"))),
             " ".join(as_string_list(node.get("artifact_refs"))),
         )
@@ -797,9 +819,13 @@ def compact_node(node: dict[str, Any], terms: list[str] | None = None, mode: str
         "rejected": node.get("rejected", []),
         "open_questions": node.get("open_questions", []),
         "impact": node.get("impact"),
+        "decision_threads": node.get("decision_threads", []),
+        "lifecycle_transition": node.get("lifecycle_transition"),
         "topic_keys": node.get("topic_keys", []),
+        "thread_id": node.get("thread_id"),
         "artifact_refs": node.get("artifact_refs", []),
         "source_entry_refs": node.get("source_entry_refs", []),
+        "source_refs": node.get("source_refs", []),
         "inference_notes": node.get("inference_notes", []),
     }
     if terms is not None:

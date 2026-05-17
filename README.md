@@ -18,17 +18,20 @@ In one coding session, you can compare multiple designs, reject plausible paths,
 
 When the session ends, that context usually disappears.
 
-Lode is a local-first, dependency-light habit toolbox for agentic coding's persistent memory. Its public wedge is decision replay: capture decisions, risks, abandoned paths, open questions, and durable artifacts, then replay the reasoning later with cited evidence. Weekly outlines, monthly reviews, and roadmaps are compounding views over the same raw record.
+Lode is a local-first, dependency-light habit toolbox for agentic coding's persistent memory. Its primary value path is decision replay: capture decisions, risks, abandoned paths, open questions, and durable artifacts, then replay the reasoning later with cited evidence. Weekly outlines, monthly reviews, and roadmaps are compounding views over the same raw record.
 
-## Habit Loop
+## Decision Replay Loop
 
-Lode is organized around the loop you want to repeat until it becomes automatic:
+Lode is packaged around one primary value path:
 
 ```text
-开工 -> 实现探索 -> 收工 -> 周期复盘
+install -> demo -> capture one session -> query one decision
 ```
 
-Weekly, monthly, and roadmap outputs are compounding layers on top of that loop. Adaptive-depth recap, lightweight sync suggestions, hard-stuff signals, and candidate rules are absorbed into the surviving skills instead of living as separate triggers.
+That loop proves the product: a coding agent can ask why a choice was made and
+get cited local evidence instead of a vague recap. `recall`, `roadmap`, daily,
+weekly, and monthly outputs come later as compounding views over the same raw
+record.
 
 ## Skills
 
@@ -39,12 +42,12 @@ namespaced command.
 | :--- | :--- | :--- |
 | `/lode:cold-start-interview` | First run | Creates `~/.lode/config.yaml` with vault path, project identity, language, and report preferences |
 | `/lode:capture` | Every session wrap-up | Classifies the session archetype, captures decision/build/repair depth, and indexes durable artifacts when relevant |
-| `/lode:recall` | Session start | Recalls recent decisions, risks, open questions, abandoned alternatives, relevant docs, and possible stale intent artifacts |
 | `/lode:query` | Targeted follow-up | Answers "why did we choose this?" with cited decision replay evidence |
+| `/lode:recall` | Session start, after history exists | Recalls recent decisions, risks, open questions, abandoned alternatives, relevant docs, and possible stale intent artifacts |
+| `/lode:roadmap` | On demand, after multiple decisions | Generates a narrative decision roadmap, including accumulating risks and recurring open questions |
 | `/lode:daily` | Daily, on demand | Updates Obsidian daily notes from raw entries and git history |
 | `/lode:weekly` | Weekly, on demand | Builds a weekly outline from raw entries, with a conditional hard-stuff section when evidence exists |
 | `/lode:monthly` | Monthly, on demand | Generates a monthly review and candidate rules from repeated evidence |
-| `/lode:roadmap` | On demand | Generates a narrative decision roadmap, including accumulating risks and recurring open questions |
 
 Skills are independent. Lode is not a strict pipeline — each skill works on its own, but they share one local storage convention so downstream reports can reuse earlier context.
 
@@ -58,9 +61,10 @@ See
 real Lode-on-Lode dogfood run, including a negative query that correctly
 returns no answer when the decision history is missing.
 
-### Try the aha moment in 3 minutes
+### First useful path
 
-Run the deterministic fixture first:
+1. Install Lode.
+2. Run the deterministic fixture:
 
 ```bash
 node examples/decision-replay-demo.mjs
@@ -70,13 +74,15 @@ It prints the same compact evidence shape `/lode:query` is meant to give a
 coding agent: answerability metadata, the top decision node, raw
 `source_entry_refs`, matched terms, and rejected alternatives.
 
-1. Install Lode and run `/lode:cold-start-interview` once.
-2. At the end of a real coding session, say `收工` or run `/lode:capture`.
-3. In the next session, ask `/lode:query why did we choose <the decision>?`.
+3. Run `/lode:cold-start-interview` once.
+4. At the end of one real coding session, say `收工` or run `/lode:capture`.
+5. Ask `/lode:query why did we choose <the decision>?`.
 
 The useful result is not a summary. It is a cited answer with matched decision
 nodes, `source_entry_refs`, rejected alternatives when recorded, and an explicit
 "not enough evidence" response when the vault does not contain that history.
+After that loop works, use `/lode:recall`, `/lode:roadmap`, `/lode:daily`,
+`/lode:weekly`, and `/lode:monthly` to compound the same record.
 
 ## Install
 
@@ -100,19 +106,80 @@ npx @lode/cli doctor
 
 ### Codex
 
-```bash
-# Codex Git-backed marketplace
-codex plugin marketplace add KKenny0/Lode
+`codex plugin marketplace add` registers the marketplace source only. For a
+command-line-only install, also copy the plugin into Codex's plugin cache and
+enable it in `~/.codex/config.toml`.
 
-# Or local development marketplace
-codex plugin marketplace add ./path/to/Lode
+```bash
+# 1. Add the Git-backed marketplace.
+codex plugin marketplace add KKenny0/Lode
+export CODEX_HOME="${CODEX_HOME:-$HOME/.codex}"
+export LODE_MARKETPLACE="lode-marketplace"
+export LODE_PLUGIN="lode"
+export LODE_MARKETPLACE_ROOT="$CODEX_HOME/.tmp/marketplaces/$LODE_MARKETPLACE"
+
+# For local development instead, use:
+# codex plugin marketplace add ./path/to/Lode
+# export LODE_MARKETPLACE_ROOT="$(cd ./path/to/Lode && pwd)"
+
+# 2. Copy the plugin payload into Codex's plugin cache.
+export LODE_VERSION="$(node -p "require('$LODE_MARKETPLACE_ROOT/.codex-plugin/plugin.json').version")"
+export LODE_CACHE="$CODEX_HOME/plugins/cache/$LODE_MARKETPLACE/$LODE_PLUGIN/$LODE_VERSION"
+rm -rf "$LODE_CACHE"
+mkdir -p "$(dirname "$LODE_CACHE")"
+cp -R "$LODE_MARKETPLACE_ROOT" "$LODE_CACHE"
+
+# 3. Enable the plugins feature and the Lode plugin.
+python3 - "$CODEX_HOME/config.toml" "$LODE_PLUGIN@$LODE_MARKETPLACE" <<'PY'
+from pathlib import Path
+import sys
+
+config_path = Path(sys.argv[1]).expanduser()
+plugin_key = sys.argv[2]
+lines = config_path.read_text().splitlines() if config_path.exists() else []
+
+def set_table_key(input_lines, header, key, value):
+    out = []
+    inside = False
+    seen = False
+    has_key = False
+    for line in input_lines:
+        stripped = line.strip()
+        if stripped.startswith("[") and stripped.endswith("]"):
+            if inside and not has_key:
+                out.append(f"{key} = {value}")
+            inside = stripped == header
+            seen = seen or inside
+            has_key = False
+        if inside and "=" in stripped and stripped.split("=", 1)[0].strip() == key:
+            out.append(f"{key} = {value}")
+            has_key = True
+        else:
+            out.append(line)
+    if inside and not has_key:
+        out.append(f"{key} = {value}")
+    if not seen:
+        if out and out[-1] != "":
+            out.append("")
+        out.extend([header, f"{key} = {value}"])
+    return out
+
+lines = set_table_key(lines, "[features]", "plugins", "true")
+lines = set_table_key(lines, f'[plugins."{plugin_key}"]', "enabled", "true")
+config_path.parent.mkdir(parents=True, exist_ok=True)
+config_path.write_text("\n".join(lines).rstrip() + "\n")
+PY
 ```
 
-Then run `/lode:cold-start-interview` once. Work in any git repo as usual:
-say `开工` or `/lode:recall` at the start of a session, `收工` or
-`/lode:capture` at the end, `/lode:query` when an agent needs a cited answer
-about a past choice, and `/lode:roadmap` when you want to see how your project's
-decisions evolved.
+Restart Codex if it is open, then start a new thread. You should see the Lode
+plugin skills as available commands such as `/lode:capture`, `/lode:recall`,
+and `/lode:query`.
+
+Then prove the replay loop: run the demo, run `/lode:cold-start-interview`
+once, capture one real session with `收工` or `/lode:capture`, and query one
+decision with `/lode:query`. After that, use `开工` or `/lode:recall` at session
+start, `/lode:roadmap` for decision evolution, and reports when the raw record
+has enough history.
 
 No vault? No problem — `收工` outputs structured Markdown directly in the conversation.
 

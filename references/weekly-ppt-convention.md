@@ -134,10 +134,24 @@ The file shape is:
       ],
       "open_questions": [],
       "impact": "Fresh coding agents can recover the reasoning behind past project direction.",
+      "decision_threads": ["decision-replay"],
+      "lifecycle_transition": {
+        "subject": "decision:decision-replay",
+        "from": "proposed",
+        "to": "chosen",
+        "reason": "The derived index gives agents a compact queryable evidence pack."
+      },
       "topic_keys": ["decision-replay", "recall"],
       "artifact_refs": [],
       "evidence_refs": [],
-      "thread_id": "decision-replay",
+      "source_refs": [
+        {
+          "type": "doc",
+          "ref": "decision-replay-plan",
+          "path": "/path/to/project/PLAN.md"
+        }
+      ],
+      "thread_id": "thread:decision-replay",
       "inference_notes": []
     }
   ],
@@ -147,7 +161,7 @@ The file shape is:
       "to": "my-project:2026-W20:002",
       "type": "same_thread",
       "confidence": "heuristic",
-      "reason": "Both nodes share thread_id=decision-replay"
+      "reason": "Both nodes share thread:decision-replay"
     }
   ]
 }
@@ -169,9 +183,12 @@ The file shape is:
 | `rejected` | object[] | No | Rejected options with reasons, derived from `abandoned_alternatives` |
 | `open_questions` | string[] | No | Unresolved questions from the source entry |
 | `impact` | string | No | Downstream effect of the decision |
+| `decision_threads` | string[] | No | Explicit raw-entry decision threads used before artifact hints or keyword fallback |
+| `lifecycle_transition` | object | No | Raw-entry lifecycle transition when this node carries a state change |
 | `topic_keys` | string[] | No | Stable retrieval terms for deterministic query helpers |
 | `artifact_refs` | string[] | No | Artifact paths or ids touched by the decision |
 | `evidence_refs` | string[] | No | Commit SHAs, eval IDs, issue IDs, doc refs, or source refs |
+| `source_refs` | object[] | No | Typed source references copied from the raw entry |
 | `thread_id` | string | No | Decision thread grouping key |
 | `inference_notes` | string[] | No | Notes explaining any inferred decision content |
 
@@ -327,6 +344,21 @@ Each `{vault}/raw/weeks/{week}/{slug}.json` file contains a **JSON array** of en
     "motivation": "Manual positioning caused recurring panel overlap failures during export.",
     "impact": "Weekly outline can explain the shipped layout capability without re-reading implementation commits.",
     "evidence_refs": ["abc1234", "/Users/dev/projects/my-project/docs/stage-composition-implementation.md"],
+    "decision_threads": ["composition-layout-boundary"],
+    "lifecycle_transition": {
+      "subject": "decision:composition-layout-boundary",
+      "from": "proposed",
+      "to": "chosen",
+      "reason": "Auto-layout with overlap resolution replaced manual positioning."
+    },
+    "source_refs": [
+      {
+        "type": "commit",
+        "ref": "abc1234",
+        "path": "/Users/dev/projects/my-project",
+        "note": "Implemented the composition layout change."
+      }
+    ],
     "artifact_context": [
       {
         "artifact_path": "/Users/dev/projects/my-project/DESIGN.md",
@@ -363,6 +395,9 @@ Consumers must tolerate these fields being absent. Producers should add them whe
 | `impact` | string | User, system, or engineering impact in report-friendly language |
 | `status` | enum | `done` \| `ongoing` \| `risk` \| `decision` |
 | `evidence_refs` | string[] | Commit SHAs, eval IDs, issue IDs, or doc paths supporting the entry |
+| `decision_threads` | string[] | Stable thread keys for decision replay. These override artifact hints and keyword fallback when deriving `thread_id` |
+| `lifecycle_transition` | object | Explicit state change for an open question, risk, decision, or artifact |
+| `source_refs` | object[] | Typed source references with `type` and `ref`, plus optional `path`, `url`, `note`, or `timestamp` |
 | `motivation` | string | Trigger reason and goal for the change — what problem was being solved |
 | `exploration_paths` | string[] | Approaches tried during the session and their outcomes |
 | `abandoned_alternatives` | string[] | Approaches explicitly rejected and why |
@@ -427,6 +462,15 @@ Recommended producer behavior:
   classification rules from the skill.
 - Add `impact` when the entry has a clear user, system, reporting, reliability, migration, or developer-workflow effect. This should be more report-ready than `context`, not a duplicate.
 - Add `evidence_refs` for commit SHAs, issue IDs, eval IDs, or doc paths that are already known. Do not perform extra repository analysis only to populate this field.
+- Add `decision_threads` when the entry belongs to a durable decision topic.
+  Use stable slug-like terms such as `validation-repair-ownership`; these are
+  preferred over artifact hints and keywords for decision replay `thread_id`.
+- Add `lifecycle_transition` when the entry explicitly changes the state of an
+  open question, risk, decision, or artifact. Keep it factual and tied to the
+  current raw entry.
+- Add `source_refs` when evidence needs a typed reference rather than a plain
+  string. Each object must include `type` and `ref`; optional fields are
+  `path`, `url`, `note`, and `timestamp`.
 - Add `project_area` or `work_stream` when the natural module or narrative grouping is obvious. Leave them absent rather than guessing.
 - Add `motivation` when the trigger for the change is clear — the problem being solved, the constraint that forced the change, or the goal being pursued. This is the "why now" behind the change.
 - Add `exploration_paths` when the session involved trying multiple approaches. Each entry should describe the approach and its outcome (e.g. "lazy loading → marginal gain on mobile first-screen").
@@ -493,6 +537,22 @@ risk: identified -> mitigated -> accepted -> obsolete
 decision: proposed -> chosen -> revised -> superseded
 artifact: draft -> active -> superseded -> obsolete; active -> missing
 ```
+
+Use the optional `lifecycle_transition` field when a raw entry carries one of
+these changes:
+
+```json
+{
+  "subject": "decision:validation-repair-ownership",
+  "from": "proposed",
+  "to": "chosen",
+  "reason": "The validation stage owns its internal repair loop."
+}
+```
+
+`subject`, `from`, `to`, and `reason` are recommended when known. Consumers must
+tolerate partial objects because older entries and agent-authored fallback
+entries may only know the new state.
 
 Future consumers may derive current state by reading entries in timestamp order.
 Producers must not pretend lifecycle state is fully managed if they only have a

@@ -7,6 +7,11 @@ stores indexes and report outputs, not full copies of every project document.
 This keeps decision replay dependency-light while still making important
 artifacts discoverable.
 
+The governance rule is simple: preserve enough provenance for
+`/lode:capture -> /lode:query` first. `recall`, `roadmap`, weekly, and monthly
+outputs can reuse that provenance later, but they should not require duplicating
+repo-local documents into the vault.
+
 ## Storage Surfaces
 
 | Surface | Owns | Examples |
@@ -15,6 +20,24 @@ artifacts discoverable.
 | Vault raw layer | Machine-readable memory and indexes | `raw/weeks/`, `raw/decisions/`, `raw/artifacts/`, `raw/months/` |
 | Vault wiki layer | Human-readable synthesis | Daily Note, weekly outline, monthly review, decision roadmap |
 | Conversation fallback | Zero-config immediate output | Structured `/lode:capture` recap when no vault is configured |
+
+## Primary Replay Path
+
+The first complete loop is:
+
+```text
+capture one session -> query one decision
+```
+
+For that loop to work, capture-owned entries should preserve:
+
+- the decision or change under discussion;
+- the path chosen and alternatives rejected or deferred;
+- the rationale, constraints, risks, and open questions;
+- references to raw entries or durable artifacts that support the answer.
+
+Later outputs should read this evidence instead of asking users to maintain a
+parallel report-specific memory.
 
 ## Artifact Index
 

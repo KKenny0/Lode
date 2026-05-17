@@ -267,6 +267,36 @@ def validate_artifact_context(entry: dict[str, Any]) -> None:
                     )
 
 
+def validate_source_refs(entry: dict[str, Any]) -> None:
+    if "source_refs" not in entry:
+        return
+    refs = entry["source_refs"]
+    if not isinstance(refs, list):
+        raise ValueError("entry source_refs must be a list when present")
+    for index, ref in enumerate(refs):
+        if not isinstance(ref, dict):
+            raise ValueError(f"entry source_refs[{index}] must be an object")
+        for field in ("type", "ref"):
+            if not isinstance(ref.get(field), str) or not ref[field].strip():
+                raise ValueError(f"entry source_refs[{index}].{field} must be a non-empty string")
+        for field in ("path", "url", "note", "timestamp"):
+            if field in ref and (not isinstance(ref[field], str) or not ref[field].strip()):
+                raise ValueError(f"entry source_refs[{index}].{field} must be a non-empty string when present")
+
+
+def validate_lifecycle_transition(entry: dict[str, Any]) -> None:
+    if "lifecycle_transition" not in entry:
+        return
+    transition = entry["lifecycle_transition"]
+    if not isinstance(transition, dict):
+        raise ValueError("entry lifecycle_transition must be an object when present")
+    for field in ("subject", "from", "to", "reason"):
+        if field in transition and (
+            not isinstance(transition[field], str) or not transition[field].strip()
+        ):
+            raise ValueError(f"entry lifecycle_transition.{field} must be a non-empty string when present")
+
+
 def validate_entry(entry: Any) -> dict[str, Any]:
     if not isinstance(entry, dict):
         raise ValueError("entry must be a JSON object")
@@ -283,6 +313,7 @@ def validate_entry(entry: Any) -> dict[str, Any]:
     for field in (
         "related_docs",
         "evidence_refs",
+        "decision_threads",
         "exploration_paths",
         "abandoned_alternatives",
         "open_questions",
@@ -303,6 +334,8 @@ def validate_entry(entry: Any) -> dict[str, Any]:
             not isinstance(entry[field], str) or not entry[field].strip()
         ):
             raise ValueError(f"entry {field} must be a non-empty string when present")
+    validate_source_refs(entry)
+    validate_lifecycle_transition(entry)
     if "status" in entry and entry["status"] not in VALID_STATUSES:
         raise ValueError(f"entry status must be one of: {', '.join(sorted(VALID_STATUSES))}")
     if "archetype" in entry and entry["archetype"] not in VALID_ARCHETYPES:

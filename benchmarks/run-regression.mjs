@@ -168,17 +168,47 @@ function runQueryPositiveFixture(fixture) {
     const topNode = queryPack.top_nodes[0] || {};
     assert(
       topNode.id === config.expected_top_node,
-      `${fixture.id}: expected validation repair node first, got ${topNode.id}`,
+      `${fixture.id}: expected top node ${config.expected_top_node}, got ${topNode.id}`,
     );
     assert(topNode.confidence === 'explicit', `${fixture.id}: expected explicit top node`);
     assertSourceRefs(queryPack.top_nodes, fixture.id);
-    assert(
-      queryPack.rejected_alternatives.some(item => (
-        String(item.option || '').includes(config.expected_rejected_option)
-        && String(item.reason || '').includes(config.expected_rejected_reason)
-      )),
-      `${fixture.id}: missing rejected orchestration alternative`,
-    );
+    if (config.expected_thread_id) {
+      const indexedTopNode = index.nodes.find(node => node.id === config.expected_top_node) || {};
+      assert(topNode.thread_id === config.expected_thread_id, `${fixture.id}: top node thread_id was ${topNode.thread_id}`);
+      assert(
+        indexedTopNode.thread_id === config.expected_thread_id,
+        `${fixture.id}: indexed node thread_id was ${indexedTopNode.thread_id}`,
+      );
+    }
+    if (Array.isArray(config.expected_topic_key_prefix)) {
+      for (const [index, expectedKey] of config.expected_topic_key_prefix.entries()) {
+        assert(
+          topNode.topic_keys?.[index] === expectedKey,
+          `${fixture.id}: expected topic_keys[${index}]=${expectedKey}, got ${topNode.topic_keys?.[index]}`,
+        );
+      }
+    }
+    if (config.expected_lifecycle_subject) {
+      assert(
+        topNode.lifecycle_transition?.subject === config.expected_lifecycle_subject,
+        `${fixture.id}: lifecycle_transition.subject was ${topNode.lifecycle_transition?.subject}`,
+      );
+    }
+    if (config.expected_source_ref_type) {
+      assert(
+        topNode.source_refs?.some(ref => ref.type === config.expected_source_ref_type),
+        `${fixture.id}: missing source_refs type ${config.expected_source_ref_type}`,
+      );
+    }
+    if (config.expected_rejected_option || config.expected_rejected_reason) {
+      assert(
+        queryPack.rejected_alternatives.some(item => (
+          String(item.option || '').includes(config.expected_rejected_option)
+          && String(item.reason || '').includes(config.expected_rejected_reason)
+        )),
+        `${fixture.id}: missing expected rejected alternative`,
+      );
+    }
   } finally {
     fs.rmSync(tempRoot, { recursive: true, force: true });
   }

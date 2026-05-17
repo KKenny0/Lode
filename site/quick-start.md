@@ -1,19 +1,25 @@
 # Quick Start
 
-## Install
+## 1. Install
 
 ```bash
-# Codex Git-backed marketplace
+# Register the marketplace, then follow README.md for cache/config steps.
 codex plugin marketplace add KKenny0/Lode
-
-# Or local development
-codex plugin marketplace add ./path/to/Lode
-
-# Verify installation
-npx @lode/cli doctor
 ```
 
-## First Run
+## 2. Run the Demo
+
+Run the deterministic replay fixture before setting up a vault:
+
+```bash
+node examples/decision-replay-demo.mjs
+```
+
+It prints the evidence-pack shape that `/lode:query` should return:
+answerability metadata, the top decision node, raw source references, matched
+terms, and rejected alternatives.
+
+## 3. First Run
 
 Run the cold-start interview once to configure Lode:
 
@@ -23,47 +29,19 @@ Run the cold-start interview once to configure Lode:
 
 This creates `~/.lode/config.yaml` with your vault path, project identity, language, and report preferences.
 
-## Daily Use
+## 4. Capture One Session
 
-**Start a session:**
-
-```
-开工
-```
-
-or
-
-```
-/lode:recall
-```
-
-Lode surfaces recent decisions, risks, open questions, and relevant docs from your vault.
-
-**End a session:**
+At the end of one real coding session, say:
 
 ```
 收工
 ```
 
-or
+or run `/lode:capture`. Lode classifies the session archetype and captures what
+matters: decisions, risks, abandoned paths, artifact changes, and source
+references.
 
-```
-/lode:capture
-```
-
-Lode classifies the session archetype and captures what matters — decisions, risks, abandoned paths, artifact changes.
-
-## Try Decision Replay
-
-Run the deterministic demo first:
-
-```bash
-node examples/decision-replay-demo.mjs
-```
-
-It prints the evidence-pack shape that `/lode:query` should return: answerability
-metadata, the top decision node, raw source references, matched terms, and
-rejected alternatives.
+## 5. Query One Decision
 
 After one captured session, ask a concrete question:
 
@@ -73,12 +51,19 @@ After one captured session, ask a concrete question:
 
 The pass condition is a cited answer: matched decision node ids, `source_entry_refs`, rejected alternatives when they exist, and an explicit insufficient-evidence response when Lode has no supporting record.
 
-## Periodic Reviews
+## Later: Recall and Reports
+
+Once there is history, start sessions with `开工` or `/lode:recall`. Use
+`/lode:roadmap` when several decisions have accumulated. Use daily, weekly, and
+monthly outputs when the raw record is thick enough to synthesize.
+
+## Compounding Outputs
 
 | Command | When | Output |
 | :--- | :--- | :--- |
 | `/lode:query` | Any time | Cited answer to a targeted decision-history question |
-| `/lode:roadmap` | Any time | Narrative decision roadmap with accumulating risks |
+| `/lode:recall` | Session start, after history exists | Compact Decision Context |
+| `/lode:roadmap` | After multiple decisions | Narrative decision roadmap with accumulating risks |
 | `/lode:daily` | Daily | Obsidian daily note from raw entries + git history |
 | `/lode:weekly` | Weekly | Weekly outline with conditional hard-stuff section |
 | `/lode:monthly` | Monthly | Monthly review + candidate rules from repeated evidence |
@@ -109,6 +94,6 @@ See the [config template](https://github.com/KKenny0/Lode/blob/main/references/l
 
 ## Zero-Config
 
-Skip the vault entirely. `capture` outputs structured Markdown right in the conversation. `recall` works from conversation context alone. You get immediate value from the first session.
+Skip the vault entirely. `capture` outputs structured Markdown right in the conversation, so the first session still has immediate value. Configure a vault before expecting `/lode:recall`, `/lode:query`, or reports to reuse that record across sessions.
 
 Configure a vault later when you want compounding reports.
