@@ -50,6 +50,17 @@ namespaced command 激活。
 
 Skills 是独立的。Lode 不是一个强制流水线 — 每个 skill 可以单独使用，但它们共享同一套本地存储约定，所以后续报告可以复用之前沉淀的上下文。
 
+### Recommended Habit Loop
+
+先运行一次 `/lode:cold-start-interview` 配置 vault。真实 session 结束后，用
+`/lode:capture` 记录决策、风险、放弃路径、开放问题和 durable artifacts。之后
+每次开工，用 `/lode:recall` 在编辑前恢复最近工作上下文。
+
+需要追问单个决策时，用 `/lode:query` 获取带引用的回答。多个决策累积之后，再用
+`/lode:roadmap` 做阶段性复盘；它不是 `/lode:recall` 的前置步骤。需要周期报告时，
+再用 `/lode:daily`、`/lode:weekly` 和 `/lode:monthly` 把同一份 raw record
+转成日报、周报和月报。
+
 ## Decision Replay
 
 Lode 把“当时为什么这么选？”变成一条明确工作流。raw entries 仍然是事实源，

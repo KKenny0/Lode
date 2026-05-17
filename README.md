@@ -51,6 +51,18 @@ namespaced command.
 
 Skills are independent. Lode is not a strict pipeline — each skill works on its own, but they share one local storage convention so downstream reports can reuse earlier context.
 
+### Recommended Habit Loop
+
+Use `/lode:cold-start-interview` once to configure the vault. After real
+sessions, use `/lode:capture` to record decisions, risks, abandoned paths, open
+questions, and durable artifacts. At the start of future sessions, use
+`/lode:recall` to recover recent working context before editing.
+
+Use `/lode:query` when you need a cited answer for one specific decision. Use
+`/lode:roadmap` for phase reviews after multiple decisions have accumulated; it
+is not a prerequisite for `/lode:recall`. Use `/lode:daily`, `/lode:weekly`, and
+`/lode:monthly` when you want the same raw record turned into periodic reports.
+
 ## Decision Replay
 
 Lode turns "why did we choose this?" into a first-class workflow. Raw entries
