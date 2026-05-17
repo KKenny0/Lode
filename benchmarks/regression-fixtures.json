@@ -307,6 +307,48 @@
       ]
     },
     {
+      "id": "decision-roadmap-thread-evidence-pack",
+      "execution": {
+        "kind": "roadmap-threads"
+      },
+      "skill": "roadmap",
+      "prompt": "用 /lode:roadmap 生成 decision narrative 前，先从 decision replay index 生成 thread-level evidence pack。",
+      "fixture": {
+        "vault": "examples/vault",
+        "project_slug": "storyboard-pipeline",
+        "limit_threads": 10,
+        "expected_node_count": 5,
+        "expected_thread_id": "thread:validation",
+        "expected_thread_node_count": 2,
+        "expected_thread_confidence": "mixed",
+        "expected_thread_decision_ids": [
+          "storyboard-pipeline:2026-W18:001",
+          "storyboard-pipeline:2026-W19:003"
+        ],
+        "expected_rejected_option": "Orchestration-level repair ownership",
+        "expected_open_question_text": "repair-loop latency",
+        "expected_lifecycle_thread_id": "thread:retry-budget-policy",
+        "expected_lifecycle_subject": "decision:retry-budget-policy",
+        "expected_source_ref_type": "conversation",
+        "expected_risk_text": "stale architecture docs"
+      },
+      "expected_behavior": "Return a `lode.decision_roadmap.v1` evidence pack that groups decision nodes by thread, preserves explicit versus inferred density, cites source raw entries, carries rejected alternatives and open questions into the thread summary, preserves lifecycle/source metadata for explicit decision threads, and lifts accumulating risks for roadmap synthesis.",
+      "assertions": [
+        {
+          "name": "thread_grouping_preserved",
+          "description": "The validation thread groups the inferred schema-check split and the explicit validation repair ownership decision with source_entry_refs."
+        },
+        {
+          "name": "thread_evidence_density_reported",
+          "description": "The validation thread reports mixed confidence with explicit and inferred node counts."
+        },
+        {
+          "name": "roadmap_signals_lifted",
+          "description": "Rejected alternatives, open questions, lifecycle transitions, typed source refs, and accumulating risks are available before prose generation."
+        }
+      ]
+    },
+    {
       "id": "decision-replay-unsafe-slug-rejected",
       "execution": {
         "kind": "unsafe-slug"

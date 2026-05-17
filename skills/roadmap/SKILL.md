@@ -155,6 +155,15 @@ rebuild an in-memory index from raw entries when the file is missing. It returns
 matching decision nodes, nearby supporting nodes, rejected alternatives, open
 questions, suggested docs, and missing-evidence notes. The host coding agent
 still writes the final answer; the helper only narrows and cites the evidence.
+For roadmap generation, use the deterministic decision-thread evidence pack
+before writing narrative sections:
+
+```bash
+python <this-skill>/scripts/decision_graph.py roadmap --cwd "$PWD" --limit-threads 20
+```
+
+Use that pack to ground thread narratives and cited decision points instead of
+reconstructing those links manually. Raw entries remain the source of truth.
 
 Generate a Markdown document with this structure:
 

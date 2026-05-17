@@ -49,8 +49,8 @@ try {
   }
 
   Run "Validate static roadmap contracts" {
-    rg -n "开工 -> 实现探索 -> 收工 -> 周期复盘" README.md README.cn.md docs/roadmap.md | Out-Null
-    Assert-LastExit "habit loop grep"
+    rg -n "Decision Replay Loop|install -> demo -> capture one session -> query one decision|安装 -> demo -> capture 一次 session -> query 一个 decision" README.md README.cn.md docs/data-model.md | Out-Null
+    Assert-LastExit "decision replay loop grep"
     rg -n "raw/artifacts|artifact index|Artifact Index" references docs skills | Out-Null
     Assert-LastExit "artifact governance grep"
     rg -n "sync_suggestions|Potentially Stale Intent Artifacts|Accumulating Risks|hard stuff this week|Candidate Rules" skills references | Out-Null

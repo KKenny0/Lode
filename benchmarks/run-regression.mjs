@@ -10,6 +10,7 @@ const repoRoot = path.resolve(scriptDir, '..');
 const fixturesPath = path.join(scriptDir, 'regression-fixtures.json');
 const captureRaw = path.join(repoRoot, 'skills', 'capture', 'scripts', 'lode_raw.py');
 const decisionGraph = path.join(repoRoot, 'skills', 'query', 'scripts', 'decision_graph.py');
+const roadmapGraph = path.join(repoRoot, 'skills', 'roadmap', 'scripts', 'decision_graph.py');
 const recallContext = path.join(repoRoot, 'skills', 'recall', 'scripts', 'recall_context.py');
 
 const failures = [];
@@ -137,6 +138,21 @@ function queryDecisionIndex(tempVault, slug, query, mode = 'why') {
     mode,
     '--limit',
     '5',
+  ]);
+}
+
+function roadmapDecisionIndex(tempVault, slug, limitThreads = 10) {
+  return runJson('python3', [
+    roadmapGraph,
+    'roadmap',
+    '--vault',
+    tempVault,
+    '--slug',
+    slug,
+    '--cwd',
+    repoRoot,
+    '--limit-threads',
+    String(limitThreads),
   ]);
 }
 
@@ -348,6 +364,61 @@ function runRecallRebuildFixture(fixture) {
   }
 }
 
+function runRoadmapThreadsFixture(fixture) {
+  const config = fixture.fixture || {};
+  const slug = config.project_slug;
+  const { tempRoot, tempVault } = copyFixtureVault(config);
+
+  try {
+    const roadmapPack = roadmapDecisionIndex(tempVault, slug, config.limit_threads || 10);
+    assert(roadmapPack.schema_version === 'lode.decision_roadmap.v1', `${fixture.id}: bad roadmap schema`);
+    assert(roadmapPack.project_slug === slug, `${fixture.id}: bad project slug`);
+    assert(Array.isArray(roadmapPack.threads), `${fixture.id}: roadmap threads must be an array`);
+    assert(
+      roadmapPack.source?.node_count === config.expected_node_count,
+      `${fixture.id}: expected node_count ${config.expected_node_count}, got ${roadmapPack.source?.node_count}`,
+    );
+
+    const validationThread = roadmapPack.threads.find(thread => thread.thread_id === config.expected_thread_id);
+    assert(validationThread, `${fixture.id}: missing thread ${config.expected_thread_id}`);
+    assert(validationThread.node_count === config.expected_thread_node_count, `${fixture.id}: bad validation node count`);
+    assert(validationThread.confidence === config.expected_thread_confidence, `${fixture.id}: bad thread confidence`);
+    assertSourceRefs(validationThread.decisions || [], fixture.id);
+    for (const expectedId of config.expected_thread_decision_ids || []) {
+      assert(
+        validationThread.decisions?.some(node => node.id === expectedId),
+        `${fixture.id}: thread missing decision ${expectedId}`,
+      );
+    }
+    assert(
+      validationThread.rejected_alternatives?.some(item => String(item.option || '').includes(config.expected_rejected_option)),
+      `${fixture.id}: validation thread missing expected rejected alternative`,
+    );
+    assert(
+      validationThread.open_questions?.some(item => String(item.question || '').includes(config.expected_open_question_text)),
+      `${fixture.id}: validation thread missing expected open question`,
+    );
+
+    const retryThread = roadmapPack.threads.find(thread => thread.thread_id === config.expected_lifecycle_thread_id);
+    assert(retryThread, `${fixture.id}: missing thread ${config.expected_lifecycle_thread_id}`);
+    assert(
+      retryThread.lifecycle_transitions?.some(item => item.subject === config.expected_lifecycle_subject),
+      `${fixture.id}: retry thread missing lifecycle transition ${config.expected_lifecycle_subject}`,
+    );
+    assert(
+      retryThread.decisions?.[0]?.source_refs?.some(ref => ref.type === config.expected_source_ref_type),
+      `${fixture.id}: retry thread missing source_refs type ${config.expected_source_ref_type}`,
+    );
+
+    assert(
+      roadmapPack.accumulating_risks?.some(item => String(item.risk || '').includes(config.expected_risk_text)),
+      `${fixture.id}: roadmap pack missing accumulating risk`,
+    );
+  } finally {
+    fs.rmSync(tempRoot, { recursive: true, force: true });
+  }
+}
+
 function runUnsafeSlugFixture(fixture) {
   const config = fixture.fixture || {};
   const { tempRoot, tempVault } = copyFixtureVault(config);
@@ -478,6 +549,8 @@ function runExecutableFixture(fixture) {
     runQueryIndexFallbackFixture(fixture);
   } else if (kind === 'recall-rebuild') {
     runRecallRebuildFixture(fixture);
+  } else if (kind === 'roadmap-threads') {
+    runRoadmapThreadsFixture(fixture);
   } else if (kind === 'unsafe-slug') {
     runUnsafeSlugFixture(fixture);
   } else if (kind === 'documented-only') {

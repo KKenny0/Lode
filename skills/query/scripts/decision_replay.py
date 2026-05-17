@@ -24,6 +24,7 @@ except Exception:  # pragma: no cover - optional dependency
 
 SCHEMA_VERSION = "lode.decision_replay.v1"
 QUERY_SCHEMA_VERSION = "lode.decision_query.v1"
+ROADMAP_SCHEMA_VERSION = "lode.decision_roadmap.v1"
 SAFE_SLUG_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]*$")
 EXPLICIT_FIELDS = (
     "motivation",
@@ -449,6 +450,9 @@ def node_from_entry(
         "id": f"{slug}:{week}:{ordinal:03d}",
         "timestamp": entry.get("timestamp"),
         "week": week,
+        "entry_type": entry.get("type"),
+        "archetype": entry.get("archetype"),
+        "status": entry.get("status"),
         "confidence": "explicit" if explicit else "inferred",
         "source_entry_refs": [entry_ref(entry)],
         "summary": text_value(entry, "summary") or "Untitled raw entry",
@@ -559,6 +563,11 @@ def latest_entry_datetime(entries: list[dict[str, Any]]) -> dt.datetime | None:
 
 
 def index_is_current(index: dict[str, Any], entries: list[dict[str, Any]]) -> bool:
+    source = index.get("source")
+    if isinstance(source, dict):
+        raw_entry_count = source.get("raw_entry_count")
+        if isinstance(raw_entry_count, int) and raw_entry_count != len(entries):
+            return False
     latest_entry = latest_entry_datetime(entries)
     if latest_entry is None:
         return True
@@ -930,6 +939,174 @@ def build_query_pack(index: dict[str, Any], query: str, mode: str, limit: int) -
     }
 
 
+def roadmap_thread_title(thread_id: str, nodes: list[dict[str, Any]]) -> str:
+    for node in nodes:
+        threads = as_string_list(node.get("decision_threads"))
+        if threads:
+            return threads[0]
+    for node in nodes:
+        keys = as_string_list(node.get("topic_keys"))
+        if keys:
+            return keys[0]
+    return thread_id.removeprefix("thread:")
+
+
+def confidence_mix(nodes: list[dict[str, Any]]) -> str:
+    explicit = sum(1 for node in nodes if node.get("confidence") == "explicit")
+    inferred = len(nodes) - explicit
+    if explicit and inferred:
+        return "mixed"
+    if explicit:
+        return "explicit"
+    return "inferred"
+
+
+def node_is_risk(node: dict[str, Any]) -> bool:
+    fields = (
+        node.get("entry_type"),
+        node.get("archetype"),
+        node.get("status"),
+        node.get("decision"),
+        node.get("summary"),
+    )
+    return any("risk" in str(value).lower() for value in fields if value)
+
+
+def compact_risk(node: dict[str, Any]) -> dict[str, Any]:
+    return {
+        "decision_id": node.get("id"),
+        "risk": node.get("summary") or node.get("decision"),
+        "timestamp": node.get("timestamp"),
+        "confidence": node.get("confidence"),
+        "source_entry_refs": node.get("source_entry_refs", []),
+    }
+
+
+def compact_transition(node: dict[str, Any]) -> dict[str, Any] | None:
+    transition = as_object(node.get("lifecycle_transition"))
+    if not transition:
+        return None
+    return {
+        "decision_id": node.get("id"),
+        "timestamp": node.get("timestamp"),
+        **transition,
+        "source_entry_refs": node.get("source_entry_refs", []),
+    }
+
+
+def build_thread_summary(thread_id: str, nodes: list[dict[str, Any]]) -> dict[str, Any]:
+    ordered = sorted(nodes, key=lambda node: (str(node.get("timestamp", "")), str(node.get("id", ""))))
+    explicit_count = sum(1 for node in ordered if node.get("confidence") == "explicit")
+    inferred_count = len(ordered) - explicit_count
+    rejected: list[dict[str, Any]] = []
+    open_questions: list[dict[str, Any]] = []
+    transitions: list[dict[str, Any]] = []
+    risks: list[dict[str, Any]] = []
+    artifact_refs: list[str] = []
+    source_entry_refs: list[dict[str, Any]] = []
+    inference_notes: list[str] = []
+
+    for node in ordered:
+        source_entry_refs.extend(as_object_list(node.get("source_entry_refs")))
+        artifact_refs.extend(as_string_list(node.get("artifact_refs")))
+        inference_notes.extend(as_string_list(node.get("inference_notes")))
+        if node_is_risk(node):
+            risks.append(compact_risk(node))
+        transition = compact_transition(node)
+        if transition:
+            transitions.append(transition)
+        for item in node.get("rejected", []):
+            if isinstance(item, dict):
+                rejected.append({
+                    "decision_id": node.get("id"),
+                    "timestamp": node.get("timestamp"),
+                    **item,
+                    "source_entry_refs": node.get("source_entry_refs", []),
+                })
+        for question in as_string_list(node.get("open_questions")):
+            open_questions.append({
+                "decision_id": node.get("id"),
+                "timestamp": node.get("timestamp"),
+                "question": question,
+                "source_entry_refs": node.get("source_entry_refs", []),
+            })
+
+    return {
+        "thread_id": thread_id,
+        "title": roadmap_thread_title(thread_id, ordered),
+        "confidence": confidence_mix(ordered),
+        "node_count": len(ordered),
+        "explicit_node_count": explicit_count,
+        "inferred_node_count": inferred_count,
+        "first_timestamp": ordered[0].get("timestamp") if ordered else None,
+        "latest_timestamp": ordered[-1].get("timestamp") if ordered else None,
+        "decisions": [compact_node(node) for node in ordered],
+        "rejected_alternatives": rejected,
+        "open_questions": open_questions,
+        "lifecycle_transitions": transitions,
+        "accumulating_risks": risks,
+        "artifact_refs": dedupe(artifact_refs),
+        "source_entry_refs": source_entry_refs,
+        "inference_notes": dedupe(inference_notes),
+    }
+
+
+def build_roadmap_pack(index: dict[str, Any], limit_threads: int = 20) -> dict[str, Any]:
+    nodes = [node for node in index.get("nodes", []) if isinstance(node, dict)]
+    edges = [edge for edge in index.get("edges", []) if isinstance(edge, dict)]
+    by_thread: dict[str, list[dict[str, Any]]] = {}
+    for node in nodes:
+        thread_id = str(node.get("thread_id") or "thread:unknown")
+        by_thread.setdefault(thread_id, []).append(node)
+
+    threads = [build_thread_summary(thread_id, thread_nodes) for thread_id, thread_nodes in by_thread.items()]
+    threads.sort(
+        key=lambda thread: (
+            str(thread.get("latest_timestamp", "")),
+            str(thread.get("thread_id", "")),
+        ),
+        reverse=True,
+    )
+    limited_threads = threads[: max(limit_threads, 1)]
+    included_thread_ids = {str(thread.get("thread_id")) for thread in limited_threads}
+    node_to_thread = {
+        str(node.get("id")): str(node.get("thread_id") or "thread:unknown")
+        for node in nodes
+    }
+    cross_thread_edges = [
+        edge for edge in edges
+        if node_to_thread.get(str(edge.get("from"))) in included_thread_ids
+        and node_to_thread.get(str(edge.get("to"))) in included_thread_ids
+        and node_to_thread.get(str(edge.get("from"))) != node_to_thread.get(str(edge.get("to")))
+    ]
+    return {
+        "schema_version": ROADMAP_SCHEMA_VERSION,
+        "project_slug": index.get("project_slug"),
+        "generated_at": current_timestamp(),
+        "source": {
+            "decision_index_generated_at": index.get("generated_at"),
+            "decision_index_source": index.get("source", {}),
+            "node_count": len(nodes),
+            "edge_count": len(edges),
+        },
+        "thread_count": len(threads),
+        "threads": limited_threads,
+        "cross_thread_edges": cross_thread_edges,
+        "open_questions": [
+            question
+            for thread in limited_threads
+            for question in thread.get("open_questions", [])
+            if isinstance(question, dict)
+        ],
+        "accumulating_risks": [
+            risk
+            for thread in limited_threads
+            for risk in thread.get("accumulating_risks", [])
+            if isinstance(risk, dict)
+        ],
+    }
+
+
 def command_query(args: argparse.Namespace) -> int:
     cwd = Path(args.cwd).expanduser().resolve()
     cfg, _ = resolve_config(cwd)
@@ -937,6 +1114,17 @@ def command_query(args: argparse.Namespace) -> int:
     slug = validate_project_slug(args.slug) if args.slug else project_slug(cwd, vault, cfg.get("project_slug"))
     index = load_index(vault, slug)
     pack = build_query_pack(index, args.query, args.mode, max(args.limit, 1))
+    print(json.dumps(pack, ensure_ascii=False, indent=2))
+    return 0
+
+
+def command_roadmap(args: argparse.Namespace) -> int:
+    cwd = Path(args.cwd).expanduser().resolve()
+    cfg, _ = resolve_config(cwd)
+    vault = Path(args.vault).expanduser().resolve() if args.vault else Path(str(cfg["knowledge_vault"]))
+    slug = validate_project_slug(args.slug) if args.slug else project_slug(cwd, vault, cfg.get("project_slug"))
+    index = load_index(vault, slug)
+    pack = build_roadmap_pack(index, max(args.limit_threads, 1))
     print(json.dumps(pack, ensure_ascii=False, indent=2))
     return 0
 
@@ -967,6 +1155,16 @@ def build_parser() -> argparse.ArgumentParser:
     query_parser.add_argument("--slug", help="Project slug override")
     query_parser.add_argument("--limit", type=int, default=5, help="Maximum top nodes")
     query_parser.set_defaults(func=command_query)
+
+    roadmap_parser = subparsers.add_parser(
+        "roadmap",
+        help="Return thread-level evidence for a decision roadmap",
+    )
+    roadmap_parser.add_argument("--cwd", default=os.getcwd(), help="Project working directory")
+    roadmap_parser.add_argument("--vault", help="Knowledge vault override")
+    roadmap_parser.add_argument("--slug", help="Project slug override")
+    roadmap_parser.add_argument("--limit-threads", type=int, default=20, help="Maximum decision threads")
+    roadmap_parser.set_defaults(func=command_roadmap)
     return parser
 
 
