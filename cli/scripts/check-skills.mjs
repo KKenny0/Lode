@@ -14,6 +14,7 @@ const canonicalConvention = path.join(repoRoot, 'references', 'weekly-ppt-conven
 const officialSkills = [
   'capture',
   'recall',
+  'query',
   'daily',
   'weekly',
   'monthly',
@@ -30,6 +31,17 @@ const conventionCopies = [
   path.join(bundledSkillsDir, 'recall', 'references', 'weekly-ppt-convention.md'),
   path.join(bundledSkillsDir, 'roadmap', 'references', 'weekly-ppt-convention.md'),
   path.join(bundledSkillsDir, 'monthly', 'references', 'weekly-ppt-convention.md'),
+];
+
+const syncedScriptPairs = [
+  [
+    path.join(sourceSkillsDir, 'roadmap', 'scripts', 'decision_graph.py'),
+    path.join(sourceSkillsDir, 'query', 'scripts', 'decision_graph.py'),
+  ],
+  [
+    path.join(bundledSkillsDir, 'roadmap', 'scripts', 'decision_graph.py'),
+    path.join(bundledSkillsDir, 'query', 'scripts', 'decision_graph.py'),
+  ],
 ];
 
 const errors = [];
@@ -110,6 +122,16 @@ if (canonical) {
       const content = fs.readFileSync(copy, 'utf-8');
       assert(content === canonical, `Convention copy is stale: ${copy}`);
     }
+  }
+}
+
+for (const [source, copy] of syncedScriptPairs) {
+  assert(exists(source), `Script source is missing: ${source}`);
+  assert(exists(copy), `Script copy is missing: ${copy}`);
+  if (exists(source) && exists(copy)) {
+    const sourceContent = fs.readFileSync(source, 'utf-8');
+    const copyContent = fs.readFileSync(copy, 'utf-8');
+    assert(sourceContent === copyContent, `Script copy is stale: ${copy}`);
   }
 }
 

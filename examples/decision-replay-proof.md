@@ -19,7 +19,8 @@ The source entry records the decision to build a derived Decision Replay Index
 before a larger autonomous capture platform. It also records rejected
 alternatives: building `lode-studio`/sentinel/Pi capture first, letting capture
 write graph nodes directly, and adding `/lode:query` before the helper query
-shape stabilizes.
+shape stabilized. The reproducible fixture later made `/lode:query` small enough
+to add as a thin wrapper.
 
 The committed repository proof stays reproducible through:
 
@@ -53,7 +54,7 @@ index can be rebuilt from `{vault}/raw/weeks/` at any time.
 ## Query 1: Why Decision Replay Before Autonomous Capture?
 
 ```bash
-python3 skills/roadmap/scripts/decision_graph.py query \
+python3 skills/query/scripts/decision_graph.py query \
   "why decision replay index autonomous capture" \
   --cwd "$PWD" \
   --slug lode \
@@ -84,12 +85,12 @@ Rejected alternatives preserved in the query pack:
 
 - Build `lode-studio`, sentinel, or Pi capture agent first: rejected because the bottleneck is replay quality, not passive collection or visualization.
 - Make capture write graph nodes directly: rejected because raw entries should remain the source of truth and derived indexes should be rebuildable.
-- Add a new `/lode:query` skill immediately: rejected until the helper query shape stabilizes through dogfood.
+- Add a new `/lode:query` skill immediately: rejected at the time until the helper query shape stabilized through dogfood.
 
 ## Query 2: Why Keep Raw Entries As Source Of Truth?
 
 ```bash
-python3 skills/roadmap/scripts/decision_graph.py query \
+python3 skills/query/scripts/decision_graph.py query \
   "why raw entries source of truth" \
   --cwd "$PWD" \
   --slug lode \
@@ -114,7 +115,7 @@ answer with citations.
 ## Query 3: What Should Be Revisited Later?
 
 ```bash
-python3 skills/roadmap/scripts/decision_graph.py query \
+python3 skills/query/scripts/decision_graph.py query \
   "zero config decision recording schema open questions" \
   --cwd "$PWD" \
   --slug lode \
@@ -132,13 +133,13 @@ returns its open questions:
 For the W20 product-direction node, useful revisit candidates are:
 
 - `lode-studio` / sentinel / Pi capture agent, after replay quality is proven.
-- `/lode:query`, after helper query modes stabilize through recall and roadmap dogfood.
+- richer `/lode:query` synthesis, after helper query modes see more real usage.
 - richer query scoring, if lexical matching becomes too noisy on larger vaults.
 
 ## Negative Query: Do Not Answer Missing History
 
 ```bash
-python3 skills/roadmap/scripts/decision_graph.py query \
+python3 skills/query/scripts/decision_graph.py query \
   "why did we choose sqlite indexing for mobile sync" \
   --cwd "$PWD" \
   --slug lode \
@@ -176,8 +177,8 @@ What needs more dogfood:
 - Lower-ranked results can be noisy because v1 retrieval is lexical.
 - Thread grouping is still simple and should improve after more real decision
   data accumulates.
-- A future `/lode:query` skill should wait until the helper's query modes are
-  stable enough to wrap.
+- `/lode:query` should stay a thin wrapper until the helper's query modes prove
+  they need richer synthesis.
 
 ## Product Conclusion
 

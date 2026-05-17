@@ -40,6 +40,7 @@ Each skill maps to a habit you already have. Activate it with a namespaced comma
 | `/lode:cold-start-interview` | First run | Creates `~/.lode/config.yaml` with vault path, project identity, and report preferences |
 | `/lode:recall` | Session start | Recalls recent decisions, risks, open questions, and relevant docs |
 | `/lode:capture` | Every wrap-up | Classifies session archetype, captures decision/repair depth, indexes artifacts |
+| `/lode:query` | Targeted follow-up | Answers "why did we choose this?" with cited decision replay evidence |
 | `/lode:daily` | Daily, on demand | Updates Obsidian daily notes from raw entries and git history |
 | `/lode:weekly` | Weekly, on demand | Builds weekly outline from raw entries with conditional hard-stuff section |
 | `/lode:monthly` | Monthly, on demand | Generates monthly review and candidate rules from repeated evidence |
@@ -71,6 +72,6 @@ codex plugin marketplace add KKenny0/Lode
 npx @lode/cli doctor
 ```
 
-Then run `/lode:cold-start-interview` once. Say `开工` at the start of a session, `收工` at the end.
+Then run `/lode:cold-start-interview` once. Say `开工` at the start of a session, `收工` at the end, and use `/lode:query` when an agent needs cited decision evidence.
 
 No vault? No problem — `收工` outputs structured Markdown directly in the conversation.

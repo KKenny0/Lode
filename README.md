@@ -40,6 +40,7 @@ namespaced command.
 | `/lode:cold-start-interview` | First run | Creates `~/.lode/config.yaml` with vault path, project identity, language, and report preferences |
 | `/lode:capture` | Every session wrap-up | Classifies the session archetype, captures decision/build/repair depth, and indexes durable artifacts when relevant |
 | `/lode:recall` | Session start | Recalls recent decisions, risks, open questions, abandoned alternatives, relevant docs, and possible stale intent artifacts |
+| `/lode:query` | Targeted follow-up | Answers "why did we choose this?" with cited decision replay evidence |
 | `/lode:daily` | Daily, on demand | Updates Obsidian daily notes from raw entries and git history |
 | `/lode:weekly` | Weekly, on demand | Builds a weekly outline from raw entries, with a conditional hard-stuff section when evidence exists |
 | `/lode:monthly` | Monthly, on demand | Generates a monthly review and candidate rules from repeated evidence |
@@ -88,8 +89,9 @@ codex plugin marketplace add ./path/to/Lode
 
 Then run `/lode:cold-start-interview` once. Work in any git repo as usual:
 say `开工` or `/lode:recall` at the start of a session, `收工` or
-`/lode:capture` at the end, and `/lode:roadmap` when you want to see how your
-project's decisions evolved.
+`/lode:capture` at the end, `/lode:query` when an agent needs a cited answer
+about a past choice, and `/lode:roadmap` when you want to see how your project's
+decisions evolved.
 
 No vault? No problem — `收工` outputs structured Markdown directly in the conversation.
 
@@ -108,6 +110,7 @@ Lode writes local Markdown and JSON only. Code-adjacent artifacts such as archit
 npm --prefix cli run build
 npm --prefix cli run copy-skills
 npm --prefix cli run check-skills
+npm --prefix cli run test:regression
 ```
 
 Design principles:

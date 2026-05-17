@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What This Is
 
-**Lode** — a cross-runtime plugin and skill monorepo (Claude Code plugin + Codex plugin) for agentic coding's persistent memory. It contains six workflow skills for session-start recall, adaptive-depth context capture, decision roadmaps, daily notes, weekly outlines, and monthly reviews, plus one cold-start setup skill.
+**Lode** — a cross-runtime plugin and skill monorepo (Claude Code plugin + Codex plugin) for agentic coding's persistent memory. It contains six workflow skills for session-start recall, adaptive-depth context capture, decision roadmaps, daily notes, weekly outlines, and monthly reviews, one targeted decision-query skill, plus one cold-start setup skill.
 
 Lode is positioned as a reporting and decision-replay engine, not a generic memory layer. Capture/retrieval is the input; structured weekly outlines, monthly reviews, and decision roadmaps are the product.
 
@@ -72,8 +72,12 @@ skills/
     references/
       recall-output-template.md
       weekly-ppt-convention.md
+  query/             # Targeted decision replay queries
+    SKILL.md
+    scripts/decision_graph.py
   roadmap/                # Narrative decision roadmap from accumulated entries
     SKILL.md
+    scripts/decision_graph.py
     references/
       weekly-ppt-convention.md
   daily/                  # Obsidian daily notes from git history
@@ -112,6 +116,7 @@ skills/*-workspace/                     # Ignored benchmark workspaces/results
 | cold-start-interview | Two-layer config setup (global prefs + project identity) + project registry | `/lode:cold-start-interview`, "configure Lode" |
 | capture | Adaptive-depth session recap plus artifact context and sync suggestions | `/lode:capture`, "收工", "done", "今天到这" |
 | recall | Session-start recall from raw entries + artifact index | `/lode:recall`, "开工", "session start", "继续上次" |
+| query | Targeted decision replay evidence pack | `/lode:query`, "why did we choose this?", "为什么当时这么选" |
 | daily | Obsidian daily notes from git history | `/lode:daily`, "更新日报", "日报", "daily note" |
 | weekly | Raw-first weekly PPT outline with conditional hard-stuff section | `/lode:weekly`, "周报", "weekly PPT" |
 | monthly | Monthly work review with candidate rules from repeated evidence | `/lode:monthly`, "月度回顾", "月报", "monthly review" |
@@ -129,6 +134,7 @@ Lode is not a strict pipeline. Skills are independently triggered, but they can 
 
 开发过程中:
   recall ← {vault}/raw/weeks/ + {vault}/raw/artifacts/ → 开工上下文
+  query ← {vault}/raw/decisions/ + {vault}/raw/weeks/ → 定向决策证据包
   capture ──→ {vault}/raw/weeks/{week}/{slug}.json
                      ├─→ artifact_context embedded in raw entries
                      ├─→ {vault}/raw/artifacts/{slug}.json when durable artifacts change
@@ -136,6 +142,7 @@ Lode is not a strict pipeline. Skills are independently triggered, but they can 
 
 按需:
   roadmap ← {vault}/raw/weeks/ → decisions + accumulating risks + recurring questions
+          └─→ {vault}/raw/decisions/{slug}.json derived decision replay index
 
 每天:
   daily ← {vault}/raw/weeks/ JSON + git log → {vault}/Daily Note.md
@@ -175,6 +182,7 @@ Lode uses four storage surfaces:
 - **Auto-maintained project registry**: `{vault}/raw/projects.json` is created and updated by the `register-project` helper (called during cold-start and as a best-effort side effect during capture). Weekly and daily skills use it for multi-project discovery.
 - **Explicit primary outputs, graceful side effects**: if a skill needs the vault for its main output, it asks for `knowledge_vault`; if a raw change entry is only a side effect, it can skip that write gracefully
 - **Artifact governance**: full repo-local artifacts stay near code by default; vault artifact indexes make them discoverable without turning weekly raw entries into a document catalog
+- **Decision replay query boundary**: `recall` surfaces session-start context; `query` handles targeted "why/alternatives/revisit/impact" questions with cited evidence packs
 - **Raw-first weekly reporting**: `weekly` consumes weekly raw change entries as the primary semantic source; git logs are fallback and coverage evidence only
 - **Adaptive-depth recap**: `capture` classifies sessions as decision/build/investigation/repair/maintenance and writes archetype-specific signals for downstream reports
 - **Legacy arch-doc compatibility**: historical `source: arch-doc` raw entries remain readable, but new write output uses `source: session-recap`

@@ -13,7 +13,8 @@ Lode 围绕你想重复直到自动化的循环来组织：
 1. **开始会话** — `开工` 或 `/lode:recall` 呈现最近的决策、风险和开放问题，让你从上次停下的地方继续。
 2. **正常工作** — 编码、探索、决策、放弃路径、更新 schema。无需特殊操作。
 3. **收工** — `收工` 或 `/lode:capture` 分类会话并捕获重要内容：决策、风险、放弃的方案、制品变更。
-4. **周期复盘** — 需要结构化总结时运行 `/lode:daily`、`/lode:weekly`、`/lode:monthly` 或 `/lode:roadmap`。
+4. **追问决策** — agent 需要知道项目当时为什么选择某条路径时运行 `/lode:query`。
+5. **周期复盘** — 需要结构化总结时运行 `/lode:daily`、`/lode:weekly`、`/lode:monthly` 或 `/lode:roadmap`。
 
 ## 积累层次
 
@@ -22,6 +23,7 @@ Lode 不是严格的流水线。技能独立触发，但会在可用时复用彼
 ```text
 Recall ← raw/weeks/ + raw/artifacts/      → 会话上下文
 Capture → raw/weeks/{week}/{slug}.json    → 原始条目 + 制品索引
+Query   ← raw/decisions/ + raw/weeks/      → 带引用的证据包
 Daily   ← raw/weeks/ JSON + git log       → Daily Note.md
 Weekly  ← raw/weeks/ + git 覆盖           → 周报大纲
 Monthly ← Daily Note.md                   → 月度回顾 + 候选规则

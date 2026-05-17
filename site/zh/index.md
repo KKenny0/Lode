@@ -40,6 +40,7 @@ features:
 | `/lode:cold-start-interview` | 首次运行 | 创建 `~/.lode/config.yaml`，配置 vault 路径、项目标识和报告偏好 |
 | `/lode:recall` | 会话开始 | 回忆最近的决策、风险、开放问题和相关文档 |
 | `/lode:capture` | 每次收工 | 分类会话原型，捕获决策/修复深度，索引制品 |
+| `/lode:query` | 定向追问 | 用带引用的 decision replay evidence 回答“当时为什么这么选？” |
 | `/lode:daily` | 每天，按需 | 从原始条目和 git 历史更新 Obsidian 日报 |
 | `/lode:weekly` | 每周，按需 | 从原始条目构建周报大纲，包含条件性的困难章节 |
 | `/lode:monthly` | 每月，按需 | 从重复证据生成月度回顾和候选规则 |
@@ -71,6 +72,6 @@ codex plugin marketplace add KKenny0/Lode
 npx @lode/cli doctor
 ```
 
-然后运行一次 `/lode:cold-start-interview`。会话开始时说 `开工`，结束时说 `收工`。
+然后运行一次 `/lode:cold-start-interview`。会话开始时说 `开工`，结束时说 `收工`；agent 需要带引用的决策证据时使用 `/lode:query`。
 
 没有 vault？没问题 — `收工` 会直接在对话中输出结构化 Markdown。

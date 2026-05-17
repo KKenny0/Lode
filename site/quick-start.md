@@ -58,6 +58,7 @@ Lode classifies the session archetype and captures what matters — decisions, r
 | Command | When | Output |
 | :--- | :--- | :--- |
 | `/lode:daily` | Daily | Obsidian daily note from raw entries + git history |
+| `/lode:query` | Any time | Cited answer to a targeted decision-history question |
 | `/lode:weekly` | Weekly | Weekly outline with conditional hard-stuff section |
 | `/lode:monthly` | Monthly | Monthly review + candidate rules from repeated evidence |
 | `/lode:roadmap` | Any time | Narrative decision roadmap with accumulating risks |

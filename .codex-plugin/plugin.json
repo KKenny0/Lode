@@ -34,7 +34,8 @@
     "brandColor": "#25636A",
     "defaultPrompt": [
       "Use Lode to capture this session with /lode:capture.",
-      "Use Lode to recall recent project decisions with /lode:recall."
+      "Use Lode to recall recent project decisions with /lode:recall.",
+      "Use Lode to query cited decision evidence with /lode:query."
     ],
     "screenshots": [
       "./assets/lode-three-actions.png"

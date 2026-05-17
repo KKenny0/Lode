@@ -105,8 +105,8 @@
     },
     {
       "id": "decision-replay-index-query-pack",
-      "skill": "roadmap",
-      "prompt": "生成决策路线图，并用 decision replay index 回答：为什么 validation repair ownership 留在 validation stage？",
+      "skill": "query",
+      "prompt": "用 /lode:query 回答：为什么 validation repair ownership 留在 validation stage？",
       "fixture": {
         "vault": "examples/vault",
         "project_slug": "storyboard-pipeline",

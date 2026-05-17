@@ -21,8 +21,11 @@ For each local benchmark run, record:
 
 - `weekly-outline.md` documents the quality bar for raw-first weekly outline generation.
 - `regression-fixtures.json` lists public, synthetic regression scenarios for behavior that should not regress.
+- `run-regression.mjs` executes fixture-backed checks. It currently runs the
+  decision replay query fixture end to end and reports other fixtures as
+  documented-only protocols.
 
-New roadmap skills should keep local eval fixtures under ignored
+New roadmap and query skills should keep local eval fixtures under ignored
 `skills/*/evals/` directories. Public benchmark writeups should describe the
 behavioral contract only: recall quality, intent-sync safety, hard-stuff evidence
 quality, and distillation overfitting safeguards.

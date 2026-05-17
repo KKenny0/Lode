@@ -13,7 +13,8 @@ Each step maps to a natural moment in your workflow:
 1. **Start a session** — `开工` or `/lode:recall` surfaces recent decisions, risks, and open questions so you pick up where you left off.
 2. **Work normally** — code, explore, decide, reject paths, update schemas. No special action needed.
 3. **Wrap up** — `收工` or `/lode:capture` classifies the session and captures what matters: decisions, risks, abandoned alternatives, artifact changes.
-4. **Review periodically** — run `/lode:daily`, `/lode:weekly`, `/lode:monthly`, or `/lode:roadmap` when you need structured synthesis.
+4. **Query decisions** — run `/lode:query` when an agent needs cited evidence for why a project chose a path.
+5. **Review periodically** — run `/lode:daily`, `/lode:weekly`, `/lode:monthly`, or `/lode:roadmap` when you need structured synthesis.
 
 ## Compounding Layers
 
@@ -22,6 +23,7 @@ Lode is not a strict pipeline. Skills are independently triggered, but they reus
 ```text
 Recall ← raw/weeks/ + raw/artifacts/      → session context
 Capture → raw/weeks/{week}/{slug}.json    → raw entry + artifact index
+Query   ← raw/decisions/ + raw/weeks/      → cited evidence pack
 Daily   ← raw/weeks/ JSON + git log       → Daily Note.md
 Weekly  ← raw/weeks/ + git coverage       → weekly outline
 Monthly ← Daily Note.md                   → monthly review + candidate rules

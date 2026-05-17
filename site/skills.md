@@ -1,6 +1,6 @@
 # Skills
 
-Lode ships seven skills. Each is independent — install individually or use them all. They share one local storage convention so downstream reports can reuse earlier context.
+Lode ships eight skills. Each is independent — install individually or use them all. They share one local storage convention so downstream reports can reuse earlier context.
 
 ## Cold Start Interview
 
@@ -25,6 +25,20 @@ Session-start context recall. Reads recent raw entries and artifact indexes from
 - Stale intent artifacts that may need attention
 
 Works without a vault — falls back to conversation-only context.
+
+## Query
+
+**Trigger:** `/lode:query`, `why did we choose this?`, `为什么当时这么选`
+
+Targeted decision replay. Reads the derived decision index and raw-entry
+fallback to answer specific project-history questions:
+- Why a path was chosen
+- What alternatives were rejected or deferred
+- Which open questions should be revisited
+- What impact a decision had
+
+The skill returns cited evidence from `source_entry_refs` and refuses to answer
+when Lode has no supporting record.
 
 ## Capture
 

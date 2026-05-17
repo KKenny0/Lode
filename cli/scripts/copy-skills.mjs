@@ -12,6 +12,7 @@ const bundledSkillsDir = path.join(cliRoot, 'skills');
 const officialSkills = [
   'capture',
   'recall',
+  'query',
   'daily',
   'weekly',
   'monthly',

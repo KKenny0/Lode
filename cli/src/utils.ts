@@ -7,6 +7,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 export const OFFICIAL_SKILLS = [
   'capture',
   'recall',
+  'query',
   'daily',
   'weekly',
   'monthly',
