@@ -53,6 +53,16 @@ Lode 会从你的 vault 中呈现最近的决策、风险、开放问题和相�
 
 Lode 会分类会话原型并捕获重要内容 — 决策、风险、放弃的方案、制品变更。
 
+## 试用 Decision Replay
+
+完成一次 capture 后，问一个具体问题：
+
+```
+/lode:query why did we choose <the decision>?
+```
+
+通过标准是带引用的回答：匹配到的 decision node ids、`source_entry_refs`、已有记录中的 rejected alternatives，以及在缺少证据时明确返回证据不足。
+
 ## 周期复盘
 
 | 命令 | 何时 | 输出 |

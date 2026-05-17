@@ -32,3 +32,4 @@ cli/skills/
 site/node_modules/
 site/.vitepress/cache/
 site/.vitepress/dist/
+.gstack/

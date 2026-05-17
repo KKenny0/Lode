@@ -53,6 +53,16 @@ or
 
 Lode classifies the session archetype and captures what matters — decisions, risks, abandoned paths, artifact changes.
 
+## Try Decision Replay
+
+After one captured session, ask a concrete question:
+
+```
+/lode:query why did we choose <the decision>?
+```
+
+The pass condition is a cited answer: matched decision node ids, `source_entry_refs`, rejected alternatives when they exist, and an explicit insufficient-evidence response when Lode has no supporting record.
+
 ## Periodic Reviews
 
 | Command | When | Output |

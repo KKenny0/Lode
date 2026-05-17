@@ -58,6 +58,16 @@ See
 real Lode-on-Lode dogfood run, including a negative query that correctly
 returns no answer when the decision history is missing.
 
+### Try the aha moment in 3 minutes
+
+1. Install Lode and run `/lode:cold-start-interview` once.
+2. At the end of a real coding session, say `收工` or run `/lode:capture`.
+3. In the next session, ask `/lode:query why did we choose <the decision>?`.
+
+The useful result is not a summary. It is a cited answer with matched decision
+nodes, `source_entry_refs`, rejected alternatives when recorded, and an explicit
+"not enough evidence" response when the vault does not contain that history.
+
 ## Install
 
 ### Claude Code

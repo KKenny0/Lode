@@ -56,6 +56,16 @@ Lode 把“当时为什么这么选？”变成一条明确工作流。raw entri
 里面包含一次真实的 Lode-on-Lode dogfood，以及一个在缺少决策历史时正确返回
 无答案的负例查询。
 
+### 3 分钟试出 aha moment
+
+1. 安装 Lode，并先运行一次 `/lode:cold-start-interview`。
+2. 在一次真实 coding session 结束时，说 `收工` 或运行 `/lode:capture`。
+3. 下次开工时问：`/lode:query why did we choose <the decision>?`
+
+有价值的结果不是普通总结，而是带引用的回答：包含匹配到的 decision nodes、
+`source_entry_refs`、被记录下来的 rejected alternatives；如果 vault 里没有这段历史，
+它应该明确说证据不足，而不是编答案。
+
 ## Install
 
 ```bash
