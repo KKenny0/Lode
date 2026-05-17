@@ -253,6 +253,49 @@ def read_artifacts(vault: Path, slug: str) -> tuple[list[dict[str, Any]], list[d
     return artifacts, missing
 
 
+def read_decision_context(vault: Path, slug: str, limit: int) -> list[dict[str, Any]]:
+    path = vault / "raw" / "decisions" / f"{slug}.json"
+    if not path.exists():
+        return []
+    try:
+        data = json.loads(path.read_text(encoding="utf-8"))
+    except json.JSONDecodeError:
+        return []
+    if isinstance(data, list):
+        items = data
+    elif isinstance(data, dict):
+        nodes = data.get("nodes")
+        if isinstance(nodes, list):
+            items = nodes
+        else:
+            value = data.get("decision_context")
+            if isinstance(value, list):
+                items = value
+            else:
+                items = []
+    else:
+        items = []
+
+    decisions = [item for item in items if isinstance(item, dict)]
+    decisions.sort(
+        key=lambda item: (
+            str(item.get("timestamp", "")),
+            str(item.get("id", "")),
+        ),
+        reverse=True,
+    )
+    return decisions[:limit]
+
+
+def add_decision_context(
+    context: dict[str, Any], vault: Path, slug: str, limit: int
+) -> dict[str, Any]:
+    decision_context = read_decision_context(vault, slug, limit)
+    if decision_context:
+        context["decision_context"] = decision_context
+    return context
+
+
 def build_context(cwd: Path, vault_override: str | None, slug_override: str | None, limit: int) -> dict[str, Any]:
     vault = resolve_vault(cwd, vault_override)
     slug = project_slug(cwd, vault, slug_override)
@@ -273,7 +316,7 @@ def build_context(cwd: Path, vault_override: str | None, slug_override: str | No
     ranked = sorted(entries, key=lambda entry: (signal_score(entry), parse_timestamp(entry)), reverse=True)
     recent_entries = ranked[:limit]
     artifacts, missing_artifacts = read_artifacts(vault, slug)
-    return {
+    context: dict[str, Any] = {
         "project_slug": slug,
         "recent_entries": recent_entries,
         "open_questions": extract_list(entries, "open_questions")[:limit],
@@ -284,6 +327,7 @@ def build_context(cwd: Path, vault_override: str | None, slug_override: str | No
         "intent_artifact_flags": extract_intent_artifact_flags(entries, limit),
         "missing_sources": missing_artifacts,
     }
+    return add_decision_context(context, vault, slug, limit)
 
 
 def main() -> int:

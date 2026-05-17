@@ -1,0 +1,211 @@
+{
+  "schema_version": "lode.decision_replay.v1",
+  "project_slug": "storyboard-pipeline",
+  "generated_at": "2026-05-17T09:40:53+08:00",
+  "source": {
+    "kind": "roadmap",
+    "raw_entry_count": 4,
+    "raw_glob": "/Users/example/lode-vault/raw/weeks/*/storyboard-pipeline.json",
+    "raw_paths": [
+      "/Users/example/lode-vault/raw/weeks/2026-W18/storyboard-pipeline.json",
+      "/Users/example/lode-vault/raw/weeks/2026-W19/storyboard-pipeline.json"
+    ],
+    "node_count": 4,
+    "artifact_index_path": "/Users/example/lode-vault/raw/artifacts/storyboard-pipeline.json",
+    "artifact_index_use": "navigation_and_edge_hints_only"
+  },
+  "nodes": [
+    {
+      "id": "storyboard-pipeline:2026-W18:001",
+      "timestamp": "2026-04-28T16:20:00+08:00",
+      "week": "2026-W18",
+      "confidence": "inferred",
+      "source_entry_refs": [
+        {
+          "week": "2026-W18",
+          "path": "/Users/example/lode-vault/raw/weeks/2026-W18/storyboard-pipeline.json",
+          "timestamp": "2026-04-28T16:20:00+08:00",
+          "entry_index": 0
+        }
+      ],
+      "summary": "Split storyboard validation into deterministic schema checks and LLM-assisted repair loops",
+      "decision": "Split storyboard validation into deterministic schema checks and LLM-assisted repair loops",
+      "why": "Single-pass validation hid recurring panel continuity failures until export time. The split gives weekly reporting a clear reliability story and gives future debugging a stable contract boundary.",
+      "chosen": null,
+      "rejected": [],
+      "open_questions": [],
+      "impact": "Weekly reporting can explain the reliability improvement without re-reading implementation commits.",
+      "topic_keys": [
+        "validation",
+        "storyboard-reliability",
+        "split",
+        "storyboard",
+        "deterministic",
+        "schema",
+        "checks"
+      ],
+      "artifact_refs": [
+        "/Users/example/projects/storyboard-pipeline/docs/2026-W18/lode-stage-validation-implementation-v1.md"
+      ],
+      "evidence_refs": [
+        "abc1234",
+        "eval:continuity-regression-07"
+      ],
+      "thread_id": "thread:validation",
+      "inference_notes": [
+        "Decision content inferred from summary/context because explicit decision fields were sparse."
+      ]
+    },
+    {
+      "id": "storyboard-pipeline:2026-W18:002",
+      "timestamp": "2026-04-29T11:45:00+08:00",
+      "week": "2026-W18",
+      "confidence": "explicit",
+      "source_entry_refs": [
+        {
+          "week": "2026-W18",
+          "path": "/Users/example/lode-vault/raw/weeks/2026-W18/storyboard-pipeline.json",
+          "timestamp": "2026-04-29T11:45:00+08:00",
+          "entry_index": 1
+        }
+      ],
+      "summary": "Kept panel layout generation separate from dialogue generation to preserve independent retry boundaries",
+      "decision": "Kept panel layout generation separate from dialogue generation to preserve independent retry boundaries",
+      "why": "Combining both stages made repair cheaper in the happy path but caused dialogue rewrites during layout-only failures. Separate contracts trade a small orchestration cost for more predictable retries.",
+      "chosen": "Kept panel layout generation separate from dialogue generation to preserve independent retry boundaries",
+      "rejected": [],
+      "open_questions": [],
+      "impact": "Architecture docs now preserve the retry-boundary decision for future stage changes.",
+      "topic_keys": [
+        "pipeline-orchestration",
+        "stage-contract-design",
+        "kept",
+        "panel",
+        "layout",
+        "generation",
+        "separate",
+        "dialogue"
+      ],
+      "artifact_refs": [
+        "/Users/example/projects/storyboard-pipeline/docs/2026-W18/lode-pipeline-evolution-v1.md"
+      ],
+      "evidence_refs": [
+        "doc:pipeline-evolution-v1"
+      ],
+      "thread_id": "thread:pipeline-orchestration",
+      "inference_notes": []
+    },
+    {
+      "id": "storyboard-pipeline:2026-W19:003",
+      "timestamp": "2026-05-05T18:10:00+08:00",
+      "week": "2026-W19",
+      "confidence": "explicit",
+      "source_entry_refs": [
+        {
+          "week": "2026-W19",
+          "path": "/Users/example/lode-vault/raw/weeks/2026-W19/storyboard-pipeline.json",
+          "timestamp": "2026-05-05T18:10:00+08:00",
+          "entry_index": 0
+        }
+      ],
+      "summary": "Kept validation repair loops inside the validation stage while preserving orchestration-level retry boundaries",
+      "decision": "Kept validation repair loops inside the validation stage while preserving orchestration-level retry boundaries",
+      "why": "Repair ownership was becoming ambiguous between validation and orchestration.",
+      "chosen": "Kept validation repair loops inside the validation stage while preserving orchestration-level retry boundaries",
+      "rejected": [
+        {
+          "option": "Orchestration-level repair ownership",
+          "reason": "rejected because it would make orchestration depend on validation internals"
+        }
+      ],
+      "open_questions": [
+        "Should repair-loop latency be tracked at validation-stage level or orchestration level?"
+      ],
+      "impact": "Future session-start recall can point directly to the validation-stage architecture doc instead of re-reading all weekly entries.",
+      "topic_keys": [
+        "validation",
+        "stage-contract-design",
+        "validation-repair-boundary",
+        "stage-retry-boundaries",
+        "validation-stage",
+        "repair-loop",
+        "schema-contract",
+        "kept",
+        "repair",
+        "loops",
+        "inside",
+        "stage"
+      ],
+      "artifact_refs": [
+        "D:/VibeProject/skills/Lode/examples/architecture-doc.md",
+        "storyboard-pipeline:arch-doc:validation-stage:v1"
+      ],
+      "evidence_refs": [
+        "doc:validation-stage-v1"
+      ],
+      "thread_id": "thread:validation",
+      "inference_notes": []
+    },
+    {
+      "id": "storyboard-pipeline:2026-W19:004",
+      "timestamp": "2026-05-06T09:30:00+08:00",
+      "week": "2026-W19",
+      "confidence": "explicit",
+      "source_entry_refs": [
+        {
+          "week": "2026-W19",
+          "path": "/Users/example/lode-vault/raw/weeks/2026-W19/storyboard-pipeline.json",
+          "timestamp": "2026-05-06T09:30:00+08:00",
+          "entry_index": 1
+        }
+      ],
+      "summary": "Identified stale architecture docs as a recall risk when stage contracts change without re-indexing",
+      "decision": "Identified stale architecture docs as a recall risk when stage contracts change without re-indexing",
+      "why": "Artifact index introduces a new source navigation layer that can become stale.",
+      "chosen": "Identified stale architecture docs as a recall risk when stage contracts change without re-indexing",
+      "rejected": [],
+      "open_questions": [
+        "What signal should mark an indexed artifact as stale: file mtime, raw entry lifecycle, or explicit sync suggestion?"
+      ],
+      "impact": "Decision roadmap and weekly outline can surface stale indexed docs before they mislead future sessions.",
+      "topic_keys": [
+        "documentation",
+        "artifact-governance",
+        "identified",
+        "stale",
+        "architecture",
+        "docs",
+        "recall",
+        "risk"
+      ],
+      "artifact_refs": [],
+      "evidence_refs": [],
+      "thread_id": "thread:documentation",
+      "inference_notes": []
+    }
+  ],
+  "edges": [
+    {
+      "id": "edge:0001",
+      "from": "storyboard-pipeline:2026-W18:001",
+      "to": "storyboard-pipeline:2026-W19:003",
+      "type": "same_thread",
+      "confidence": "heuristic",
+      "reason": "Consecutive entries in thread:validation.",
+      "evidence_refs": [
+        {
+          "week": "2026-W18",
+          "path": "/Users/example/lode-vault/raw/weeks/2026-W18/storyboard-pipeline.json",
+          "timestamp": "2026-04-28T16:20:00+08:00",
+          "entry_index": 0
+        },
+        {
+          "week": "2026-W19",
+          "path": "/Users/example/lode-vault/raw/weeks/2026-W19/storyboard-pipeline.json",
+          "timestamp": "2026-05-05T18:10:00+08:00",
+          "entry_index": 0
+        }
+      ]
+    }
+  ]
+}

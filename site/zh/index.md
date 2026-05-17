@@ -53,6 +53,14 @@ features:
 
 周报、月度和路线图输出是这一循环之上的积累层。技能相互独立 — 每个都能单独使用，但它们共享一套本地存储约定，使下游报告可以复用早期上下文。
 
+## Decision Replay Proof
+
+Lode 已经用自己的项目历史 dogfood 派生决策回放索引。raw entries 仍然是事实源；
+`{vault}/raw/decisions/{slug}.json` 为 coding agent 提供回答“当时为什么这么选？”
+的紧凑证据包。
+
+查看 [GitHub 上的 dogfood proof](https://github.com/KKenny0/Lode/blob/main/examples/decision-replay-proof.md)。
+
 ## 安装
 
 ```bash

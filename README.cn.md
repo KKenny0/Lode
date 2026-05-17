@@ -47,6 +47,14 @@ namespaced command 激活。
 
 Skills 是独立的。Lode 不是一个强制流水线 — 每个 skill 可以单独使用，但它们共享同一套本地存储约定，所以后续报告可以复用之前沉淀的上下文。
 
+## Decision Replay Proof
+
+Lode 现在已经 dogfood 了派生的决策回放索引：raw entries 仍然是事实源，
+`{vault}/raw/decisions/{slug}.json` 为 coding agent 提供回答“当时为什么这么选？”
+所需的紧凑证据包。见 [`examples/decision-replay-proof.md`](examples/decision-replay-proof.md)：
+里面包含一次真实的 Lode-on-Lode dogfood，以及一个在缺少决策历史时正确返回
+无答案的负例查询。
+
 ## Install
 
 ```bash

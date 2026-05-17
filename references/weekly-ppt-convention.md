@@ -58,6 +58,8 @@ pattern:
     projects.json                 # Optional project registry
     artifacts/
       my-project.json             # Array of durable artifact index entries
+    decisions/
+      my-project.json             # Derived decision replay index for agent queries
     weeks/
       2026-W15/
         my-project.json           # Array of change entries
@@ -80,6 +82,117 @@ pattern:
 Weekly outline consumers should write their primary human-readable output to
 `{vault}/Work Diary/Weekly/{YYYY-WNN}.md` unless the user or config provides an
 explicit output path.
+
+## Decision Replay Index
+
+The decision replay index is a derived, machine-readable view over raw entries.
+It exists so coding agents can query why a project chose a path, what was
+rejected, and what evidence supports the answer without reading every weekly raw
+entry. Raw entries remain the source of truth; the index can be rebuilt from
+`{vault}/raw/weeks/` at any time.
+
+Store one project-scoped index at:
+
+```
+{vault}/raw/decisions/{slug}.json
+```
+
+The file shape is:
+
+```json
+{
+  "schema_version": "lode.decision_replay.v1",
+  "project_slug": "my-project",
+  "generated_at": "2026-05-17T08:00:00+08:00",
+  "source": {
+    "kind": "roadmap",
+    "raw_entry_count": 12
+  },
+  "nodes": [
+    {
+      "id": "my-project:2026-W20:001",
+      "timestamp": "2026-05-17T08:00:00+08:00",
+      "week": "2026-W20",
+      "confidence": "explicit",
+      "source_entry_refs": [
+        {
+          "week": "2026-W20",
+          "path": "/path/to/vault/raw/weeks/2026-W20/my-project.json",
+          "timestamp": "2026-05-17T08:00:00+08:00",
+          "entry_index": 0
+        }
+      ],
+      "summary": "Chose a derived decision replay index before adding autonomous capture",
+      "decision": "Use a derived decision replay index as the next product layer",
+      "why": "Raw entries already contain decision evidence, but agents need a compact queryable evidence pack.",
+      "chosen": "Derived index plus recall/query consumption",
+      "rejected": [
+        {
+          "option": "Build a dashboard, sentinel, or capture agent first",
+          "reason": "Expands platform surface before decision replay value is proven"
+        }
+      ],
+      "open_questions": [],
+      "impact": "Fresh coding agents can recover the reasoning behind past project direction.",
+      "topic_keys": ["decision-replay", "recall"],
+      "artifact_refs": [],
+      "evidence_refs": [],
+      "thread_id": "decision-replay",
+      "inference_notes": []
+    }
+  ],
+  "edges": [
+    {
+      "from": "my-project:2026-W20:001",
+      "to": "my-project:2026-W20:002",
+      "type": "same_thread",
+      "confidence": "heuristic",
+      "reason": "Both nodes share thread_id=decision-replay"
+    }
+  ]
+}
+```
+
+### Decision Node Fields
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `id` | string | Yes | Stable id within the project index |
+| `timestamp` | ISO 8601 | Yes | Timestamp of the source raw entry |
+| `week` | string | Yes | ISO week containing the source raw entry |
+| `confidence` | enum | Yes | `explicit` when the raw entry has decision fields; `inferred` when derived from summary/context |
+| `source_entry_refs` | object[] | Yes | Week file, timestamp, and entry index references back to source raw entries |
+| `summary` | string | Yes | Original raw entry summary |
+| `decision` | string | Yes | Decision phrased as a reusable agent-facing statement |
+| `why` | string | No | Motivation or reconstructed reason |
+| `chosen` | string | No | Chosen path when explicit or inferable |
+| `rejected` | object[] | No | Rejected options with reasons, derived from `abandoned_alternatives` |
+| `open_questions` | string[] | No | Unresolved questions from the source entry |
+| `impact` | string | No | Downstream effect of the decision |
+| `topic_keys` | string[] | No | Stable retrieval terms for deterministic query helpers |
+| `artifact_refs` | string[] | No | Artifact paths or ids touched by the decision |
+| `evidence_refs` | string[] | No | Commit SHAs, eval IDs, issue IDs, doc refs, or source refs |
+| `thread_id` | string | No | Decision thread grouping key |
+| `inference_notes` | string[] | No | Notes explaining any inferred decision content |
+
+`source_entry_refs` are mandatory because agents should ground answers in raw
+evidence. Consumers may summarize the decision node, but they must not present
+derived content as stronger than the node's `confidence` and `inference_notes`
+allow.
+
+### Decision Edges
+
+Edges are optional navigation hints, not facts by themselves. Supported v1 edge
+types:
+
+- `same_thread` — nodes share a decision thread or stable topic key
+- `supersedes` — a later decision explicitly replaces an earlier one
+- `related` — nodes share a meaningful topic or retrieval term
+- `touches_artifact` — nodes affect the same durable artifact
+
+Each edge must include `confidence` (`explicit` or `heuristic`) and `reason`.
+Consumers should use edges to expand context after retrieval, not as standalone
+decision evidence.
 
 ## Artifact Index
 

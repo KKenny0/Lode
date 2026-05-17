@@ -19,6 +19,8 @@ AI do not restart from zero.
 - Intra-project only.
 - Raw entries are the semantic source of truth.
 - Artifact index entries are optional source navigation.
+- Decision context entries are optional synthesized decision-replay hints from
+  `{vault}/raw/decisions/{project-slug}.json`.
 - Do not use git commits as fallback in v1.
 - Do not invent history when no vault data exists.
 
@@ -43,6 +45,7 @@ The response must include:
 
 - Recent progress
 - Relevant decisions
+- Decision Context, when `{vault}/raw/decisions/{project-slug}.json` exists
 - Abandoned alternatives that may affect the current task
 - Open questions
 - Risks to check before implementation
@@ -60,6 +63,9 @@ with git history or assumptions.
 - Cite raw entry timestamps for decisions, risks, abandoned alternatives, and
   open questions.
 - Cite artifact ids for docs worth reading.
+- Cite decision context `source_entry_refs` when using `decision_context`;
+  preserve `confidence` and `inference_notes` instead of presenting inferred
+  nodes as fact.
 - Treat `intent_artifact_flags` as read-only staleness hints. Phrase them as
   "may need review" rather than facts. Do not write or propose diffs from this
   skill.
@@ -72,6 +78,7 @@ This skill reads:
 
 - `{vault}/raw/weeks/{YYYY-WNN}/{project-slug}.json`
 - `{vault}/raw/artifacts/{project-slug}.json` when present
+- `{vault}/raw/decisions/{project-slug}.json` when present
 
 This skill writes no files.
 

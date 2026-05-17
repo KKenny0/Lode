@@ -9,6 +9,9 @@
 ### Relevant Decisions
 - {timestamp}: {decision and why it matters now}
 
+### Decision Context
+- {decision_id}: {decision} — why: {why}; evidence: {source_entry_refs timestamp}; confidence: {confidence}
+
 ### Abandoned Alternatives
 - {timestamp}: {alternative} — {reason it was rejected}
 

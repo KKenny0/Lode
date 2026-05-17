@@ -47,6 +47,15 @@ namespaced command.
 
 Skills are independent. Lode is not a strict pipeline — each skill works on its own, but they share one local storage convention so downstream reports can reuse earlier context.
 
+## Decision Replay Proof
+
+Lode now dogfoods a derived decision replay index: raw entries remain the
+source of truth, while `{vault}/raw/decisions/{slug}.json` gives coding agents
+a compact evidence pack for "why did we choose this?" queries. See
+[`examples/decision-replay-proof.md`](examples/decision-replay-proof.md) for a
+real Lode-on-Lode dogfood run, including a negative query that correctly
+returns no answer when the decision history is missing.
+
 ## Install
 
 ### Claude Code

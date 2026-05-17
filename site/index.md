@@ -53,6 +53,14 @@ Each skill maps to a habit you already have. Activate it with a namespaced comma
 
 Weekly, monthly, and roadmap outputs are compounding layers on top of that loop. Skills are independent — each works on its own, but they share one local storage convention so downstream reports reuse earlier context.
 
+## Decision Replay Proof
+
+Lode dogfoods a derived decision replay index for its own project history. Raw
+entries remain the source of truth; `{vault}/raw/decisions/{slug}.json` gives
+coding agents compact evidence packs for "why did we choose this?" queries.
+
+See the [dogfood proof on GitHub](https://github.com/KKenny0/Lode/blob/main/examples/decision-replay-proof.md).
+
 ## Install
 
 ```bash

@@ -119,6 +119,42 @@ Aim for 3-7 threads. If you find more, merge loosely related ones. If you find f
 
 ### Step 4: Write the Roadmap
 
+Before writing the human-readable roadmap, generate the Decision Replay Index
+from raw entries:
+
+```bash
+python <this-skill>/scripts/decision_graph.py build --cwd "$PWD"
+```
+
+This writes:
+
+```
+{vault}/raw/decisions/{slug}.json
+```
+
+The index schema is `lode.decision_replay.v1` and contains:
+`schema_version`, `project_slug`, `generated_at`, `source`, `nodes`, and
+`edges`. Each node preserves `source_entry_refs`, `confidence`
+(`explicit` or `inferred`), `decision`, `why`, `chosen`, `rejected`,
+`open_questions`, `impact`, `topic_keys`, `artifact_refs`, `evidence_refs`, and
+`thread_id`. Edges are heuristic links between entries in the same thread or
+entries that share referenced artifacts. Raw entries remain the source of truth;
+artifact index data is navigation and edge-hint metadata only.
+
+For a targeted agent query, use the same helper to return a compact evidence
+pack rather than asking the agent to read every raw entry:
+
+```bash
+python <this-skill>/scripts/decision_graph.py query "why did we choose the current validation boundary?" \
+  --cwd "$PWD" --mode why --limit 5
+```
+
+The query helper reads `{vault}/raw/decisions/{slug}.json` when present and can
+rebuild an in-memory index from raw entries when the file is missing. It returns
+matching decision nodes, nearby supporting nodes, rejected alternatives, open
+questions, suggested docs, and missing-evidence notes. The host coding agent
+still writes the final answer; the helper only narrows and cites the evidence.
+
 Generate a Markdown document with this structure:
 
 ```markdown
@@ -282,6 +318,8 @@ If scoped to a date range:
 If the vault path cannot be resolved, output the roadmap directly to the conversation and tell the user to run `/lode:cold-start-interview` for persistent roadmap memory.
 
 This skill does **not** write a raw entry side effect. The decision roadmap is a reading/synthesis activity — it consumes entries, it doesn't produce new decision signals. The roadmap itself is the deliverable.
+The Decision Replay Index is a derived raw-layer index, not a new historical
+raw entry.
 
 ## Configuration
 
@@ -296,4 +334,7 @@ Uses the unified Lode configuration system. Same resolution order as other skill
 
 ## Shared Storage Convention
 
-The skill reads raw entries following the schema in `references/weekly-ppt-convention.md`. It produces a Markdown document in the vault's wiki layer — it does not modify the raw layer.
+The skill reads raw entries following the schema in `references/weekly-ppt-convention.md`.
+It produces a Markdown document in the vault's wiki layer and may refresh
+`{vault}/raw/decisions/{slug}.json` as a derived decision replay index. It does
+not write new historical raw entries.

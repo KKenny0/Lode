@@ -102,6 +102,36 @@
           "description": "The chore-only commit is not promoted into a main work stream."
         }
       ]
+    },
+    {
+      "id": "decision-replay-index-query-pack",
+      "skill": "roadmap",
+      "prompt": "生成决策路线图，并用 decision replay index 回答：为什么 validation repair ownership 留在 validation stage？",
+      "fixture": {
+        "vault": "examples/vault",
+        "project_slug": "storyboard-pipeline",
+        "query": "why validation repair ownership",
+        "mode": "why"
+      },
+      "expected_behavior": "Build `{vault}/raw/decisions/{slug}.json` as a derived decision replay index and return a compact query evidence pack grounded in source raw entries. The answer must identify the validation-stage ownership decision, cite `source_entry_refs`, preserve confidence labels, include the rejected orchestration-level alternative, and avoid inventing facts outside raw entries.",
+      "assertions": [
+        {
+          "name": "derived_index_schema",
+          "description": "The generated index uses schema_version `lode.decision_replay.v1` with nodes, edges, and mandatory `source_entry_refs` on every node."
+        },
+        {
+          "name": "query_pack_grounded",
+          "description": "The query output uses schema_version `lode.decision_query.v1`, returns `answerable=true`, and includes top_nodes with raw source entry references."
+        },
+        {
+          "name": "rejected_alternative_preserved",
+          "description": "The query pack preserves the rejected orchestration-level repair ownership alternative and its reason."
+        },
+        {
+          "name": "negative_query_not_answerable",
+          "description": "An unrelated query such as `why did we choose sqlite indexing for mobile sync` returns `answerable=false` or a non-empty `missing_evidence` list instead of weak-word matches."
+        }
+      ]
     }
   ]
 }
