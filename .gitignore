@@ -3,6 +3,7 @@ docs/*
 !docs/configuration.md
 !docs/data-model.md
 !docs/artifact-governance.md
+!docs/release-artifact-inventory.md
 demo/
 ROADMAP.md
 TODO*.md

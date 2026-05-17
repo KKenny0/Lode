@@ -55,6 +55,15 @@ Lode 会分类会话原型并捕获重要内容 — 决策、风险、放弃的�
 
 ## 试用 Decision Replay
 
+先运行确定性的 demo：
+
+```bash
+node examples/decision-replay-demo.mjs
+```
+
+它会打印 `/lode:query` 应该返回的证据包形状：answerability metadata、top
+decision node、raw source references、matched terms，以及 rejected alternatives。
+
 完成一次 capture 后，问一个具体问题：
 
 ```

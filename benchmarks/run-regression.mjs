@@ -8,6 +8,7 @@ import { fileURLToPath } from 'node:url';
 const scriptDir = path.dirname(fileURLToPath(import.meta.url));
 const repoRoot = path.resolve(scriptDir, '..');
 const fixturesPath = path.join(scriptDir, 'regression-fixtures.json');
+const captureRaw = path.join(repoRoot, 'skills', 'capture', 'scripts', 'lode_raw.py');
 const decisionGraph = path.join(repoRoot, 'skills', 'query', 'scripts', 'decision_graph.py');
 const recallContext = path.join(repoRoot, 'skills', 'recall', 'scripts', 'recall_context.py');
 
@@ -378,9 +379,68 @@ function runUnsafeSlugFixture(fixture) {
   }
 }
 
+function runCaptureHelperRepairFixture(fixture) {
+  const config = fixture.fixture || {};
+  const slug = config.project_slug;
+  const entry = config.entry;
+  const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'lode-regression-'));
+  const tempVault = path.join(tempRoot, 'vault');
+  const entryPath = path.join(tempRoot, 'repair-entry.json');
+
+  try {
+    fs.mkdirSync(tempVault, { recursive: true });
+    fs.writeFileSync(entryPath, JSON.stringify(entry, null, 2), 'utf-8');
+    const appendResult = runJson('python3', [
+      captureRaw,
+      'append-entry',
+      '--entry',
+      entryPath,
+      '--cwd',
+      repoRoot,
+      '--vault',
+      tempVault,
+      '--slug',
+      slug,
+      '--date',
+      config.date,
+    ]);
+
+    assert(appendResult.week === config.expected_week, `${fixture.id}: wrote week ${appendResult.week}`);
+    assert(appendResult.slug === slug, `${fixture.id}: wrote slug ${appendResult.slug}`);
+    assert(appendResult.entries_appended === 1, `${fixture.id}: expected one appended entry`);
+    assert(fs.existsSync(appendResult.path), `${fixture.id}: missing raw output ${appendResult.path}`);
+
+    const entries = readJson(appendResult.path);
+    assert(Array.isArray(entries), `${fixture.id}: raw output should be a JSON array`);
+    assert(entries.length === 1, `${fixture.id}: expected exactly one raw entry`);
+    const appended = entries[0] || {};
+
+    assert(appended.source === 'session-recap', `${fixture.id}: expected source=session-recap`);
+    assert(appended.archetype === 'repair', `${fixture.id}: expected archetype=repair`);
+    assert(String(appended.root_cause || '').includes('export time'), `${fixture.id}: root_cause lost late export guard`);
+    assert(String(appended.root_cause || '').includes('validation repair loop'), `${fixture.id}: root_cause lost repair-loop ownership`);
+    assert(
+      Array.isArray(appended.exploration_paths)
+        && appended.exploration_paths.some(item => String(item).includes('export fallback'))
+        && appended.exploration_paths.some(item => String(item).includes('upfront validation')),
+      `${fixture.id}: exploration_paths should preserve both compared paths`,
+    );
+    assert(
+      Array.isArray(appended.abandoned_alternatives)
+        && appended.abandoned_alternatives.some(item => String(item).includes('Export fallback only')),
+      `${fixture.id}: abandoned_alternatives should preserve rejected fallback-only path`,
+    );
+    assert(typeof appended.impact === 'string' && appended.impact.length > 0, `${fixture.id}: missing impact`);
+  } finally {
+    fs.rmSync(tempRoot, { recursive: true, force: true });
+  }
+}
+
 function runExecutableFixture(fixture) {
   const kind = fixture.execution?.kind || 'documented-only';
-  if (kind === 'query-positive') {
+  if (kind === 'capture-helper-repair') {
+    runCaptureHelperRepairFixture(fixture);
+  } else if (kind === 'query-positive') {
     runQueryPositiveFixture(fixture);
   } else if (kind === 'query-negative') {
     runQueryNegativeFixture(fixture);

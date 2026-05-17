@@ -60,6 +60,16 @@ returns no answer when the decision history is missing.
 
 ### Try the aha moment in 3 minutes
 
+Run the deterministic fixture first:
+
+```bash
+node examples/decision-replay-demo.mjs
+```
+
+It prints the same compact evidence shape `/lode:query` is meant to give a
+coding agent: answerability metadata, the top decision node, raw
+`source_entry_refs`, matched terms, and rejected alternatives.
+
 1. Install Lode and run `/lode:cold-start-interview` once.
 2. At the end of a real coding session, say `收工` or run `/lode:capture`.
 3. In the next session, ask `/lode:query why did we choose <the decision>?`.
@@ -144,6 +154,7 @@ Public benchmark protocols document the quality bar without publishing local fix
 
 - [`benchmarks/README.md`](benchmarks/README.md)
 - [`benchmarks/weekly-outline.md`](benchmarks/weekly-outline.md)
+- [`docs/release-artifact-inventory.md`](docs/release-artifact-inventory.md)
 
 </details>
 

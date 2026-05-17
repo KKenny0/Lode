@@ -55,6 +55,16 @@ Lode classifies the session archetype and captures what matters — decisions, r
 
 ## Try Decision Replay
 
+Run the deterministic demo first:
+
+```bash
+node examples/decision-replay-demo.mjs
+```
+
+It prints the evidence-pack shape that `/lode:query` should return: answerability
+metadata, the top decision node, raw source references, matched terms, and
+rejected alternatives.
+
 After one captured session, ask a concrete question:
 
 ```

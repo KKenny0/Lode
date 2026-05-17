@@ -28,6 +28,15 @@ The committed repository proof stays reproducible through:
 - `benchmarks/regression-fixtures.json`
 - this dogfood note with sanitized `{vault}` paths
 
+For the shortest runnable check, use:
+
+```bash
+node examples/decision-replay-demo.mjs
+```
+
+The demo runs the same helper against `examples/vault` and prints a stable
+evidence-pack summary suitable for quick release smoke tests.
+
 ## Build The Index
 
 ```bash

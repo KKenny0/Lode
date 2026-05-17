@@ -3,12 +3,38 @@
     {
       "id": "session-recap-adaptive-depth-repair",
       "execution": {
-        "kind": "documented-only",
-        "reason": "Capture output is agent-authored Markdown/JSON and does not have a deterministic local command yet."
+        "kind": "capture-helper-repair"
       },
       "skill": "capture",
       "prompt": "收工。本 session 修复了 validation repair-loop 漏掉 empty panel list 的问题，根因是 schema guard 在 export 前才运行；我们比较过 export fallback 和 upfront validation，最后选择把 deterministic schema check 前移。",
-      "expected_behavior": "Classify the session as repair, produce a source=session-recap raw entry with motivation, root_cause, exploration_paths, and impact when inferable. Do not ask the user extra questions only to satisfy optional fields.",
+      "fixture": {
+        "project_slug": "storyboard-pipeline",
+        "date": "2026-05-05",
+        "expected_week": "2026-W19",
+        "entry": {
+          "timestamp": "2026-05-05T18:40:00+08:00",
+          "archetype": "repair",
+          "type": "fix",
+          "summary": "Moved schema guard before export so validation repair loops catch empty panel lists earlier",
+          "context": "The repair loop missed empty panel lists because schema guarding only ran at export time. The session compared export fallback with upfront validation and chose the earlier deterministic check.",
+          "source": "session-recap",
+          "status": "done",
+          "impact": "Future weekly reports can explain the reliability fix without reading implementation commits.",
+          "motivation": "Empty panel lists escaped validation until export, making the repair loop harder to reason about.",
+          "root_cause": "Schema guard ran at export time instead of before the validation repair loop.",
+          "exploration_paths": [
+            "Keep export fallback -> catches failures late but preserves existing flow",
+            "Move upfront validation before repair loop -> catches empty panel lists earlier and clarifies ownership"
+          ],
+          "abandoned_alternatives": [
+            "Export fallback only: rejected because it keeps schema failures hidden until export"
+          ],
+          "open_questions": [
+            "Should repair-loop latency be tracked at validation-stage level?"
+          ]
+        }
+      },
+      "expected_behavior": "Validate and append a repair-shaped source=session-recap raw entry with motivation, root_cause, exploration_paths, abandoned alternatives, and impact. This executable helper gate covers the storage contract; agent-authored extraction quality remains a documented protocol.",
       "assertions": [
         {
           "name": "repair_archetype",

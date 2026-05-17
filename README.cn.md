@@ -58,6 +58,16 @@ Lode 把“当时为什么这么选？”变成一条明确工作流。raw entri
 
 ### 3 分钟试出 aha moment
 
+先运行确定性的 fixture：
+
+```bash
+node examples/decision-replay-demo.mjs
+```
+
+它会打印 `/lode:query` 应该交给 coding agent 的紧凑证据形状：answerability
+metadata、top decision node、raw `source_entry_refs`、matched terms，以及
+rejected alternatives。
+
 1. 安装 Lode，并先运行一次 `/lode:cold-start-interview`。
 2. 在一次真实 coding session 结束时，说 `收工` 或运行 `/lode:capture`。
 3. 下次开工时问：`/lode:query why did we choose <the decision>?`
