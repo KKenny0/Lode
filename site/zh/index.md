@@ -3,8 +3,8 @@ layout: home
 
 hero:
   name: Lode
-  text: Agentic coding 的持久记忆
-  tagline: 记录为什么，然后将其积累为报告、回顾和决策路线图。
+  text: Agentic coding 的 decision replay
+  tagline: 记录选择为什么发生，再回放成带引用证据、报告和路线图。
   image:
     src: /mark.svg
     alt: Lode
@@ -17,11 +17,11 @@ hero:
       link: https://github.com/KKenny0/Lode
 
 features:
+  - title: 决策回放
+    details: 追问为什么选择某条路径，并从本地 raw entries 与派生决策索引中得到带引用证据。
+    icon: 🧠
   - title: 持久记忆
     details: 在每次收工时捕获决策、放弃的路径、风险和开放问题。在开工时自动回忆。
-    icon: 🧠
-  - title: 决策回溯
-    details: 超越 git diff。用叙事性决策路线图重建代码背后的推理过程。
     icon: 🗺️
   - title: 积累报告
     details: 原始条目积累为周报大纲、月度回顾和候选规则。每一层都建立在前一层之上。
@@ -54,7 +54,7 @@ features:
 
 周报、月度和路线图输出是这一循环之上的积累层。技能相互独立 — 每个都能单独使用，但它们共享一套本地存储约定，使下游报告可以复用早期上下文。
 
-## Decision Replay Proof
+## Decision Replay
 
 Lode 已经用自己的项目历史 dogfood 派生决策回放索引。raw entries 仍然是事实源；
 `{vault}/raw/decisions/{slug}.json` 为 coding agent 提供回答“当时为什么这么选？”

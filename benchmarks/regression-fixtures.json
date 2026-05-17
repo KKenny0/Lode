@@ -2,6 +2,10 @@
   "fixtures": [
     {
       "id": "session-recap-adaptive-depth-repair",
+      "execution": {
+        "kind": "documented-only",
+        "reason": "Capture output is agent-authored Markdown/JSON and does not have a deterministic local command yet."
+      },
       "skill": "capture",
       "prompt": "收工。本 session 修复了 validation repair-loop 漏掉 empty panel list 的问题，根因是 schema guard 在 export 前才运行；我们比较过 export fallback 和 upfront validation，最后选择把 deterministic schema check 前移。",
       "expected_behavior": "Classify the session as repair, produce a source=session-recap raw entry with motivation, root_cause, exploration_paths, and impact when inferable. Do not ask the user extra questions only to satisfy optional fields.",
@@ -22,6 +26,10 @@
     },
     {
       "id": "weekly-outline-adaptive-artifact-context",
+      "execution": {
+        "kind": "documented-only",
+        "reason": "Weekly outline generation remains agent-authored; this fixture documents expected behavior until a deterministic renderer exists."
+      },
       "skill": "weekly",
       "prompt": "用 $weekly 写本周技术型周报。raw entries 包含 archetype-tagged session-recap，并带 artifact_context 描述 validation contract split；git log 也有同一变更的 commit。",
       "fixture": {
@@ -81,6 +89,10 @@
     },
     {
       "id": "weekly-outline-fallback-confidence",
+      "execution": {
+        "kind": "documented-only",
+        "reason": "Weekly outline generation remains agent-authored; this fixture documents fallback confidence expectations."
+      },
       "skill": "weekly",
       "prompt": "用 $weekly 写本周周报。没有 raw entries，但 repo path 有效，请从 git log fallback 生成。",
       "fixture": {
@@ -104,14 +116,25 @@
       ]
     },
     {
-      "id": "decision-replay-index-query-pack",
+      "id": "decision-replay-query-positive",
+      "execution": {
+        "kind": "query-positive"
+      },
       "skill": "query",
       "prompt": "用 /lode:query 回答：为什么 validation repair ownership 留在 validation stage？",
       "fixture": {
         "vault": "examples/vault",
         "project_slug": "storyboard-pipeline",
         "query": "why validation repair ownership",
-        "mode": "why"
+        "mode": "why",
+        "expected_top_node": "storyboard-pipeline:2026-W19:003",
+        "expected_matched_terms": [
+          "validation",
+          "repair",
+          "ownership"
+        ],
+        "expected_rejected_option": "Orchestration-level repair ownership",
+        "expected_rejected_reason": "validation internals"
       },
       "expected_behavior": "Build `{vault}/raw/decisions/{slug}.json` as a derived decision replay index and return a compact query evidence pack grounded in source raw entries. The answer must identify the validation-stage ownership decision, cite `source_entry_refs`, preserve confidence labels, include the rejected orchestration-level alternative, and avoid inventing facts outside raw entries.",
       "assertions": [
@@ -128,8 +151,112 @@
           "description": "The query pack preserves the rejected orchestration-level repair ownership alternative and its reason."
         },
         {
+          "name": "query_answerability_metadata",
+          "description": "The query pack includes `matched_terms`, `evidence_strength`, and `answerability_reason` so downstream agents can explain why the answer is supported."
+        }
+      ]
+    },
+    {
+      "id": "decision-replay-query-negative",
+      "execution": {
+        "kind": "query-negative"
+      },
+      "skill": "query",
+      "prompt": "用 /lode:query 回答：why did we choose sqlite indexing for mobile sync",
+      "fixture": {
+        "vault": "examples/vault",
+        "project_slug": "storyboard-pipeline",
+        "query": "why did we choose sqlite indexing for mobile sync",
+        "mode": "why",
+        "expected_matched_terms_absent": [
+          "sqlite",
+          "mobile",
+          "sync"
+        ]
+      },
+      "expected_behavior": "An unrelated decision query returns `answerable=false`, explains the answerability failure, and does not promote weak word matches into evidence.",
+      "assertions": [
+        {
           "name": "negative_query_not_answerable",
-          "description": "An unrelated query such as `why did we choose sqlite indexing for mobile sync` returns `answerable=false` or a non-empty `missing_evidence` list instead of weak-word matches."
+          "description": "The query pack returns `answerable=false` and includes missing evidence or an answerability reason."
+        },
+        {
+          "name": "negative_query_metadata",
+          "description": "The query pack includes `matched_terms`, `evidence_strength`, and `answerability_reason` even when the answer is not supported."
+        }
+      ]
+    },
+    {
+      "id": "decision-replay-query-index-fallback",
+      "execution": {
+        "kind": "query-index-fallback"
+      },
+      "skill": "query",
+      "prompt": "Use raw weekly entries when the saved decision index is invalid or stale.",
+      "fixture": {
+        "vault": "examples/vault",
+        "project_slug": "storyboard-pipeline",
+        "query": "why validation repair ownership",
+        "mode": "why",
+        "expected_top_node": "storyboard-pipeline:2026-W19:003"
+      },
+      "expected_behavior": "`/lode:query` rebuilds from raw weekly entries when the saved derived index is invalid JSON or older than the latest raw entry.",
+      "assertions": [
+        {
+          "name": "invalid_index_fallback",
+          "description": "Invalid decision index JSON does not block a grounded query answer."
+        },
+        {
+          "name": "stale_index_fallback",
+          "description": "A stale decision index does not override newer raw weekly evidence."
+        }
+      ]
+    },
+    {
+      "id": "recall-decision-context-rebuild",
+      "execution": {
+        "kind": "recall-rebuild"
+      },
+      "skill": "recall",
+      "prompt": "开工。examples/vault 里 raw/decisions 缺失时，从 raw/weeks 重建 decision context，并标明来源。",
+      "fixture": {
+        "vault": "examples/vault",
+        "project_slug": "storyboard-pipeline",
+        "limit": 5,
+        "expected_decision_id": "storyboard-pipeline:2026-W19:003"
+      },
+      "expected_behavior": "When `{vault}/raw/decisions/{slug}.json` is missing, recall rebuilds decision context from weekly raw entries, writes the derived decision replay index, and reports `decision_context_source` with path, `rebuilt=true`, and a reason. A subsequent run should reuse the fresh index with `rebuilt=false`.",
+      "assertions": [
+        {
+          "name": "decision_context_rebuilt",
+          "description": "Deleting the copied raw decision index still produces bounded `decision_context` containing the validation-stage ownership decision."
+        },
+        {
+          "name": "decision_context_source_reported",
+          "description": "`decision_context_source` includes the derived index path, whether it was rebuilt, and why."
+        },
+        {
+          "name": "fresh_index_reused",
+          "description": "A second recall run against the same copied vault reuses the fresh decision index instead of rebuilding it again."
+        }
+      ]
+    },
+    {
+      "id": "decision-replay-unsafe-slug-rejected",
+      "execution": {
+        "kind": "unsafe-slug"
+      },
+      "skill": "query",
+      "prompt": "Do not allow a project slug with path separators to write outside raw/decisions.",
+      "fixture": {
+        "vault": "examples/vault",
+        "unsafe_slug": "../outside"
+      },
+      "expected_behavior": "Decision index helpers reject filename-unsafe slugs before reading or writing `{vault}/raw/decisions/{slug}.json`.",
+      "assertions": [
+        {
+          "name": "unsafe_slug_rejected",
+          "description": "`../outside` exits non-zero for decision index build and recall refresh paths."
         }
       ]
     }

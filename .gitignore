@@ -1,5 +1,8 @@
 # Design docs, plans, and working notes — local only
-docs/
+docs/*
+!docs/configuration.md
+!docs/data-model.md
+!docs/artifact-governance.md
 demo/
 ROADMAP.md
 TODO*.md

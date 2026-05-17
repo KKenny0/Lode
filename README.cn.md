@@ -4,7 +4,7 @@
 
 <h1 align="center">Lode</h1>
 
-<p align="center"><strong>Agentic coding 的 persistent memory：记录为什么，复利成周报、月报和决策路线图。</strong></p>
+<p align="center"><strong>Agentic coding 的 decision replay：记录为什么，复利成周报、月报和路线图。</strong></p>
 
 <p align="center">
   <a href="https://kkenny0.github.io/Lode/zh/">文档</a> · <a href="README.md">English</a>
@@ -18,7 +18,7 @@ AI 让软件探索变便宜，也让上下文延续变困难。
 
 Session 结束，这些上下文通常就消失了。
 
-Lode 是一个本地优先的 agentic coding persistent memory 工具箱。它捕获决策、风险、放弃路径、开放问题和架构产物，再把它们复利成周报、月报和决策路线图。它的差异化不是再做一个 memory layer，而是把原始 session 记忆变成可阅读、可复盘、可分享的 decision replay。
+Lode 是一个本地优先、依赖很轻的 agentic coding persistent memory 工具箱。它的 public wedge 是 decision replay：捕获决策、风险、放弃路径、开放问题和 durable artifacts，之后用带引用的证据回放当时为什么这么选。周报、月报和路线图都是同一份 raw record 之上的复利视图。
 
 ## Habit Loop
 
@@ -48,11 +48,11 @@ namespaced command 激活。
 
 Skills 是独立的。Lode 不是一个强制流水线 — 每个 skill 可以单独使用，但它们共享同一套本地存储约定，所以后续报告可以复用之前沉淀的上下文。
 
-## Decision Replay Proof
+## Decision Replay
 
-Lode 现在已经 dogfood 了派生的决策回放索引：raw entries 仍然是事实源，
-`{vault}/raw/decisions/{slug}.json` 为 coding agent 提供回答“当时为什么这么选？”
-所需的紧凑证据包。见 [`examples/decision-replay-proof.md`](examples/decision-replay-proof.md)：
+Lode 把“当时为什么这么选？”变成一条明确工作流。raw entries 仍然是事实源，
+`{vault}/raw/decisions/{slug}.json` 为 coding agent 提供回答定向决策问题
+所需的带引用证据包。见 [`examples/decision-replay-proof.md`](examples/decision-replay-proof.md)：
 里面包含一次真实的 Lode-on-Lode dogfood，以及一个在缺少决策历史时正确返回
 无答案的负例查询。
 
@@ -97,9 +97,10 @@ npm --prefix cli run test:regression
 Design principles:
 
 - **Self-contained skills**: each skill carries its own references so it can be installed individually.
+- **Decision replay first**: `/lode:query` 和 `/lode:roadmap` 把捕获的 rationale 变成带引用回答和叙事性决策历史。
 - **Raw-first reporting**: weekly reports use raw entries as the primary semantic source; git is fallback and coverage evidence.
 - **Adaptive-depth recap**: 收工条目携带 archetype-specific fields，让周报能解释 decisions、repairs、investigations 和 builds，而不需要第二个写入 skill。
-- **Artifact governance**: full repo-local docs stay near the code, while recap-owned vault indexes make them discoverable for recall and reports.
+- **Artifact governance**: full repo-local docs stay near the code, while capture-owned vault indexes make them discoverable for recall and reports.
 - **Graceful side effects**: when a raw write is only a side effect, failures do not block the primary deliverable.
 - **Deterministic helpers**: scripts handle path resolution, date calculation, parsing, and aggregation where consistency matters.
 - **Local evals, public protocols**: local fixtures stay ignored; public benchmark guidance lives under [`benchmarks/`](benchmarks/).

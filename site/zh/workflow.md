@@ -23,20 +23,20 @@ Lode 不是严格的流水线。技能独立触发，但会在可用时复用彼
 ```text
 Recall ← raw/weeks/ + raw/artifacts/      → 会话上下文
 Capture → raw/weeks/{week}/{slug}.json    → 原始条目 + 制品索引
-Query   ← raw/decisions/ + raw/weeks/      → 带引用的证据包
+Query   ← raw/decisions/ + raw/weeks/      → 带引用的决策回放证据包
 Daily   ← raw/weeks/ JSON + git log       → Daily Note.md
 Weekly  ← raw/weeks/ + git 覆盖           → 周报大纲
 Monthly ← Daily Note.md                   → 月度回顾 + 候选规则
-Roadmap ← raw/weeks/                      → 决策叙事
+Roadmap ← raw/weeks/ + raw/decisions/      → 决策叙事
 ```
 
-关键洞察：`capture` 的原始条目具有报告价值。它们携带原型特定字段（决策理由、修复根因、调查发现），使下游报告无需二次写入即可解释发生了什么。
+关键洞察：`capture` 的原始条目具有报告价值。它们携带原型特定字段（决策理由、修复根因、调查发现），使 `/lode:query`、`/lode:roadmap` 和周期报告无需二次写入即可解释发生了什么。
 
 ## 存储约定
 
 数据分为两个层次存放在你的知识库中：
 
-- **原始层** (`raw/`) — 不可变的中间数据：JSON 条目、制品索引、信号、骨架
+- **原始层** (`raw/`) — 不可变的中间数据：weekly entries、decision replay indexes、制品索引、信号、骨架
 - **Wiki 层** — 人类可读的输出：日报、周报大纲、月度回顾、决策路线图
 
 你的知识库是一个 git 仓库（通常是 Obsidian vault），通过 git push/pull 实现跨机器同步。

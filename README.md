@@ -4,7 +4,7 @@
 
 <h1 align="center">Lode</h1>
 
-<p align="center"><strong>Agentic coding's persistent memory: capture the why, then compound it into reports, reviews, and decision roadmaps.</strong></p>
+<p align="center"><strong>Decision replay for agentic coding: capture the why, then compound it into reports, reviews, and roadmaps.</strong></p>
 
 <p align="center">
   <a href="https://kkenny0.github.io/Lode/">Documentation</a> · <a href="README.cn.md">中文</a>
@@ -18,7 +18,7 @@ In one coding session, you can compare multiple designs, reject plausible paths,
 
 When the session ends, that context usually disappears.
 
-Lode is a local habit toolbox for agentic coding's persistent memory. It captures decisions, risks, abandoned paths, open questions, and architecture artifacts, then compounds them into weekly outlines, monthly reviews, and decision roadmaps. The differentiator is not another memory layer; it is structured decision replay that tells the story of what happened and why.
+Lode is a local-first, dependency-light habit toolbox for agentic coding's persistent memory. Its public wedge is decision replay: capture decisions, risks, abandoned paths, open questions, and durable artifacts, then replay the reasoning later with cited evidence. Weekly outlines, monthly reviews, and roadmaps are compounding views over the same raw record.
 
 ## Habit Loop
 
@@ -48,11 +48,12 @@ namespaced command.
 
 Skills are independent. Lode is not a strict pipeline — each skill works on its own, but they share one local storage convention so downstream reports can reuse earlier context.
 
-## Decision Replay Proof
+## Decision Replay
 
-Lode now dogfoods a derived decision replay index: raw entries remain the
-source of truth, while `{vault}/raw/decisions/{slug}.json` gives coding agents
-a compact evidence pack for "why did we choose this?" queries. See
+Lode turns "why did we choose this?" into a first-class workflow. Raw entries
+remain the source of truth, while `{vault}/raw/decisions/{slug}.json` gives
+coding agents a compact, cited evidence pack for targeted decision questions.
+See
 [`examples/decision-replay-proof.md`](examples/decision-replay-proof.md) for a
 real Lode-on-Lode dogfood run, including a negative query that correctly
 returns no answer when the decision history is missing.
@@ -116,9 +117,10 @@ npm --prefix cli run test:regression
 Design principles:
 
 - **Self-contained skills**: each skill carries its own references so it can be installed individually.
+- **Decision replay first**: `/lode:query` and `/lode:roadmap` turn captured rationale into cited answers and narrative decision history.
 - **Raw-first reporting**: weekly reports use raw entries as the primary semantic source; git is fallback and coverage evidence.
 - **Adaptive-depth recap**: session wrap-up entries carry archetype-specific fields so reports can explain decisions, repairs, investigations, and builds without a second write skill.
-- **Artifact governance**: full repo-local docs stay near the code, while recap-owned vault indexes make them discoverable for recall and reports.
+- **Artifact governance**: full repo-local docs stay near the code, while capture-owned vault indexes make them discoverable for recall and reports.
 - **Graceful side effects**: when a raw write is only a side effect, failures do not block the primary deliverable.
 - **Deterministic helpers**: scripts handle path resolution, date calculation, parsing, and aggregation where consistency matters.
 - **Local evals, public protocols**: local fixtures stay ignored; public benchmark guidance lives under [`benchmarks/`](benchmarks/).

@@ -23,20 +23,20 @@ Lode is not a strict pipeline. Skills are independently triggered, but they reus
 ```text
 Recall ← raw/weeks/ + raw/artifacts/      → session context
 Capture → raw/weeks/{week}/{slug}.json    → raw entry + artifact index
-Query   ← raw/decisions/ + raw/weeks/      → cited evidence pack
+Query   ← raw/decisions/ + raw/weeks/      → cited decision replay pack
 Daily   ← raw/weeks/ JSON + git log       → Daily Note.md
 Weekly  ← raw/weeks/ + git coverage       → weekly outline
 Monthly ← Daily Note.md                   → monthly review + candidate rules
-Roadmap ← raw/weeks/                      → decision narrative
+Roadmap ← raw/weeks/ + raw/decisions/      → decision narrative
 ```
 
-The key insight: raw entries from `capture` are report-worthy. They carry archetype-specific fields (decision rationale, repair root causes, investigation findings) so downstream reports can explain what happened without a second write pass.
+The key insight: raw entries from `capture` are report-worthy. They carry archetype-specific fields (decision rationale, repair root causes, investigation findings) so `/lode:query`, `/lode:roadmap`, and periodic reports can explain what happened without a second write pass.
 
 ## Storage Convention
 
 Data lives in two layers within your knowledge vault:
 
-- **Raw layer** (`raw/`) — immutable intermediate data: JSON entries, artifact indexes, signals, skeletons
+- **Raw layer** (`raw/`) — immutable intermediate data: weekly entries, decision replay indexes, artifact indexes, signals, skeletons
 - **Wiki layer** — human-readable outputs: Daily Note, weekly outline, monthly review, decision roadmap
 
 Your knowledge vault is a git repo (typically an Obsidian vault), enabling cross-machine sync via git push/pull.

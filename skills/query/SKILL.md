@@ -55,6 +55,7 @@ Return a concise answer with:
 
 - A direct answer when `answerable=true`.
 - The matched decision node ids and source timestamps.
+- `matched_terms`, `evidence_strength`, and `answerability_reason`.
 - `source_entry_refs` for every cited decision.
 - Rejected alternatives when relevant.
 - Open questions when relevant.
@@ -69,6 +70,8 @@ evidence. Include `missing_evidence` and suggest capturing the decision with
 
 - Treat `confidence=explicit` as directly recorded raw-entry evidence.
 - Treat `confidence=inferred` as useful navigation, not a proven fact.
+- Treat `evidence_strength=weak` as a prompt to hedge or ask for more evidence
+  even when `answerable=true`.
 - Preserve uncertainty in the wording when `inference_notes` are present.
 - Do not quote or cite a decision without its `source_entry_refs`.
 - Edges and supporting nodes are context expansion, not standalone proof.

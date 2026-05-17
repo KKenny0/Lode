@@ -10,6 +10,7 @@
 - {timestamp}: {decision and why it matters now}
 
 ### Decision Context
+- Source: {decision_context_source path}; rebuilt: {decision_context_source rebuilt}; reason: {decision_context_source reason}
 - {decision_id}: {decision} — why: {why}; evidence: {source_entry_refs timestamp}; confidence: {confidence}
 
 ### Abandoned Alternatives

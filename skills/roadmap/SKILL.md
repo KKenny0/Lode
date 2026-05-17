@@ -13,13 +13,14 @@ Unlike weekly/monthly reports (organized by calendar period) or git history (org
 
 ### Step 0: Resolve Config and Scope
 
-Resolve the vault path using the standard Lode config resolution:
+Resolve the vault path using the standard Lode config resolution. The bundled
+decision graph helper performs that resolution while building the derived index:
 
 ```bash
-python <this-skill>/scripts/lode_raw.py resolve-config --cwd "$PWD"
+python <this-skill>/scripts/decision_graph.py build --cwd "$PWD"
 ```
 
-If the helper is unavailable, resolve manually:
+If the helper cannot resolve config, resolve manually:
 1. Check `.lode/config.yaml` in project root
 2. Check `~/.lode/config.yaml`
 3. Fall back to `$WEEKLY_PPT_PATH` or `~/.weekly-ppt/`

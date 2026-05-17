@@ -30,15 +30,17 @@ Works without a vault — falls back to conversation-only context.
 
 **Trigger:** `/lode:query`, `why did we choose this?`, `为什么当时这么选`
 
-Targeted decision replay. Reads the derived decision index and raw-entry
-fallback to answer specific project-history questions:
+The main public wedge: targeted decision replay. Reads
+`{vault}/raw/decisions/` first, then falls back to raw weekly entries to answer
+specific project-history questions:
 - Why a path was chosen
 - What alternatives were rejected or deferred
 - Which open questions should be revisited
 - What impact a decision had
 
 The skill returns cited evidence from `source_entry_refs` and refuses to answer
-when Lode has no supporting record.
+when Lode has no supporting record. This keeps the system local-first and
+evidence-bound rather than turning it into a generic memory guesser.
 
 ## Capture
 

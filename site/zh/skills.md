@@ -30,14 +30,15 @@ Lode 包含八个技能。每个技能相互独立 — 可以单独安装，也�
 
 **触发：** `/lode:query`、`why did we choose this?`、`为什么当时这么选`
 
-定向决策回放。从派生决策索引和 raw-entry fallback 中回答具体项目历史问题：
+主要 public wedge：定向决策回放。优先读取 `{vault}/raw/decisions/`，
+再 fallback 到 weekly raw entries，回答具体项目历史问题：
 - 为什么选择某条路径
 - 哪些方案被拒绝或延后
 - 哪些开放问题值得重新评估
 - 某个决策产生了什么影响
 
 该技能会从 `source_entry_refs` 返回带引用的证据；如果 Lode 没有支持记录，
-必须拒绝编造答案。
+必须拒绝编造答案。这让系统保持本地优先、证据约束，而不是泛化成会猜的 memory layer。
 
 ## Capture（捕获）
 

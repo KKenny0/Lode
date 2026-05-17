@@ -21,6 +21,9 @@ AI do not restart from zero.
 - Artifact index entries are optional source navigation.
 - Decision context entries are optional synthesized decision-replay hints from
   `{vault}/raw/decisions/{project-slug}.json`.
+- If the saved decision index is missing, invalid, empty, or older than the raw
+  entries, the helper refreshes the derived decision index from raw entries as a
+  best-effort side effect, then uses that fresh Decision Context.
 - Do not use git commits as fallback in v1.
 - Do not invent history when no vault data exists.
 
@@ -46,6 +49,7 @@ The response must include:
 - Recent progress
 - Relevant decisions
 - Decision Context, when `{vault}/raw/decisions/{project-slug}.json` exists
+  or can be rebuilt in memory from raw entries
 - Abandoned alternatives that may affect the current task
 - Open questions
 - Risks to check before implementation
@@ -66,6 +70,9 @@ with git history or assumptions.
 - Cite decision context `source_entry_refs` when using `decision_context`;
   preserve `confidence` and `inference_notes` instead of presenting inferred
   nodes as fact.
+- Include `decision_context_source` when present, especially if `rebuilt=true`,
+  so the user can see whether the section came from a saved index or an
+  in-memory freshness rebuild.
 - Treat `intent_artifact_flags` as read-only staleness hints. Phrase them as
   "may need review" rather than facts. Do not write or propose diffs from this
   skill.
@@ -80,7 +87,9 @@ This skill reads:
 - `{vault}/raw/artifacts/{project-slug}.json` when present
 - `{vault}/raw/decisions/{project-slug}.json` when present
 
-This skill writes no files.
+This skill writes `{vault}/raw/decisions/{project-slug}.json` only when the
+derived decision index is missing, invalid, empty, or older than raw entries.
+Raw entries remain the source of truth.
 
 ## Absorbed Intent-Artifact Flagging
 

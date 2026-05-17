@@ -3,8 +3,8 @@ layout: home
 
 hero:
   name: Lode
-  text: Agentic coding's persistent memory
-  tagline: Capture the why. Compound it into reports, reviews, and decision roadmaps.
+  text: Decision replay for agentic coding
+  tagline: Capture why choices happened, then replay them as cited evidence, reports, and roadmaps.
   image:
     src: /mark.svg
     alt: Lode
@@ -17,11 +17,11 @@ hero:
       link: https://github.com/KKenny0/Lode
 
 features:
+  - title: Decision Replay
+    details: Ask why a path was chosen and get cited evidence from local raw entries and derived decision indexes.
+    icon: 🧠
   - title: Persistent Memory
     details: Capture decisions, abandoned paths, risks, and open questions at every session wrap-up. Recall them automatically at session start.
-    icon: 🧠
-  - title: Decision Replay
-    details: Go beyond git diffs. Reconstruct the reasoning that made the code possible with narrative decision roadmaps.
     icon: 🗺️
   - title: Compounding Reports
     details: Raw entries compound into weekly outlines, monthly reviews, and candidate rules. Each layer builds on the last.
@@ -54,11 +54,12 @@ Each skill maps to a habit you already have. Activate it with a namespaced comma
 
 Weekly, monthly, and roadmap outputs are compounding layers on top of that loop. Skills are independent — each works on its own, but they share one local storage convention so downstream reports reuse earlier context.
 
-## Decision Replay Proof
+## Decision Replay
 
 Lode dogfoods a derived decision replay index for its own project history. Raw
 entries remain the source of truth; `{vault}/raw/decisions/{slug}.json` gives
-coding agents compact evidence packs for "why did we choose this?" queries.
+coding agents compact evidence packs for targeted "why did we choose this?"
+queries.
 
 See the [dogfood proof on GitHub](https://github.com/KKenny0/Lode/blob/main/examples/decision-replay-proof.md).
 

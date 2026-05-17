@@ -8,8 +8,8 @@ Knowledge vault 采用双层架构设计，将结构化数据与人类可读文�
 
 Lode 的数据治理不只依赖 vault。完整模型包含四个存储表面：
 
-- **Project Repo**：和代码强绑定、需要随实现一起演进的产物，例如 `arch-doc`、`DESIGN.md`、`PLAN.md`、`AGENTS.md`、prompt/schema contracts。
-- **Vault Raw Layer**：机器可读的记忆和索引，例如 weekly raw entries、artifact index、monthly signals。
+- **Project Repo**：和代码强绑定、需要随实现一起演进的产物，例如 architecture docs、`DESIGN.md`、`PLAN.md`、`AGENTS.md`、prompt/schema contracts。
+- **Vault Raw Layer**：机器可读的记忆和索引，例如 weekly raw entries、decision replay indexes、artifact index、monthly signals。
 - **Vault Wiki Layer**：人类可读的综合输出，例如 Daily Note、weekly outline、monthly review、decision roadmap。
 - **Conversation Fallback**：无配置时的即时价值，例如 `收工` 的 Markdown recap。
 
@@ -21,6 +21,8 @@ Knowledge vault 内部分为 raw/wiki 两层：
     projects.json                 # 可选项目注册表
     artifacts/
       storyboard-pipeline.json    # Durable artifact index entries
+    decisions/
+      storyboard-pipeline.json    # Derived decision replay evidence packs
     weeks/
       2026-W18/
         storyboard-pipeline.json  # Raw change entries
@@ -47,6 +49,7 @@ Knowledge vault 内部分为 raw/wiki 两层：
 - **内容**:
   - `projects.json`: 可选的项目注册表，定义项目元信息
   - `artifacts/`: 长期产物索引，指向 repo-local docs、design docs、prompt/schema contracts 等
+  - `decisions/`: 派生决策回放索引，保存带引用的 evidence pack，事实源仍是 weekly raw entries
   - `weeks/`: 按周组织的 raw change entries
   - `months/`: 按月组织的信号和框架数据
 
@@ -68,18 +71,22 @@ Knowledge vault 内部分为 raw/wiki 两层：
 
 ```
 开发过程中:
-  lode-session-recap -> {vault}/raw/weeks/{week}/{slug}.json
-  lode-arch-doc      -> project docs/ + {vault}/raw/weeks/{week}/{slug}.json
-                     -> {vault}/raw/artifacts/{slug}.json
+  /lode:capture -> {vault}/raw/weeks/{week}/{slug}.json
+                -> {vault}/raw/artifacts/{slug}.json when durable artifacts change
+  /lode:query   <- {vault}/raw/decisions/{slug}.json + raw weekly fallback
+                -> cited decision replay answer
 
 每天:
-  lode-git-daily-note <- raw entries + git log -> {vault}/Daily Note.md
+  /lode:daily <- raw entries + git log -> {vault}/Daily Note.md
 
 每周:
-  lode-weekly-outline <- raw entries + fallback git coverage -> weekly outline
+  /lode:weekly <- raw entries + fallback git coverage -> weekly outline
 
 每月:
-  lode-monthly-review <- Daily Note.md -> monthly archive + summary
+  /lode:monthly <- Daily Note.md -> monthly archive + summary
+
+按需:
+  /lode:roadmap <- raw entries + decision indexes -> narrative decision roadmap
 ```
 
 ## Artifact Ownership Matrix
@@ -93,7 +100,8 @@ Knowledge vault 内部分为 raw/wiki 两层：
 | Weekly outline | `{vault}/Work Diary/Weekly/{week}.md` | 无 vault 时输出到 conversation |
 | Monthly archive/summary | `{vault}/Work Diary/Monthly/` | `{vault}/raw/months/{month}/` |
 | Decision roadmap | `{vault}/Work Diary/Decision Roadmap*.md` | 无 vault 时输出到 conversation |
-| Open questions / risks / decisions | raw entries at creation time | future derived lifecycle indexes |
+| Decision replay pack | `{vault}/raw/decisions/{slug}.json` | Derived from weekly raw entries; source refs point back to raw evidence |
+| Open questions / risks / decisions | raw entries at creation time | derived lifecycle indexes such as `raw/decisions/` |
 
 ## Raw Entry 与 Artifact Index 的边界
 
@@ -116,6 +124,16 @@ Artifact index 回答“有哪些长期可召回资料”：
 
 Weekly raw entries 不应承担文档目录的职责。Artifact index 是 `开工召回`、决策路线图、周报和月度回顾的 source navigation layer。
 
+Decision replay index 回答“某条选择为什么发生”：
+
+- decision slug 和当前摘要；
+- chosen path、rejected/deferred alternatives；
+- rationale、impact、risks、open questions；
+- `source_entry_refs`，指回 weekly raw entries 或其它本地证据；
+- confidence / evidence gap，明确没有证据时不回答。
+
+`raw/decisions/` 是派生索引，不替代 raw weekly entries。它的职责是让 `/lode:query` 可以快速、带引用地回答定向历史问题。
+
 ## 生命周期语义
 
 Lode 不修改历史 raw entry。后续 skill 如果发现问题、风险或决策状态变化，应追加新的 raw entry 记录 transition。
@@ -135,33 +153,39 @@ artifact:
   active -> missing
 ```
 
-第一阶段只要求 producer 清楚写出 lifecycle signal；当前状态可以由 `decision-roadmap`、`weekly-outline` 或 `monthly-review` 从 raw entries 和 artifact index 推导。
+第一阶段只要求 producer 清楚写出 lifecycle signal；当前状态可以由 `/lode:roadmap`、`/lode:weekly`、`/lode:monthly` 或 `/lode:query` 从 raw entries、decision indexes 和 artifact index 推导。
 
 ### 数据流说明
 
 1. **Raw Entry 生成**
-   - `lode-session-recap`: 每次工作结束时生成结构化的变更信号
-   - `lode-arch-doc`: 架构工作后生成架构相关的 raw entries
-   - 两者都写入 `{vault}/raw/weeks/{week}/{slug}.json`
+   - `/lode:capture`: 每次工作结束时生成结构化的变更信号
+   - durable artifacts 变化时，写入或建议更新 `{vault}/raw/artifacts/{slug}.json`
+   - weekly raw entry 写入 `{vault}/raw/weeks/{week}/{slug}.json`
 
-2. **日报生成**
-   - `lode-git-daily-note` 读取 weekly raw entries
+2. **Decision Replay 查询**
+   - `/lode:query` 优先读取 `{vault}/raw/decisions/{slug}.json`
+   - 没有派生索引时 fallback 到 weekly raw entries
+   - 仅在有 `source_entry_refs` 或明确本地证据时回答
+
+3. **日报生成**
+   - `/lode:daily` 读取 weekly raw entries
    - 结合 git log 补充上下文
    - 生成或更新 `{vault}/Daily Note.md`
 
-3. **周报生成**
-   - `lode-weekly-outline` 消费 weekly raw entries
+4. **周报生成**
+   - `/lode:weekly` 消费 weekly raw entries
    - 使用 git 作为 fallback 和 coverage 补充
    - 生成结构化的周报大纲
 
-4. **月度回顾**
-   - `lode-monthly-review` 基于 Daily Note.md
+5. **月度回顾**
+   - `/lode:monthly` 基于 Daily Note.md
    - 拆分月度档案并生成总结
    - 输出到 `{vault}/Work Diary/Monthly/`
 
 ## 设计优势
 
 - **原始优先**: 周报以 raw entries 为主要语义来源，确保信息质量
+- **决策可回放**: `raw/decisions/` 保持查询路径短而可引用，同时不改变 raw entries 的事实源地位
 - **灵活架构**: 技能可以独立运行，但通过共享数据模型增强协作
 - **双向流动**: Raw entries 既可向上生成报告，也可向下补充日报
 - **可读性保证**: Wiki 层提供人类友好的文档访问方式
@@ -172,4 +196,4 @@ artifact:
 - **命名规范**: 使用 ISO 周格式 (YYYY-WXX) 和 ISO 月格式 (YYYY-MM)
 - **文件格式**: JSON 用于结构化数据，Markdown 用于人类可读文档
 - **路径约定**: 严格遵循上述目录结构，确保技能间互操作性
-- **扩展性**: 预留了 months 层用于月度数据聚合，支持未来的技能扩展
+- **扩展性**: 预留了 decisions 和 months 层用于决策回放与月度数据聚合，支持未来的技能扩展

@@ -24,6 +24,7 @@ except Exception:  # pragma: no cover - optional dependency
 
 SCHEMA_VERSION = "lode.decision_replay.v1"
 QUERY_SCHEMA_VERSION = "lode.decision_query.v1"
+SAFE_SLUG_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]*$")
 EXPLICIT_FIELDS = (
     "motivation",
     "exploration_paths",
@@ -176,6 +177,14 @@ def slugify(value: str) -> str:
     return slug or "project"
 
 
+def validate_project_slug(slug: str) -> str:
+    if not SAFE_SLUG_RE.fullmatch(slug):
+        raise ValueError(
+            "project slug must be a filename-safe value using letters, numbers, dots, underscores, or hyphens"
+        )
+    return slug
+
+
 def same_path(left: str, right: Path) -> bool:
     left_path = Path(left).expanduser()
     right_path = right.expanduser()
@@ -187,7 +196,7 @@ def same_path(left: str, right: Path) -> bool:
 
 def project_slug(cwd: Path, vault: Path, configured: Any = None) -> str:
     if isinstance(configured, str) and configured.strip():
-        return configured.strip()
+        return validate_project_slug(configured.strip())
 
     projects_file = vault / "raw" / "projects.json"
     if projects_file.exists():
@@ -201,11 +210,11 @@ def project_slug(cwd: Path, vault: Path, configured: Any = None) -> str:
                     slug_value = project.get("slug")
                     if isinstance(path_value, str) and isinstance(slug_value, str):
                         if same_path(path_value, cwd):
-                            return slug_value
+                            return validate_project_slug(slug_value)
         except json.JSONDecodeError:
             pass
 
-    return slugify(cwd.resolve().name)
+    return validate_project_slug(slugify(cwd.resolve().name))
 
 
 def load_json_array(path: Path) -> list[Any]:
@@ -511,6 +520,31 @@ def current_timestamp() -> str:
     return dt.datetime.now(dt.timezone.utc).astimezone().isoformat(timespec="seconds")
 
 
+def parse_datetime(value: Any) -> dt.datetime | None:
+    if not isinstance(value, str) or not value.strip():
+        return None
+    try:
+        parsed = dt.datetime.fromisoformat(value.replace("Z", "+00:00"))
+    except ValueError:
+        return None
+    if parsed.tzinfo is None:
+        parsed = parsed.replace(tzinfo=dt.timezone.utc)
+    return parsed
+
+
+def latest_entry_datetime(entries: list[dict[str, Any]]) -> dt.datetime | None:
+    parsed = [item for item in (parse_datetime(entry.get("timestamp")) for entry in entries) if item is not None]
+    return max(parsed) if parsed else None
+
+
+def index_is_current(index: dict[str, Any], entries: list[dict[str, Any]]) -> bool:
+    latest_entry = latest_entry_datetime(entries)
+    if latest_entry is None:
+        return True
+    generated_at = parse_datetime(index.get("generated_at"))
+    return generated_at is not None and generated_at >= latest_entry
+
+
 def build_index(vault: Path, slug: str, generated_at: str | None = None) -> dict[str, Any]:
     entries, raw_paths = load_raw_entries(vault, slug)
     artifacts, artifact_path = load_artifacts(vault, slug)
@@ -559,7 +593,7 @@ def command_build(args: argparse.Namespace) -> int:
     cwd = Path(args.cwd).expanduser().resolve()
     cfg, config_sources = resolve_config(cwd)
     vault = Path(args.vault).expanduser().resolve() if args.vault else Path(str(cfg["knowledge_vault"]))
-    slug = args.slug or project_slug(cwd, vault, cfg.get("project_slug"))
+    slug = validate_project_slug(args.slug) if args.slug else project_slug(cwd, vault, cfg.get("project_slug"))
     output = Path(args.output).expanduser().resolve() if args.output else None
     index = build_index(vault, slug, args.generated_at)
     path = write_index(index, vault, slug, output)
@@ -584,9 +618,15 @@ def command_build(args: argparse.Namespace) -> int:
 def load_index(vault: Path, slug: str) -> dict[str, Any]:
     path = vault / "raw" / "decisions" / f"{slug}.json"
     if path.exists():
-        data = json.loads(path.read_text(encoding="utf-8"))
+        try:
+            data = json.loads(path.read_text(encoding="utf-8"))
+        except json.JSONDecodeError:
+            data = None
         if isinstance(data, dict):
-            return data
+            entries, _ = load_raw_entries(vault, slug)
+            if index_is_current(data, entries):
+                return data
+            return build_index(vault, slug)
     return build_index(vault, slug)
 
 
@@ -662,8 +702,8 @@ def matched_terms(node: dict[str, Any], terms: list[str], mode: str) -> list[str
     return [term for term in terms if term in haystack]
 
 
-def compact_node(node: dict[str, Any]) -> dict[str, Any]:
-    return {
+def compact_node(node: dict[str, Any], terms: list[str] | None = None, mode: str = "why") -> dict[str, Any]:
+    result = {
         "id": node.get("id"),
         "timestamp": node.get("timestamp"),
         "week": node.get("week"),
@@ -679,6 +719,9 @@ def compact_node(node: dict[str, Any]) -> dict[str, Any]:
         "source_entry_refs": node.get("source_entry_refs", []),
         "inference_notes": node.get("inference_notes", []),
     }
+    if terms is not None:
+        result["matched_terms"] = matched_terms(node, terms, mode)
+    return result
 
 
 def supporting_nodes(
@@ -696,6 +739,32 @@ def supporting_nodes(
     by_id = {str(node.get("id")): node for node in all_nodes}
     result = [by_id[node_id] for node_id in dedupe(wanted_ids) if node_id in by_id]
     return result[:limit]
+
+
+def evidence_strength(top: list[dict[str, Any]], terms: list[str], mode: str) -> str:
+    if not top:
+        return "none"
+    strongest = top[0]
+    match_count = len(matched_terms(strongest, terms, mode))
+    has_sources = bool(strongest.get("source_entry_refs"))
+    if strongest.get("confidence") == "explicit" and has_sources and match_count >= max(2, min(len(terms), 3)):
+        return "strong"
+    if has_sources and match_count >= 2:
+        return "moderate"
+    return "weak"
+
+
+def answerability_reason(top: list[dict[str, Any]], terms: list[str], mode: str, strength: str) -> str:
+    if not terms:
+        return "The query did not contain enough searchable decision terms."
+    if not top:
+        return "No decision index nodes matched enough query terms to ground an answer."
+    top_node = top[0]
+    matched = matched_terms(top_node, terms, mode)
+    return (
+        f"Top node {top_node.get('id')} matched {len(matched)}/{len(terms)} query terms "
+        f"with {top_node.get('confidence', 'unknown')} confidence and {strength} evidence."
+    )
 
 
 def build_query_pack(index: dict[str, Any], query: str, mode: str, limit: int) -> dict[str, Any]:
@@ -716,6 +785,12 @@ def build_query_pack(index: dict[str, Any], query: str, mode: str, limit: int) -
     )
     top = [node for _, node in scored[:limit]]
     supporting = supporting_nodes(top, nodes, edges, max(limit, 1))
+    top_matched_terms = dedupe([
+        term
+        for node in top
+        for term in matched_terms(node, terms, mode)
+    ])
+    strength = evidence_strength(top, terms, mode)
     rejected: list[dict[str, Any]] = []
     open_questions: list[dict[str, Any]] = []
     docs: list[str] = []
@@ -734,8 +809,11 @@ def build_query_pack(index: dict[str, Any], query: str, mode: str, limit: int) -
         "mode": mode,
         "answerable": bool(top),
         "terms": terms,
-        "top_nodes": [compact_node(node) for node in top],
-        "supporting_nodes": [compact_node(node) for node in supporting],
+        "matched_terms": top_matched_terms,
+        "evidence_strength": strength,
+        "answerability_reason": answerability_reason(top, terms, mode, strength),
+        "top_nodes": [compact_node(node, terms, mode) for node in top],
+        "supporting_nodes": [compact_node(node, terms, mode) for node in supporting],
         "rejected_alternatives": rejected,
         "open_questions": open_questions,
         "missing_evidence": [] if top else ["No decision index nodes matched the query terms."],
@@ -747,7 +825,7 @@ def command_query(args: argparse.Namespace) -> int:
     cwd = Path(args.cwd).expanduser().resolve()
     cfg, _ = resolve_config(cwd)
     vault = Path(args.vault).expanduser().resolve() if args.vault else Path(str(cfg["knowledge_vault"]))
-    slug = args.slug or project_slug(cwd, vault, cfg.get("project_slug"))
+    slug = validate_project_slug(args.slug) if args.slug else project_slug(cwd, vault, cfg.get("project_slug"))
     index = load_index(vault, slug)
     pack = build_query_pack(index, args.query, args.mode, max(args.limit, 1))
     print(json.dumps(pack, ensure_ascii=False, indent=2))
