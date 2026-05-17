@@ -58,8 +58,9 @@ const tempDirs = [];
 
 try {
   const vault = mkTempDir('doctor-vault');
-  tempDirs.push(vault);
-  const success = runDoctor(['--vault', vault, '--skip-install-check', '--json']);
+  const successCwd = mkTempDir('doctor-cwd');
+  tempDirs.push(vault, successCwd);
+  const success = runDoctor(['--cwd', successCwd, '--vault', vault, '--skip-install-check', '--json']);
   assert(success.status === 0, `Expected success doctor exit 0, got ${success.status}\n${success.stderr}`);
   const successJson = parseJson(success.stdout);
   assert(successJson.ok === true, 'Expected success doctor ok=true');
@@ -69,7 +70,7 @@ try {
 
   const cleanHome = mkTempDir('doctor-home');
   tempDirs.push(cleanHome);
-  const noConfig = runDoctor(['--skip-install-check', '--no-write', '--json'], homeEnv(cleanHome));
+  const noConfig = runDoctor(['--cwd', cleanHome, '--skip-install-check', '--no-write', '--json'], homeEnv(cleanHome));
   assert(noConfig.status !== 0, 'Expected no-config doctor to fail');
   const noConfigJson = parseJson(noConfig.stdout);
   assert(noConfigJson.ok === false, 'Expected no-config doctor ok=false');
@@ -79,7 +80,7 @@ try {
   const missingInstallHome = mkTempDir('doctor-install-home');
   const missingInstallVault = mkTempDir('doctor-install-vault');
   tempDirs.push(missingInstallHome, missingInstallVault);
-  const missingInstall = runDoctor(['--vault', missingInstallVault, '--no-write', '--json'], homeEnv(missingInstallHome));
+  const missingInstall = runDoctor(['--cwd', missingInstallHome, '--vault', missingInstallVault, '--no-write', '--json'], homeEnv(missingInstallHome));
   assert(missingInstall.status !== 0, 'Expected missing-install doctor to fail');
   const missingInstallJson = parseJson(missingInstall.stdout);
   const installResult = assertResult(missingInstallJson.results, 'skill installation', false);
@@ -89,7 +90,7 @@ try {
   const minimalConfigVault = mkTempDir('doctor-minimal-config-vault');
   tempDirs.push(minimalConfigHome, minimalConfigVault);
   writeConfig(minimalConfigHome, `knowledge_vault: ${minimalConfigVault.replaceAll('\\', '/')}\n`);
-  const minimalConfig = runDoctor(['--skip-install-check', '--no-write', '--json'], homeEnv(minimalConfigHome));
+  const minimalConfig = runDoctor(['--cwd', minimalConfigHome, '--skip-install-check', '--no-write', '--json'], homeEnv(minimalConfigHome));
   assert(minimalConfig.status === 0, `Expected minimal config doctor to pass, got ${minimalConfig.status}\n${minimalConfig.stderr}`);
   const minimalConfigJson = parseJson(minimalConfig.stdout);
   assertResult(minimalConfigJson.results, 'arch doc output dir', true);
@@ -108,7 +109,7 @@ try {
     '  enabled: false',
     '',
   ].join('\n'));
-  const governanceConfig = runDoctor(['--skip-install-check', '--no-write', '--json'], homeEnv(governanceConfigHome));
+  const governanceConfig = runDoctor(['--cwd', governanceConfigHome, '--skip-install-check', '--no-write', '--json'], homeEnv(governanceConfigHome));
   assert(governanceConfig.status === 0, `Expected governance config doctor to pass, got ${governanceConfig.status}\n${governanceConfig.stderr}`);
   const governanceConfigJson = parseJson(governanceConfig.stdout);
   const archDocResult = assertResult(governanceConfigJson.results, 'arch doc output dir', true);
