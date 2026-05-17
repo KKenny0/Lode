@@ -83,6 +83,27 @@ rejected alternatives。
 
 ## Install
 
+### Claude Code
+
+```bash
+# GitHub marketplace（推荐）
+claude plugin marketplace add KKenny0/Lode
+
+# 或本地开发
+claude plugin marketplace add ./path/to/Lode
+```
+
+安装后，namespaced commands（`/lode:capture`、`/lode:recall` 等）会在每个
+Claude Code session 中可用。
+
+也可以用 CLI 做验证：
+
+```bash
+npx @lode/cli doctor
+```
+
+### Codex
+
 `codex plugin marketplace add` 只会注册 marketplace source，不会把插件本体安装并启用。
 如果要纯命令行安装，需要再把插件复制到 Codex plugin cache，并写入
 `~/.codex/config.toml` 启用 `lode@lode-marketplace`。
