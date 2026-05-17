@@ -8,10 +8,12 @@
   },
   "files": [
     "dist",
-    "skills"
+    "skills",
+    "assets"
   ],
   "scripts": {
     "build": "tsc",
+    "prepack": "npm run build && npm run copy-skills && npm run check-skills",
     "prepublishOnly": "npm run build && npm run copy-skills && npm run check-skills",
     "copy-skills": "node scripts/copy-skills.mjs",
     "check-skills": "node scripts/check-skills.mjs",

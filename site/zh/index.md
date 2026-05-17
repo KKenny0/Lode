@@ -61,8 +61,8 @@ Lode 已经用自己的项目历史 dogfood 派生决策回放索引。raw entri
 ## 安装
 
 ```bash
-# 先注册 marketplace，再按 README.md 完成 cache/config 步骤
 codex plugin marketplace add KKenny0/Lode
+npx @lode/cli install-codex-plugin
 ```
 
 然后运行 demo，运行一次 `/lode:cold-start-interview`，用 `收工` 捕获一次真实

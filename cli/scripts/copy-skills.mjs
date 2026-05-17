@@ -8,6 +8,8 @@ const cliRoot = path.resolve(scriptDir, '..');
 const repoRoot = path.resolve(cliRoot, '..');
 const sourceSkillsDir = path.join(repoRoot, 'skills');
 const bundledSkillsDir = path.join(cliRoot, 'skills');
+const sourceAssetsDir = path.join(repoRoot, 'assets');
+const bundledAssetsDir = path.join(cliRoot, 'assets');
 
 const officialSkills = [
   'capture',
@@ -47,4 +49,12 @@ for (const skill of officialSkills) {
   copyDir(skillPath, path.join(bundledSkillsDir, skill));
 }
 
+fs.rmSync(bundledAssetsDir, { recursive: true, force: true });
+if (fs.existsSync(sourceAssetsDir)) {
+  copyDir(sourceAssetsDir, bundledAssetsDir);
+}
+
 console.log(`Copied skills to ${bundledSkillsDir}`);
+if (fs.existsSync(bundledAssetsDir)) {
+  console.log(`Copied assets to ${bundledAssetsDir}`);
+}

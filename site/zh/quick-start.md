@@ -3,8 +3,8 @@
 ## 1. 安装
 
 ```bash
-# 先注册 marketplace，再按 README.md 完成 cache/config 步骤
 codex plugin marketplace add KKenny0/Lode
+npx @lode/cli install-codex-plugin
 ```
 
 ## 2. 运行 Demo
@@ -74,6 +74,8 @@ Lode 从以下位置读取配置（按优先级排序）：
 
 1. `{project}/.lode/config.yaml` — 项目级
 2. `~/.lode/config.yaml` — 全局
+3. `$WEEKLY_PPT_PATH` — legacy 环境变量 fallback
+4. `~/.weekly-ppt/` — legacy 默认 fallback
 
 ```yaml
 knowledge_vault: /path/to/your/knowledge-vault

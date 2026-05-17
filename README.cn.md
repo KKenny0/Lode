@@ -104,73 +104,24 @@ npx @lode/cli doctor
 
 ### Codex
 
-`codex plugin marketplace add` 只会注册 marketplace source，不会把插件本体安装并启用。
-如果要纯命令行安装，需要再把插件复制到 Codex plugin cache，并写入
-`~/.codex/config.toml` 启用 `lode@lode-marketplace`。
+Codex 现在可以注册 plugin marketplace，但还没有官方 CLI 命令把 marketplace
+里的插件安装并启用。Lode 提供了一个桥接命令：把 bundled plugin 复制到 Codex
+plugin cache，并写入 `~/.codex/config.toml` 启用 `lode@lode-marketplace`。
 
 ```bash
-# 1. 添加 Git-backed marketplace
 codex plugin marketplace add KKenny0/Lode
-export CODEX_HOME="${CODEX_HOME:-$HOME/.codex}"
-export LODE_MARKETPLACE="lode-marketplace"
-export LODE_PLUGIN="lode"
-export LODE_MARKETPLACE_ROOT="$CODEX_HOME/.tmp/marketplaces/$LODE_MARKETPLACE"
-
-# 本地开发版本用下面两行替代上面的 GitHub source：
-# codex plugin marketplace add ./path/to/Lode
-# export LODE_MARKETPLACE_ROOT="$(cd ./path/to/Lode && pwd)"
-
-# 2. 复制插件 payload 到 Codex plugin cache
-export LODE_VERSION="$(node -p "require('$LODE_MARKETPLACE_ROOT/.codex-plugin/plugin.json').version")"
-export LODE_CACHE="$CODEX_HOME/plugins/cache/$LODE_MARKETPLACE/$LODE_PLUGIN/$LODE_VERSION"
-rm -rf "$LODE_CACHE"
-mkdir -p "$(dirname "$LODE_CACHE")"
-cp -R "$LODE_MARKETPLACE_ROOT" "$LODE_CACHE"
-
-# 3. 启用 plugins feature 和 Lode plugin
-python3 - "$CODEX_HOME/config.toml" "$LODE_PLUGIN@$LODE_MARKETPLACE" <<'PY'
-from pathlib import Path
-import sys
-
-config_path = Path(sys.argv[1]).expanduser()
-plugin_key = sys.argv[2]
-lines = config_path.read_text().splitlines() if config_path.exists() else []
-
-def set_table_key(input_lines, header, key, value):
-    out = []
-    inside = False
-    seen = False
-    has_key = False
-    for line in input_lines:
-        stripped = line.strip()
-        if stripped.startswith("[") and stripped.endswith("]"):
-            if inside and not has_key:
-                out.append(f"{key} = {value}")
-            inside = stripped == header
-            seen = seen or inside
-            has_key = False
-        if inside and "=" in stripped and stripped.split("=", 1)[0].strip() == key:
-            out.append(f"{key} = {value}")
-            has_key = True
-        else:
-            out.append(line)
-    if inside and not has_key:
-        out.append(f"{key} = {value}")
-    if not seen:
-        if out and out[-1] != "":
-            out.append("")
-        out.extend([header, f"{key} = {value}"])
-    return out
-
-lines = set_table_key(lines, "[features]", "plugins", "true")
-lines = set_table_key(lines, f'[plugins."{plugin_key}"]', "enabled", "true")
-config_path.parent.mkdir(parents=True, exist_ok=True)
-config_path.write_text("\n".join(lines).rstrip() + "\n")
-PY
+npx @lode/cli install-codex-plugin
 ```
 
 如果 Codex 已经打开，重启 Codex，然后开一个新 thread。此时应该能看到
 `/lode:capture`、`/lode:recall`、`/lode:query` 等 Lode plugin skills。
+
+本地开发时，可以从当前 checkout 构建并安装：
+
+```bash
+npm --prefix cli run build
+node cli/dist/index.js install-codex-plugin
+```
 
 然后先证明 replay loop：运行 demo，运行一次 `/lode:cold-start-interview`，
 用 `收工` 或 `/lode:capture` 捕获一次真实 session，再用 `/lode:query`

@@ -58,16 +58,20 @@ function checkSkillInstallation(skipInstallCheck: boolean | undefined): CheckRes
   }
 
   const codexDir = codex.getInstallPath();
+  const codexPluginDir = codex.getPluginSkillsPath();
   const claudeMarketplace = claudeCode.getInstallPath();
   const claudeSkillsDir = path.join(claudeMarketplace, 'lode', 'skills');
 
   const codexSkills = installedSkillsIn(codexDir);
+  const codexPluginSkills = installedSkillsIn(codexPluginDir);
   const claudeSkills = installedSkillsIn(claudeSkillsDir);
   const installed = codexSkills.length === OFFICIAL_SKILLS.length
+    || codexPluginSkills.length === OFFICIAL_SKILLS.length
     || claudeSkills.length === OFFICIAL_SKILLS.length;
 
   if (installed) {
     const targets = [
+      codexPluginSkills.length === OFFICIAL_SKILLS.length ? `Codex plugin: ${codexPluginDir}` : null,
       codexSkills.length === OFFICIAL_SKILLS.length ? `Codex: ${codexDir}` : null,
       claudeSkills.length === OFFICIAL_SKILLS.length ? `Claude Code: ${claudeSkillsDir}` : null,
     ].filter(Boolean).join('; ');
@@ -75,11 +79,12 @@ function checkSkillInstallation(skipInstallCheck: boolean | undefined): CheckRes
   }
 
   const missingCodex = OFFICIAL_SKILLS.filter(skill => !codexSkills.includes(skill));
+  const missingCodexPlugin = OFFICIAL_SKILLS.filter(skill => !codexPluginSkills.includes(skill));
   const missingClaude = OFFICIAL_SKILLS.filter(skill => !claudeSkills.includes(skill));
   return fail(
     'skill installation',
-    `Missing skills. Codex missing: ${missingCodex.join(', ') || 'none'}; Claude Code missing: ${missingClaude.join(', ') || 'none'}`,
-    'Run `lode setup` and choose Codex, Claude Code, or Both.',
+    `Missing skills. Codex plugin missing: ${missingCodexPlugin.join(', ') || 'none'}; Codex standalone missing: ${missingCodex.join(', ') || 'none'}; Claude Code missing: ${missingClaude.join(', ') || 'none'}`,
+    'Run `lode install-codex-plugin`, or run `lode setup` for standalone skills.',
   );
 }
 

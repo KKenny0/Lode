@@ -106,74 +106,27 @@ npx @lode/cli doctor
 
 ### Codex
 
-`codex plugin marketplace add` registers the marketplace source only. For a
-command-line-only install, also copy the plugin into Codex's plugin cache and
-enable it in `~/.codex/config.toml`.
+Codex can register a plugin marketplace, but it does not currently expose a
+native command that installs and enables a marketplace plugin from the CLI.
+Lode ships a small bridge command for that gap: it copies the bundled plugin to
+Codex's plugin cache and enables `lode@lode-marketplace` in
+`~/.codex/config.toml`.
 
 ```bash
-# 1. Add the Git-backed marketplace.
 codex plugin marketplace add KKenny0/Lode
-export CODEX_HOME="${CODEX_HOME:-$HOME/.codex}"
-export LODE_MARKETPLACE="lode-marketplace"
-export LODE_PLUGIN="lode"
-export LODE_MARKETPLACE_ROOT="$CODEX_HOME/.tmp/marketplaces/$LODE_MARKETPLACE"
-
-# For local development instead, use:
-# codex plugin marketplace add ./path/to/Lode
-# export LODE_MARKETPLACE_ROOT="$(cd ./path/to/Lode && pwd)"
-
-# 2. Copy the plugin payload into Codex's plugin cache.
-export LODE_VERSION="$(node -p "require('$LODE_MARKETPLACE_ROOT/.codex-plugin/plugin.json').version")"
-export LODE_CACHE="$CODEX_HOME/plugins/cache/$LODE_MARKETPLACE/$LODE_PLUGIN/$LODE_VERSION"
-rm -rf "$LODE_CACHE"
-mkdir -p "$(dirname "$LODE_CACHE")"
-cp -R "$LODE_MARKETPLACE_ROOT" "$LODE_CACHE"
-
-# 3. Enable the plugins feature and the Lode plugin.
-python3 - "$CODEX_HOME/config.toml" "$LODE_PLUGIN@$LODE_MARKETPLACE" <<'PY'
-from pathlib import Path
-import sys
-
-config_path = Path(sys.argv[1]).expanduser()
-plugin_key = sys.argv[2]
-lines = config_path.read_text().splitlines() if config_path.exists() else []
-
-def set_table_key(input_lines, header, key, value):
-    out = []
-    inside = False
-    seen = False
-    has_key = False
-    for line in input_lines:
-        stripped = line.strip()
-        if stripped.startswith("[") and stripped.endswith("]"):
-            if inside and not has_key:
-                out.append(f"{key} = {value}")
-            inside = stripped == header
-            seen = seen or inside
-            has_key = False
-        if inside and "=" in stripped and stripped.split("=", 1)[0].strip() == key:
-            out.append(f"{key} = {value}")
-            has_key = True
-        else:
-            out.append(line)
-    if inside and not has_key:
-        out.append(f"{key} = {value}")
-    if not seen:
-        if out and out[-1] != "":
-            out.append("")
-        out.extend([header, f"{key} = {value}"])
-    return out
-
-lines = set_table_key(lines, "[features]", "plugins", "true")
-lines = set_table_key(lines, f'[plugins."{plugin_key}"]', "enabled", "true")
-config_path.parent.mkdir(parents=True, exist_ok=True)
-config_path.write_text("\n".join(lines).rstrip() + "\n")
-PY
+npx @lode/cli install-codex-plugin
 ```
 
 Restart Codex if it is open, then start a new thread. You should see the Lode
 plugin skills as available commands such as `/lode:capture`, `/lode:recall`,
 and `/lode:query`.
+
+For local development, build the CLI and install from this checkout:
+
+```bash
+npm --prefix cli run build
+node cli/dist/index.js install-codex-plugin
+```
 
 Then prove the replay loop: run the demo, run `/lode:cold-start-interview`
 once, capture one real session with `收工` or `/lode:capture`, and query one

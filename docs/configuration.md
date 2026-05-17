@@ -79,8 +79,8 @@ lode doctor
 
 ### 常见问题
 
-**问题**: "Cannot find config"
-**解决**: 检查配置文件路径和权限，确保存在有效的配置文件
+**问题**: "Vault does not exist: ~/.weekly-ppt"
+**解决**: 这是 legacy fallback 生效后的诊断结果。新项目推荐运行 `lode setup` 写入明确的 `knowledge_vault`，或设置 `$WEEKLY_PPT_PATH` 指向已有 vault。
 
 **问题**: "Vault is not writable"
 **解决**: 检查目录权限，确保 Claude Code 有写入权限

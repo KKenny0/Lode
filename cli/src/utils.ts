@@ -25,13 +25,23 @@ const OFFICIAL_SKILL_SET = new Set(OFFICIAL_SKILLS);
 export function getSkillsDir(): string {
   // Check for published package layout first (skills/ next to dist/)
   const published = path.join(__dirname, '..', 'skills');
-  if (fs.existsSync(published)) return published;
+  if (hasAllOfficialSkills(published)) return published;
 
   // Dev layout: cli/dist/ → ../../skills
   const dev = path.join(__dirname, '..', '..', 'skills');
-  if (fs.existsSync(dev)) return dev;
+  if (hasAllOfficialSkills(dev)) return dev;
 
   throw new Error('Cannot find skills directory. Run `npm run copy-skills` first.');
+}
+
+export function getAssetsDir(): string | null {
+  const published = path.join(__dirname, '..', 'assets');
+  if (fs.existsSync(published)) return published;
+
+  const dev = path.join(__dirname, '..', '..', 'assets');
+  if (fs.existsSync(dev)) return dev;
+
+  return null;
 }
 
 const EXCLUDED_RESOURCE_DIRS = new Set(['evals']);
@@ -41,6 +51,11 @@ function isSkillDirectory(dir: string, name: string): boolean {
   if (name.endsWith('-workspace')) return false;
   const fullPath = path.join(dir, name);
   return fs.statSync(fullPath).isDirectory() && fs.existsSync(path.join(fullPath, 'SKILL.md'));
+}
+
+function hasAllOfficialSkills(dir: string): boolean {
+  return fs.existsSync(dir)
+    && OFFICIAL_SKILLS.every(name => fs.existsSync(path.join(dir, name, 'SKILL.md')));
 }
 
 function shouldSkipCopy(entryName: string): boolean {

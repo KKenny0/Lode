@@ -18,7 +18,11 @@ function mkTempDir(name) {
 }
 
 function runDoctor(args, env = {}) {
-  return spawnSync(process.execPath, [entrypoint, 'doctor', ...args], {
+  return runCli(['doctor', ...args], env);
+}
+
+function runCli(args, env = {}) {
+  return spawnSync(process.execPath, [entrypoint, ...args], {
     cwd: path.resolve(cliRoot, '..'),
     env: { ...process.env, ...env },
     encoding: 'utf-8',
@@ -70,21 +74,64 @@ try {
 
   const cleanHome = mkTempDir('doctor-home');
   tempDirs.push(cleanHome);
-  const noConfig = runDoctor(['--cwd', cleanHome, '--skip-install-check', '--no-write', '--json'], homeEnv(cleanHome));
-  assert(noConfig.status !== 0, 'Expected no-config doctor to fail');
-  const noConfigJson = parseJson(noConfig.stdout);
-  assert(noConfigJson.ok === false, 'Expected no-config doctor ok=false');
-  const configResult = assertResult(noConfigJson.results, 'config', false);
-  assert(configResult.fix.includes('lode setup'), 'Expected no-config fix to mention lode setup');
+  const legacyDefault = runDoctor(['--cwd', cleanHome, '--skip-install-check', '--no-write', '--json'], {
+    ...homeEnv(cleanHome),
+    WEEKLY_PPT_PATH: '',
+  });
+  assert(legacyDefault.status !== 0, 'Expected legacy-default doctor to fail until ~/.weekly-ppt exists');
+  const legacyDefaultJson = parseJson(legacyDefault.stdout);
+  assert(legacyDefaultJson.ok === false, 'Expected legacy-default doctor ok=false');
+  assertResult(legacyDefaultJson.results, 'config', true);
+  const legacyDefaultVault = assertResult(legacyDefaultJson.results, 'vault exists', false);
+  assert(legacyDefaultVault.message.includes('.weekly-ppt'), 'Expected fallback vault to use ~/.weekly-ppt');
+
+  const envFallbackHome = mkTempDir('doctor-env-fallback-home');
+  const envFallbackVault = mkTempDir('doctor-env-fallback-vault');
+  tempDirs.push(envFallbackHome, envFallbackVault);
+  const envFallback = runDoctor(['--cwd', envFallbackHome, '--skip-install-check', '--no-write', '--json'], {
+    ...homeEnv(envFallbackHome),
+    WEEKLY_PPT_PATH: envFallbackVault,
+  });
+  assert(envFallback.status === 0, `Expected WEEKLY_PPT_PATH fallback doctor to pass, got ${envFallback.status}\n${envFallback.stderr}`);
+  const envFallbackJson = parseJson(envFallback.stdout);
+  assert(envFallbackJson.ok === true, 'Expected WEEKLY_PPT_PATH fallback doctor ok=true');
+  const envFallbackVaultResult = assertResult(envFallbackJson.results, 'vault exists', true);
+  assert(envFallbackVaultResult.message === envFallbackVault, 'Expected vault to come from WEEKLY_PPT_PATH');
 
   const missingInstallHome = mkTempDir('doctor-install-home');
   const missingInstallVault = mkTempDir('doctor-install-vault');
-  tempDirs.push(missingInstallHome, missingInstallVault);
-  const missingInstall = runDoctor(['--cwd', missingInstallHome, '--vault', missingInstallVault, '--no-write', '--json'], homeEnv(missingInstallHome));
+  const missingInstallCodexHome = mkTempDir('doctor-install-codex-home');
+  tempDirs.push(missingInstallHome, missingInstallVault, missingInstallCodexHome);
+  const missingInstall = runDoctor(['--cwd', missingInstallHome, '--vault', missingInstallVault, '--no-write', '--json'], {
+    ...homeEnv(missingInstallHome),
+    CODEX_HOME: missingInstallCodexHome,
+  });
   assert(missingInstall.status !== 0, 'Expected missing-install doctor to fail');
   const missingInstallJson = parseJson(missingInstall.stdout);
   const installResult = assertResult(missingInstallJson.results, 'skill installation', false);
   assert(installResult.message.includes('Missing skills'), 'Expected missing-install message');
+  assert(installResult.fix.includes('install-codex-plugin'), 'Expected install fix to mention install-codex-plugin');
+
+  const codexHome = mkTempDir('doctor-codex-home');
+  const codexInstallHome = mkTempDir('doctor-codex-install-home');
+  const codexInstallVault = mkTempDir('doctor-codex-install-vault');
+  tempDirs.push(codexHome, codexInstallHome, codexInstallVault);
+  const codexInstall = runCli(['install-codex-plugin', '--codex-home', codexHome], homeEnv(codexInstallHome));
+  assert(codexInstall.status === 0, `Expected Codex plugin install to pass, got ${codexInstall.status}\n${codexInstall.stderr}`);
+  assert(fs.existsSync(path.join(codexHome, 'plugins', 'cache', 'lode-marketplace', 'lode', '0.1.0', 'skills', 'capture', 'SKILL.md')), 'Expected Codex plugin skill cache to be created');
+  assert(fs.existsSync(path.join(codexHome, 'plugins', 'cache', 'lode-marketplace', 'lode', '0.1.0', 'assets', 'mark.svg')), 'Expected Codex plugin assets to be created');
+  const codexConfig = fs.readFileSync(path.join(codexHome, 'config.toml'), 'utf-8');
+  assert(codexConfig.includes('[features]'), 'Expected Codex config features table');
+  assert(codexConfig.includes('plugins = true'), 'Expected Codex plugins feature to be enabled');
+  assert(codexConfig.includes('[plugins."lode@lode-marketplace"]'), 'Expected Lode plugin table');
+  const codexDoctor = runDoctor(['--cwd', codexInstallHome, '--vault', codexInstallVault, '--no-write', '--json'], {
+    ...homeEnv(codexInstallHome),
+    CODEX_HOME: codexHome,
+  });
+  assert(codexDoctor.status === 0, `Expected doctor to find Codex plugin install, got ${codexDoctor.status}\n${codexDoctor.stderr}`);
+  const codexDoctorJson = parseJson(codexDoctor.stdout);
+  const codexInstallResult = assertResult(codexDoctorJson.results, 'skill installation', true);
+  assert(codexInstallResult.message.includes('Codex plugin'), 'Expected doctor to report Codex plugin install');
 
   const minimalConfigHome = mkTempDir('doctor-minimal-config-home');
   const minimalConfigVault = mkTempDir('doctor-minimal-config-vault');

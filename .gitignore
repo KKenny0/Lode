@@ -26,6 +26,7 @@ skills/**/__pycache__/
 
 # CLI build artifacts
 cli/node_modules/
+cli/assets/
 cli/dist/
 cli/skills/
 

@@ -3,8 +3,8 @@
 ## 1. Install
 
 ```bash
-# Register the marketplace, then follow README.md for cache/config steps.
 codex plugin marketplace add KKenny0/Lode
+npx @lode/cli install-codex-plugin
 ```
 
 ## 2. Run the Demo
@@ -78,6 +78,8 @@ Lode reads config from (in priority order):
 
 1. `{project}/.lode/config.yaml` — project-level
 2. `~/.lode/config.yaml` — global
+3. `$WEEKLY_PPT_PATH` — legacy environment fallback
+4. `~/.weekly-ppt/` — legacy default fallback
 
 ```yaml
 knowledge_vault: /path/to/your/knowledge-vault

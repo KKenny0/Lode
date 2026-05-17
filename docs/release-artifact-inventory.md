@@ -10,6 +10,7 @@ workspaces need explicit review before removal.
 | :--- | :--- | :--- | :--- |
 | `cli/dist/` | TypeScript build output for the installer CLI. | Keep ignored; regenerate with `npm --prefix cli run build`. | Safe to delete after verification. |
 | `cli/skills/` | Generated skill copy used by CLI packaging checks. | Keep ignored; regenerate with `npm --prefix cli run copy-skills` or `check-skills`. | Safe to delete after verification. |
+| `cli/assets/` | Generated asset copy used by CLI plugin packaging. | Keep ignored; regenerate with `npm --prefix cli run copy-skills`. | Safe to delete after verification. |
 | `site/.vitepress/cache/` | VitePress cache. | Keep ignored. | Safe to delete after verification. |
 | `site/.vitepress/dist/` | VitePress static site build output. | Keep ignored; deployment should rebuild it. | Safe to delete after verification. |
 | `skills/**/__pycache__/` | Python bytecode caches from helper execution. | Keep ignored. | Safe to delete after verification. |

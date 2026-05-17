@@ -83,14 +83,23 @@ function mergeConfigs(globalCfg: LodeConfig | null, projectCfg: LodeConfig | nul
 export function readConfigForCwd(cwd: string): LodeConfig | null {
   const globalCfg = readConfig();
   const projectPath = findProjectConfig(cwd);
-  if (!projectPath) return globalCfg;
+  if (!projectPath) return withLegacyFallback(globalCfg);
   try {
     const raw = fs.readFileSync(projectPath, 'utf-8');
     const projectCfg = yaml.load(raw) as LodeConfig;
-    return mergeConfigs(globalCfg, projectCfg);
+    return withLegacyFallback(mergeConfigs(globalCfg, projectCfg));
   } catch {
-    return globalCfg;
+    return withLegacyFallback(globalCfg);
   }
+}
+
+function withLegacyFallback(cfg: LodeConfig | null): LodeConfig | null {
+  if (cfg?.knowledge_vault) return cfg;
+  const envVault = process.env.WEEKLY_PPT_PATH;
+  if (envVault && envVault.trim()) {
+    return { ...(cfg || {}), knowledge_vault: envVault };
+  }
+  return { ...(cfg || {}), knowledge_vault: '~/.weekly-ppt' };
 }
 
 export function writeConfig(cfg: LodeConfig): void {

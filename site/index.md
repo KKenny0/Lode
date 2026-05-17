@@ -62,8 +62,8 @@ See the [dogfood proof on GitHub](https://github.com/KKenny0/Lode/blob/main/exam
 ## Install
 
 ```bash
-# Register the marketplace, then follow README.md for cache/config steps.
 codex plugin marketplace add KKenny0/Lode
+npx @lode/cli install-codex-plugin
 ```
 
 Then run the demo, run `/lode:cold-start-interview` once, capture one real
