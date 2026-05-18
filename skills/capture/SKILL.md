@@ -199,12 +199,25 @@ Resolve `{vault}` using the standard priority order:
 | 3 | `$WEEKLY_PPT_PATH` | Legacy fallback |
 | 4 | `~/.weekly-ppt/` | Legacy fallback default |
 
-Use the bundled helper when available:
+Use the bundled helper when available. Each helper call requires the JSON to be
+on disk as a file — the scripts read `--entry` / `--artifact` paths, not stdin.
+
+### Step 4a: Resolve config and write entry JSON to a temp file
 
 ```bash
 python <this-skill>/scripts/lode_raw.py resolve-config --cwd "$PWD"
+```
+
+Then use the **Write tool** (not bash heredoc, pipe, or redirect) to write the
+entry JSON array to `{project}/.lode/tmp-entry.json`. The Write tool guarantees
+the file content is flushed to disk before the helper reads it. Do NOT use
+heredoc or `cat > file` — those can leave stale content from a previous session.
+
+### Step 4b: Append the entry
+
+```bash
 python <this-skill>/scripts/lode_raw.py append-entry \
-  --entry /tmp/lode-session-entries.json \
+  --entry .lode/tmp-entry.json \
   --cwd "$PWD"
 ```
 
@@ -212,13 +225,29 @@ The helper resolves config, calculates the ISO week, resolves the project slug,
 validates required fields, logs adaptive-depth warnings, and appends the entry
 object or array.
 
-For each durable artifact index entry:
+### Step 4c: Clean up
 
 ```bash
-python <this-skill>/scripts/lode_raw.py upsert-artifact \
-  --artifact /tmp/lode-artifact.json \
-  --cwd "$PWD"
+rm .lode/tmp-entry.json
 ```
+
+Delete the temp file only after Step 4b succeeds. If the helper fails, keep the
+temp file for debugging and fall back to Markdown output.
+
+### Artifact index entries
+
+For each durable artifact index entry, follow the same Write → call → cleanup
+pattern:
+
+1. Use the **Write tool** to write the artifact JSON to
+   `{project}/.lode/tmp-artifact.json`.
+2. Call the helper:
+   ```bash
+   python <this-skill>/scripts/lode_raw.py upsert-artifact \
+     --artifact .lode/tmp-artifact.json \
+     --cwd "$PWD"
+   ```
+3. On success, delete `rm .lode/tmp-artifact.json`.
 
 If any helper call fails, fall back to Markdown output instead of blocking the
 recap.
