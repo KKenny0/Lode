@@ -374,6 +374,13 @@ def append_entries(
     week = iso_week(date_value)
     entries = load_entries(entry_path)
 
+    # Overwrite LLM-provided timestamps with the authoritative server clock.
+    # LLMs do not have access to a real-time clock and can hallucinate
+    # timestamps that are minutes (or more) off from the actual time.
+    now_iso = dt.datetime.now().astimezone().isoformat()
+    for entry in entries:
+        entry["timestamp"] = now_iso
+
     target_dir = vault / "raw" / "weeks" / week
     target_dir.mkdir(parents=True, exist_ok=True)
     target_file = target_dir / f"{slug}.json"

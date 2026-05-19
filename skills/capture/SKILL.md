@@ -87,7 +87,7 @@ Follow `references/weekly-ppt-convention.md`. The change entry JSON shape is:
 
 ```json
 {
-  "timestamp": "ISO 8601",
+  "timestamp": "ISO 8601 (set by helper; LLM-provided value is overwritten with server clock)",
   "archetype": "decision | build | investigation | repair | maintenance",
   "type": "feature | fix | refactor | decision | risk",
   "summary": "1 sentence, engineering-level abstraction",
