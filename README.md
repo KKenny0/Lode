@@ -110,6 +110,13 @@ claude plugin marketplace add ./path/to/Lode
 
 After installation the namespaced commands (`/lode:capture`, `/lode:recall`, etc.) are available in every Claude Code session.
 
+To update to the latest version:
+
+```bash
+claude plugin marketplace update lode
+claude plugin update lode@lode
+```
+
 CLI verification is also available:
 
 ```bash

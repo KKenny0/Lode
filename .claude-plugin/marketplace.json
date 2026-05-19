@@ -10,7 +10,6 @@
     {
       "name": "lode",
       "description": "Agentic coding persistent memory and decision replay.",
-      "version": "0.1.0",
       "author": {
         "name": "Kennywu",
         "email": "jdlow@live.cn"
