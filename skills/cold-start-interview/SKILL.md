@@ -39,7 +39,9 @@ If an existing config is present, preserve fields that are unrelated to this
 interview, including `daily_note`, `weekly_outline`, `monthly_review`, and any
 custom keys.
 
-## Step 0: Scope Detection
+## Step 0: Scope Detection — MUST Complete Before Step 1
+
+**CRITICAL**: Step 0 is a mandatory gate. You MUST read both config files (if they exist) and check completeness BEFORE asking any questions. Do not skip to Step 1 until Step 0 is done.
 
 Check the current working directory:
 
@@ -50,9 +52,24 @@ Check the current working directory:
    - **No**: This is a global-preferences-only setup. Write everything to
      `~/.lode/config.yaml` (backward-compatible single-project behavior).
 
-2. Does `~/.lode/config.yaml` already exist?
-   - **Yes**: Read it. The interview only asks about missing values.
-   - **No**: Full interview needed.
+2. Read `~/.lode/config.yaml` if it exists.
+   - **Global config is complete** when ALL of these are present and non-empty:
+     `knowledge_vault`, `profile.report_language`, `profile.weekly_mode`,
+     `profile.team_context`, `artifact_index.enabled`, `auto_capture.enabled`.
+   - **Partial**: Some fields present. Interview only asks for the missing fields.
+   - **Missing**: No file exists. Full interview needed.
+
+3. If CWD is a project (has `.git/` or `.lode/`), read `{project-root}/.lode/config.yaml` if it exists.
+   - **Project config is complete** when BOTH `project_slug` and `profile.project_name` are present and non-empty.
+   - **Missing**: Project identity not yet set. Interview only asks for these two fields (project_name, project_slug) — do NOT re-ask global questions.
+
+### Early-Exit Gate
+
+**If global config is complete AND (CWD is not a project OR project config is also complete), STOP immediately.** Reply with a brief status summary listing both config paths and their contents. Do not ask any questions. The setup is done.
+
+**If global config is complete but project config is missing (in a project), only ask project_name and project_slug.** Do not ask knowledge_vault, report_language, weekly_mode, team_context, auto_capture questions — they are already set.
+
+**If global config is partial, only ask the specific fields that are missing.** Do not re-ask fields that already have values.
 
 ## Step 1: Interview
 
