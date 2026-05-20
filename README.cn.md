@@ -37,29 +37,42 @@ raw record 之上的复利视图，放在后面使用。
 每个 skill 对应一个你已经有的工作习惯。插件形态下，用统一的
 namespaced command 激活。
 
-| Skill | When | What it does |
+### Tier 1 — 第一天就用的（无需积累数据，即刻生效）
+
+| Skill | 时机 | 功能 |
 | :--- | :--- | :--- |
 | `/lode:cold-start-interview` | 首次使用 | 创建包含 vault path、项目身份、语言和报告偏好的 `~/.lode/config.yaml` |
 | `/lode:capture` | 每次收工 | 识别 session archetype，按 decision/build/repair 等类型捕获深度信号，并在需要时索引 durable artifacts |
-| `/lode:query` | 定向追问 | 用带引用的 decision replay evidence 回答“当时为什么这么选？” |
 | `/lode:recall` | 已有历史后的开工 | 召回最近决策、风险、开放问题、放弃方案、相关 docs 和可能过期的 intent artifacts |
-| `/lode:roadmap` | 多个决策之后按需 | 生成叙事性决策路线图，并汇总累积风险与反复开放问题 |
+
+先用 capture + recall 坚持 1-2 周。等 raw entry 积累起来后，Tier 2 的 skill 就会自动变丰富。
+
+### Tier 2 — 积累一周后用的（有几条 raw entry 后效果更好）
+
+| Skill | 时机 | 功能 |
+| :--- | :--- | :--- |
 | `/lode:daily` | 每天按需 | 从 raw entries 和 git history 更新 Obsidian 日报 |
-| `/lode:weekly` | 每周按需 | 基于 raw entries 生成周报大纲，有证据时加入本周难点 |
+| `/lode:weekly` | 每周按需 | 基于 raw entries 生成 PPT 制作参考文档，有证据时加入本周难点 |
+| `/lode:query` | 定向追问 | 用带引用的 decision replay evidence 回答”当时为什么这么选？” |
+
+### Tier 3 — 积累一个月后用的（复利视图，需要足够历史）
+
+| Skill | 时机 | 功能 |
+| :--- | :--- | :--- |
 | `/lode:monthly` | 每月按需 | 生成月度工作回顾，并从重复证据中提出 candidate rules |
+| `/lode:roadmap` | 阶段性复盘 | 生成叙事性决策路线图，并汇总累积风险与反复开放问题 |
 
 Skills 是独立的。Lode 不是一个强制流水线 — 每个 skill 可以单独使用，但它们共享同一套本地存储约定，所以后续报告可以复用之前沉淀的上下文。
 
-### Recommended Habit Loop
+### 推荐使用节奏
 
-先运行一次 `/lode:cold-start-interview` 配置 vault。真实 session 结束后，用
-`/lode:capture` 记录决策、风险、放弃路径、开放问题和 durable artifacts。之后
-每次开工，用 `/lode:recall` 在编辑前恢复最近工作上下文。
+**第一天**：运行一次 `/lode:cold-start-interview` 配置 vault。
 
-需要追问单个决策时，用 `/lode:query` 获取带引用的回答。多个决策累积之后，再用
-`/lode:roadmap` 做阶段性复盘；它不是 `/lode:recall` 的前置步骤。需要周期报告时，
-再用 `/lode:daily`、`/lode:weekly` 和 `/lode:monthly` 把同一份 raw record
-转成日报、周报和月报。
+**每次工作**：收工时 `/lode:capture`（”收工”），开工时 `/lode:recall`（”开工”）。这两个构成核心 habit loop。
+
+**积累 1-2 周后**：`/lode:daily`、`/lode:weekly` 生成周期报告，`/lode:query` 定向追问决策。
+
+**积累 1 个月以上**：`/lode:monthly` 做月度回顾，`/lode:roadmap` 做决策演变复盘。
 
 ## Decision Replay
 

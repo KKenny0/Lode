@@ -85,6 +85,20 @@ evidence_mode: strict            # strict | best_effort
 日标题：  ^###\s*\d{4}\.\d{2}\.\d{2}
 ```
 
+### Step 1.5: Source Coverage Check
+
+Check how many days in the target month have raw entries vs git-only entries in
+the Daily Note:
+
+1. Parse the daily note for the target month
+2. Tag each day's content as: `raw-entry-backed`, `git-only`, or `empty`
+3. Report in the summary:
+   - Days with raw entry coverage: {N}/{total_days}
+   - Git-only days: {M}/{total_days}
+   - Empty days: {K}/{total_days}
+
+If raw entry coverage < 50%, include a note in the summary: "本月大部分工作记录来自 git log，缺少决策和动机上下文。建议坚持使用 /lode:capture 以提升月报质量。"
+
 ### Step 2：按月拆分归档
 
 运行 `scripts/split_daily_note.py`，将 Daily Note.md 拆分为 `YYYY-MM.md` 月度归档文件，保存到 `{vault}/Work Diary/Monthly/`。

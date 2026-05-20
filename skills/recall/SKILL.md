@@ -29,6 +29,18 @@ AI do not restart from zero.
 
 ## Workflow
 
+### Pre-Check: Vault Health
+
+Before running the recall helper, do a quick health check:
+
+1. Resolve vault path from config
+2. Check if `{vault}/raw/weeks/` has any `{slug}.json` files
+3. If no raw entries exist at all: suggest `/lode:capture` and stop
+4. If raw entries exist but are older than 14 days: note staleness in output
+5. If `recall_context.py` is missing: warn and suggest re-install
+
+If the pre-check passes, continue to the main workflow:
+
 1. Resolve the current project context.
 2. Run the helper:
 
@@ -90,6 +102,28 @@ This skill reads:
 This skill writes `{vault}/raw/decisions/{project-slug}.json` only when the
 derived decision index is missing, invalid, empty, or older than raw entries.
 Raw entries remain the source of truth.
+
+## Artifact Discovery
+
+The artifact index at `{vault}/raw/artifacts/{slug}.json` is a structured
+catalog of durable project documents. When present, use it to enrich the recall
+output:
+
+1. **Find related docs**: When raw entries mention `related_docs` or
+   `artifact_context`, cross-reference the artifact index for topic tags and
+   decision threads to find adjacent documents.
+2. **Detect stale documents**: Artifacts with `status: superseded` or a
+   `superseded_by` field indicate documents that have been replaced — flag these
+   so the next session doesn't rely on outdated references.
+3. **Navigate by topic**: Artifact `topics` and `decision_threads` fields provide
+   stable retrieval terms for finding documents relevant to the current session.
+
+In the "Docs worth reading" section, include for each artifact:
+- Why the artifact matters (from its `scope` or `topics`)
+- Whether it is still active (from `status`)
+
+Missing artifact index is acceptable — the recall output must not depend on it.
+When absent, derive doc references from raw entry fields alone.
 
 ## Absorbed Intent-Artifact Flagging
 

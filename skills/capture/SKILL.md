@@ -35,6 +35,41 @@ Zero-config mode is best-effort. Fill every field that can be inferred from the
 conversation, but do not interrogate the user only to satisfy a schema field.
 Depth enforcement is warning-based in the helper, not a hard block.
 
+## Auto-Capture (Optional)
+
+When configured, `/lode:capture` can run automatically at session end via a
+Claude Code `Stop` hook. This eliminates the dependency on remembering to say
+"收工".
+
+**Enable**: Set `auto_capture.enabled: true` in `~/.lode/config.yaml`.
+`/lode:cold-start-interview` sets this by default for new configurations.
+
+**Hook configuration**: Add to `~/.claude/settings.json` under `hooks.Stop`:
+
+```json
+{
+  "hooks": {
+    "Stop": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/lode:capture"
+          }
+        ]
+      }
+    ]
+  }
+}
+```
+
+**Disable**: Set `auto_capture.enabled: false` in `~/.lode/config.yaml`.
+Remove the hook entry from `~/.claude/settings.json` to fully deactivate.
+
+The hook runs best-effort — if the vault is not configured or the helper is
+unavailable, the skill falls back to Markdown output in the conversation.
+
 ## Step 1: Classify The Session Archetype
 
 Read the full conversation context and choose one primary archetype. Apply these
@@ -189,6 +224,23 @@ Keep suggestions conservative. A suggestion means "this file may need review",
 not "this file is stale" and not "apply this diff".
 
 ## Step 4: Output Or Write
+
+### Helper Resilience
+
+The `lode_raw.py` helper is the canonical write path, but capture must not fail
+when the helper is unreachable:
+
+1. **Helper timeout**: If `python lode_raw.py resolve-config` takes > 10 seconds,
+   fall back to Markdown output.
+2. **Helper missing**: If the script file is not found (e.g., incomplete
+   installation), fall back to Markdown output.
+3. **Parse errors**: If the helper returns non-JSON, fall back to Markdown output
+   and report the error to the user.
+4. **Write errors**: If `append-entry` fails with a disk/permission error, fall
+   back to Markdown output and report the specific error.
+
+In all fallback cases, the Markdown output is the primary deliverable. The vault
+write is a side effect that must not block the recap.
 
 Resolve `{vault}` using the standard priority order:
 

@@ -95,6 +95,25 @@ the exact output format.
 | `date` | 用户指定 | 今天 (YYYY-MM-DD) |
 | `date_end` | 用户指定 | 同 date（单天模式） |
 
+### Step 1.5: Raw Data Coverage Check
+
+Before processing, check how much raw entry data exists for the target date(s):
+
+1. Count raw entries matching the target date from `{vault}/raw/weeks/{week}/{slug}.json`
+2. Count git commits for the same date range
+3. Report coverage:
+
+| Coverage Level | Raw Entries | Git-Only Commits | Quality |
+|---------------|-------------|------------------|---------|
+| Full | >= 1 | any | High — raw entries carry intent and decisions |
+| Partial | 0 | >= 1 | Medium — git-only; lacks motivation and trade-offs |
+| None | 0 | 0 | Empty — no work signal available |
+
+If coverage is `Partial` or `None`, include a warning at the top of the output:
+
+- **Partial**: "本日无 raw entry 覆盖，日报内容来自 git log，缺少决策动机和上下文。建议运行 /lode:capture 记录关键决策。"
+- **None**: "本日无 raw entry 和 git commit，建议确认日期范围是否正确。"
+
 ### Step 2: 读取 weekly change entries（主数据源）
 
 从 `{vault}/raw/weeks/{week}/{slug}.json` 读取当天已有的 change entries。

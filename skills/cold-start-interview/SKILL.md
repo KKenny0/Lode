@@ -27,6 +27,7 @@ Create or update valid Lode configuration:
 - `profile.weekly_mode`
 - `profile.team_context`
 - `artifact_index.enabled`
+- `auto_capture.enabled`
 
 **Project config** (`{project-root}/.lode/config.yaml`, when CWD is a project repo):
 - `project_slug`
@@ -69,6 +70,8 @@ Ask for any missing values in one compact pass:
 5. Weekly mode: `tech` for engineering narrative or `report` for manager-facing
    status. Target: **global config**.
 6. Team context: `solo`, `team`, or `mixed`. Target: **global config**.
+7. Auto-capture: should `/lode:capture` run automatically at session end?
+   Default: yes for configured vaults. Target: **global config**.
 
 Prefer sensible defaults over long discussion:
 
@@ -94,6 +97,9 @@ profile:
   team_context: solo
 
 artifact_index:
+  enabled: true
+
+auto_capture:
   enabled: true
 ```
 
@@ -155,11 +161,15 @@ Report:
 3. The resolved vault path
 4. Confirmation that the project was registered in `projects.json`
 
-Then suggest the first use based on context:
+Then recommend the Tier 1 habit loop:
 
-- End of a session: `/lode:capture`
-- Start of a session: `/lode:recall`
-- Weekly reporting: `/lode:weekly`
+> Lode 已配置完成。从今天开始只需两个动作：
+> - 每次结束工作说 **"收工"** 或运行 `/lode:capture`
+> - 下次开始工作运行 `/lode:recall`
+>
+> 坚持 1-2 周积累数据后，日报 (`/lode:daily`)、周报 (`/lode:weekly`) 和决策查询 (`/lode:query`) 会自动变得更丰富。
+
+Also mention:
 - Another project to set up: switch to that directory and run `/lode:cold-start-interview` again
 
 Keep the final response concise.

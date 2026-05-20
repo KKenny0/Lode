@@ -15,6 +15,10 @@ profile:
 artifact_index:
   enabled: true                      # default true; writes raw/artifacts/{slug}.json when vault exists
 
+# Auto-capture settings (optional)
+auto_capture:
+  enabled: true                        # default true; auto-trigger /lode:capture at session end via Claude Code Stop hook
+
 # Weekly outline settings (optional)
 # weekly_outline:
 #   output_dir: /path/to/Work Diary/Weekly      # default {vault}/Work Diary/Weekly

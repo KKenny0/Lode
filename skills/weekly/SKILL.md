@@ -23,9 +23,9 @@ Convert **weekly Lode raw change entries** into a structured Markdown PPT outlin
 
 | Phase | Executor | Input | Output |
 |-------|----------|-------|--------|
-| 0: Scope | Main dialog | User prompt + config | Raw entries + optional git coverage + params |
-| 1: Analysis | Main dialog by default; optional parallel agents when explicitly allowed | Raw entries + fallback git logs + template | Structured JSON (with work_streams) |
-| 2: Stitching | Main dialog | JSONs | Markdown PPT outline saved to `{vault}/Work Diary/Weekly/{YYYY-WNN}.md` |
+| 1. Scope & Gather | Main dialog | User prompt + config | Raw entries + optional git coverage + params |
+| 2. Analyze | Main dialog | Raw entries + fallback git logs + template | Structured JSON (with work_streams) |
+| 3. Stitch & Output | Main dialog | JSONs | Markdown PPT outline saved to `{vault}/Work Diary/Weekly/{YYYY-WNN}.md` |
 
 ## Inputs
 
@@ -65,7 +65,7 @@ If `{vault}` cannot be resolved and no explicit output path was provided, return
 
 After writing the file, report the absolute output path.
 
-## Phase 0: Scope Gathering
+## Phase 0: Scope & Gather
 
 Parse the user's prompt, resolve configuration, and collect missing parameters before analysis.
 
@@ -98,6 +98,23 @@ Use `artifact_context` before reading files from disk. If `related_docs` points 
 
 Read `{vault}/raw/artifacts/{slug}.json` when present. Use artifact index metadata as optional source navigation for high-value docs. Missing artifact index must not block output. Do not invent decision facts from artifact titles alone.
 
+### Raw Data Coverage
+
+Before analysis, compute the coverage ratio for each project:
+
+```
+coverage = raw_entry_count / (raw_entry_count + uncovered_commit_count)
+```
+
+Show one badge per project:
+
+- `coverage >= 0.7`: "High signal — {N} raw entries, {M} git-only gaps"
+- `0.3 <= coverage < 0.7`: "Moderate — {N} raw entries, {M} git-only gaps. Consider running /lode:capture"
+- `coverage < 0.3`: "Low signal — mostly git-only. Narrative may miss decisions and trade-offs"
+- `coverage = 0` (no raw entries at all): "No raw data — fallback git analysis only. Quality limited."
+
+Display this badge prominently at the top of each project's analysis section in the final output.
+
 ### Git Coverage Check
 
 For projects with a repo path, run a lightweight git log only to detect uncovered work:
@@ -118,9 +135,9 @@ Compare commit subjects against raw entry summaries/contexts. If a commit is cle
 
 Pass collected raw entries and uncovered git logs into Phase 1 as `{raw_entries}` and `{fallback_git_logs}`.
 
-## Phase 1: Analyze Projects
+## Phase 1: Analyze
 
-For each project, use the template in [references/subagent-prompt.md](references/subagent-prompt.md) to produce a structured analysis. By default, perform this in the main dialog. If the runtime supports parallel agents and the user explicitly requested or approved them, each project may be analyzed in a separate agent. The analysis returns a `work_streams` array — each stream is an independent narrative unit with its own technical approach.
+For each project, use the template in [references/subagent-prompt.md](references/subagent-prompt.md) to produce a structured analysis. Analysis runs in the main dialog. The analysis returns a `work_streams` array — each stream is an independent narrative unit with its own technical approach.
 
 Raw entries are authoritative for intent and impact because they were produced at session wrap-up time. Adaptive-depth `session-recap` entries may be both intent-rich and evidence-rich. Legacy `arch-doc` entries remain valid evidence. Fallback git commits are lower-confidence evidence and should never override or duplicate a clear raw entry.
 
@@ -132,7 +149,7 @@ marked lower confidence in the narrative or next steps.
 - Analysis returns non-JSON → retry with "Return ONLY valid JSON, no markdown fencing"
 - Missing required fields → fill from available data; impossible to infer → "待确认"
 
-## Phase 2: PPT Stitching
+## Phase 2: Stitch & Output
 
 Assemble the final Markdown PPT outline from collected JSONs. Each project's `work_streams` array drives the slide layout. Apply [references/slide-template.md](references/slide-template.md) per stream based on mode and priority.
 
@@ -180,6 +197,7 @@ or artifact titles alone.
 | 没有目标 | "做了一些优化" without why | Every stream needs a clear goal |
 | 跨项目强行融合 | Invented themes in project slides | Keep cross-project themes on overview slide only |
 | Raw git appendix | Commit logs in main slides | Logs are coverage evidence, not the main narrative |
+| Phase inflation | Treating the 3 phases as rigid quality gates | Phases are an execution checklist; the goal is a clear PPT reference, not process compliance |
 
 ## Clarity Over Constraints
 

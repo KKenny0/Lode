@@ -105,6 +105,34 @@ For each thread, extract:
 | Abandoned alternatives | From `abandoned_alternatives` field (strong) or from `context` describing rejected approaches (medium) |
 | Current status | Resolved / Ongoing / Has open questions |
 
+### Cross-Referencing Artifact Index
+
+When the artifact index exists at `{vault}/raw/artifacts/{slug}.json`:
+
+1. For each identified decision thread, check if any artifact index entries
+   carry `decision_threads` that match.
+2. When an artifact links to a thread, include its `title`, `path`, and
+   `topics` in the thread's supporting evidence.
+3. Artifacts with `status: superseded` or `superseded_by` may indicate decisions
+   that have been revisited — flag these for the "Roadmap Correction" section.
+4. Do not create threads from artifact metadata alone. Artifacts can connect
+   threads but cannot define them.
+
+### Thread Merge Suggestions
+
+When the derived Decision Replay Index contains `thread_merge_suggestions` in its
+`source` block, review them before writing thread narratives. These are
+heuristically detected similar thread slugs that may represent the same decision
+domain. The agent should:
+
+1. Read the entries behind both threads
+2. Confirm whether they are genuinely the same domain
+3. Present the merge suggestion to the user
+4. After confirmation, use the `suggested_merge` slug in the roadmap narrative
+
+Do not auto-merge threads without confirmation. If the evidence is ambiguous,
+keep the threads separate and note the possible relationship.
+
 Also track lifecycle-like signals when entries explicitly support them:
 
 - revised decisions

@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import argparse
 import datetime as dt
+import difflib
 import json
 import os
 from pathlib import Path
@@ -394,6 +395,63 @@ def thread_id_for(keys: list[str], entry: dict[str, Any]) -> str:
     return f"thread:{'-'.join(words[:3]) or slugify(summary)[:48]}"
 
 
+def merge_suggestions(thread_ids: list[str], threshold: float = 0.7) -> list[dict[str, Any]]:
+    """Return merge suggestions for similar thread_id values.
+
+    Two threads are candidates when they share a common word (token Jaccard >= 0.5)
+    OR their SequenceMatcher ratio is >= threshold. Returns advisory hints only —
+    never auto-merges threads.
+    """
+    if len(thread_ids) < 2:
+        return []
+
+    def _tokens(tid: str) -> set[str]:
+        name = tid.removeprefix("thread:")
+        parts: set[str] = set()
+        for token in name.split("-"):
+            token = token.strip()
+            if len(token) >= 2 and token not in STOPWORDS:
+                parts.add(token)
+        return parts
+
+    suggestions: list[dict[str, Any]] = []
+    unique = sorted(set(tid for tid in thread_ids if tid))
+    for i, left in enumerate(unique):
+        left_tokens = _tokens(left)
+        if not left_tokens:
+            continue
+        for right in unique[i + 1 :]:
+            right_tokens = _tokens(right)
+            shared = left_tokens & right_tokens
+            if not shared:
+                continue
+            jaccard = len(shared) / len(left_tokens | right_tokens)
+            seq_ratio = difflib.SequenceMatcher(None, left, right).ratio()
+            if jaccard >= 0.5 or seq_ratio >= threshold:
+                suggestions.append(
+                    {
+                        "thread_a": left,
+                        "thread_b": right,
+                        "reason": (
+                            f"shared_tokens={sorted(shared)}, "
+                            f"jaccard={jaccard:.2f}, "
+                            f"seq_ratio={seq_ratio:.2f}"
+                        ),
+                        "suggested_merge": _shorter_or_clearer(left, right),
+                    }
+                )
+    return suggestions
+
+
+def _shorter_or_clearer(a: str, b: str) -> str:
+    """Prefer the more specific thread_id between two similar slugs."""
+    name_a = a.removeprefix("thread:")
+    name_b = b.removeprefix("thread:")
+    if len(name_a) > len(name_b):
+        return a
+    return b
+
+
 def chosen_path(entry: dict[str, Any]) -> str | None:
     paths = as_string_list(entry.get("exploration_paths"))
     chosen_markers = (
@@ -581,6 +639,8 @@ def build_index(vault: Path, slug: str, generated_at: str | None = None) -> dict
     artifacts, artifact_path = load_artifacts(vault, slug)
     nodes = build_nodes(entries, slug, artifacts)
     edges = build_edges(nodes)
+    all_thread_ids = [str(n.get("thread_id", "")) for n in nodes]
+    thread_merge_hints = merge_suggestions(dedupe(all_thread_ids))
     source: dict[str, Any] = {
         "kind": "roadmap",
         "raw_entry_count": len(entries),
@@ -588,6 +648,8 @@ def build_index(vault: Path, slug: str, generated_at: str | None = None) -> dict
         "raw_paths": raw_paths,
         "node_count": len(nodes),
     }
+    if thread_merge_hints:
+        source["thread_merge_suggestions"] = thread_merge_hints
     if artifact_path:
         source["artifact_index_path"] = artifact_path
         source["artifact_index_use"] = "navigation_and_edge_hints_only"

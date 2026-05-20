@@ -38,30 +38,42 @@ record.
 Each skill maps to a habit you already have. In plugin form, activate it with a
 namespaced command.
 
+### Tier 1 — Start here (immediate value, no accumulated data needed)
+
 | Skill | When | What it does |
 | :--- | :--- | :--- |
 | `/lode:cold-start-interview` | First run | Creates `~/.lode/config.yaml` with vault path, project identity, language, and report preferences |
 | `/lode:capture` | Every session wrap-up | Classifies the session archetype, captures decision/build/repair depth, and indexes durable artifacts when relevant |
-| `/lode:query` | Targeted follow-up | Answers "why did we choose this?" with cited decision replay evidence |
 | `/lode:recall` | Session start, after history exists | Recalls recent decisions, risks, open questions, abandoned alternatives, relevant docs, and possible stale intent artifacts |
-| `/lode:roadmap` | On demand, after multiple decisions | Generates a narrative decision roadmap, including accumulating risks and recurring open questions |
+
+Start with the capture+recall loop for 1-2 weeks. Once raw entries accumulate, Tier 2 skills become richer.
+
+### Tier 2 — Week 1+ (better after a few sessions of raw entries)
+
+| Skill | When | What it does |
+| :--- | :--- | :--- |
 | `/lode:daily` | Daily, on demand | Updates Obsidian daily notes from raw entries and git history |
-| `/lode:weekly` | Weekly, on demand | Builds a weekly outline from raw entries, with a conditional hard-stuff section when evidence exists |
+| `/lode:weekly` | Weekly, on demand | Builds a PPT preparation reference from raw entries, with a conditional hard-stuff section when evidence exists |
+| `/lode:query` | Targeted follow-up | Answers "why did we choose this?" with cited decision replay evidence |
+
+### Tier 3 — Month+ (compounding views, need accumulated history)
+
+| Skill | When | What it does |
+| :--- | :--- | :--- |
 | `/lode:monthly` | Monthly, on demand | Generates a monthly review and candidate rules from repeated evidence |
+| `/lode:roadmap` | Phase reviews, after multiple decisions | Generates a narrative decision roadmap, including accumulating risks and recurring open questions |
 
 Skills are independent. Lode is not a strict pipeline — each skill works on its own, but they share one local storage convention so downstream reports can reuse earlier context.
 
 ### Recommended Habit Loop
 
-Use `/lode:cold-start-interview` once to configure the vault. After real
-sessions, use `/lode:capture` to record decisions, risks, abandoned paths, open
-questions, and durable artifacts. At the start of future sessions, use
-`/lode:recall` to recover recent working context before editing.
+**Day 1**: Run `/lode:cold-start-interview` once to configure the vault.
 
-Use `/lode:query` when you need a cited answer for one specific decision. Use
-`/lode:roadmap` for phase reviews after multiple decisions have accumulated; it
-is not a prerequisite for `/lode:recall`. Use `/lode:daily`, `/lode:weekly`, and
-`/lode:monthly` when you want the same raw record turned into periodic reports.
+**Every session**: End with `/lode:capture` ("收工"), start with `/lode:recall` ("开工"). These two form the core habit loop.
+
+**After 1-2 weeks**: Use `/lode:daily` and `/lode:weekly` for periodic reports, `/lode:query` for targeted decision follow-up.
+
+**After 1+ months**: Use `/lode:monthly` for monthly reviews and `/lode:roadmap` for decision evolution retrospectives.
 
 ## Decision Replay
 
