@@ -48,7 +48,7 @@ Four-level hierarchy: **project → module → change type → specific task**. 
 - [Content Pipeline]
   （Props → Characters → Registry → Output）
     【能力升级】
-      - [x] 道具提升为一等实体，新增独立 PropProfile 模型（prop_id/visual_prompt/holders/state_variants），
+      - [x] 道具提升为一等实体，新增独立 ItemProfile 模型（item_id/scene_prompt/holders/state_variants），
       在 extract_characters 中联合提取，registry v2→v3 迁移并兼容旧数据（+359/-21 行）
         - 联合提取方案避免新增 pipeline stage，单次 LLM 调用零额外开销
 ```
