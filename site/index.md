@@ -7,6 +7,9 @@ hero:
   tagline: Install, run the demo, capture one session, then query one decision with cited local evidence.
   actions:
     - theme: brand
+      text: See It in Action
+      link: /showcase
+    - theme: alt
       text: Get Started
       link: /quick-start
     - theme: alt

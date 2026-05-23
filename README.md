@@ -7,8 +7,10 @@
 <p align="center"><strong>Decision replay for agentic coding: capture the why, then compound it into reports, reviews, and roadmaps.</strong></p>
 
 <p align="center">
-  <a href="https://kkenny0.github.io/Lode/">Documentation</a> · <a href="README.cn.md">中文</a>
+  <a href="https://kkenny0.github.io/Lode/showcase"><strong>See Lode in Action</strong></a> · <a href="https://kkenny0.github.io/Lode/">Documentation</a> · <a href="README.cn.md">中文</a>
 </p>
+
+> **New:** [See real Lode outputs](https://kkenny0.github.io/Lode/showcase) — Daily Notes, Weekly Reports, Decision Replay, and Monthly Reviews from 14 months of daily use.
 
 ## Why
 
