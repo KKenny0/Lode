@@ -5,16 +5,23 @@ description: Real outputs from 14 months of daily use. Every example below is ac
 
 # See Lode in Action
 
-Real outputs from 14 months of daily use. Every example below is actual Lode output, lightly sanitized.
-No mocks, no demos.
+<div class="showcase-stats">
+<div class="stat"><strong>14</strong><span>MONTHS OF DAILY USE</span></div>
+<div class="stat"><strong>8</strong><span>SKILLS</span></div>
+<div class="stat"><strong>0</strong><span>MOCKS</span></div>
+</div>
+
+Every example below is real Lode output, lightly sanitized. No demos, no synthetic data.
 
 ---
 
-## Daily Note
+## 01 / Daily Note
 
 Every day, automatically structured.
 
-Four-level hierarchy: **project → module → change type → specific task**. Generated from raw entries + git history.
+::: info What to notice
+Four-level hierarchy: **project → module → change type → specific task**. Generated from raw entries + git history. No manual writing.
+:::
 
 ```markdown
 ### 2026.05.05
@@ -55,11 +62,13 @@ Four-level hierarchy: **project → module → change type → specific task**. 
 
 ---
 
-## Weekly Report
+## 02 / Weekly Report
 
 PPT-ready weekly outline, zero manual writing.
 
-Raw entries compound into slide-structured reports with technical narrative, risk assessment, and decision tracking.
+::: info What to notice
+Slide-structured reports with **problem → solution** narrative. Each row in the risk table traces back to an original raw entry.
+:::
 
 ```markdown
 # 2026-W21 Content Pipeline Weekly Report
@@ -116,11 +125,13 @@ Phase 2 (May 21) — rolling mode & dialogue prefix:
 
 ---
 
-## Decision Replay
+## 03 / Decision Replay
 
 "Why did we choose this?" — with cited evidence.
 
-Every captured decision becomes queryable. Not summaries — evidence packs with reasoning, alternatives, and impact.
+::: info What to notice
+Not a summary — an **evidence pack**. Reasoning, rejected alternatives, open questions, and impact. Every captured decision becomes queryable.
+:::
 
 ```json
 {
@@ -159,11 +170,13 @@ Every captured decision becomes queryable. Not summaries — evidence packs with
 
 ---
 
-## Monthly Review
+## 04 / Monthly Review
 
 One month, one page — with signal extraction.
 
-Daily notes compound into monthly reviews with statistics, work distribution, key changes, and risk tracking.
+::: info What to notice
+**20 work days, 126 completed tasks** — compounded from daily notes into statistics, work distribution, and key change tracking. Evidence mode: strict.
+:::
 
 ```markdown
 # 2026-04 Work Summary
@@ -218,6 +231,12 @@ Six skills, one habit loop.
 | `/lode:daily` | Daily, on demand | Structured daily notes from raw entries + git history |
 | `/lode:weekly` | Weekly, on demand | PPT-ready weekly outlines with technical narrative |
 | `/lode:monthly` | Monthly, on demand | Monthly reviews with statistics and candidate rules |
+
+---
+
+<div class="showcase-cta">
+<a class="showcase-button" href="/Lode/quick-start">Get Started</a>
+</div>
 
 All examples above are real Lode outputs from daily use, 2025-03 to 2026-05.
 Internal URLs and proprietary details have been removed.
