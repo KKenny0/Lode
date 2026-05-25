@@ -17,7 +17,7 @@ artifact_index:
 
 # Auto-capture settings (optional)
 auto_capture:
-  enabled: true                        # default true; auto-trigger /lode:capture at session end via Claude Code Stop hook
+  enabled: true                        # Lode preference flag; Claude Code also needs a Stop hook in ~/.claude/settings.json
 
 # Weekly outline settings (optional)
 # weekly_outline:

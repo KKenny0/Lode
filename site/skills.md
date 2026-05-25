@@ -35,9 +35,9 @@ evidence-bound rather than turning it into a generic memory guesser.
 
 ## Capture
 
-**Trigger:** `/lode:capture`, `收工`, `done`, `今天到这`
+**Trigger:** `/lode:capture`, `/lode:capture checkpoint`, `收工`, `done`, `今天到这`, `checkpoint`
 
-Adaptive-depth session recap. Classifies your session as one of five archetypes:
+Adaptive-depth session recap and checkpoint capture. Classifies your session as one of five archetypes:
 - **Decision** — design choices, tradeoffs, rejected paths
 - **Build** — features implemented, contracts changed
 - **Investigation** — explorations, findings, dead ends
@@ -47,6 +47,10 @@ Adaptive-depth session recap. Classifies your session as one of five archetypes:
 Writes report-worthy signals (decisions, risks, contracts, impact) rather than process logs. Also generates lightweight sync suggestions for architecture docs, plans, and README files.
 
 Zero-config mode: outputs structured Markdown directly in the conversation without writing to any vault.
+
+Vault mode writes quietly by default. Use checkpoint capture during long work to
+save decisions, stage progress, risks, or next-step entry points without filling
+the main conversation with a full recap.
 
 ## Recall
 

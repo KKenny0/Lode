@@ -225,7 +225,7 @@ Six skills, one habit loop.
 
 | Skill | When | What it does |
 | :--- | :--- | :--- |
-| `/lode:capture` | Every session wrap-up ("收工", "done") | Classifies archetype, captures decision/repair depth, indexes artifacts |
+| `/lode:capture` | Wrap-up or checkpoint ("收工", "done") | Quietly captures session depth, stage progress, and artifacts |
 | `/lode:recall` | Session start ("开工") | Recalls decisions, risks, open questions, relevant docs |
 | `/lode:query` | Targeted follow-up | "Why did we choose this?" with cited evidence |
 | `/lode:daily` | Daily, on demand | Structured daily notes from raw entries + git history |

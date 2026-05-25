@@ -1,20 +1,21 @@
 ---
 name: capture
 description: >
-  Adaptive-depth session-end recap for weekly reporting and decision replay.
-  Use this skill for "/lode:capture" or when the user signals end of a work
-  session — e.g. "收工", "今天到这", "done", "wrap up", "that's it for
-  today", "好了", "先这样".
+  Adaptive-depth session recap and low-friction checkpoint capture for weekly
+  reporting and decision replay. Use this skill for "/lode:capture" or when
+  the user signals end of a work session — e.g. "收工", "今天到这", "done",
+  "wrap up", "that's it for today", "好了", "先这样".
   Also trigger on explicit requests like "记录变更", "log changes",
-  "记一下今天做了什么". Do NOT trigger when the user is simply saying goodbye
-  or switching topics.
+  "记一下今天做了什么", "记一下当前进展", or "checkpoint". Do NOT trigger when
+  the user is simply saying goodbye or switching topics.
 ---
 
 # Adaptive-Depth Session Recap
 
-Session-end signal extraction. When the developer wraps up work, read the
-conversation context and produce raw entries rich enough for weekly outlines,
-monthly reviews, decision roadmaps, and session-start recall.
+Session-end and checkpoint signal extraction. When the developer wraps up work
+or explicitly asks to checkpoint the current progress, read the conversation
+context and produce raw entries rich enough for weekly outlines, monthly
+reviews, decision roadmaps, and session-start recall.
 
 The goal is not a chronological diary. Capture the durable engineering signal:
 why the work happened, what was decided, what was tried, what changed, and what
@@ -27,6 +28,8 @@ This skill works with or without a configured knowledge vault:
 - **With vault**: entries are written to
   `{vault}/raw/weeks/{ISO-week}/{project-slug}.json`; durable artifact indexes
   are written to `{vault}/raw/artifacts/{project-slug}.json` when applicable.
+  Output is quiet by default: after a successful write, return only a short
+  confirmation unless the user explicitly asks for verbose output.
 - **Without vault**: entries are rendered as structured Markdown directly in the
   conversation. No files written, no directories created. A one-line setup hint
   follows the output.
@@ -34,6 +37,32 @@ This skill works with or without a configured knowledge vault:
 Zero-config mode is best-effort. Fill every field that can be inferred from the
 conversation, but do not interrogate the user only to satisfy a schema field.
 Depth enforcement is warning-based in the helper, not a hard block.
+
+## Capture Modes
+
+Default mode is a session-end recap. It is triggered by `/lode:capture`, "收工",
+"done", and similar wrap-up signals.
+
+Checkpoint mode is a mid-session progress record. Trigger it when the user says
+"checkpoint", "记一下当前进展", `/lode:capture checkpoint`, or clearly asks to
+record the current state before continuing. A checkpoint is not a diary entry.
+Capture only durable stage signals:
+
+- A decision made or clarified
+- A meaningful phase completed or unblocked
+- A risk, blocker, or open question discovered
+- An abandoned approach and the reason it was dropped
+- A next-session or next-phase entry point
+
+Checkpoint entries use the same raw entry schema as session recaps. Prefer
+`status: "ongoing"` unless the checkpoint records a clearly completed phase,
+resolved repair, or chosen decision. Keep checkpoint entries shorter than
+session-end recaps, but still preserve the "why" when it is available.
+
+Verbose output is opt-in. Treat "verbose", "show recap", "展开总结", or an
+explicit request to inspect the recap as a request to print the full Markdown
+recap after writing. Quiet output remains the default in vault mode for both
+session-end and checkpoint captures.
 
 ## Auto-Capture (Optional)
 
@@ -225,15 +254,33 @@ not "this file is stale" and not "apply this diff".
 
 ## Step 4: Output Or Write
 
+### Output Policy
+
+Use quiet output by default whenever a vault write succeeds. This applies to
+manual `/lode:capture`, checkpoint capture, and auto-capture. Return only a
+short confirmation such as:
+
+```text
+已记录 {N} 条进展 -> {slug} ({week})
+```
+
+If the user requested verbose output, also include the Markdown recap after the
+write confirmation.
+
+Zero-config mode is always verbose because the conversation output is the only
+deliverable. Helper failures must not be silent: report the specific failure
+briefly, then provide the Markdown fallback recap.
+
 ### Helper Resilience
 
 The `lode_raw.py` helper is the canonical write path, but capture must not fail
 when the helper is unreachable:
 
 1. **Helper timeout**: If `python lode_raw.py resolve-config` takes > 10 seconds,
-   fall back to Markdown output.
+   briefly report the timeout and fall back to Markdown output.
 2. **Helper missing**: If the script file is not found (e.g., incomplete
-   installation), fall back to Markdown output.
+   installation), briefly report the missing helper and fall back to Markdown
+   output.
 3. **Parse errors**: If the helper returns non-JSON, fall back to Markdown output
    and report the error to the user.
 4. **Write errors**: If `append-entry` fails with a disk/permission error, fall
@@ -380,6 +427,13 @@ After the final entry, append:
 Vault mode:
 
 ```text
+已记录 {N} 条进展 -> {slug} ({week})
+```
+
+Use the fuller confirmation only when the user requested verbose output or when
+debugging a write issue:
+
+```text
 记录了 {N} 条变更 -> {slug} ({week})
   写入: {vault}/raw/weeks/{week}/{slug}.json
   - [{archetype}/{type}] {summary}
@@ -398,12 +452,14 @@ Before finalizing each entry, check:
 - Would this help a weekly report or future decision roadmap?
 - Is the summary a report-level outcome, not a file-level description?
 - Are durable artifacts represented through `artifact_context`, not vague prose?
+- For checkpoint mode, is this a durable stage signal rather than a progress log?
 
 ## Anti-Patterns
 
 - Do not fabricate fields to satisfy the schema.
 - Do not ask confirmation questions just to enrich optional fields.
 - Do not preserve process noise that would never appear in a weekly review.
+- Do not use checkpoint mode to record command-by-command progress.
 - Do not split one coherent feature across many entries.
 - Do not write new entries with `source: "arch-doc"`; that source is legacy-only.
 - Do not generate formal Stage/Pipeline architecture documents from this skill.

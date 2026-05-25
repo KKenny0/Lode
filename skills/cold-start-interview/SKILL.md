@@ -88,7 +88,9 @@ Ask for any missing values in one compact pass:
    status. Target: **global config**.
 6. Team context: `solo`, `team`, or `mixed`. Target: **global config**.
 7. Auto-capture: should `/lode:capture` run automatically at session end?
-   Default: yes for configured vaults. Target: **global config**.
+   Default: yes for configured vaults. Target: **global config**. Explain that
+   this config is Lode's intent flag; Claude Code only runs it automatically
+   when a `Stop` hook is present in `~/.claude/settings.json`.
 
 Prefer sensible defaults over long discussion:
 
@@ -145,7 +147,46 @@ If the user wants to override a global preference for this project (e.g. differe
 - Preserve unknown top-level keys and nested sections from existing configs.
 - Never store secrets, credentials, or remote sync tokens.
 
-## Step 3: Register Project
+## Step 3: Check Auto-Capture Hook
+
+If `auto_capture.enabled` is true after config resolution, check whether
+`~/.claude/settings.json` exists and contains a `hooks.Stop` command hook that
+runs `/lode:capture`.
+
+Use this as the expected minimal hook shape:
+
+```json
+{
+  "hooks": {
+    "Stop": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/lode:capture"
+          }
+        ]
+      }
+    ]
+  }
+}
+```
+
+Check only; do not write or modify `~/.claude/settings.json` unless the user
+explicitly asks for that. Preserve the distinction in the final report:
+
+- `auto_capture.enabled: true` + hook present -> automatic capture is active.
+- `auto_capture.enabled: true` + hook missing -> Lode's auto-capture preference is
+  enabled, but Claude Code will not trigger it until the Stop hook is added.
+- `auto_capture.enabled: false` -> automatic capture is disabled; users can still
+  run `/lode:capture` or say "收工".
+
+If `~/.claude/settings.json` is missing, report the path and the minimal hook
+snippet. If it exists but has other hooks, tell the user to add the Lode command
+under `hooks.Stop` without replacing unrelated hooks.
+
+## Step 4: Register Project
 
 After writing config, register the project in the knowledge vault:
 
@@ -176,7 +217,8 @@ Report:
 1. The global config path and what was written there
 2. The project config path (if created) and what was written there
 3. The resolved vault path
-4. Confirmation that the project was registered in `projects.json`
+4. Auto-capture status: active, enabled-but-missing-hook, or disabled
+5. Confirmation that the project was registered in `projects.json`
 
 Then recommend the Tier 1 habit loop:
 
@@ -185,6 +227,11 @@ Then recommend the Tier 1 habit loop:
 > - 下次开始工作运行 `/lode:recall`
 >
 > 坚持 1-2 周积累数据后，日报 (`/lode:daily`)、周报 (`/lode:weekly`) 和决策查询 (`/lode:query`) 会自动变得更丰富。
+
+If auto-capture is enabled and the Stop hook is present, mention that ending a
+Claude Code session can now trigger capture automatically. If the hook is
+missing, say clearly that the config switch is on but automatic capture is not
+active yet, and show the `~/.claude/settings.json` path.
 
 Also mention:
 - Another project to set up: switch to that directory and run `/lode:cold-start-interview` again

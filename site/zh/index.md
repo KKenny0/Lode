@@ -35,7 +35,7 @@ features:
 | 技能 | 何时 | 作用 |
 | :--- | :--- | :--- |
 | `/lode:cold-start-interview` | 首次运行 | 创建 `~/.lode/config.yaml`，配置 vault 路径、项目标识和报告偏好 |
-| `/lode:capture` | 每次收工 | 分类会话原型，捕获决策/修复深度，索引制品 |
+| `/lode:capture` | 收工或阶段记录 | 安静捕获会话深度、阶段进展和制品 |
 | `/lode:query` | 定向追问 | 用带引用的 decision replay evidence 回答"当时为什么这么选？" |
 | `/lode:recall` | 已有历史后的开工 | 回忆最近的决策、风险、开放问题和相关文档 |
 | `/lode:roadmap` | 多个决策之后 | 生成叙事性决策路线图，包含累积风险 |
@@ -69,3 +69,4 @@ npx @lode/cli install-codex-plugin
 session，再用 `/lode:query` 追问一个 decision。
 
 没有 vault? 没问题。`收工` 会直接在对话中输出结构化 Markdown。
+配置 vault 后 capture 默认安静写入；长 session 中途可以用 `/lode:capture checkpoint`。

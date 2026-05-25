@@ -38,7 +38,7 @@ Each skill maps to a habit you already have. Activate it with a namespaced comma
 | Skill | When | What it does |
 | :--- | :--- | :--- |
 | `/lode:cold-start-interview` | First run | Creates `~/.lode/config.yaml` with vault path, project identity, and report preferences |
-| `/lode:capture` | Every wrap-up | Classifies session archetype, captures decision/repair depth, indexes artifacts |
+| `/lode:capture` | Wrap-up or checkpoint | Quietly captures session depth, stage progress, and artifacts |
 | `/lode:query` | Targeted follow-up | Answers "why did we choose this?" with cited decision replay evidence |
 | `/lode:recall` | Session start, after history exists | Recalls recent decisions, risks, open questions, and relevant docs |
 | `/lode:roadmap` | After multiple decisions | Generates narrative decision roadmap with accumulating risks |
@@ -73,3 +73,5 @@ Then run the demo, run `/lode:cold-start-interview` once, capture one real
 session with `收工`, and query one decision with `/lode:query`.
 
 No vault? No problem. `收工` outputs structured Markdown directly in the conversation.
+With a vault, capture writes quietly by default; use `/lode:capture checkpoint`
+during long sessions.

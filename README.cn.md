@@ -42,7 +42,7 @@ namespaced command 激活。
 | Skill | 时机 | 功能 |
 | :--- | :--- | :--- |
 | `/lode:cold-start-interview` | 首次使用 | 创建包含 vault path、项目身份、语言和报告偏好的 `~/.lode/config.yaml` |
-| `/lode:capture` | 每次收工 | 识别 session archetype，按 decision/build/repair 等类型捕获深度信号，并在需要时索引 durable artifacts |
+| `/lode:capture` | 收工或阶段记录 | 安静捕获 decision/build/repair 等深度信号、阶段进展，并在需要时索引 durable artifacts |
 | `/lode:recall` | 已有历史后的开工 | 召回最近决策、风险、开放问题、放弃方案、相关 docs 和可能过期的 intent artifacts |
 
 先用 capture + recall 坚持 1-2 周。等 raw entry 积累起来后，Tier 2 的 skill 就会自动变丰富。
@@ -68,7 +68,7 @@ Skills 是独立的。Lode 不是一个强制流水线 — 每个 skill 可以�
 
 **第一天**：运行一次 `/lode:cold-start-interview` 配置 vault。
 
-**每次工作**：收工时 `/lode:capture`（”收工”），开工时 `/lode:recall`（”开工”）。这两个构成核心 habit loop。
+**每次工作**：收工时 `/lode:capture`（”收工”），长任务中途用 `/lode:capture checkpoint` 记录阶段进展，开工时 `/lode:recall`（”开工”）。这几个动作构成核心 habit loop。
 
 **积累 1-2 周后**：`/lode:daily`、`/lode:weekly` 生成周期报告，`/lode:query` 定向追问决策。
 
@@ -96,7 +96,7 @@ metadata、top decision node、raw `source_entry_refs`、matched terms，以及
 rejected alternatives。
 
 3. 运行一次 `/lode:cold-start-interview`。
-4. 在一次真实 coding session 结束时，说 `收工` 或运行 `/lode:capture`。
+4. 在一次真实 coding session 结束时，说 `收工` 或运行 `/lode:capture`。配置了 vault 后，capture 默认只做简短确认。
 5. 追问：`/lode:query why did we choose <the decision>?`
 
 有价值的结果不是普通总结，而是带引用的回答：包含匹配到的 decision nodes、
@@ -149,8 +149,9 @@ node cli/dist/index.js install-codex-plugin
 
 然后先证明 replay loop：运行 demo，运行一次 `/lode:cold-start-interview`，
 用 `收工` 或 `/lode:capture` 捕获一次真实 session，再用 `/lode:query`
-追问一个 decision。跑通之后，再在 session 开始时用 `开工` 或 `/lode:recall`，
-用 `/lode:roadmap` 回顾决策演变，在 raw record 足够厚之后生成报告。
+追问一个 decision。长任务中途可以用 `/lode:capture checkpoint` 安静保存阶段进展。
+跑通之后，再在 session 开始时用 `开工` 或 `/lode:recall`，用 `/lode:roadmap`
+回顾决策演变，在 raw record 足够厚之后生成报告。
 
 不配置 vault 也可以开始 — `收工` 会直接在对话中输出结构化 Markdown。
 

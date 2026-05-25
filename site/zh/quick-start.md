@@ -37,7 +37,9 @@ decision node、raw source references、matched terms，以及 rejected alternat
 ```
 
 或运行 `/lode:capture`。Lode 会分类会话原型，并捕获重要内容：决策、风险、
-放弃的方案、制品变更和 source references。
+放弃的方案、制品变更和 source references。配置了 vault 后，capture 默认只做简短确认。
+
+长 session 中途可以运行 `/lode:capture checkpoint`，安静保存一个有价值的阶段进展。
 
 ## 5. Query 一个 Decision
 
@@ -92,6 +94,6 @@ profile:
 
 ## 零配置
 
-完全跳过 vault。`capture` 直接在对话中输出结构化 Markdown，所以第一个会话仍然有即时价值。等你希望 `/lode:recall`、`/lode:query` 或报告跨会话复用记录时，再配置 vault。
+完全跳过 vault。`capture` 直接在对话中输出结构化 Markdown，所以第一个会话仍然有即时价值。等你希望安静写入、`/lode:recall`、`/lode:query` 或报告跨会话复用记录时，再配置 vault。
 
 等你需要积累报告时再配置 vault。

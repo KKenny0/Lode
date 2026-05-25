@@ -33,6 +33,10 @@ knowledge_vault: /path/to/your/knowledge-vault
   - 默认 `true`
   - 当 vault 可用时，producer skills 可写入 `{vault}/raw/artifacts/{slug}.json`
   - 关闭后，primary output 仍然生成，只跳过 artifact index side effect
+- `auto_capture.enabled`: 是否希望自动收工捕获（可选）
+  - 默认 `true`
+  - 这是 Lode 的偏好开关，不是实际触发器
+  - Claude Code 还需要在 `~/.claude/settings.json` 里配置 `hooks.Stop` 才会自动运行 `/lode:capture`
 
 ## 配置解析优先级
 
@@ -125,7 +129,35 @@ arch_doc:
 
 artifact_index:
   enabled: true
+
+auto_capture:
+  enabled: true
 ```
+
+### Auto-capture Stop hook
+
+`auto_capture.enabled: true` 表示 Lode 希望启用自动捕获。真正让它在 Claude Code
+会话结束时运行的是 `~/.claude/settings.json` 里的 Stop hook：
+
+```json
+{
+  "hooks": {
+    "Stop": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/lode:capture"
+          }
+        ]
+      }
+    ]
+  }
+}
+```
+
+如果这个 hook 不存在，仍然可以手动说 `收工` 或运行 `/lode:capture`。
 
 如果项目策略不允许写入 repo 内的 `docs/`，可以把架构文档输出到 vault 或其他本地目录：
 

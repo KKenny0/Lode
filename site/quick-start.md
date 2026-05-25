@@ -39,7 +39,10 @@ At the end of one real coding session, say:
 
 or run `/lode:capture`. Lode classifies the session archetype and captures what
 matters: decisions, risks, abandoned paths, artifact changes, and source
-references.
+references. With a configured vault, capture writes quietly by default.
+
+During a long session, run `/lode:capture checkpoint` to quietly save a durable
+stage signal before continuing.
 
 ## 5. Query One Decision
 
@@ -96,6 +99,6 @@ See the [config template](https://github.com/KKenny0/Lode/blob/main/references/l
 
 ## Zero-Config
 
-Skip the vault entirely. `capture` outputs structured Markdown right in the conversation, so the first session still has immediate value. Configure a vault before expecting `/lode:recall`, `/lode:query`, or reports to reuse that record across sessions.
+Skip the vault entirely. `capture` outputs structured Markdown right in the conversation, so the first session still has immediate value. Configure a vault before expecting quiet writes, `/lode:recall`, `/lode:query`, or reports to reuse that record across sessions.
 
 Configure a vault later when you want compounding reports.

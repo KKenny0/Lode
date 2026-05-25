@@ -45,7 +45,7 @@ namespaced command.
 | Skill | When | What it does |
 | :--- | :--- | :--- |
 | `/lode:cold-start-interview` | First run | Creates `~/.lode/config.yaml` with vault path, project identity, language, and report preferences |
-| `/lode:capture` | Every session wrap-up | Classifies the session archetype, captures decision/build/repair depth, and indexes durable artifacts when relevant |
+| `/lode:capture` | Wrap-up or checkpoint | Quietly captures decision/build/repair depth, stage progress, and durable artifacts when relevant |
 | `/lode:recall` | Session start, after history exists | Recalls recent decisions, risks, open questions, abandoned alternatives, relevant docs, and possible stale intent artifacts |
 
 Start with the capture+recall loop for 1-2 weeks. Once raw entries accumulate, Tier 2 skills become richer.
@@ -71,7 +71,7 @@ Skills are independent. Lode is not a strict pipeline — each skill works on it
 
 **Day 1**: Run `/lode:cold-start-interview` once to configure the vault.
 
-**Every session**: End with `/lode:capture` ("收工"), start with `/lode:recall` ("开工"). These two form the core habit loop.
+**Every session**: End with `/lode:capture` ("收工"), checkpoint long work with `/lode:capture checkpoint`, and start with `/lode:recall` ("开工"). These form the core habit loop.
 
 **After 1-2 weeks**: Use `/lode:daily` and `/lode:weekly` for periodic reports, `/lode:query` for targeted decision follow-up.
 
@@ -101,7 +101,7 @@ coding agent: answerability metadata, the top decision node, raw
 `source_entry_refs`, matched terms, and rejected alternatives.
 
 3. Run `/lode:cold-start-interview` once.
-4. At the end of one real coding session, say `收工` or run `/lode:capture`.
+4. At the end of one real coding session, say `收工` or run `/lode:capture`. With a configured vault, capture writes quietly by default.
 5. Ask `/lode:query why did we choose <the decision>?`.
 
 The useful result is not a summary. It is a cited answer with matched decision
@@ -163,9 +163,10 @@ node cli/dist/index.js install-codex-plugin
 
 Then prove the replay loop: run the demo, run `/lode:cold-start-interview`
 once, capture one real session with `收工` or `/lode:capture`, and query one
-decision with `/lode:query`. After that, use `开工` or `/lode:recall` at session
-start, `/lode:roadmap` for decision evolution, and reports when the raw record
-has enough history.
+decision with `/lode:query`. During long sessions, use `/lode:capture checkpoint`
+to quietly save stage progress. After that, use `开工` or `/lode:recall` at
+session start, `/lode:roadmap` for decision evolution, and reports when the raw
+record has enough history.
 
 No vault? No problem — `收工` outputs structured Markdown directly in the conversation.
 
