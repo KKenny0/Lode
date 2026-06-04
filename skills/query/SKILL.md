@@ -1,6 +1,6 @@
 ---
 name: query
-description: Query Lode's decision replay index for why a project chose a path, what alternatives were rejected, what should be revisited, or what impact a decision had. Use this skill for "/lode:query", "why did we choose this?", "为什么当时这么选", "有没有被拒绝过的方案", "revisit this decision", or when a coding agent needs cited decision evidence before changing architecture, contracts, prompts, schemas, or product direction.
+description: Query Lode's decision replay index for why a project chose a path, what alternatives were rejected, what should be revisited, what impact a decision had, or any natural-language question about project history. Use this skill for "/lode:query", "why did we choose this?", "为什么当时这么选", "有没有被拒绝过的方案", "revisit this decision", "auth 迁移做到哪了", "我们讨论过 rate limiting 吗", or when a coding agent needs cited decision evidence before changing architecture, contracts, prompts, schemas, or product direction.
 ---
 
 # Decision Replay Query
@@ -34,6 +34,26 @@ for session-start orientation; use `query` for a specific follow-up question.
 | `alternatives` | what was rejected, abandoned, deferred, or not chosen |
 | `revisit` | what open questions or deferred choices should be reconsidered |
 | `impact` | what downstream effects a decision had |
+| `free` | anything that doesn't fit the other 4 modes — status checks, "did we discuss X?", "what's the history of Y?" |
+
+### Free-Form Mode
+
+When the user asks a natural-language question that doesn't clearly map to
+`why` / `alternatives` / `revisit` / `impact`, use `free` mode. The agent
+tries multiple modes sequentially and returns the first result with
+`answerable=true`.
+
+**Fallback order**: `why` → `revisit` → `impact`. Stop at the first
+`answerable=true` result. Do not try `alternatives` in the fallback chain —
+it answers a different question shape.
+
+If all three modes return `answerable=false`, say the vault does not contain
+enough evidence for this question. Suggest capturing the context with
+`/lode:capture` if the user can clarify the decision.
+
+Free-form queries still pass a concrete `--mode` to the helper on each
+attempt. The agent handles the multi-mode orchestration; the helper script is
+not modified.
 
 3. Run the helper:
 
@@ -41,10 +61,10 @@ for session-start orientation; use `query` for a specific follow-up question.
 python <this-skill>/scripts/decision_graph.py query "<question>" --cwd "$PWD" --mode why --limit 5
 ```
 
-Use `--mode alternatives`, `--mode revisit`, or `--mode impact` when the
-question is better served by another mode. If the user names a project slug,
-pass `--slug <slug>`. If the user or config provides a vault path, pass
-`--vault <path>`.
+Use `--mode alternatives`, `--mode revisit`, `--mode impact`, or follow the
+free-form fallback order when the question calls for it. If the user names a
+project slug, pass `--slug <slug>`. If the user or config provides a vault
+path, pass `--vault <path>`.
 
 4. Read the JSON evidence pack.
 5. Answer from the evidence pack only.

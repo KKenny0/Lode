@@ -442,6 +442,61 @@ debugging a write issue:
 Zero-config mode needs no extra confirmation because the Markdown recap is the
 deliverable.
 
+## Capture Receipt
+
+After the vault-mode confirmation, append a 2-3 line receipt that gives the
+user immediate signal from what was just captured. Zero-config mode does not
+need a receipt because the full Markdown output already serves this purpose.
+
+**Receipt template:**
+
+```text
+📋 {最关键的 summary}
+   ⚠️ {N} 个风险 · ❓ {N} 个开放问题 · 🔄 {N} 个放弃方案
+```
+
+**Selection rules for the top summary:**
+
+1. If any entry has `archetype: decision`, use its `summary`.
+2. Otherwise, if any entry has an `impact` field, use that entry's `summary`.
+3. Otherwise, use the first entry's `summary`.
+4. If there is only one entry, use its `summary` directly.
+
+**Signal counts** — count across all entries written in this capture:
+
+- Risks: count of entries with `status: "risk"` plus entries whose
+  `open_questions` contain risk-related phrasing.
+- Open questions: total count of all `open_questions` items across entries.
+- Abandoned alternatives: total count of all `abandoned_alternatives` items
+  across entries.
+
+**Omission rules:**
+
+- When a count is 0, omit that segment entirely rather than showing "0 个".
+- When all entries are `archetype: "maintenance"`, omit the 📋 prefix and use
+  plain wording (e.g., the summary text without the emoji).
+
+**Checkpoint receipt** is shorter — show only the top summary and open questions
+(if any). Skip the full signal-count line.
+
+**Example receipts:**
+
+```
+已记录 3 条进展 -> lode (2026-W23)
+📋 选择了 SQLite 而非 LevelDB 做本地缓存
+   ⚠️ 1 个风险 · ❓ 2 个开放问题 · 🔄 1 个放弃方案
+```
+
+```
+已记录 1 条进展 -> my-app (2026-W23)
+📋 完成了用户认证模块的 API 端点
+```
+
+```
+已记录 2 条进展 -> tools (2026-W23)
+更新了依赖版本并清理了无用导入
+```
+
 ## Quality Gate
 
 Before finalizing each entry, check:
