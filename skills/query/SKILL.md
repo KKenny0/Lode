@@ -36,6 +36,12 @@ for session-start orientation; use `query` for a specific follow-up question.
 | `impact` | what downstream effects a decision had |
 | `free` | anything that doesn't fit the other 4 modes — status checks, "did we discuss X?", "what's the history of Y?" |
 
+Questions asking for evidence, proof, verification, or whether a claimed result
+is supported use the existing modes rather than inventing an evidence mode:
+try `impact` first to retrieve the claimed effect, then `why` if the impact
+query is not answerable. The agent performs this routing; the helper continues
+to expose only its four concrete modes.
+
 ### Free-Form Mode
 
 When the user asks a natural-language question that doesn't clearly map to
@@ -77,6 +83,9 @@ Return a concise answer with:
 - The matched decision node ids and source timestamps.
 - `matched_terms`, `evidence_strength`, and `answerability_reason`.
 - `source_entry_refs` for every cited decision.
+- Direct evidence fields (`evidence_refs`, `source_refs`, and
+  `direct_artifact_refs` source-of-truth evidence)
+  when present on a cited decision.
 - Rejected alternatives when relevant.
 - Open questions when relevant.
 - `confidence` and `inference_notes` when a node is inferred.
@@ -90,8 +99,17 @@ evidence. Include `missing_evidence` and suggest capturing the decision with
 
 - Treat `confidence=explicit` as directly recorded raw-entry evidence.
 - Treat `confidence=inferred` as useful navigation, not a proven fact.
+- Treat `source_entry_refs` as provenance: they prove where Lode recorded a
+  claim, not that the claim's outcome was independently verified.
+- Treat `evidence_refs`, typed `source_refs`, and `direct_artifact_refs` as
+  direct evidence. General `artifact_refs` are navigation hints unless the raw
+  entry explicitly marked them source-of-truth. Preserve both kinds so readers
+  can drill down without overstating verification.
 - Treat `evidence_strength=weak` as a prompt to hedge or ask for more evidence
   even when `answerable=true`.
+- An explicit, well-matched raw entry without direct evidence remains
+  answerable, but it must not be called `strong`; include its
+  `missing_evidence` instead.
 - Preserve uncertainty in the wording when `inference_notes` are present.
 - Do not quote or cite a decision without its `source_entry_refs`.
 - Edges and supporting nodes are context expansion, not standalone proof.

@@ -49,7 +49,9 @@ decision node、raw source references、matched terms，以及 rejected alternat
 /lode:query why did we choose <the decision>?
 ```
 
-通过标准是带引用的回答：匹配到的 decision node ids、`source_entry_refs`、已有记录中的 rejected alternatives，以及在缺少证据时明确返回证据不足。
+通过标准是有依据的回答：匹配到的 decision node ids、作为记录出处的
+`source_entry_refs`、存在时的直接证据引用、已有记录中的 rejected alternatives，
+以及在只有记录但缺少独立核验依据或完全没有支持记录时明确返回证据缺口。
 
 ## 之后：Recall 和 Reports
 

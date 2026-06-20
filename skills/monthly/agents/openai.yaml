@@ -1,4 +1,4 @@
 interface:
   display_name: "Lode Monthly"
-  short_description: "Summarize monthly work from daily notes"
-  default_prompt: "Use $monthly to generate a monthly review from Daily Note.md."
+  short_description: "Review evidenced monthly outcomes before activity coverage"
+  default_prompt: "Use $monthly to generate an outcome-first monthly review with report-local O#/W#/D#/E# traceability, preserve status and evidence gaps, and keep activity counts in a coverage appendix."

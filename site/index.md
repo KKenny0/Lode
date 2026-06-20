@@ -23,13 +23,31 @@ features:
   - title: Persistent Memory
     details: Capture decisions, abandoned paths, risks, and open questions at wrap-up. Recall them after history exists.
     icon: 💎
-  - title: Compounding Outputs
-    details: The same raw entries later compound into recall context, roadmaps, weekly outlines, and monthly reviews.
+  - title: Report-ready Outcomes
+    details: Roll session signals into work streams and outcomes while preserving decisions, tradeoffs, and evidence for drill-down.
     icon: 📈
   - title: Zero-Config Start
     details: One command captures your first session. No vault required. Structured Markdown appears right in the conversation.
     icon: ⚡
 ---
+
+## For Technical Professionals: Roll Work Up, Drill Down
+
+**Roll work up for reporting. Drill down to verify.**
+
+Lode turns scattered work from AI collaboration into report-ready, verifiable
+outcomes. When questions arise, trace each outcome back to decisions, tradeoffs,
+and evidence.
+
+```text
+Report upward: session signals → work streams → outcomes and impact
+Verify downward: outcomes and impact → decisions and tradeoffs → source refs
+```
+
+This use case is for developers, tech leads, and small technical teams that need
+to explain technical work. Activity counts measure record coverage; they do not
+prove outcomes by themselves. Lode does not expand into generic meetings,
+approvals, or employee monitoring.
 
 ## Skills
 

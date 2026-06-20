@@ -17,7 +17,10 @@ Artifact index metadata for source navigation:
 Fallback git logs for uncovered commits:
 {fallback_git_logs}
 
-Execute these 4 steps in order:
+Execute these 4 steps in order. Your output is a project analysis input to the
+final stitcher. Do not assign `O#`, `W#`, `D#`, or `E#` identifiers here; the
+stitcher assigns globally unique report-local IDs after all projects are
+analyzed.
 
 **Step 1: Classify signals**
 - Treat raw entries as authoritative semantic signals.
@@ -36,7 +39,9 @@ Execute these 4 steps in order:
 - Map `type` directly: feature/fix/refactor/decision/risk.
 - Use fallback git commits only when they are not clearly covered by a raw entry.
 - Drop fallback commits that are only chore, docs, style, or formatting noise.
-- Output: change_blocks list with { archetype, type, source, summary, context, artifact_context, related_docs, confidence }
+- Preserve concrete source references for later claim-level evidence mapping.
+- Output: change_blocks list with { archetype, type, source, summary, context,
+  artifact_context, related_docs, source_refs, confidence }
 
 If 0 change_blocks after filtering → "maintenance week". Output empty results and note it.
 
@@ -55,6 +60,11 @@ Keep as one stream when:
 - Splitting would produce streams with weak narrative value
 
 Name each stream concisely — a phrase that captures its essence (e.g. "跨集滚动 Pipeline 架构演进").
+
+For every stream, decide whether it contributes to a headline candidate. If it
+does not, keep it and classify it as `exploration`, `maintenance`, or
+`activity`. Never drop meaningful work merely because it cannot be rolled up
+into an outcome.
 
 **Assess narrative density per stream:**
 
@@ -104,7 +114,24 @@ items would be explained the same way in a meeting, merge them.
 
 When raw entry info is insufficient: consult `related_docs` if available, then fallback git logs. When truly impossible → mark as "待确认". Do NOT fabricate.
 
-**Step 4: Build narrative (per stream)**
+Extract decisions and trade-offs separately from changes. Each decision must
+state the chosen direction, any rejected or deferred alternative, why, whether the
+interpretation is `explicit` or `inferred`, and the concrete source references
+that support it. Do not turn an implementation detail into a decision unless a
+source supports the choice or trade-off.
+
+**Step 4: Build the outcome-first narrative**
+
+Both modes use the same 3+1 reporting backbone:
+
+1. headline outcome/progress candidates,
+2. supporting work streams,
+3. decisions and trade-offs,
+4. claim-level evidence.
+
+`tech` mode keeps its full problem and technical-approach explanation. `report`
+mode shortens that explanation but must preserve the same links and evidence
+discipline.
 
 Tech mode (6-part): Goal(Why) → Problems(Pain) → KeyChanges(What) → TechApproach(How) → Result(Impact) → Risk&Next
 
@@ -114,7 +141,31 @@ Sparse data (0-1 raw entries and no meaningful fallback commits): combine into a
 
 Risk&Next must include decisions revisited, open questions carried forward, and
 hard problems that change next-week planning when the raw entries support them.
-Fallback-only streams must say they are lower confidence.
+Fallback-only streams must be marked `limited` and phrased as progress/activity.
+
+**Fruit Check for every headline candidate:**
+
+- Name the observable state change, deliverable, recorded user/team effect, or
+  demonstrably removed risk.
+- Commits, task counts, files touched, tokens, and activity volume are not
+  outcomes by themselves.
+- Expected or planned impact stays explicitly prospective and cannot be a
+  completed outcome.
+- A fallback-only candidate can only be `kind: progress` with
+  `evidence_grade: limited`; it can never be `kind: outcome`.
+- When a stream has useful work but no defensible headline candidate, keep the
+  stream and set `unaligned_classification` to `exploration`, `maintenance`, or
+  `activity`.
+
+Grade each candidate using exactly one value:
+
+- `verified`: a raw entry states the claim and a direct independent source
+  substantiates that claim's actual wording (commit, test/eval result, issue
+  state, or source-of-truth artifact). A merely related source is not enough.
+- `recorded`: a raw entry explicitly records status and impact, but there is no
+  independent verification source.
+- `limited`: only fallback git or semantically incomplete material is
+  available; phrase it as progress/activity, not a completed outcome.
 
 If the week's raw entries contain supported risks, recurring open questions,
 stale threads, or abandoned alternatives worth revisiting, include them in a
@@ -133,16 +184,44 @@ fallback git subjects alone.
 - Treat `source: arch-doc` as legacy high-confidence architecture evidence, not
   as a current producer path.
 
+Return at most three `headline_candidates` for this project. The final stitcher
+will select at most three for the whole report. Preserve source references as
+plain strings; do not invent durable IDs or modify raw data.
+
 **Return ONLY this JSON (no other commentary):**
 
 {
   "project": "{project_name}",
   "is_maintenance_week": false,
+  "headline_candidates": [
+    {
+      "kind": "outcome | progress",
+      "statement": "observable result or bounded progress claim",
+      "impact": "recorded impact; label expected impact as prospective",
+      "evidence_grade": "verified | recorded | limited",
+      "supporting_stream_names": ["stream name"],
+      "source_refs": ["raw timestamp/entry summary, commit, test/eval, issue, or artifact reference"],
+      "fruit_check": "state change, deliverable, effect, or removed risk that makes this report-worthy"
+    }
+  ],
   "work_streams": [
     {
       "name": "concise stream name",
       "priority": "core | supporting | exploratory",
       "density": "rich | moderate | light",
+      "supports_headline_candidates": ["exact candidate statement"],
+      "unaligned_classification": "null | exploration | maintenance | activity",
+      "source_refs": ["concrete source reference"],
+      "decisions": [
+        {
+          "choice": "chosen direction",
+          "alternative": "rejected or deferred alternative, or none recorded",
+          "alternative_disposition": "rejected | deferred | none recorded",
+          "why": "supported rationale",
+          "interpretation": "explicit | inferred",
+          "source_refs": ["concrete source reference"]
+        }
+      ],
       "narrative": {
         "goal": "1 sentence — why this stream's work matters",
         "problems": "core pain points this stream addresses",
@@ -163,4 +242,10 @@ fallback git subjects alone.
 - `is_maintenance_week: true` → project gets only a brief line on the overview slide, no dedicated slides
 - Non-JSON response → retry with stricter format instruction
 - Missing fields → fill from available data; if truly missing → mark as "待确认"
-- Fallback-only stream → label the confidence as lower in the narrative or next steps
+- Fallback-only stream → keep it as `limited` progress/activity; never promote it to an outcome
+- More than three project candidates → retain only the three strongest Fruit
+  Check passes; the report stitcher still applies a report-wide maximum of three
+- Stream with no candidate → retain it with `unaligned_classification`; do not hide it
+- During final stitching, assign globally unique `O#` to selected headline
+  items, `W#` to all meaningful streams, `D#` to decisions/trade-offs, and `E#`
+  to deduplicated concrete sources

@@ -54,6 +54,8 @@ Daily notes are human work logs, not code review records.
   not pack the sentence with function and field names.
 - Prefer `impact` from raw entries when present; otherwise use `summary` plus
   `context`.
+- Treat `impact` as a recorded claim whose wording must preserve its status and
+  evidence boundary; do not strengthen an expected effect into a verified result.
 - For `status: ongoing`, avoid wording that implies completion.
 - For `status: risk`, keep the risk visible instead of converting it into a
   success statement.
@@ -63,6 +65,10 @@ Daily notes are human work logs, not code review records.
 - If artifact index metadata points to a high-value source document, link the
   artifact title or path concisely. Do not paste long architecture docs into the
   daily note.
+- The `[x]` marker means the source activity was recorded as completed. It is
+  activity metadata, not proof that the activity produced an outcome or impact.
+- `+N/-M` line counts describe change size only. Never use line counts as outcome,
+  quality, importance, or value evidence.
 
 ## Merge Rules
 
@@ -95,6 +101,11 @@ Do not merge unrelated commits only because they happened on the same day.
 				- 详细说明
 				- 明日衔接：开放问题 / 风险 / 需要读取的 artifact link
 ```
+
+In this format, preserve `[ ]` or an explicit ongoing/risk label when the source
+does not say the item is complete. Never normalize every item to `[x]`. When
+monthly reporting consumes these notes, checkbox and line-count metadata must be
+treated as coverage/activity signals rather than outcomes.
 
 Module labels:
 

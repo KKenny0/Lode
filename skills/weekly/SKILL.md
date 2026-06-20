@@ -37,7 +37,11 @@ Convert **weekly Lode raw change entries** into a structured Markdown PPT outlin
 | Output path | No | `{vault}/Work Diary/Weekly/{YYYY-WNN}.md` | Prompt overrides config; config overrides default |
 | Priority order | No | Auto | By commit volume (see below) |
 
-**Mode:** `tech` = 6-part narrative with technical approach; `report` = 4-part focused on outcomes. See [references/slide-template.md](references/slide-template.md) for both structures.
+**Mode:** `tech` and `report` share the same outcome-first 3+1 reporting
+backbone: outcomes/progress → work streams → decisions/trade-offs → evidence.
+`tech` keeps the full problems and technical-approach depth; `report` keeps the
+same traceability while presenting a shorter management narrative. See
+[references/slide-template.md](references/slide-template.md) for both layouts.
 
 **Priority (auto):** Prefer `projects.json` `priority` when present. Otherwise sort by raw entry count plus uncovered commit count: ≥5 signals → Core; 2-4 → Supporting; <2 → Exploratory. User override takes precedence.
 
@@ -64,6 +68,49 @@ Create the output directory if it does not exist. If the target file already exi
 If `{vault}` cannot be resolved and no explicit output path was provided, return the Markdown outline in the chat and tell the user to run `/lode:cold-start-interview` or configure `knowledge_vault`.
 
 After writing the file, report the absolute output path.
+
+### Report-local traceability contract
+
+Every generated outline uses four report-local identifier types. They are
+presentation references, not additions to the raw-entry schema, and are
+regenerated for every report:
+
+- `O#`: at most three headline **outcome or progress** claims for the whole
+  report. Each one links to supporting `W#` streams and `E#` evidence.
+- `W#`: a work stream. Each stream either contributes to one or more `O#`
+  claims or is visibly classified as `exploration`, `maintenance`, or
+  `activity`; unaligned work must not disappear.
+- `D#`: a decision or trade-off, including chosen, rejected, or deferred
+  alternatives and whether the interpretation is explicit or inferred.
+- `E#`: a concrete source reference used to support a claim, such as a raw
+  entry, commit, test/eval result, issue, or source-of-truth artifact.
+
+Assign identifiers only after all project analyses have been gathered so IDs
+remain unique across a multi-project report. Keep IDs stable within that output
+and use them on the overview, stream slides, and evidence appendix. This
+contract does not change the output path or any stored raw JSON.
+
+### Fruit Check and evidence grades
+
+Before promoting a candidate to `O#`, ask: **what observable state changed,
+what deliverable now exists, what user/team effect is recorded, or what risk
+was demonstrably removed?** Activity volume, files touched, commits, tokens,
+and completed tasks are not outcomes by themselves.
+
+Grade every `O#` claim:
+
+- `verified`: a raw entry states the claim **and** at least one direct,
+  independent verification source substantiates that claim's actual wording
+  (commit, test/eval result, issue state, or source-of-truth artifact). A
+  merely related source is not enough.
+- `recorded`: the raw entry explicitly records the status and impact, but no
+  independent verification source is available.
+- `limited`: only fallback git or semantically incomplete material is
+  available. Phrase it as progress or activity, never as a completed outcome.
+
+Expected, planned, or hoped-for impact must be labelled as such and cannot be
+promoted to a completed outcome. A fallback-only candidate can become a
+`limited` progress item, but never an outcome.
 
 ## Phase 0: Scope & Gather
 
@@ -139,11 +186,17 @@ Pass collected raw entries and uncovered git logs into Phase 1 as `{raw_entries}
 
 For each project, use the template in [references/subagent-prompt.md](references/subagent-prompt.md) to produce a structured analysis. Analysis runs in the main dialog. The analysis returns a `work_streams` array — each stream is an independent narrative unit with its own technical approach.
 
-Raw entries are authoritative for intent and impact because they were produced at session wrap-up time. Adaptive-depth `session-recap` entries may be both intent-rich and evidence-rich. Legacy `arch-doc` entries remain valid evidence. Fallback git commits are lower-confidence evidence and should never override or duplicate a clear raw entry.
+Raw entries are authoritative for intent and **recorded** impact because they
+were produced at session wrap-up time; they do not independently verify their
+own claims. Adaptive-depth `session-recap` entries may be both intent-rich and
+evidence-rich. Legacy `arch-doc` entries remain valid evidence. Fallback git
+commits are lower-confidence evidence and should never override or duplicate a
+clear raw entry.
 
 The analysis must preserve decisions revisited, open questions carried forward,
 and hard problems that changed next-week planning. Fallback-only streams must be
-marked lower confidence in the narrative or next steps.
+marked `limited` and cannot substantiate an outcome. Apply the Fruit Check to
+each headline candidate before stitching.
 
 **Error handling:**
 - Analysis returns non-JSON → retry with "Return ONLY valid JSON, no markdown fencing"
@@ -151,7 +204,17 @@ marked lower confidence in the narrative or next steps.
 
 ## Phase 2: Stitch & Output
 
-Assemble the final Markdown PPT outline from collected JSONs. Each project's `work_streams` array drives the slide layout. Apply [references/slide-template.md](references/slide-template.md) per stream based on mode and priority.
+Assemble the final Markdown PPT outline from collected JSONs. Select no more
+than three report-wide headline candidates that pass the Fruit Check, then
+assign report-local `O#`, `W#`, `D#`, and `E#` identifiers. Each project's
+`work_streams` array drives the slide layout. Apply
+[references/slide-template.md](references/slide-template.md) per stream based
+on mode and priority.
+
+If no candidate qualifies as an outcome, say so plainly and use `progress`
+items; do not manufacture an outcome to fill Slide 2. Preserve every meaningful
+stream: a stream that does not support a headline item remains visible with an
+`exploration`, `maintenance`, or `activity` classification.
 
 Write the assembled outline to the resolved output path from the Output Contract.
 
@@ -177,7 +240,10 @@ Do NOT compress individual streams to stay under 10 slides. Each stream deserves
 
 When streams share close context (e.g. a bug fix stream and the feature it fixes), consider merging their slides to avoid redundancy — but do not merge purely to reduce slide count.
 
-**Overview slide:** 1 sentence per stream. Natural cross-stream themes are fine when they genuinely emerge, but don't force them.
+**Overview slide:** Show at most three `O#` outcome/progress items, including
+kind, impact, evidence grade, and supporting `W#` references. Do not use the
+overview as a flat stream list. Natural cross-stream themes are fine when they
+genuinely emerge, but don't force them.
 
 **Hard stuff this week:** Add this section to the summary slide only when raw
 entries contain at least one supported risk, recurring open question, stale
@@ -186,7 +252,10 @@ when empty. This is the absorbed hard-stuff radar behavior for weekly planning;
 it must cite raw-entry evidence and must not invent concerns from git subjects
 or artifact titles alone.
 
-**Summary slide:** Aggregate next steps and status from all streams into one table.
+**Summary slide:** Aggregate next steps and status from all streams into one
+table, preserving `O#`/`W#`/`D#` references. Follow it with a claim-level
+evidence appendix mapping each material `O#`, `W#`, and `D#` claim to `E#`
+sources. A raw commit dump is not a claim-level evidence map.
 
 ## Anti-Patterns
 
@@ -197,6 +266,9 @@ or artifact titles alone.
 | 没有目标 | "做了一些优化" without why | Every stream needs a clear goal |
 | 跨项目强行融合 | Invented themes in project slides | Keep cross-project themes on overview slide only |
 | Raw git appendix | Commit logs in main slides | Logs are coverage evidence, not the main narrative |
+| Activity inflation | Commits/tasks/files are presented as outcomes | Apply the Fruit Check; classify unsupported work as activity |
+| Evidence theatre | Source list exists but is not tied to claims | Map each material claim to specific `E#` references |
+| Hidden unaligned work | Streams vanish because they do not support a headline | Keep them visible as exploration, maintenance, or activity |
 | Phase inflation | Treating the 3 phases as rigid quality gates | Phases are an execution checklist; the goal is a clear PPT reference, not process compliance |
 
 ## Clarity Over Constraints

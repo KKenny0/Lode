@@ -36,6 +36,25 @@ Daily, weekly, and monthly outputs are compounding layers. They should improve
 as decision evidence accumulates, but they are not required for the first useful
 Lode experience.
 
+## Reporting Roll-up
+
+Lode uses one reversible path for reporting: roll session signals upward into
+outcomes, then let every important claim drill back down to decisions and
+evidence.
+
+```text
+Roll upward: raw entries → decisions/tradeoffs → work streams → outcomes/progress
+Verify downward: outcomes/progress → supporting work → decisions/tradeoffs → raw/source/evidence refs
+```
+
+- `capture` records concrete changes, impact, status, work streams, and evidence references.
+- `weekly` and `monthly` promote only claims that pass the outcome check; ongoing work, risks, exploration, and maintenance keep their honest status.
+- `query` uses cited local records to explain why a claim exists, what was rejected, and which evidence or evidence gaps remain.
+- Raw entries remain the source of truth. Reports are traceable reading views; they do not create facts retroactively.
+
+Commit counts, changed lines, task counts, work days, and log volume measure
+activity or coverage. None proves an outcome by itself.
+
 ## Storage Convention
 
 Data lives in two layers within your knowledge vault:

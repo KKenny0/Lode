@@ -221,6 +221,31 @@ an open question, risk, decision, or artifact. Use `subject`, `from`, `to`, and
 Add `source_refs` when evidence needs typed structure. Each object must include
 `type` and `ref`; optional fields are `path`, `url`, `note`, and `timestamp`.
 
+### Fruit Check
+
+Before accepting an entry, make sure its report-level claim has a real
+"fruit": a changed user, product, system, reliability, migration, or workflow
+state. Activity counts, commits, files touched, tokens, logs, and documents are
+evidence or inputs; they are not outcomes by themselves.
+
+- `work_stream` groups related work for later reporting. It does not prove that
+  the grouped work produced an outcome.
+- `summary` states the factual change or decision at the boundary actually
+  reached. Do not promote an experiment, partial implementation, or plan into
+  shipped work.
+- `impact` states an observed downstream effect when one is known. If it is
+  prospective, label it explicitly with wording such as "expected to", "can",
+  or "intended to"; never rewrite the expectation as an achieved result.
+- `status` bounds every claim: `done` means the described scope completed,
+  `ongoing` means progress only, `risk` is unresolved exposure, and `decision`
+  records a choice rather than implementation.
+- `evidence_refs`, `source_refs`, and `artifact_context.source_of_truth` support
+  verification. Their existence does not by itself prove the `impact` claim.
+
+If no fruit can be stated honestly, preserve a narrower decision,
+investigation, maintenance, or risk signal instead of manufacturing an
+outcome.
+
 ### Artifact Context
 
 Add `artifact_context` only when the session created or materially changed a
@@ -506,6 +531,11 @@ Before finalizing each entry, check:
 - Are archetype-specific fields filled when available?
 - Would this help a weekly report or future decision roadmap?
 - Is the summary a report-level outcome, not a file-level description?
+- Does the Fruit Check distinguish actual state change from activity or an
+  expected effect?
+- Does `status` limit the claim correctly, especially for ongoing work, risks,
+  and decisions?
+- Do evidence references support the claim rather than merely exist beside it?
 - Are durable artifacts represented through `artifact_context`, not vague prose?
 - For checkpoint mode, is this a durable stage signal rather than a progress log?
 

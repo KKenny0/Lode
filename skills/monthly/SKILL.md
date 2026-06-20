@@ -12,7 +12,7 @@ description: >
 
 # Lode Monthly Review
 
-面向工作沉淀的月度日志处理。从 Daily Note.md 中按月拆分归档，提取结构化信号，生成事实优先的月度总结。月度回顾是 Lode 的月级复利层：除了总结成果，还要识别反复出现的开放问题、风险、习惯变化和下月需要调整的工作方式。
+面向工作沉淀的月度日志处理。从 Daily Note.md 中按月拆分归档，提取结构化信号，生成事实优先、成果优先的月度总结。月度回顾先回答本月形成了哪些有依据的成果、当前状态和证据缺口，再补充活动覆盖情况；同时识别反复出现的开放问题、风险、习惯变化和下月需要调整的工作方式。
 
 核心产物：
 
@@ -27,6 +27,9 @@ description: >
 - **原文不动**：归档文件保留原始 Markdown，不做改写
 - **总结与日志分离**：归档和总结是独立文件
 - **允许总结，禁止脑补**：可以把多条记录归纳为一个主题，但不得凭空生成不存在的"成果"或"结论"
+- **成果先于活动**：先写有状态和依据的成果，再在附录报告活跃天数、任务数、类别分布和代码行数
+- **活动不等于成果**：`[x]`、条目数、活跃天数、类别计数和代码行数只描述记录覆盖或工作活动，不证明价值、影响或完成质量
+- **可逆的 3+1 关系**：月报用 report-local `O#`、`W#`、`D#`、`E#` 连接成果、工作主线、决策取舍和证据；编号只属于本次输出，不写回 raw data
 - **周期复利**：总结必须指出下月应该改变什么，而不是只复述本月做了什么
 
 ## 配置
@@ -92,12 +95,12 @@ the Daily Note:
 
 1. Parse the daily note for the target month
 2. Tag each day's content as: `raw-entry-backed`, `git-only`, or `empty`
-3. Report in the summary:
+3. Report in the summary's coverage appendix, after the outcome narrative:
    - Days with raw entry coverage: {N}/{total_days}
    - Git-only days: {M}/{total_days}
    - Empty days: {K}/{total_days}
 
-If raw entry coverage < 50%, include a note in the summary: "本月大部分工作记录来自 git log，缺少决策和动机上下文。建议坚持使用 /lode:capture 以提升月报质量。"
+These counts describe source coverage, not outcomes. If raw entry coverage < 50%, include a note in the coverage appendix: "本月大部分工作记录来自 git log，缺少决策和动机上下文。建议坚持使用 /lode:capture 以提升月报质量。"
 
 ### Step 2：按月拆分归档
 
@@ -130,18 +133,42 @@ python scripts/prepare_monthly_data.py \
 
 读取 `references/worklog-summary-template.md` 模板、`skeleton.json` 骨架数据、原始月度归档 `YYYY-MM.md`。
 
+为增强成果证据，agent 可以只读查询 `{vault}/raw/weeks/{YYYY-WNN}/{slug}.json` 中时间落在目标月份、且与归档项目/主题相匹配的 raw entries。该步骤是可选的证据补充，不改变 `prepare_monthly_data.py`，也不改变 signals/skeleton schema：
+
+- 只补充 raw 中已经记录的 `status`、`impact`、`evidence_refs`、`source_refs`、决策与取舍；
+- 匹配不明确时不关联，不从相似关键词制造成果；
+- Daily Note 与 raw 冲突时保留冲突和证据缺口，不静默选择更积极的版本；
+- 没有 matching raw 时仍可生成总结，但必须按归档证据降低置信度。
+
+月报与周报共享同一个 report-local 3+1 合同，但不改变 deterministic scripts、
+signals/skeleton schema 或存储路径：
+
+- `O#`：整份月报最多三条头部成果或进展；每条关联支撑它的 `W#` 和 `E#`。
+- `W#`：项目或工作主线；没有形成头部成果的探索、维护和活动仍要保留。
+- `D#`：能解释 `O#`/`W#` 的选择、拒绝或延后方案；没有记录时写“未记录”，不得补造。
+- `E#`：Daily Note/raw entry 出处及可直接检查的 commit、test/eval、issue 或 source-of-truth 引用。
+
+证据等级使用 `verified`、`recorded`、`limited`：明确记录加独立可核验证据才是
+`verified`；只有明确记录和出处是 `recorded`；fallback、推断、冲突或材料不足是
+`limited`。超出三条的候选转为支撑进展，不能为了凑数制造成果。
+
 按模板撰写 `{YYYY-MM}.summary.md`，保存到 `{vault}/Work Diary/Monthly/`。
 
 **重要约束：**
 
 - `evidence_mode=strict` 时，每条总结必须能在原文中找到对应条目
+- 输出顺序必须是：本月成果 → 项目/工作主线 → 问题与风险 → 决策与开放问题 → 下月衔接 → 习惯与数据质量 → Candidate Rules → 主张—证据审计 → 覆盖与活动附录
+- 本月成果区最多三条 `O#`；每条必须标出 `status`、evidence grade、支撑 `W#` 和相关 `E#`
+- 每项成果保留最新 `status`、证据引用和证据缺口；没有完成证据时写成“进展”或“仍在进行”，不能写成已交付成果
 - 不把"优化中"说成"已完成"
 - 不把多条独立小修复包装成"重大成果"
 - 某项目只有零星记录时如实说明"记录较少"
+- Daily Note 的 `[x]` 只表示记录中的活动项被标为完成，不单独证明形成成果
+- 已完成条目数、活跃天数、类别分布、代码增删行数全部放入“覆盖与活动附录”，并明确标注为 activity metadata，不进入成果排序或价值判断
 
 **取舍规则：**
 - 每个项目最多 2-3 个核心主题，其余合并为"日常优化包括..."
-- 代码变更数字只在净增 >300 行或净减 >200 行时保留
+- 代码变更数字只在净增 >300 行或净减 >200 行时保留，且只能出现在覆盖与活动附录中作为变更规模元数据
 - 配置调整、文档优化、<50 行变更的小修复合并为一句
 - 总结总长度 80-120 行
 - 如果多个日期记录同一工作流，合并为一个主题，按最新状态表述；不要把同一 raw/git 来源在日报中的重复痕迹放大成多个成果

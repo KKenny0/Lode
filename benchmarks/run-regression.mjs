@@ -74,6 +74,16 @@ function assertNoSymlinks(root, sourceLabel) {
 }
 
 function copyFixtureVault(config) {
+  if (Array.isArray(config.raw_entries)) {
+    const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'lode-regression-'));
+    const tempVault = path.join(tempRoot, 'vault');
+    const week = config.week || '2026-W24';
+    const slug = config.project_slug;
+    const rawPath = path.join(tempVault, 'raw', 'weeks', week, `${slug}.json`);
+    fs.mkdirSync(path.dirname(rawPath), { recursive: true });
+    fs.writeFileSync(rawPath, `${JSON.stringify(config.raw_entries, null, 2)}\n`, 'utf-8');
+    return { tempRoot, tempVault };
+  }
   const sourceVault = path.resolve(repoRoot, config.vault);
   const realSourceVault = fs.realpathSync(sourceVault);
   const allowedRoots = [
@@ -159,6 +169,7 @@ function roadmapDecisionIndex(tempVault, slug, limitThreads = 10) {
 function assertBuiltIndex(index, slug, fixtureId) {
   assert(index.schema_version === 'lode.decision_replay.v1', `${fixtureId}: bad index schema`);
   assert(index.project_slug === slug, `${fixtureId}: bad project slug`);
+  assert(index.source?.builder_version === 2, `${fixtureId}: bad decision index builder version`);
   assert(Array.isArray(index.nodes), `${fixtureId}: index nodes must be an array`);
   assert(Array.isArray(index.edges), `${fixtureId}: index edges must be an array`);
   assertSourceRefs(index.nodes, fixtureId);
@@ -188,6 +199,36 @@ function runQueryPositiveFixture(fixture) {
     );
     assert(topNode.confidence === 'explicit', `${fixture.id}: expected explicit top node`);
     assertSourceRefs(queryPack.top_nodes, fixture.id);
+    if (config.expected_evidence_strength) {
+      assert(
+        queryPack.evidence_strength === config.expected_evidence_strength,
+        `${fixture.id}: expected evidence_strength ${config.expected_evidence_strength}, got ${queryPack.evidence_strength}`,
+      );
+    }
+    if (config.expected_missing_evidence_text) {
+      assert(
+        queryPack.missing_evidence?.some(item => String(item).includes(config.expected_missing_evidence_text)),
+        `${fixture.id}: missing_evidence should mention ${config.expected_missing_evidence_text}`,
+      );
+    }
+    if (config.expected_evidence_ref) {
+      assert(
+        topNode.evidence_refs?.includes(config.expected_evidence_ref),
+        `${fixture.id}: compact top node lost evidence ref ${config.expected_evidence_ref}`,
+      );
+    }
+    if (config.expected_direct_artifact_ref) {
+      assert(
+        topNode.direct_artifact_refs?.includes(config.expected_direct_artifact_ref),
+        `${fixture.id}: compact top node lost source-of-truth artifact ref ${config.expected_direct_artifact_ref}`,
+      );
+    }
+    if (config.expected_supporting_decision_absent) {
+      assert(
+        !queryPack.supporting_nodes?.some(node => String(node.decision || '').includes(config.expected_supporting_decision_absent)),
+        `${fixture.id}: unrelated supporting node leaked into the query pack`,
+      );
+    }
     if (config.expected_thread_id) {
       const indexedTopNode = index.nodes.find(node => node.id === config.expected_top_node) || {};
       assert(topNode.thread_id === config.expected_thread_id, `${fixture.id}: top node thread_id was ${topNode.thread_id}`);
@@ -290,6 +331,22 @@ function runQueryIndexFallbackFixture(fixture) {
     assert(
       stalePack.top_nodes?.[0]?.id === config.expected_top_node,
       `${fixture.id}: stale index fallback returned ${stalePack.top_nodes?.[0]?.id}`,
+    );
+
+    const { index: currentIndex } = buildDecisionIndex(tempVault, slug);
+    const legacyBuilderIndex = structuredClone(currentIndex);
+    delete legacyBuilderIndex.source.builder_version;
+    legacyBuilderIndex.generated_at = '2999-01-01T00:00:00+00:00';
+    legacyBuilderIndex.nodes = [{
+      ...legacyBuilderIndex.nodes.find(node => node.id === config.expected_top_node),
+      id: 'legacy-builder-sentinel',
+    }];
+    legacyBuilderIndex.edges = [];
+    fs.writeFileSync(decisionPath, JSON.stringify(legacyBuilderIndex, null, 2), 'utf-8');
+    const legacyBuilderPack = queryDecisionIndex(tempVault, slug, query, mode);
+    assert(
+      legacyBuilderPack.top_nodes?.[0]?.id === config.expected_top_node,
+      `${fixture.id}: old builder index was reused instead of rebuilt`,
     );
   } finally {
     fs.rmSync(tempRoot, { recursive: true, force: true });

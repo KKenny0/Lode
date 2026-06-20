@@ -61,9 +61,9 @@ These entries directly state why something was done, what was tried, and what wa
 **Medium signal** — entries without decision-recording fields, but with rich `summary` and `context` that reveal decision logic. These are the most common case in real vaults — many projects have entries written before the decision-recording schema was introduced. **Infer decision signals** from:
 
 - `summary` describes what was built/changed → infer **motivation** from the "why" implicit in `context`
-- `context` explains why it was needed → extract **trigger** and **outcome**
+- `context` explains why it was needed → extract the **trigger** and only the recorded status or effect; do not promote an expected effect into an observed outcome
 - `type` indicates the nature of the change → `feature` = new capability chosen, `fix` = problem-driven decision, `refactor` = structural decision, `risk` = identified concern
-- `impact` field (when present) → forward-looking consequence, useful for reassessment
+- `impact` field (when present) → recorded impact claim, preserving whether it is observed, expected, ongoing, or evidence-limited
 
 Inference examples:
 - summary: "Added retry-with-repair loop to validation" + context: "Single-pass missed 3 failure patterns" → motivation: "Validation accuracy insufficient for production", exploration: ["single-pass → rejected (missed patterns)", "retry-with-repair → chosen"]
@@ -87,7 +87,7 @@ If the raw entries are insufficient to build a meaningful thread, say so rather 
 Group entries into **decision threads**. A thread connects entries that share a common theme, regardless of signal strength:
 
 - Same technical area (same module, component, or architectural concern mentioned in `summary` or `context`)
-- Exploration paths that reference each other's outcomes
+- Exploration paths that reference each other's recorded results or status
 - Motivations that build on each other (later entry resolves earlier entry's `open_questions`)
 - Entries that describe successive iterations on the same problem
 
@@ -104,6 +104,8 @@ For each thread, extract:
 | Exploration paths | From `exploration_paths` field (strong) or inferred from before/after in `summary`+`context` (medium) |
 | Abandoned alternatives | From `abandoned_alternatives` field (strong) or from `context` describing rejected approaches (medium) |
 | Current status | Resolved / Ongoing / Has open questions |
+| Confidence | `explicit` when sourced from decision fields; `inferred` when reconstructed from summary/context |
+| Evidence | Raw entry timestamp/reference plus available `evidence_refs`, `source_refs`, or source-of-truth artifact references; general artifact refs remain navigation |
 
 ### Cross-Referencing Artifact Index
 
@@ -211,10 +213,10 @@ timeline
     title {project} Decision Timeline
     section {YYYY-WNN}
         {Thread title}
-        : {Key decision or outcome}
+        : {Key decision or recorded status/impact}
     section {YYYY-WNN}
         {Thread title}
-        : {Key decision or outcome}
+        : {Key decision or recorded status/impact}
 ```
 
 ---
@@ -228,24 +230,24 @@ timeline
 
 ### Decision Points
 
-| Date | Decision | Trigger | Outcome |
-|------|----------|---------|---------|
-| {date} | {what was decided} | {what prompted it} | {what happened as a result} |
+| Date | Decision | Trigger | Recorded Status / Impact | Confidence | Evidence |
+|------|----------|---------|--------------------------|------------|----------|
+| {date} | {what was decided} | {what prompted it} | {status or impact exactly as supported; say “not recorded” when absent} | explicit / inferred | {source entry timestamp/id plus evidence refs} |
 
 ### Exploration Paths
 
 ```mermaid
 flowchart LR
     A[{Trigger}] --> B{Decision point}
-    B -->|{Option 1}| C[{Outcome}]
-    B -->|{Option 2}| D[{Outcome}]
+    B -->|{Option 1}| C[{Recorded result or status}]
+    B -->|{Option 2}| D[{Recorded result or status}]
     D -->|Rejected| E[{Reason}]
-    C --> F[{Result}]
+    C --> F[{Follow-up status}]
 ```
 
-| Approach | Outcome | Why |
-|----------|---------|-----|
-| {approach} | {chosen / rejected / deferred} | {reason} |
+| Approach | Recorded Status / Result | Why | Confidence | Evidence |
+|----------|--------------------------|-----|------------|----------|
+| {approach} | {chosen / rejected / deferred / observed result} | {reason} | explicit / inferred | {source timestamp/id and available refs} |
 
 ### Abandoned Alternatives
 
@@ -315,6 +317,12 @@ All unresolved questions across threads, organized by urgency:
 **Narrative tone**: Write as a colleague explaining the project's journey to someone who wasn't there. Second person is fine ("we explored", "we chose"). Be specific about technical details — vague abstractions defeat the purpose.
 
 **Decision points table**: Each row should be a meaningful fork in the road, not every entry. Ask: "did this change the project's direction?" If yes, it's a decision point.
+Use the raw entry's recorded `status` and `impact`; if neither records what
+happened afterward, write "not recorded" rather than inventing an outcome. Every
+row must expose confidence and evidence. `source_entry_refs` establish provenance;
+`evidence_refs`, `source_refs`, and source-of-truth artifact references provide
+additional verification paths when present. General artifact refs remain
+navigation hints.
 
 **Mermaid diagrams**:
 - Use `timeline` for the overview — one entry per thread per week where something happened
@@ -338,6 +346,9 @@ explicit repeated label.
 - Decision points inferred from summary/context: "appears to have been motivated by..." or "likely driven by..."
 - Exploration paths from explicit fields: stated as fact
 - Exploration paths inferred from before/after: "the approach evolved from X to Y, suggesting..."
+- Recorded impact is not automatically verified impact. Preserve words such as
+  "expected", "enabled", "ongoing", or "risk" from the source, and identify an
+  evidence gap when no result evidence is recorded.
 
 ### Step 5: Output
 

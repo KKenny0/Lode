@@ -8,6 +8,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 Lode is positioned as a reporting and decision-replay engine, not a generic memory layer. Capture/retrieval is the input; structured weekly outlines, monthly reviews, and decision roadmaps are the product.
 
+For technical workplace reporting, Lode rolls scattered AI-assisted work upward into report-ready outcomes and lets readers drill back down to decisions, tradeoffs, and evidence. This is a secondary use case built on the decision-replay loop, not a separate generic-office product.
+
 The skills themselves are Markdown-first and dependency-light. The repository also includes a Node-based CLI installer under `cli/`, local-only eval fixtures, and public benchmark guidance.
 
 The name comes from **lode**: a vein of ore where valuable mineral is concentrated. These skills extract lasting value from raw development activity. The word shares its root with "load" and the Chinese character 载 (zài, to carry, to record).
@@ -177,6 +179,7 @@ Lode uses four storage surfaces:
 - **Self-contained skills**: each skill has its own copy of shared files in its `references/` directory, so skills work correctly when installed individually. Skills cannot reference files outside their directory via `../`
 - **Convention sync**: the canonical version lives at `references/weekly-ppt-convention.md`; after editing it, run `scripts/sync-convention.sh` to copy to all skill directories that need it
 - **Script sync**: `scripts/lode_raw.py` is the canonical copy; after editing it, run `scripts/sync-lode-raw.sh` to copy to all skill directories that bundle it (capture, cold-start-interview, cli/capture)
+- **Derived-index builder version**: bump `INDEX_BUILDER_VERSION` whenever decision node, edge, or retrieval derivation semantics change so apparently current v1 indexes rebuild safely without migrating weekly raw data
 - **Unified config**: all skills read vault path from `.lode/config.yaml`; project-level config overrides global
 - **Config layering**: global config holds user preferences (`knowledge_vault`, `report_language`, `weekly_mode`, `team_context`); project-level config holds project identity (`project_slug`, `project_name`) and can override any global preference via nested merge. The cold-start interview writes to the appropriate layer based on context.
 - **Auto-maintained project registry**: `{vault}/raw/projects.json` is created and updated by the `register-project` helper (called during cold-start and as a best-effort side effect during capture). Weekly and daily skills use it for multi-project discovery.
@@ -187,6 +190,7 @@ Lode uses four storage surfaces:
 - **Adaptive-depth recap**: `capture` classifies sessions as decision/build/investigation/repair/maintenance and writes archetype-specific signals for downstream reports
 - **Legacy arch-doc compatibility**: historical `source: arch-doc` raw entries remain readable, but new write output uses `source: session-recap`
 - **Weekly-report-quality raw entries**: `capture` should write report-worthy signals, decisions, risks, contracts, and impact rather than process logs or "updated docs" entries
+- **Progressive-closure reporting**: weekly and monthly reports derive a report-local `O# -> W# -> D# -> E#` chain from raw truth; activity metrics are coverage metadata, not outcomes, and provenance alone is not verification
 - **Local evals, public benchmarks**: `skills/*/evals/` and `*-workspace/` stay local; public benchmark guidance lives under `benchmarks/`
 - **Scripts for deterministic work**: monthly uses Python scripts for parsing and aggregation; the agent handles interpretation and writing
 

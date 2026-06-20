@@ -52,7 +52,10 @@ After one captured session, ask a concrete question:
 /lode:query why did we choose <the decision>?
 ```
 
-The pass condition is a cited answer: matched decision node ids, `source_entry_refs`, rejected alternatives when they exist, and an explicit insufficient-evidence response when Lode has no supporting record.
+The pass condition is a grounded answer: matched decision node ids,
+`source_entry_refs` for provenance, direct evidence references when available,
+rejected alternatives when they exist, and an explicit evidence gap when Lode
+has only a record but no independent verification—or no supporting record at all.
 
 ## Later: Recall and Reports
 

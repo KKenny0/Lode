@@ -35,6 +35,26 @@ get cited local evidence instead of a vague recap. `recall`, `roadmap`, daily,
 weekly, and monthly outputs come later as compounding views over the same raw
 record.
 
+## For Technical Professionals: Roll Work Up, Drill Down
+
+**Roll work up for reporting. Drill down to verify.**
+
+Lode turns scattered work from AI collaboration into report-ready, verifiable
+outcomes. When questions arise, trace each outcome back to decisions, tradeoffs,
+and evidence.
+
+```text
+Report upward: session signals -> work streams -> outcomes and impact
+Verify downward: outcomes and impact -> decisions and tradeoffs -> source refs
+```
+
+`capture` preserves the reporting inputs, `weekly` and `monthly` roll them into
+outcomes and progress, and `query` traces a claim back to cited local evidence.
+Activity counts measure record coverage; they do not prove an outcome by
+themselves. This use case is for developers, tech leads, and small technical
+teams that need to explain technical work—not generic meetings, approvals, or
+employee monitoring.
+
 ## Skills
 
 Each skill maps to a habit you already have. In plugin form, activate it with a

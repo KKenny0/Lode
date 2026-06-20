@@ -1,4 +1,4 @@
-# Weekly PPT Shared Convention (v2.1)
+# Weekly PPT Shared Convention (v2.2)
 
 This file defines the shared data schema and storage convention used by all skills in this monorepo. When generating change entries, follow this spec exactly so downstream consumers can reliably read them.
 
@@ -106,6 +106,7 @@ The file shape is:
   "generated_at": "2026-05-17T08:00:00+08:00",
   "source": {
     "kind": "roadmap",
+    "builder_version": 2,
     "raw_entry_count": 12
   },
   "nodes": [
@@ -167,6 +168,11 @@ The file shape is:
 }
 ```
 
+`raw/decisions/` is derived and rebuildable. `source.builder_version`
+identifies the deterministic builder semantics; consumers rebuild an older
+derived index when this version changes without migrating or rewriting weekly
+raw entries.
+
 ### Decision Node Fields
 
 | Field | Type | Required | Description |
@@ -175,7 +181,7 @@ The file shape is:
 | `timestamp` | ISO 8601 | Yes | Timestamp of the source raw entry |
 | `week` | string | Yes | ISO week containing the source raw entry |
 | `confidence` | enum | Yes | `explicit` when the raw entry has decision fields; `inferred` when derived from summary/context |
-| `source_entry_refs` | object[] | Yes | Week file, timestamp, and entry index references back to source raw entries |
+| `source_entry_refs` | object[] | Yes | Provenance pointers to the raw entries where the claim was recorded; not independent verification of the claim |
 | `summary` | string | Yes | Original raw entry summary |
 | `decision` | string | Yes | Decision phrased as a reusable agent-facing statement |
 | `why` | string | No | Motivation or reconstructed reason |
@@ -187,15 +193,19 @@ The file shape is:
 | `lifecycle_transition` | object | No | Raw-entry lifecycle transition when this node carries a state change |
 | `topic_keys` | string[] | No | Stable retrieval terms for deterministic query helpers |
 | `artifact_refs` | string[] | No | Artifact paths or ids touched by the decision |
-| `evidence_refs` | string[] | No | Commit SHAs, eval IDs, issue IDs, doc refs, or source refs |
-| `source_refs` | object[] | No | Typed source references copied from the raw entry |
+| `direct_artifact_refs` | string[] | No | Artifact references explicitly recorded under `artifact_context.source_of_truth`; unlike general `artifact_refs`, these can support verification |
+| `evidence_refs` | string[] | No | Direct commit, eval, issue, document, or source references supporting the claim |
+| `source_refs` | object[] | No | Typed direct evidence references copied from the raw entry |
 | `thread_id` | string | No | Decision thread grouping key |
 | `inference_notes` | string[] | No | Notes explaining any inferred decision content |
 
 `source_entry_refs` are mandatory because agents should ground answers in raw
-evidence. Consumers may summarize the decision node, but they must not present
-derived content as stronger than the node's `confidence` and `inference_notes`
-allow.
+records. They establish provenance, not independent verification. Consumers may
+summarize the decision node, but they must not present derived content as
+stronger than the node's `confidence`, `inference_notes`, and direct evidence
+allow. `evidence_refs`, typed `source_refs`, and `direct_artifact_refs` are the
+direct evidence surfaces for drilling below the raw claim. General
+`artifact_refs` remain navigation hints unless explicitly marked source-of-truth.
 
 ### Decision Edges
 
@@ -379,7 +389,7 @@ Each `{vault}/raw/weeks/{week}/{slug}.json` file contains a **JSON array** of en
 | `timestamp` | ISO 8601 | Yes | When the change was made or recorded |
 | `archetype` | enum | Recommended for new entries | `decision` \| `build` \| `investigation` \| `repair` \| `maintenance`; describes the session shape |
 | `type` | enum | Yes | `feature` \| `fix` \| `refactor` \| `decision` \| `risk` |
-| `summary` | string | Yes | 1 sentence, engineering-level abstraction |
+| `summary` | string | Yes | 1 factual sentence at the boundary actually reached; do not promote plans or partial work into shipped outcomes |
 | `context` | string | Yes | 1-2 sentences explaining why and impact |
 | `related_docs` | string[] | No | Absolute paths to relevant documentation files |
 | `source` | enum | Yes | `session-recap` for new entries; `arch-doc` is legacy-only historical data |
@@ -391,10 +401,10 @@ Consumers must tolerate these fields being absent. Producers should add them whe
 | Field | Type | Description |
 |-------|------|-------------|
 | `project_area` | string | Product/module area affected by the change |
-| `work_stream` | string | Suggested weekly-report narrative grouping |
-| `impact` | string | User, system, or engineering impact in report-friendly language |
-| `status` | enum | `done` \| `ongoing` \| `risk` \| `decision` |
-| `evidence_refs` | string[] | Commit SHAs, eval IDs, issue IDs, or doc paths supporting the entry |
+| `work_stream` | string | Suggested weekly-report grouping; groups activity but does not prove an outcome |
+| `impact` | string | Observed user, system, or engineering effect; prospective effects must be labeled as expected or intended |
+| `status` | enum | Claim boundary: `done` completed the described scope; `ongoing` is progress; `risk` is unresolved exposure; `decision` records a choice, not implementation |
+| `evidence_refs` | string[] | Direct commit, eval, issue, or document references supporting the entry; their presence alone does not prove `impact` |
 | `decision_threads` | string[] | Stable thread keys for decision replay. These override artifact hints and keyword fallback when deriving `thread_id` |
 | `lifecycle_transition` | object | Explicit state change for an open question, risk, decision, or artifact |
 | `source_refs` | object[] | Typed source references with `type` and `ref`, plus optional `path`, `url`, `note`, or `timestamp` |
@@ -481,6 +491,30 @@ Recommended producer behavior:
   `DESIGN.md`, `PLAN.md`, `AGENTS.md`, README, architecture docs, prompt
   contracts, or schema contracts. This is lightweight flagging only; producers
   must not claim semantic diffing or automatic doc updates.
+
+### Fruit Check
+
+Every report-level claim should have a real "fruit": an observable change in
+user, product, system, reliability, migration, or developer-workflow state.
+Commits, files, tokens, logs, task counts, and documents are activity or
+evidence, not outcomes by themselves.
+
+Apply these checks without adding fields or migrating historical raw entries:
+
+1. `summary` states what actually changed at the boundary reached.
+2. `status` limits the claim; `ongoing`, `risk`, and `decision` must not be
+   rewritten as completed outcomes.
+3. `impact` describes an observed effect. If only a future effect is known,
+   label it explicitly as expected, intended, or possible.
+4. `work_stream` explains how related entries may roll up, but does not turn
+   their combined activity into an outcome.
+5. Evidence must support the claim. A true commit, log, or document reference
+   does not make an unsupported impact statement true.
+
+If an entry cannot pass this check, narrow it to a decision, investigation,
+maintenance, or risk signal instead of manufacturing a result. Consumers must
+remain backward-compatible with entries that predate v2.2 and omit optional
+fields.
 
 ### Writing `summary`
 

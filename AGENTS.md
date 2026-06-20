@@ -8,6 +8,8 @@ This file provides guidance to Codex (Codex.ai/code) when working with code in t
 
 Lode is positioned as a reporting and decision-replay engine, not a generic memory layer. Capture/retrieval is the input; structured weekly outlines, monthly reviews, and decision roadmaps are the product.
 
+For technical workplace reporting, Lode rolls scattered AI-assisted work upward into report-ready outcomes and lets readers drill back down to decisions, tradeoffs, and evidence. This is a secondary use case built on the decision-replay loop, not a separate generic-office product.
+
 The skills themselves are Markdown-first and dependency-light. The repository also includes a Node-based CLI installer under `cli/`, local-only eval fixtures, and public benchmark guidance.
 
 The name comes from **lode**: a vein of ore where valuable mineral is concentrated. These skills extract lasting value from raw development activity. The word shares its root with "load" and the Chinese character 载 (zài, to carry, to record).
@@ -179,6 +181,7 @@ Lode uses four storage surfaces:
 - **Self-contained skills**: each skill has its own copy of shared files in its `references/` directory, so skills work correctly when installed individually. Skills cannot reference files outside their directory via `../`
 - **Convention sync**: the canonical version lives at `references/weekly-ppt-convention.md`; after editing it, run `scripts/sync-convention.sh` to copy to all skill directories that need it
 - **Decision replay helper sync**: the canonical implementation lives at `references/decision_replay.py`; after editing it, run `scripts/sync-decision-replay.sh` so `query`, `roadmap`, and `recall` keep identical local copies
+- **Derived-index builder version**: bump `INDEX_BUILDER_VERSION` whenever decision node, edge, or retrieval derivation semantics change so apparently current v1 indexes rebuild safely without migrating weekly raw data
 - **Unified config**: all skills read vault path from `.lode/config.yaml`; project-level config overrides global
 - **Explicit primary outputs, graceful side effects**: if a skill needs the vault for its main output, it asks for `knowledge_vault`; if a raw change entry is only a side effect, it can skip that write gracefully
 - **Artifact governance**: full repo-local artifacts stay near code by default; vault artifact indexes make them discoverable without turning weekly raw entries into a document catalog
@@ -187,6 +190,7 @@ Lode uses four storage surfaces:
 - **Adaptive-depth recap**: `capture` classifies sessions as decision/build/investigation/repair/maintenance and writes archetype-specific signals for downstream reports
 - **Legacy arch-doc compatibility**: historical `source: arch-doc` raw entries remain readable, but new write output uses `source: session-recap`
 - **Weekly-report-quality raw entries**: `capture` should write report-worthy signals, decisions, risks, contracts, and impact rather than process logs or "updated docs" entries
+- **Progressive-closure reporting**: weekly and monthly reports derive a report-local `O# -> W# -> D# -> E#` chain from raw truth; activity metrics are coverage metadata, not outcomes, and provenance alone is not verification
 - **Local evals, public benchmarks**: `skills/*/evals/` and `*-workspace/` stay local; public benchmark guidance lives under `benchmarks/`
 - **Scripts for deterministic work**: monthly uses Python scripts for parsing and aggregation; the agent handles interpretation and writing
 

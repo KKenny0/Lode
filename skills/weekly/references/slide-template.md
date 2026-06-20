@@ -1,5 +1,33 @@
 # Slide Structure Templates
 
+## Shared 3+1 Reporting Backbone
+
+Both modes use report-local traceability IDs assigned during final stitching:
+
+```text
+O# outcome/progress
+  └─ W# supporting work stream
+       └─ D# decision/trade-off
+            └─ E# concrete evidence
+```
+
+Use at most three `O#` items in the entire report. An `O#` marked
+`outcome` must pass the Fruit Check: it names an observable state change,
+deliverable, recorded effect, or demonstrably removed risk. Expected impact is
+prospective. Fallback-only work is `limited` progress/activity, never an
+outcome.
+
+Evidence grades:
+
+- `verified`: raw claim plus direct independent verification that substantiates
+  the claim's actual wording, not merely a related change.
+- `recorded`: raw entry records status and impact without independent verification.
+- `limited`: fallback-only or semantically incomplete; phrase as progress/activity.
+
+Every meaningful `W#` appears even when it does not support an `O#`; label it
+`exploration`, `maintenance`, or `activity`. Every material claim maps to one or
+more `E#` items in the evidence appendix.
+
 ## Slide Format
 
 Use `## Slide N: Title` for slide headings, separated by `---`:
@@ -25,17 +53,19 @@ Slide numbering starts from 1. The title page is Slide 1, overview is Slide 2, a
 ### Full layout (1 stream — 3-4 slides)
 
 ```markdown
-## Slide N: {stream} — 背景 & 问题
+## Slide N: W# {stream} — 背景 & 问题
 
 ### 背景
 {narrative.goal}
+
+**向上关联：** {O# references, or "未收口：exploration/maintenance/activity"}
 
 ### 本周核心问题
 {narrative.problems}
 
 ---
 
-## Slide N+1: {stream} — 关键改动 & 技术方案
+## Slide N+1: W# {stream} — 关键改动 & 技术方案
 
 ### 关键改动
 {narrative.key_changes}
@@ -43,12 +73,18 @@ Slide numbering starts from 1. The title page is Slide 1, overview is Slide 2, a
 ### 技术方案
 {narrative.technical_approach}
 
+### 决策与取舍
+
+| ID | 选择 | 放弃/延后 | 原因 | 解释状态 |
+|----|------|-----------|------|----------|
+| D# | {choice} | {alternative} | {why} | explicit / inferred |
+
 ---
 
-## Slide N+2: {stream} — 成果 & 下一步
+## Slide N+2: W# {stream} — 成果/进展 & 下一步
 
-### 成果
-{narrative.result}
+### 成果/进展
+{narrative.result}（关联 {O# or "未形成 headline"}，证据见 {E# references}）
 
 ### 风险 & 下一步
 {narrative.risk_and_next}
@@ -60,10 +96,12 @@ The default for most streams in a multi-stream week. Separates context+approach
 from results+next. Every non-trivial stream gets at least this layout.
 
 ```markdown
-## Slide N: {stream} — 背景 & 方案
+## Slide N: W# {stream} — 背景 & 方案
 
 ### 背景
 {narrative.goal}
+
+**向上关联：** {O# references, or "未收口：exploration/maintenance/activity"}
 
 ### 本周核心问题
 {narrative.problems}
@@ -74,12 +112,15 @@ from results+next. Every non-trivial stream gets at least this layout.
 ### 技术方案
 {narrative.technical_approach}
 
+### 决策与取舍
+{D# choices, alternatives, reasons, and explicit/inferred status}
+
 ---
 
-## Slide N+1: {stream} — 成果 & 下一步
+## Slide N+1: W# {stream} — 成果/进展 & 下一步
 
-### 成果
-{narrative.result}
+### 成果/进展
+{narrative.result}（证据见 {E# references}）
 
 ### 风险 & 下一步
 {narrative.risk_and_next}
@@ -92,10 +133,12 @@ Background and problems are merged into the key changes section.
 Technical approach is inline rather than diagram-heavy.
 
 ```markdown
-## Slide N: {stream} — 背景 & 关键改动
+## Slide N: W# {stream} — 背景 & 关键改动
 
 ### 背景
 {narrative.goal}
+
+**向上关联：** {O# references, or "未收口：exploration/maintenance/activity"}
 
 ### 关键改动
 {narrative.key_changes}
@@ -103,12 +146,15 @@ Technical approach is inline rather than diagram-heavy.
 ### 技术方案
 {narrative.technical_approach}
 
+### 决策与取舍
+{D# concise choices and alternatives}
+
 ---
 
-## Slide N+1: {stream} — 成果 & 下一步
+## Slide N+1: W# {stream} — 成果/进展 & 下一步
 
-### 成果
-{narrative.result}
+### 成果/进展
+{narrative.result}（证据见 {E# references}）
 
 ### 风险 & 下一步
 {narrative.risk_and_next}
@@ -117,20 +163,25 @@ Technical approach is inline rather than diagram-heavy.
 ## Report Mode (4-part, 2-3 slides per stream)
 
 ```markdown
-## Slide N: {stream} — 目标 & 关键改动
+## Slide N: W# {stream} — 目标 & 关键改动
 
 ### 本周目标
 {narrative.goal}
 
+**向上关联：** {O# references, or "未收口：exploration/maintenance/activity"}
+
 ### 关键改动
 {narrative.key_changes}
 
+### 关键决策
+{D# choice, trade-off, and reason; keep concise}
+
 ---
 
-## Slide N+1: {stream} — 成果 & 下一步
+## Slide N+1: W# {stream} — 成果/进展 & 下一步
 
-### 成果
-{narrative.result}
+### 成果/进展
+{narrative.result}（证据见 {E# references}）
 
 ### 下一步
 {narrative.risk_and_next}
@@ -150,14 +201,24 @@ Technical approach is inline rather than diagram-heavy.
 
 ### Overview (Slide 2)
 
-One bullet per work stream (or per project in multi-project mode):
+Show at most three report-wide headline items. Use `成果` only for claims that
+pass the Fruit Check; otherwise use `进展`. If none qualify as outcomes, say
+“本周无可核验的完成成果” and show bounded progress instead.
 
 ```markdown
-## Slide 2: 本周总览
+## Slide 2: 本周成果与进展
 
-- **stream-a：** {narrative.goal} (one sentence)
-- **stream-b：** {narrative.goal} (one sentence)
-- **stream-c：** {narrative.goal} (one sentence)
+| ID | 类型 | 成果/进展 | 影响 | 证据等级 | 支撑主线 |
+|----|------|-----------|------|----------|----------|
+| O1 | outcome / progress | {observable claim} | {recorded or prospective impact} | verified / recorded / limited | W1, W2 |
+| O2 | outcome / progress | {observable claim} | {impact} | verified / recorded / limited | W3 |
+| O3 | outcome / progress | {observable claim} | {impact} | verified / recorded / limited | W4 |
+
+Omit unused rows; never invent an item to fill the table.
+
+### 未收口工作
+
+- **W# exploration / maintenance / activity：** {brief explanation}
 ```
 
 Natural cross-project/cross-stream themes are fine here when they genuinely emerge, but don't force connections that don't exist.
@@ -169,21 +230,21 @@ Natural cross-project/cross-stream themes are fine here when they genuinely emer
 
 ### 全局状态
 
-| 工作项 | 状态 | 关键进展 |
-|--------|------|----------|
-| stream-a | {current_status} | {key_changes summary} |
-| stream-b | {current_status} | {key_changes summary} |
+| 工作主线 | 向上关联 | 状态 | 关键进展 |
+|----------|----------|------|----------|
+| W1 stream-a | O1 | {current_status} | {key_changes summary} |
+| W2 stream-b | 未收口：exploration | {current_status} | {key_changes summary} |
 
 ### 各工作项下一步
 
-- **stream-a：** {narrative.risk_and_next}
-- **stream-b：** {narrative.risk_and_next}
+- **W1 stream-a：** {narrative.risk_and_next}
+- **W2 stream-b：** {narrative.risk_and_next}
 
 ### 决策与开放问题
 
 | 信号 | 状态 | 下周影响 |
 |------|------|----------|
-| {decision/open question/risk} | carried-forward / revisited / resolved | {next-week planning impact} |
+| D# {decision/open question/risk} | carried-forward / revisited / resolved | {next-week planning impact} |
 
 ### 本周难点
 
@@ -194,19 +255,37 @@ Natural cross-project/cross-stream themes are fine here when they genuinely emer
 | {risk/open question/stale thread} | {raw timestamp or entry summary} | {planning impact} |
 ```
 
-## Commit Appendix (Optional)
+## Claim-level Evidence Appendix
 
-Include a commit table at the end for verification. Mark it clearly so the presenter knows it's reference material, not slide content.
+Always include a claim-level evidence map after the slides. It is reference
+material, not slide content. Deduplicate sources into `E#` IDs, and link every
+material `O#`, `W#`, and `D#` claim to its source. A raw commit list without
+claim links does not satisfy this contract.
 
 ```markdown
 ---
 
-## 附录：本周 Commit 清单（仅供核实，不入 PPT）
+## 附录：主张—证据映射（仅供核验，不入 PPT）
 
-| Hash | Message |
-|------|---------|
-| abc1234 | feat(xxx): description |
+| 主张 | 表述 | 证据 | 来源类型 | 核验说明 |
+|------|------|------|----------|----------|
+| O1 | {outcome/progress claim} | E1, E2 | raw + test | {why this grade is justified} |
+| W1 | {work-stream claim} | E1, E3 | raw + commit | {scope/status support} |
+| D1 | {decision/trade-off} | E4 | raw/artifact | {explicit or inferred} |
+
+### Evidence index
+
+| ID | 来源类型 | 引用 |
+|----|----------|------|
+| E1 | raw entry | {timestamp + entry summary or durable raw reference} |
+| E2 | test/eval | {test or eval result reference} |
+| E3 | commit | {hash + subject} |
+| E4 | artifact | {source-of-truth path or artifact reference} |
 ```
+
+Do not upgrade a raw-entry reference to independent verification merely because
+the entry contains `evidence_refs`; verify the referenced source type. A commit
+may appear here when it supports a claim, but never as an unconnected dump.
 
 ## Slide Budget
 

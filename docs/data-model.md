@@ -95,6 +95,32 @@ Knowledge vault 内部分为 raw/wiki 两层：
 日报、周报和月报是 compounding outputs。它们复用 capture/query 产生的证据，
 但不应取代 decision replay 作为第一优先级。
 
+## 逐层收口与反向核验
+
+报告是 raw truth 的派生视图，不是新的事实源。Lode 在报告内部使用临时 3+1
+关系把散乱工作向上收口，同时保留向下核验路径；这些编号只属于当前报告，
+不会写回 raw schema，也不要求迁移历史数据。
+
+```text
+向上收口:
+raw evidence -> D# 决策/取舍 -> W# 工作流 -> O# 成果/进展
+
+向下核验:
+O# 成果 -> W# 支撑工作 -> D# 决策/取舍 -> E# 证据
+```
+
+- `O#`：可观察的状态变化，带 `done`、`ongoing`、`risk` 或 `decision` 状态；
+  报告概览最多保留三条头部成果或进展。
+- `W#`：对成果的具体贡献；没有支撑任何成果的工作仍可作为探索、维护或活动呈现。
+- `D#`：触发原因、选择、被拒绝或延后的替代方案，以及置信度。
+- `E#`：raw entry 出处、直接证据引用、证据等级和缺失证据。
+
+证据等级分为 `verified`、`recorded`、`limited`。`verified` 需要明确 raw record
+和至少一个可独立检查的证据引用；`recorded` 只有明确记录和出处；fallback、
+推断、冲突或证据不足的内容必须标为 `limited`。`source_entry_refs` 只证明
+记录来源，不自动证明成果已经发生。commit 数、代码行数、任务数、活跃天数等
+只可作为覆盖或活动元数据，不能单独成为成果。
+
 ## Artifact Ownership Matrix
 
 | 产物 | Primary location | Secondary representation |
@@ -135,7 +161,8 @@ Decision replay index 回答“某条选择为什么发生”。这是 Lode 的�
 - decision slug 和当前摘要；
 - chosen path、rejected/deferred alternatives；
 - rationale、impact、risks、open questions；
-- `source_entry_refs`，指回 weekly raw entries 或其它本地证据；
+- `source_entry_refs`，指回记录该说法的 weekly raw entries，只作为 provenance；
+- `evidence_refs`、带类型的 `source_refs` 或 source-of-truth artifact，提供进一步核验路径；
 - confidence / evidence gap，明确没有证据时不回答。
 
 `raw/decisions/` 是派生索引，不替代 raw weekly entries。它的职责是让 `/lode:query` 可以快速、带引用地回答定向历史问题。
@@ -172,7 +199,7 @@ artifact:
 2. **Decision Replay 查询**
    - `/lode:query` 优先读取 `{vault}/raw/decisions/{slug}.json`
    - 没有派生索引时 fallback 到 weekly raw entries
-   - 仅在有 `source_entry_refs` 或明确本地证据时回答
+   - 仅在有 `source_entry_refs` 或明确本地记录时回答；只有 provenance 时降低证据等级并报告缺口
    - 支持 `why`、`alternatives`、`revisit`、`impact` 等定向问题
 
 3. **Session Start / Roadmap**

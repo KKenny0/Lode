@@ -29,9 +29,11 @@ specific project-history questions:
 - Which open questions should be revisited
 - What impact a decision had
 
-The skill returns cited evidence from `source_entry_refs` and refuses to answer
-when Lode has no supporting record. This keeps the system local-first and
-evidence-bound rather than turning it into a generic memory guesser.
+The skill returns compact nodes with raw provenance (`source_entry_refs`) and
+direct evidence links (`evidence_refs` or typed `source_refs`) kept distinct.
+Provenance says where a claim was recorded; it does not by itself verify that
+claim. Missing evidence is reported explicitly, and attached references remain
+visible for inspection; Lode refuses to answer when it has no supporting record.
 
 ## Capture
 
@@ -44,7 +46,12 @@ Adaptive-depth session recap and checkpoint capture. Classifies your session as 
 - **Repair** — bugs fixed, root causes, mitigations
 - **Maintenance** — refactors, upgrades, cleanup
 
-Writes report-worthy signals (decisions, risks, contracts, impact) rather than process logs. Also generates lightweight sync suggestions for architecture docs, plans, and README files.
+Writes report-worthy signals (`work_stream`, state change, status, impact,
+decisions, risks, contracts, and evidence) rather than process logs. A Fruit
+Check prevents commits, line counts, task counts, or vague completion claims
+from becoming outcomes without an observable state change, impact, honest
+status, and source path. Capture also generates lightweight sync suggestions
+for architecture docs, plans, and README files.
 
 Zero-config mode: outputs structured Markdown directly in the conversation without writing to any vault.
 
@@ -76,13 +83,22 @@ Updates Obsidian daily notes from raw entries and git history. Aggregates what h
 
 **Trigger:** `/lode:weekly`, `周报`, `weekly PPT`
 
-Builds a weekly outline from raw change entries. Uses raw entries as the primary semantic source; git logs are fallback and coverage evidence only. Includes a conditional "hard stuff" section when evidence exists.
+Builds a weekly outline around at most three headline outcomes or progress
+claims. Each report uses a local 3+1 chain: `O#` outcome/progress, `W#` work
+stream, `D#` decision/tradeoff, and `E#` evidence audit. Raw entries remain the
+primary semantic source; git logs are fallback and coverage evidence only.
+Fallback-only work stays limited progress, never verified delivery.
 
 ## Monthly
 
 **Trigger:** `/lode:monthly`, `月度回顾`, `月报`, `monthly review`
 
-Generates a monthly review from daily notes. Extracts signals, produces a structured skeleton, and proposes candidate rules from repeated evidence. Python scripts handle parsing and aggregation for determinism.
+Generates an outcomes-first monthly review from daily notes, with optional raw
+evidence enrichment and the same report-local `O#`/`W#`/`D#`/`E#` traceability
+used by weekly reports. Task counts, active days, category totals, and code-size
+figures stay in a coverage appendix and are never promoted into outcomes.
+Risks, evidence gaps, next-month handoff, and candidate rules remain visible.
+Python scripts handle parsing and aggregation for determinism.
 
 ## Roadmap
 
@@ -93,5 +109,6 @@ Generates a narrative decision roadmap from accumulated raw entries. Tracks:
 - Accumulating risks that haven't been resolved
 - Recurring open questions
 - How thinking evolved over time
+- Confidence, evidence references, and evidence gaps for each decision point
 
 The roadmap is not a feature list — it tells the story of what happened and why.

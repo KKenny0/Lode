@@ -26,6 +26,7 @@ except Exception:  # pragma: no cover - optional dependency
 SCHEMA_VERSION = "lode.decision_replay.v1"
 QUERY_SCHEMA_VERSION = "lode.decision_query.v1"
 ROADMAP_SCHEMA_VERSION = "lode.decision_roadmap.v1"
+INDEX_BUILDER_VERSION = 2
 SAFE_SLUG_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]*$")
 EXPLICIT_FIELDS = (
     "motivation",
@@ -85,6 +86,10 @@ STOPWORDS = {
     "with",
     "without",
 }
+CJK_QUERY_BOILERPLATE_RE = re.compile(
+    r"为什么|为何|怎么|什么|是否|当时|我们|这个|那个|请问"
+)
+CJK_RUN_RE = re.compile(r"[\u3400-\u4dbf\u4e00-\u9fff]+")
 
 
 def load_yaml_config(path: Path) -> dict[str, Any]:
@@ -324,6 +329,16 @@ def artifact_refs_from_entry(entry: dict[str, Any]) -> list[str]:
     return dedupe(refs)
 
 
+def direct_artifact_refs_from_entry(entry: dict[str, Any]) -> list[str]:
+    """Return only artifact refs explicitly marked as source-of-truth evidence."""
+    refs: list[str] = []
+    for context in entry.get("artifact_context", []):
+        if not isinstance(context, dict):
+            continue
+        refs.extend(as_string_list(context.get("source_of_truth")))
+    return dedupe(refs)
+
+
 def artifact_hints_for_entry(
     entry: dict[str, Any], artifacts: list[dict[str, Any]]
 ) -> tuple[list[str], list[str]]:
@@ -356,8 +371,33 @@ def keyword_tokens(text: str) -> list[str]:
     return dedupe(tokens)
 
 
+def cjk_lexical_tokens(text: str) -> list[str]:
+    """Return deterministic CJK bigrams/trigrams without a tokenizer dependency."""
+    normalized = CJK_QUERY_BOILERPLATE_RE.sub(" ", text)
+    tokens: list[str] = []
+    for run in CJK_RUN_RE.findall(normalized):
+        for size in (2, 3):
+            if len(run) < size:
+                continue
+            tokens.extend(run[index : index + size] for index in range(len(run) - size + 1))
+    return dedupe(tokens)
+
+
+def lexical_tokens(text: str) -> list[str]:
+    return dedupe([*keyword_tokens(text), *cjk_lexical_tokens(text)])
+
+
+def topic_key(value: str) -> str:
+    """Return a stable readable key for either Latin or CJK topic text."""
+    latin = slugify(value)
+    if latin != "project" or not CJK_RUN_RE.search(value):
+        return latin
+    cjk = cjk_lexical_tokens(value)
+    return "-".join(cjk[:3]) or "project"
+
+
 def search_tokens(text: str) -> set[str]:
-    tokens = set(keyword_tokens(text))
+    tokens = set(lexical_tokens(text))
     for token in list(tokens):
         if "-" not in token or token.startswith("re-"):
             continue
@@ -369,30 +409,31 @@ def search_tokens(text: str) -> set[str]:
 
 def topic_keys(entry: dict[str, Any], artifact_thread_hints: list[str]) -> list[str]:
     keys: list[str] = []
-    keys.extend(slugify(item) for item in as_string_list(entry.get("decision_threads")))
+    keys.extend(topic_key(item) for item in as_string_list(entry.get("decision_threads")))
     for field in ("project_area", "work_stream"):
         value = text_value(entry, field)
         if value:
-            keys.append(slugify(value))
-    keys.extend(slugify(item) for item in artifact_thread_hints)
+            keys.append(topic_key(value))
+    keys.extend(topic_key(item) for item in artifact_thread_hints)
     for context in entry.get("artifact_context", []):
         if not isinstance(context, dict):
             continue
         for field in ("scope", "delta"):
             value = text_value(context, field)
             if value:
-                keys.extend(keyword_tokens(value)[:4])
-    keys.extend(keyword_tokens(" ".join([str(entry.get("summary", "")), str(entry.get("context", ""))]))[:6])
+                keys.extend(lexical_tokens(value)[:4])
+    keys.extend(lexical_tokens(" ".join([str(entry.get("summary", "")), str(entry.get("context", ""))]))[:6])
     return dedupe([key for key in keys if key])
 
 
 def thread_id_for(keys: list[str], entry: dict[str, Any]) -> str:
     for key in keys:
         if key:
-            return f"thread:{slugify(key)}"
+            return f"thread:{topic_key(key)}"
     summary = text_value(entry, "summary") or f"entry-{entry.get('_source_index', 0)}"
-    words = keyword_tokens(summary)
-    return f"thread:{'-'.join(words[:3]) or slugify(summary)[:48]}"
+    words = lexical_tokens(summary)
+    fallback = "-".join(words[:3]) or f"entry-{entry.get('_source_index', 0)}"
+    return f"thread:{fallback[:48]}"
 
 
 def merge_suggestions(thread_ids: list[str], threshold: float = 0.7) -> list[dict[str, Any]]:
@@ -494,6 +535,7 @@ def node_from_entry(
 ) -> dict[str, Any]:
     artifact_ids, artifact_thread_hints = artifact_hints_for_entry(entry, artifacts)
     artifact_refs = dedupe([*artifact_refs_from_entry(entry), *artifact_ids])
+    direct_artifact_refs = direct_artifact_refs_from_entry(entry)
     keys = topic_keys(entry, artifact_thread_hints)
     explicit = has_explicit_decision_signal(entry)
     why = text_value(entry, "motivation") or text_value(entry, "context")
@@ -524,6 +566,7 @@ def node_from_entry(
         "lifecycle_transition": lifecycle_transition,
         "topic_keys": keys,
         "artifact_refs": artifact_refs,
+        "direct_artifact_refs": direct_artifact_refs,
         "evidence_refs": as_string_list(entry.get("evidence_refs")),
         "source_refs": source_refs,
         "thread_id": thread_id_for(keys, entry),
@@ -622,10 +665,11 @@ def latest_entry_datetime(entries: list[dict[str, Any]]) -> dt.datetime | None:
 
 def index_is_current(index: dict[str, Any], entries: list[dict[str, Any]]) -> bool:
     source = index.get("source")
-    if isinstance(source, dict):
-        raw_entry_count = source.get("raw_entry_count")
-        if isinstance(raw_entry_count, int) and raw_entry_count != len(entries):
-            return False
+    if not isinstance(source, dict) or source.get("builder_version") != INDEX_BUILDER_VERSION:
+        return False
+    raw_entry_count = source.get("raw_entry_count")
+    if isinstance(raw_entry_count, int) and raw_entry_count != len(entries):
+        return False
     latest_entry = latest_entry_datetime(entries)
     if latest_entry is None:
         return True
@@ -643,6 +687,7 @@ def build_index(vault: Path, slug: str, generated_at: str | None = None) -> dict
     thread_merge_hints = merge_suggestions(dedupe(all_thread_ids))
     source: dict[str, Any] = {
         "kind": "roadmap",
+        "builder_version": INDEX_BUILDER_VERSION,
         "raw_entry_count": len(entries),
         "raw_glob": str(vault / "raw" / "weeks" / "*" / f"{slug}.json"),
         "raw_paths": raw_paths,
@@ -839,26 +884,30 @@ def node_search_text(node: dict[str, Any], mode: str) -> str:
 
 
 def query_terms(query: str) -> list[str]:
-    return keyword_tokens(query)
+    return lexical_tokens(query)
 
 
 def score_node(node: dict[str, Any], terms: list[str], mode: str) -> int:
     if not terms:
         return 0
     score = 0
-    matched = matched_terms(node, terms, mode)
+    node_tokens = search_tokens(node_search_text(node, mode))
+    topic_tokens = search_tokens(" ".join(as_string_list(node.get("topic_keys"))))
+    decision_tokens = search_tokens(str(node.get("decision", "")))
+    why_tokens = search_tokens(str(node.get("why", "")))
+    matched = [term for term in terms if term in node_tokens]
     required_matches = 1 if len(terms) == 1 else max(2, (len(terms) // 2) + 1)
     if len(matched) < required_matches:
         return 0
     score += len(matched) * 8
     for term in terms:
-        if term in search_tokens(node_search_text(node, mode)):
+        if term in node_tokens:
             score += 10
-        if term in search_tokens(" ".join(as_string_list(node.get("topic_keys")))):
+        if term in topic_tokens:
             score += 8
-        if term in search_tokens(str(node.get("decision", ""))):
+        if term in decision_tokens:
             score += 6
-        if term in search_tokens(str(node.get("why", ""))):
+        if term in why_tokens:
             score += 4
     if mode == "alternatives" and node.get("rejected"):
         score += 4
@@ -895,6 +944,8 @@ def compact_node(node: dict[str, Any], terms: list[str] | None = None, mode: str
         "topic_keys": node.get("topic_keys", []),
         "thread_id": node.get("thread_id"),
         "artifact_refs": node.get("artifact_refs", []),
+        "direct_artifact_refs": node.get("direct_artifact_refs", []),
+        "evidence_refs": node.get("evidence_refs", []),
         "source_entry_refs": node.get("source_entry_refs", []),
         "source_refs": node.get("source_refs", []),
         "inference_notes": node.get("inference_notes", []),
@@ -921,16 +972,29 @@ def supporting_nodes(
     return result[:limit]
 
 
+def has_direct_evidence(node: dict[str, Any]) -> bool:
+    """Direct evidence is distinct from raw-entry provenance."""
+    return bool(
+        as_string_list(node.get("evidence_refs"))
+        or as_object_list(node.get("source_refs"))
+        or as_string_list(node.get("direct_artifact_refs"))
+    )
+
+
 def evidence_strength(top: list[dict[str, Any]], terms: list[str], mode: str) -> str:
     if not top:
         return "none"
     strongest = top[0]
     match_count = len(matched_terms(strongest, terms, mode))
-    has_sources = bool(strongest.get("source_entry_refs"))
-    if strongest.get("confidence") == "explicit" and has_sources and match_count >= max(2, min(len(terms), 3)):
+    has_provenance = bool(strongest.get("source_entry_refs"))
+    direct_evidence = has_direct_evidence(strongest)
+    strong_match_floor = 1 if len(terms) == 1 else min(len(terms), 3)
+    if strongest.get("confidence") == "explicit" and direct_evidence and match_count >= strong_match_floor:
         return "strong"
-    if has_sources and match_count >= 2:
+    if direct_evidence and match_count >= 1:
         return "moderate"
+    if has_provenance and match_count >= 1:
+        return "weak"
     return "weak"
 
 
@@ -941,9 +1005,10 @@ def answerability_reason(top: list[dict[str, Any]], terms: list[str], mode: str,
         return "No decision index nodes matched enough query terms to ground an answer."
     top_node = top[0]
     matched = matched_terms(top_node, terms, mode)
+    basis = "direct evidence" if has_direct_evidence(top_node) else "raw-entry provenance only"
     return (
         f"Top node {top_node.get('id')} matched {len(matched)}/{len(terms)} query terms "
-        f"with {top_node.get('confidence', 'unknown')} confidence and {strength} evidence."
+        f"with {top_node.get('confidence', 'unknown')} confidence, {basis}, and {strength} evidence."
     )
 
 
@@ -981,6 +1046,14 @@ def build_query_pack(index: dict[str, Any], query: str, mode: str, limit: int) -
         for question in as_string_list(node.get("open_questions")):
             open_questions.append({"decision_id": node.get("id"), "question": question})
         docs.extend(as_string_list(node.get("artifact_refs")))
+    if not top:
+        missing_evidence = ["No decision index nodes matched the query terms."]
+    elif not has_direct_evidence(top[0]):
+        missing_evidence = [
+            "The top matched decision has raw-entry provenance but lacks direct evidence_refs, source_refs, or source-of-truth artifact evidence."
+        ]
+    else:
+        missing_evidence = []
     return {
         "schema_version": QUERY_SCHEMA_VERSION,
         "project_slug": index.get("project_slug"),
@@ -996,7 +1069,7 @@ def build_query_pack(index: dict[str, Any], query: str, mode: str, limit: int) -
         "supporting_nodes": [compact_node(node, terms, mode) for node in supporting],
         "rejected_alternatives": rejected,
         "open_questions": open_questions,
-        "missing_evidence": [] if top else ["No decision index nodes matched the query terms."],
+        "missing_evidence": missing_evidence,
         "suggested_docs": dedupe(docs),
     }
 

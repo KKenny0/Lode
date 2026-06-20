@@ -201,6 +201,7 @@
         ],
         "expected_lifecycle_subject": "decision:retry-budget-policy",
         "expected_source_ref_type": "conversation",
+        "expected_direct_artifact_ref": "tests/test_validation_retry_budget.py",
         "expected_matched_terms": [
           "retry",
           "budget",
@@ -218,6 +219,141 @@
         {
           "name": "top_node_metadata_preserved",
           "description": "The top query node includes `lifecycle_transition` and typed `source_refs` from the raw entry."
+        }
+      ]
+    },
+    {
+      "id": "decision-replay-explicit-without-direct-evidence",
+      "execution": {
+        "kind": "query-positive"
+      },
+      "skill": "query",
+      "prompt": "用 /lode:query 回答：why stale architecture docs recall risk",
+      "fixture": {
+        "vault": "examples/vault",
+        "project_slug": "storyboard-pipeline",
+        "query": "why stale architecture docs recall risk",
+        "mode": "why",
+        "expected_top_node": "storyboard-pipeline:2026-W19:004",
+        "expected_matched_terms": [
+          "stale",
+          "architecture",
+          "docs",
+          "recall",
+          "risk"
+        ],
+        "expected_evidence_strength": "weak",
+        "expected_missing_evidence_text": "lacks direct evidence_refs"
+      },
+      "expected_behavior": "An explicit raw decision signal remains answerable through source-entry provenance when no direct evidence is attached, but it is never labeled strong and the evidence gap remains visible.",
+      "assertions": [
+        {
+          "name": "provenance_not_direct_evidence",
+          "description": "source_entry_refs keep the answer grounded but do not count as independent verification."
+        },
+        {
+          "name": "missing_direct_evidence_reported",
+          "description": "The answer is weak and missing_evidence asks for evidence_refs, source_refs, or artifact evidence."
+        }
+      ]
+    },
+    {
+      "id": "decision-replay-query-cjk-positive",
+      "execution": {
+        "kind": "query-positive"
+      },
+      "skill": "query",
+      "prompt": "用 /lode:query 回答：修复责任为什么保留在验证阶段？",
+      "fixture": {
+        "project_slug": "cjk-query",
+        "week": "2026-W24",
+        "raw_entries": [
+          {
+            "timestamp": "2026-06-09T10:00:00+08:00",
+            "archetype": "decision",
+            "type": "decision",
+            "summary": "把修复责任保留在验证阶段以保持边界清晰",
+            "context": "修复循环属于验证内部行为，编排层不应依赖验证实现细节。",
+            "source": "session-recap",
+            "status": "decision",
+            "motivation": "修复责任保留在验证阶段可以避免编排层耦合内部细节。",
+            "impact": "阶段边界保持清晰。",
+            "evidence_refs": [
+              "doc:validation-ownership-cn"
+            ]
+          },
+          {
+            "timestamp": "2026-06-10T10:00:00+08:00",
+            "archetype": "decision",
+            "type": "decision",
+            "summary": "移动同步采用本地数据库索引以支持离线访问",
+            "context": "本地索引属于移动同步链路，与验证阶段修复责任无关。",
+            "source": "session-recap",
+            "status": "decision",
+            "motivation": "离线访问需要稳定的本地索引。"
+          }
+        ],
+        "query": "修复责任为什么保留在验证阶段",
+        "mode": "why",
+        "expected_top_node": "cjk-query:2026-W24:001",
+        "expected_matched_terms": [
+          "修复",
+          "责任",
+          "验证",
+          "阶段"
+        ],
+        "expected_evidence_strength": "strong",
+        "expected_evidence_ref": "doc:validation-ownership-cn",
+        "expected_supporting_decision_absent": "移动同步采用本地数据库索引"
+      },
+      "expected_behavior": "Dependency-free CJK lexical tokens retrieve the explicit Chinese decision and preserve direct evidence in the compact query node.",
+      "assertions": [
+        {
+          "name": "pure_chinese_query_answerable",
+          "description": "A pure-Chinese query matches the Chinese decision without an external tokenizer."
+        },
+        {
+          "name": "compact_evidence_preserved",
+          "description": "The compact top node retains evidence_refs for downstream verification."
+        }
+      ]
+    },
+    {
+      "id": "decision-replay-query-cjk-negative",
+      "execution": {
+        "kind": "query-negative"
+      },
+      "skill": "query",
+      "prompt": "用 /lode:query 回答：移动同步为何采用本地数据库索引？",
+      "fixture": {
+        "project_slug": "cjk-query",
+        "week": "2026-W24",
+        "raw_entries": [
+          {
+            "timestamp": "2026-06-09T10:00:00+08:00",
+            "archetype": "decision",
+            "type": "decision",
+            "summary": "把修复责任保留在验证阶段以保持边界清晰",
+            "context": "修复循环属于验证内部行为，编排层不应依赖验证实现细节。",
+            "source": "session-recap",
+            "status": "decision",
+            "motivation": "修复责任保留在验证阶段可以避免编排层耦合内部细节。"
+          }
+        ],
+        "query": "移动同步为何采用本地数据库索引",
+        "mode": "why",
+        "expected_matched_terms_absent": [
+          "移动",
+          "同步",
+          "数据",
+          "索引"
+        ]
+      },
+      "expected_behavior": "An unrelated pure-Chinese query remains unanswerable; CJK n-grams must not turn isolated or generic overlap into evidence.",
+      "assertions": [
+        {
+          "name": "unrelated_chinese_query_rejected",
+          "description": "The helper returns answerable=false with missing evidence for an unrelated pure-Chinese topic."
         }
       ]
     },

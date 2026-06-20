@@ -4,6 +4,7 @@ docs/*
 !docs/data-model.md
 !docs/artifact-governance.md
 !docs/release-artifact-inventory.md
+!docs/progressive-closure-implementation.md
 demo/
 ROADMAP.md
 TODO*.md
