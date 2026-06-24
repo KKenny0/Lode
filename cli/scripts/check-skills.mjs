@@ -9,6 +9,11 @@ const cliRoot = path.resolve(scriptDir, '..');
 const repoRoot = path.resolve(cliRoot, '..');
 const sourceSkillsDir = path.join(repoRoot, 'skills');
 const bundledSkillsDir = path.join(cliRoot, 'skills');
+const codexPluginBundleDir = path.join(repoRoot, 'plugins', 'lode');
+const codexPluginSkillsDir = path.join(codexPluginBundleDir, 'skills');
+const codexPluginManifest = path.join(codexPluginBundleDir, '.codex-plugin', 'plugin.json');
+const sourceCodexPluginManifest = path.join(repoRoot, '.codex-plugin', 'plugin.json');
+const codexMarketplace = path.join(repoRoot, '.agents', 'plugins', 'marketplace.json');
 const canonicalConvention = path.join(repoRoot, 'references', 'weekly-ppt-convention.md');
 const canonicalDecisionReplay = path.join(repoRoot, 'references', 'decision_replay.py');
 
@@ -103,10 +108,14 @@ function validateSkillDirectory(baseDir, skill) {
 }
 
 assert(exists(bundledSkillsDir), 'cli/skills is missing. Run npm run copy-skills first.');
+assert(exists(codexPluginBundleDir), 'plugins/lode is missing. Run npm run copy-skills first.');
+assert(exists(codexPluginManifest), 'plugins/lode/.codex-plugin/plugin.json is missing. Run npm run copy-skills first.');
+assert(exists(sourceCodexPluginManifest), '.codex-plugin/plugin.json is missing');
 
 for (const skill of officialSkills) {
   validateSkillDirectory(sourceSkillsDir, skill);
   validateSkillDirectory(bundledSkillsDir, skill);
+  validateSkillDirectory(codexPluginSkillsDir, skill);
 }
 
 const bundledNames = fs.existsSync(bundledSkillsDir)
@@ -116,11 +125,49 @@ for (const name of bundledNames) {
   assert(officialSkills.includes(name), `Unexpected bundled skill directory: ${name}`);
 }
 
+const codexPluginNames = fs.existsSync(codexPluginSkillsDir)
+  ? fs.readdirSync(codexPluginSkillsDir).filter(name => fs.statSync(path.join(codexPluginSkillsDir, name)).isDirectory())
+  : [];
+for (const name of codexPluginNames) {
+  assert(officialSkills.includes(name), `Unexpected Codex plugin skill directory: ${name}`);
+}
+
 const forbiddenBundled = walk(bundledSkillsDir, (fullPath, entry) => (
   entry.isDirectory() && (entry.name === 'evals' || entry.name.endsWith('-workspace'))
 ));
 for (const dir of forbiddenBundled) {
   errors.push(`Forbidden bundled directory: ${path.relative(cliRoot, dir)}`);
+}
+
+const forbiddenCodexPlugin = walk(codexPluginSkillsDir, (fullPath, entry) => (
+  entry.isDirectory() && (entry.name === 'evals' || entry.name.endsWith('-workspace'))
+));
+for (const dir of forbiddenCodexPlugin) {
+  errors.push(`Forbidden Codex plugin directory: ${path.relative(repoRoot, dir)}`);
+}
+
+if (exists(sourceCodexPluginManifest) && exists(codexPluginManifest)) {
+  const sourceManifest = fs.readFileSync(sourceCodexPluginManifest, 'utf-8');
+  const bundleManifest = fs.readFileSync(codexPluginManifest, 'utf-8');
+  assert(bundleManifest === sourceManifest, 'Codex plugin manifest copy is stale: plugins/lode/.codex-plugin/plugin.json');
+}
+
+if (exists(sourceCodexPluginManifest)) {
+  const manifest = JSON.parse(fs.readFileSync(sourceCodexPluginManifest, 'utf-8'));
+  assert(!('$schema' in manifest), '.codex-plugin/plugin.json must not include $schema; Codex plugin validation rejects it');
+  assert(manifest.name === 'lode', '.codex-plugin/plugin.json name must be lode');
+  assert(manifest.skills === './skills/', '.codex-plugin/plugin.json skills must point to ./skills/');
+}
+
+if (exists(codexMarketplace)) {
+  const marketplace = JSON.parse(fs.readFileSync(codexMarketplace, 'utf-8'));
+  assert(marketplace.name === 'lode', '.agents/plugins/marketplace.json name must be lode');
+  assert(Array.isArray(marketplace.plugins) && marketplace.plugins.length === 1, '.agents/plugins/marketplace.json must expose exactly one plugin');
+  const plugin = marketplace.plugins?.[0];
+  assert(plugin?.name === 'lode', '.agents/plugins/marketplace.json plugin name must be lode');
+  assert(plugin?.source?.source === 'local', '.agents/plugins/marketplace.json plugin source must be local');
+  assert(plugin?.source?.path === './plugins/lode', '.agents/plugins/marketplace.json plugin source path must be ./plugins/lode');
+  assert(!('interface' in plugin), '.agents/plugins/marketplace.json plugin entry should not carry non-standard interface metadata');
 }
 
 const canonical = exists(canonicalConvention) ? fs.readFileSync(canonicalConvention, 'utf-8') : null;

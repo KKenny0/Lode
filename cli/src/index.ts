@@ -29,11 +29,12 @@ program
 
 program
   .command('install-codex-plugin')
-  .description('Install Lode as a Codex plugin while Codex lacks a native plugin install command')
+  .description('Install Lode as a Codex plugin using the legacy cache fallback')
   .option('--codex-home <path>', 'Codex home directory, defaults to $CODEX_HOME or ~/.codex')
   .option('--skip-config', 'Copy the plugin cache without editing Codex config.toml')
   .action((options: codex.PluginInstallOptions) => {
     const result = codex.installPlugin(options);
+    console.log('Legacy fallback: prefer `codex plugin marketplace add KKenny0/Lode` then `codex plugin add lode@lode`.');
     console.log(`Plugin key: ${result.pluginKey}`);
     console.log(`Plugin cache: ${result.pluginDir}`);
     if (result.configured) {

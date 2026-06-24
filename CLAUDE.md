@@ -50,6 +50,7 @@ references/
 .claude-plugin/plugin.json              # Claude Code plugin manifest
 .claude-plugin/marketplace.json         # Claude-style marketplace metadata
 .agents/plugins/marketplace.json        # Codex repo marketplace metadata
+plugins/lode/                           # Generated Codex installable plugin bundle
 scripts/sync-convention.sh              # Sync convention to skill directories
 scripts/sync-lode-raw.sh                # Sync lode_raw.py to skill directories
 benchmarks/
@@ -179,6 +180,7 @@ Lode uses four storage surfaces:
 - **Self-contained skills**: each skill has its own copy of shared files in its `references/` directory, so skills work correctly when installed individually. Skills cannot reference files outside their directory via `../`
 - **Convention sync**: the canonical version lives at `references/weekly-ppt-convention.md`; after editing it, run `scripts/sync-convention.sh` to copy to all skill directories that need it
 - **Script sync**: `scripts/lode_raw.py` is the canonical copy; after editing it, run `scripts/sync-lode-raw.sh` to copy to all skill directories that bundle it (capture, cold-start-interview, cli/capture)
+- **Codex plugin bundle sync**: `.agents/plugins/marketplace.json` points at `plugins/lode`; after editing `.codex-plugin/`, `skills/`, or `assets/`, run `npm --prefix cli run copy-skills` and `npm --prefix cli run check-skills` so the installable bundle stays in sync
 - **Derived-index builder version**: bump `INDEX_BUILDER_VERSION` whenever decision node, edge, or retrieval derivation semantics change so apparently current v1 indexes rebuild safely without migrating weekly raw data
 - **Unified config**: all skills read vault path from `.lode/config.yaml`; project-level config overrides global
 - **Config layering**: global config holds user preferences (`knowledge_vault`, `report_language`, `weekly_mode`, `team_context`); project-level config holds project identity (`project_slug`, `project_name`) and can override any global preference via nested merge. The cold-start interview writes to the appropriate layer based on context.

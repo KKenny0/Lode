@@ -1,25 +1,20 @@
 {
-  "name": "lode-marketplace",
+  "name": "lode",
   "interface": {
-    "displayName": "Lode Marketplace",
-    "description": "Local marketplace entry for the Lode plugin."
+    "displayName": "Lode"
   },
   "plugins": [
     {
       "name": "lode",
       "source": {
         "source": "local",
-        "path": "./"
+        "path": "./plugins/lode"
       },
       "policy": {
         "installation": "AVAILABLE",
         "authentication": "ON_INSTALL"
       },
-      "category": "Productivity",
-      "interface": {
-        "displayName": "Lode",
-        "description": "Agentic coding persistent memory and decision replay."
-      }
+      "category": "Productivity"
     }
   ]
 }

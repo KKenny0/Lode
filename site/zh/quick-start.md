@@ -4,6 +4,19 @@
 
 ```bash
 codex plugin marketplace add KKenny0/Lode
+codex plugin add lode@lode
+```
+
+更新：
+
+```bash
+codex plugin marketplace upgrade lode
+codex plugin add lode@lode
+```
+
+只有 `codex plugin add` 不可用时，才使用 legacy fallback：
+
+```bash
 npx @lode/cli install-codex-plugin
 ```
 

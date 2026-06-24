@@ -84,6 +84,19 @@ See the [dogfood proof on GitHub](https://github.com/KKenny0/Lode/blob/main/exam
 
 ```bash
 codex plugin marketplace add KKenny0/Lode
+codex plugin add lode@lode
+```
+
+Update:
+
+```bash
+codex plugin marketplace upgrade lode
+codex plugin add lode@lode
+```
+
+Only use the legacy fallback when `codex plugin add` is unavailable:
+
+```bash
 npx @lode/cli install-codex-plugin
 ```
 

@@ -145,23 +145,42 @@ npx @lode/cli doctor
 
 ### Codex
 
-Codex 现在可以注册 plugin marketplace，但还没有官方 CLI 命令把 marketplace
-里的插件安装并启用。Lode 提供了一个桥接命令：把 bundled plugin 复制到 Codex
-plugin cache，并写入 `~/.codex/config.toml` 启用 `lode@lode-marketplace`。
+Codex 主路径使用原生 plugin marketplace 安装：
 
 ```bash
 codex plugin marketplace add KKenny0/Lode
-npx @lode/cli install-codex-plugin
+codex plugin add lode@lode
+```
+
+更新到最新版时：
+
+```bash
+codex plugin marketplace upgrade lode
+codex plugin add lode@lode
+```
+
+如果你之前使用过 legacy bridge install，先安装当前 plugin，再移除旧的
+plugin key：
+
+```bash
+codex plugin remove lode@lode-marketplace
 ```
 
 如果 Codex 已经打开，重启 Codex，然后开一个新 thread。此时应该能看到
 `/lode:capture`、`/lode:recall`、`/lode:query` 等 Lode plugin skills。
 
-本地开发时，可以从当前 checkout 构建并安装：
+本地开发时，从当前 checkout 安装前先重建 plugin bundle：
 
 ```bash
-npm --prefix cli run build
-node cli/dist/index.js install-codex-plugin
+npm --prefix cli run copy-skills
+codex plugin marketplace add ./path/to/Lode
+codex plugin add lode@lode
+```
+
+只有当前 Codex 版本不可用 `codex plugin add` 时，才使用 legacy fallback：
+
+```bash
+npx @lode/cli install-codex-plugin
 ```
 
 然后先证明 replay loop：运行 demo，运行一次 `/lode:cold-start-interview`，

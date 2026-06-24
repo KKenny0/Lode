@@ -1,0 +1,4 @@
+interface:
+  display_name: "Lode Query"
+  short_description: "Query cited decision evidence"
+  default_prompt: "Use $query to answer targeted questions about why a project chose a path, what was rejected, and what evidence supports the decision."

@@ -110,7 +110,13 @@ try {
   const missingInstallJson = parseJson(missingInstall.stdout);
   const installResult = assertResult(missingInstallJson.results, 'skill installation', false);
   assert(installResult.message.includes('Missing skills'), 'Expected missing-install message');
-  assert(installResult.fix.includes('install-codex-plugin'), 'Expected install fix to mention install-codex-plugin');
+  assert(installResult.fix.includes('codex plugin marketplace add KKenny0/Lode'), 'Expected install fix to mention native marketplace add');
+  assert(installResult.fix.includes('codex plugin add lode@lode'), 'Expected install fix to mention native plugin add');
+  assert(installResult.fix.includes('install-codex-plugin'), 'Expected install fix to keep legacy fallback');
+  assert(
+    installResult.fix.indexOf('codex plugin add lode@lode') < installResult.fix.indexOf('install-codex-plugin'),
+    'Expected native Codex plugin command before legacy fallback',
+  );
 
   const codexHome = mkTempDir('doctor-codex-home');
   const codexInstallHome = mkTempDir('doctor-codex-install-home');
@@ -118,12 +124,16 @@ try {
   tempDirs.push(codexHome, codexInstallHome, codexInstallVault);
   const codexInstall = runCli(['install-codex-plugin', '--codex-home', codexHome], homeEnv(codexInstallHome));
   assert(codexInstall.status === 0, `Expected Codex plugin install to pass, got ${codexInstall.status}\n${codexInstall.stderr}`);
-  assert(fs.existsSync(path.join(codexHome, 'plugins', 'cache', 'lode-marketplace', 'lode', '0.1.0', 'skills', 'capture', 'SKILL.md')), 'Expected Codex plugin skill cache to be created');
-  assert(fs.existsSync(path.join(codexHome, 'plugins', 'cache', 'lode-marketplace', 'lode', '0.1.0', 'assets', 'mark.svg')), 'Expected Codex plugin assets to be created');
+  assert(codexInstall.stdout.includes('Legacy fallback'), 'Expected install output to mark legacy fallback');
+  assert(codexInstall.stdout.includes('codex plugin add lode@lode'), 'Expected install output to prefer native plugin install');
+  assert(fs.existsSync(path.join(codexHome, 'plugins', 'cache', 'lode', 'lode', '0.1.0', 'skills', 'capture', 'SKILL.md')), 'Expected Codex plugin skill cache to be created');
+  assert(fs.existsSync(path.join(codexHome, 'plugins', 'cache', 'lode', 'lode', '0.1.0', 'assets', 'mark.svg')), 'Expected Codex plugin assets to be created');
+  const codexPluginManifest = JSON.parse(fs.readFileSync(path.join(codexHome, 'plugins', 'cache', 'lode', 'lode', '0.1.0', '.codex-plugin', 'plugin.json'), 'utf-8'));
+  assert(!('$schema' in codexPluginManifest), 'Expected legacy fallback manifest to omit $schema');
   const codexConfig = fs.readFileSync(path.join(codexHome, 'config.toml'), 'utf-8');
   assert(codexConfig.includes('[features]'), 'Expected Codex config features table');
   assert(codexConfig.includes('plugins = true'), 'Expected Codex plugins feature to be enabled');
-  assert(codexConfig.includes('[plugins."lode@lode-marketplace"]'), 'Expected Lode plugin table');
+  assert(codexConfig.includes('[plugins."lode@lode"]'), 'Expected Lode plugin table');
   const codexDoctor = runDoctor(['--cwd', codexInstallHome, '--vault', codexInstallVault, '--no-write', '--json'], {
     ...homeEnv(codexInstallHome),
     CODEX_HOME: codexHome,

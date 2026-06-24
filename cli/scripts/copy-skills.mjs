@@ -10,6 +10,11 @@ const sourceSkillsDir = path.join(repoRoot, 'skills');
 const bundledSkillsDir = path.join(cliRoot, 'skills');
 const sourceAssetsDir = path.join(repoRoot, 'assets');
 const bundledAssetsDir = path.join(cliRoot, 'assets');
+const sourceCodexPluginDir = path.join(repoRoot, '.codex-plugin');
+const codexPluginBundleDir = path.join(repoRoot, 'plugins', 'lode');
+const bundledCodexPluginDir = path.join(codexPluginBundleDir, '.codex-plugin');
+const bundledCodexSkillsDir = path.join(codexPluginBundleDir, 'skills');
+const bundledCodexAssetsDir = path.join(codexPluginBundleDir, 'assets');
 
 const officialSkills = [
   'capture',
@@ -54,7 +59,23 @@ if (fs.existsSync(sourceAssetsDir)) {
   copyDir(sourceAssetsDir, bundledAssetsDir);
 }
 
+fs.rmSync(codexPluginBundleDir, { recursive: true, force: true });
+fs.mkdirSync(bundledCodexPluginDir, { recursive: true });
+fs.mkdirSync(bundledCodexSkillsDir, { recursive: true });
+copyDir(sourceCodexPluginDir, bundledCodexPluginDir);
+
+for (const skill of officialSkills) {
+  const skillPath = path.join(sourceSkillsDir, skill);
+  if (!fs.existsSync(path.join(skillPath, 'SKILL.md'))) continue;
+  copyDir(skillPath, path.join(bundledCodexSkillsDir, skill));
+}
+
+if (fs.existsSync(sourceAssetsDir)) {
+  copyDir(sourceAssetsDir, bundledCodexAssetsDir);
+}
+
 console.log(`Copied skills to ${bundledSkillsDir}`);
 if (fs.existsSync(bundledAssetsDir)) {
   console.log(`Copied assets to ${bundledAssetsDir}`);
 }
+console.log(`Synced Codex plugin bundle to ${codexPluginBundleDir}`);

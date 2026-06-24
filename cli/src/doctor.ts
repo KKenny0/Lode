@@ -84,7 +84,7 @@ function checkSkillInstallation(skipInstallCheck: boolean | undefined): CheckRes
   return fail(
     'skill installation',
     `Missing skills. Codex plugin missing: ${missingCodexPlugin.join(', ') || 'none'}; Codex standalone missing: ${missingCodex.join(', ') || 'none'}; Claude Code missing: ${missingClaude.join(', ') || 'none'}`,
-    'Run `lode install-codex-plugin`, or run `lode setup` for standalone skills.',
+    'Run `codex plugin marketplace add KKenny0/Lode` then `codex plugin add lode@lode`. Legacy fallback: run `lode install-codex-plugin`. Standalone skills: run `lode setup`.',
   );
 }
 

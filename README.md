@@ -159,26 +159,45 @@ npx @lode/cli doctor
 
 ### Codex
 
-Codex can register a plugin marketplace, but it does not currently expose a
-native command that installs and enables a marketplace plugin from the CLI.
-Lode ships a small bridge command for that gap: it copies the bundled plugin to
-Codex's plugin cache and enables `lode@lode-marketplace` in
-`~/.codex/config.toml`.
+Install Lode through the native Codex plugin marketplace flow:
 
 ```bash
 codex plugin marketplace add KKenny0/Lode
-npx @lode/cli install-codex-plugin
+codex plugin add lode@lode
+```
+
+To update to the latest version:
+
+```bash
+codex plugin marketplace upgrade lode
+codex plugin add lode@lode
+```
+
+If you previously used the legacy bridge install, install the current plugin
+first, then remove the old plugin key:
+
+```bash
+codex plugin remove lode@lode-marketplace
 ```
 
 Restart Codex if it is open, then start a new thread. You should see the Lode
 plugin skills as available commands such as `/lode:capture`, `/lode:recall`,
 and `/lode:query`.
 
-For local development, build the CLI and install from this checkout:
+For local development from this checkout, rebuild the plugin bundle before
+installing it:
 
 ```bash
-npm --prefix cli run build
-node cli/dist/index.js install-codex-plugin
+npm --prefix cli run copy-skills
+codex plugin marketplace add ./path/to/Lode
+codex plugin add lode@lode
+```
+
+Only use the legacy fallback when your Codex build does not provide
+`codex plugin add`:
+
+```bash
+npx @lode/cli install-codex-plugin
 ```
 
 Then prove the replay loop: run the demo, run `/lode:cold-start-interview`

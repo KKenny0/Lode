@@ -4,6 +4,19 @@
 
 ```bash
 codex plugin marketplace add KKenny0/Lode
+codex plugin add lode@lode
+```
+
+To update:
+
+```bash
+codex plugin marketplace upgrade lode
+codex plugin add lode@lode
+```
+
+Use the legacy fallback only when `codex plugin add` is unavailable:
+
+```bash
 npx @lode/cli install-codex-plugin
 ```
 

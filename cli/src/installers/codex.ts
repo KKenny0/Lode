@@ -5,7 +5,7 @@ import ora from 'ora';
 import { getAssetsDir, getSkillsDir, listSkills, copyDir, removeDir } from '../utils.js';
 
 const CODEX_SKILLS_DIR = path.join(os.homedir(), '.agents', 'skills');
-export const PLUGIN_MARKETPLACE = 'lode-marketplace';
+export const PLUGIN_MARKETPLACE = 'lode';
 export const PLUGIN_NAME = 'lode';
 export const PLUGIN_VERSION = '0.1.0';
 export const PLUGIN_KEY = `${PLUGIN_NAME}@${PLUGIN_MARKETPLACE}`;
@@ -76,7 +76,7 @@ export function isPluginInstalled(codexHomeOverride?: string): boolean {
 export function installPlugin(options: PluginInstallOptions = {}): PluginInstallResult {
   const codexHome = getCodexHome(options.codexHome);
   const pluginDir = getPluginInstallPath(codexHome);
-  const spinner = ora('Installing Lode Codex plugin...').start();
+  const spinner = ora('Installing Lode Codex plugin legacy fallback...').start();
   const skillsDir = getSkillsDir();
   const skills = listSkills();
 
@@ -102,7 +102,7 @@ export function installPlugin(options: PluginInstallOptions = {}): PluginInstall
     enablePluginInConfig(configPath, PLUGIN_KEY);
   }
 
-  spinner.succeed(`Installed Lode Codex plugin to ${pluginDir}`);
+  spinner.succeed(`Installed Lode Codex plugin legacy fallback to ${pluginDir}`);
   return { pluginDir, configPath, pluginKey: PLUGIN_KEY, configured: !options.skipConfig };
 }
 
@@ -114,7 +114,6 @@ function expandHome(value: string): string {
 
 function codexPluginManifest(): object {
   return {
-    '$schema': 'https://developers.openai.com/codex/schemas/plugin.schema.json',
     name: PLUGIN_NAME,
     version: PLUGIN_VERSION,
     description: 'Agentic coding persistent memory: capture the why, then compound it into reports, reviews, and decision roadmaps.',

@@ -54,6 +54,7 @@ references/
 .claude-plugin/plugin.json              # Claude Code plugin manifest
 .claude-plugin/marketplace.json         # Claude-style marketplace metadata
 .agents/plugins/marketplace.json        # Codex repo marketplace metadata
+plugins/lode/                           # Generated Codex installable plugin bundle
 scripts/sync-convention.sh              # Sync convention to skill directories
 scripts/sync-decision-replay.sh         # Sync decision replay helper to skill directories
 benchmarks/
@@ -181,6 +182,7 @@ Lode uses four storage surfaces:
 - **Self-contained skills**: each skill has its own copy of shared files in its `references/` directory, so skills work correctly when installed individually. Skills cannot reference files outside their directory via `../`
 - **Convention sync**: the canonical version lives at `references/weekly-ppt-convention.md`; after editing it, run `scripts/sync-convention.sh` to copy to all skill directories that need it
 - **Decision replay helper sync**: the canonical implementation lives at `references/decision_replay.py`; after editing it, run `scripts/sync-decision-replay.sh` so `query`, `roadmap`, and `recall` keep identical local copies
+- **Codex plugin bundle sync**: `.agents/plugins/marketplace.json` points at `plugins/lode`; after editing `.codex-plugin/`, `skills/`, or `assets/`, run `npm --prefix cli run copy-skills` and `npm --prefix cli run check-skills` so the installable bundle stays in sync
 - **Derived-index builder version**: bump `INDEX_BUILDER_VERSION` whenever decision node, edge, or retrieval derivation semantics change so apparently current v1 indexes rebuild safely without migrating weekly raw data
 - **Unified config**: all skills read vault path from `.lode/config.yaml`; project-level config overrides global
 - **Explicit primary outputs, graceful side effects**: if a skill needs the vault for its main output, it asks for `knowledge_vault`; if a raw change entry is only a side effect, it can skip that write gracefully
