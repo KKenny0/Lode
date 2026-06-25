@@ -30,7 +30,7 @@
     "websiteURL": "https://github.com/KKenny0/Lode",
     "composerIcon": "./assets/mark.svg",
     "logo": "./assets/logo.png",
-    "brandColor": "#25636A",
+    "brandColor": "#B87508",
     "defaultPrompt": [
       "Use Lode to capture this session with /lode:capture.",
       "Use Lode to recall recent project decisions with /lode:recall.",

@@ -2,8 +2,6 @@
   <img src="assets/mark.svg" alt="Lode" width="132" />
 </p>
 
-<h1 align="center">Lode</h1>
-
 <p align="center"><strong>Decision replay for agentic coding: capture the why, then compound it into reports, reviews, and roadmaps.</strong></p>
 
 <p align="center">

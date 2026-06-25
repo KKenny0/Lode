@@ -14,7 +14,7 @@ export default defineConfig({
 
   head: [
     ['link', { rel: 'icon', type: 'image/svg+xml', href: '/Lode/mark.svg' }],
-    ['meta', { name: 'theme-color', content: '#25636A' }]
+    ['meta', { name: 'theme-color', content: '#0B0F14' }]
   ],
 
   vite: {

@@ -2,8 +2,6 @@
   <img src="assets/mark.svg" alt="Lode" width="132" />
 </p>
 
-<h1 align="center">Lode</h1>
-
 <p align="center"><strong>Agentic coding 的 decision replay：记录为什么，复利成周报、月报和路线图。</strong></p>
 
 <p align="center">
