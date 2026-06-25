@@ -13,9 +13,14 @@ description: >
 # Adaptive-Depth Session Recap
 
 Session-end and checkpoint signal extraction. When the developer wraps up work
-or explicitly asks to checkpoint the current progress, read the conversation
-context and produce raw entries rich enough for weekly outlines, monthly
+or explicitly asks to checkpoint the current progress, dispatch to the capture
+subagent to produce raw entries rich enough for weekly outlines, monthly
 reviews, decision roadmaps, and session-start recall.
+
+The capture subagent (`agents/capture.md`) handles archetype classification,
+signal extraction, and raw entry generation in its own context window. The
+main session only compiles context, dispatches, writes the result to the vault,
+and shows a receipt. This keeps the main session context clean.
 
 The goal is not a chronological diary. Capture the durable engineering signal:
 why the work happened, what was decided, what was tried, what changed, and what
@@ -67,8 +72,8 @@ session-end and checkpoint captures.
 ## Auto-Capture (Optional)
 
 When configured, `/lode:capture` can run automatically at session end via a
-Claude Code `Stop` hook. This eliminates the dependency on remembering to say
-"收工".
+Claude Code `Stop` hook, and before context compaction via a `PreCompact` hook.
+This eliminates the dependency on remembering to say "收工".
 
 **Enable**: Set `auto_capture.enabled: true` in `~/.lode/config.yaml`.
 `/lode:cold-start-interview` sets this by default for new configurations.
@@ -99,160 +104,42 @@ Remove the hook entry from `~/.claude/settings.json` to fully deactivate.
 The hook runs best-effort — if the vault is not configured or the helper is
 unavailable, the skill falls back to Markdown output in the conversation.
 
-## Step 1: Classify The Session Archetype
+## Step 1: Dispatch to Capture Subagent
 
-Read the full conversation context and choose one primary archetype. Apply these
-rules in priority order:
+The capture subagent (`agents/capture.md`) handles archetype classification,
+report-worthy signal extraction, and raw entry generation. It runs in its own
+context window so the main session stays clean.
 
-1. If the session chose between approaches or design trade-offs → `decision`
-2. If the session fixed a bug, regression, or reliability issue → `repair`
-3. If the session explored a problem without shipping a fix or feature →
-   `investigation`
-4. If the session shipped a working feature or capability → `build`
-5. Otherwise → `maintenance`
+### 1a: Compile Session Context
 
-If multiple archetypes apply, choose the one with the strongest signal. A fix
-after exploration is usually `repair`; a feature that mainly records a design
-choice is usually `decision`. If uncertain, use `build` and fill the optional
-fields supported by evidence.
+Gather from the conversation:
 
-## Step 2: Extract Report-Worthy Signals
+- What the session accomplished (shipped features, fixes, decisions)
+- What approaches were tried and rejected (abandoned alternatives)
+- What was decided and why (motivation, trade-offs)
+- What files or artifacts changed (especially durable artifacts)
+- What risks, blockers, or open questions remain
+- Whether this is session-end or checkpoint mode
 
-Start with the decision landscape, then use files, commits, and commands as
-evidence. Extract in this order:
+### 1b: Dispatch
 
-- Motivation: the problem, goal, or constraint that made the work necessary
-- Exploration paths: approaches tried, outcomes observed, and trade-offs
-- Abandoned alternatives: options rejected and why
-- What changed: shipped capability, fix, refactor, decision, or risk
-- Impact: what the work enables, prevents, simplifies, or changes downstream
-- Open questions: unresolved decisions, risks, or next-session entry points
-- Artifact context: durable artifacts created or materially changed
+Read `agents/capture.md` for the subagent's full instructions (focus areas,
+output format, scope rules, anti-patterns).
 
-Prioritize signals that can appear in a weekly report:
+Dispatch to the capture subagent via the Agent tool with:
+- The subagent prompt from `agents/capture.md`
+- The compiled session context
+- Whether this is session-end or checkpoint mode
 
-- Shipped or meaningfully advanced capabilities
-- Technical decisions, trade-offs, and rejected alternatives
-- Risks, blockers, regressions, and follow-up work
-- Prompt, schema, orchestration, migration, or contract changes
-- Reliability, performance, validation, or developer-workflow improvements
+The subagent returns a JSON array of raw entries.
 
-Skip process-only noise unless it explains a larger report-worthy signal:
-formatting, import cleanup, file moves, generated files, local setup, or
-intermediate experiments that were fully replaced.
+### 1c: Fallback (Subagent Unavailable)
 
-Group related work into logical units. A session that touched many files for one
-feature should usually produce one entry. Maximum 5 entries; 1-3 is the normal
-range.
+If the Agent tool or subagent is unavailable, follow the instructions in
+`agents/capture.md` inline. The output is the same JSON array — only the
+execution location changes.
 
-## Step 3: Generate Raw Entries
-
-Follow `references/weekly-ppt-convention.md`. The change entry JSON shape is:
-
-```json
-{
-  "timestamp": "ISO 8601 (set by helper; LLM-provided value is overwritten with server clock)",
-  "archetype": "decision | build | investigation | repair | maintenance",
-  "type": "feature | fix | refactor | decision | risk",
-  "summary": "1 sentence, engineering-level abstraction",
-  "context": "1-2 sentences explaining why and impact",
-  "source": "session-recap",
-  "status": "done | ongoing | risk | decision",
-  "related_docs": ["/absolute/path/to/doc"],
-  "impact": "report-ready user, system, reliability, or workflow impact",
-  "evidence_refs": ["commit SHA, issue ID, eval ID, or doc path"],
-  "decision_threads": ["stable-decision-thread"],
-  "lifecycle_transition": {
-    "subject": "decision:stable-decision-thread",
-    "from": "proposed",
-    "to": "chosen",
-    "reason": "Why this session changed the lifecycle state"
-  },
-  "source_refs": [
-    {
-      "type": "commit | issue | eval | doc | conversation | other",
-      "ref": "stable source id",
-      "path": "/absolute/path/when-local",
-      "url": "https://example.com/when-remote",
-      "note": "short evidence note"
-    }
-  ],
-  "motivation": "why this work was needed now",
-  "exploration_paths": ["approach tried -> observed outcome"],
-  "abandoned_alternatives": ["approach rejected -> reason"],
-  "open_questions": ["unresolved question or next-session entry point"],
-  "root_cause": "repair-only: 1-2 sentence cause of the bug or reliability issue",
-  "artifact_context": [
-    {
-      "artifact_path": "/absolute/path/to/artifact",
-      "scope": "What this artifact governs",
-      "delta": "What changed in this session",
-      "open_questions": ["unresolved artifact question"],
-      "source_of_truth": ["path/to/implementation", "path/to/tests"]
-    }
-  ],
-  "sync_suggestions": ["Review DESIGN.md because the session changed a contract."]
-}
-```
-
-### Archetype Field Expectations
-
-| Archetype | Required when known | Purpose |
-|---|---|---|
-| `decision` | `motivation`, `exploration_paths` | Preserve why one approach won |
-| `build` | `motivation`, `impact` | Explain what shipped and why it matters |
-| `investigation` | `exploration_paths`, `open_questions` | Preserve findings without pretending work shipped |
-| `repair` | `motivation`, `root_cause` | Keep the concrete failure path reusable |
-| `maintenance` | core fields only | Avoid over-documenting low-risk cleanup |
-
-These are adaptive-depth expectations. In vault mode the helper logs warnings
-for missing archetype fields; it does not reject the entry.
-
-### Decision Tracking Fields
-
-Add `decision_threads` when the entry belongs to a durable decision topic. Use
-stable slug-like terms; decision replay treats these as stronger than artifact
-hints or keyword-derived topics when assigning `thread_id`.
-
-Add `lifecycle_transition` only when the session explicitly changes the state of
-an open question, risk, decision, or artifact. Use `subject`, `from`, `to`, and
-`reason` when known; leave the field absent instead of guessing.
-
-Add `source_refs` when evidence needs typed structure. Each object must include
-`type` and `ref`; optional fields are `path`, `url`, `note`, and `timestamp`.
-
-### Artifact Context
-
-Add `artifact_context` only when the session created or materially changed a
-durable artifact, such as `DESIGN.md`, `PLAN.md`, `AGENTS.md`, README,
-architecture docs, prompt contracts, schema contracts, migration notes, or
-checklists.
-
-Each artifact context must include:
-
-- `artifact_path`: absolute path to the artifact
-- `scope`: what the artifact governs
-- `delta`: what changed in this session
-- `source_of_truth`: implementation, tests, prompts, schemas, or docs that make
-  the artifact checkable
-- `open_questions`: unresolved artifact-level questions, when present
-
-When `artifact_context` is present and a vault is configured, also upsert an
-artifact index entry with `scripts/lode_raw.py upsert-artifact`. Use
-`source: "capture"`. If `artifact_index.enabled` is `false`, config
-cannot be resolved, or the helper fails, skip the artifact-index side effect and
-continue.
-
-### Sync Suggestions
-
-Add `sync_suggestions` when the entry mentions decisions, contract changes,
-prompt/schema changes, orchestration rules, or intent artifacts that may need
-human review.
-
-Keep suggestions conservative. A suggestion means "this file may need review",
-not "this file is stale" and not "apply this diff".
-
-## Step 4: Output Or Write
+## Step 2: Write Entry JSON and Append
 
 ### Output Policy
 
@@ -301,7 +188,7 @@ Resolve `{vault}` using the standard priority order:
 Use the bundled helper when available. Each helper call requires the JSON to be
 on disk as a file — the scripts read `--entry` / `--artifact` paths, not stdin.
 
-### Step 4a: Resolve config and write entry JSON to a temp file
+### Step 2a: Resolve config and write entry JSON to a temp file
 
 ```bash
 python <this-skill>/scripts/lode_raw.py resolve-config --cwd "$PWD"
@@ -312,7 +199,7 @@ entry JSON array to `{project}/.lode/tmp-entry.json`. The Write tool guarantees
 the file content is flushed to disk before the helper reads it. Do NOT use
 heredoc or `cat > file` — those can leave stale content from a previous session.
 
-### Step 4b: Append the entry
+### Step 2b: Append the entry
 
 ```bash
 python <this-skill>/scripts/lode_raw.py append-entry \
@@ -324,18 +211,18 @@ The helper resolves config, calculates the ISO week, resolves the project slug,
 validates required fields, logs adaptive-depth warnings, and appends the entry
 object or array.
 
-### Step 4c: Clean up
+### Step 2c: Clean up
 
 ```bash
 rm .lode/tmp-entry.json
 ```
 
-Delete the temp file only after Step 4b succeeds. If the helper fails, keep the
+Delete the temp file only after Step 2b succeeds. If the helper fails, keep the
 temp file for debugging and fall back to Markdown output.
 
 ### Artifact index entries
 
-For each durable artifact index entry, follow the same Write → call → cleanup
+For each durable artifact index entry, follow the same Write -> call -> cleanup
 pattern:
 
 1. Use the **Write tool** to write the artifact JSON to
@@ -496,25 +383,3 @@ need a receipt because the full Markdown output already serves this purpose.
 已记录 2 条进展 -> tools (2026-W23)
 更新了依赖版本并清理了无用导入
 ```
-
-## Quality Gate
-
-Before finalizing each entry, check:
-
-- Does it explain why, not just what?
-- Is `archetype` accurate from the conversation evidence?
-- Are archetype-specific fields filled when available?
-- Would this help a weekly report or future decision roadmap?
-- Is the summary a report-level outcome, not a file-level description?
-- Are durable artifacts represented through `artifact_context`, not vague prose?
-- For checkpoint mode, is this a durable stage signal rather than a progress log?
-
-## Anti-Patterns
-
-- Do not fabricate fields to satisfy the schema.
-- Do not ask confirmation questions just to enrich optional fields.
-- Do not preserve process noise that would never appear in a weekly review.
-- Do not use checkpoint mode to record command-by-command progress.
-- Do not split one coherent feature across many entries.
-- Do not write new entries with `source: "arch-doc"`; that source is legacy-only.
-- Do not generate formal Stage/Pipeline architecture documents from this skill.

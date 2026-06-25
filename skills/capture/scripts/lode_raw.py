@@ -554,6 +554,100 @@ def register_project(
     }
 
 
+def write_pending(
+    cwd: Path,
+    vault_override: Path | None,
+    session_id: str | None,
+    transcript_path: str | None,
+    trigger: str,
+    platform: str,
+) -> dict[str, Any]:
+    cfg, _ = resolve_config(cwd)
+    vault = vault_override or Path(str(cfg["knowledge_vault"]))
+    slug = project_slug(cwd, vault)
+
+    if not session_id:
+        session_id = dt.datetime.now().strftime("%Y%m%d%H%M%S%f")
+
+    pending_dir = vault / "raw" / "pending"
+    pending_dir.mkdir(parents=True, exist_ok=True)
+
+    pending_file = pending_dir / f"{session_id}.json"
+    record: dict[str, Any] = {
+        "session_id": session_id,
+        "transcript_path": transcript_path,
+        "cwd": str(cwd.resolve()),
+        "project_slug": slug,
+        "trigger": trigger,
+        "platform": platform,
+        "timestamp": dt.datetime.now().astimezone().isoformat(),
+        "status": "pending",
+    }
+
+    pending_file.write_text(
+        json.dumps(record, ensure_ascii=False, indent=2) + "\n",
+        encoding="utf-8",
+    )
+    return {
+        "session_id": session_id,
+        "path": str(pending_file),
+        "project_slug": slug,
+        "trigger": trigger,
+    }
+
+
+def list_pending(
+    cwd: Path,
+    vault_override: Path | None,
+    slug_override: str | None,
+) -> dict[str, Any]:
+    cfg, _ = resolve_config(cwd)
+    vault = vault_override or Path(str(cfg["knowledge_vault"]))
+    slug = slug_override or project_slug(cwd, vault)
+
+    pending_dir = vault / "raw" / "pending"
+    if not pending_dir.exists():
+        return {"project_slug": slug, "pending": []}
+
+    matching: list[dict[str, Any]] = []
+    for pf in sorted(pending_dir.glob("*.json")):
+        try:
+            record = json.loads(pf.read_text(encoding="utf-8"))
+        except (json.JSONDecodeError, OSError):
+            continue
+        if not isinstance(record, dict):
+            continue
+        if record.get("project_slug") != slug:
+            continue
+        if record.get("status") != "pending":
+            continue
+        record["pending_file"] = str(pf)
+        matching.append(record)
+
+    return {"project_slug": slug, "pending": matching}
+
+
+def consume_pending(pending_file: Path) -> dict[str, Any]:
+    if not pending_file.exists():
+        raise ValueError(f"pending file not found: {pending_file}")
+
+    record = json.loads(pending_file.read_text(encoding="utf-8"))
+    if not isinstance(record, dict):
+        raise ValueError(f"pending file is not a JSON object: {pending_file}")
+
+    record["status"] = "consumed"
+    record["consumed_at"] = dt.datetime.now().astimezone().isoformat()
+    pending_file.write_text(
+        json.dumps(record, ensure_ascii=False, indent=2) + "\n",
+        encoding="utf-8",
+    )
+    return {
+        "session_id": record.get("session_id"),
+        "path": str(pending_file),
+        "status": "consumed",
+    }
+
+
 def print_json(data: Any) -> None:
     print(json.dumps(data, ensure_ascii=False, indent=2))
 
@@ -613,6 +707,37 @@ def command_register_project(args: argparse.Namespace) -> int:
     return 0
 
 
+def command_write_pending(args: argparse.Namespace) -> int:
+    vault = Path(args.vault).expanduser().resolve() if args.vault else None
+    result = write_pending(
+        cwd=Path(args.cwd).expanduser().resolve(),
+        vault_override=vault,
+        session_id=args.session_id,
+        transcript_path=args.transcript,
+        trigger=args.trigger,
+        platform=args.platform,
+    )
+    print_json(result)
+    return 0
+
+
+def command_list_pending(args: argparse.Namespace) -> int:
+    vault = Path(args.vault).expanduser().resolve() if args.vault else None
+    result = list_pending(
+        cwd=Path(args.cwd).expanduser().resolve(),
+        vault_override=vault,
+        slug_override=args.slug,
+    )
+    print_json(result)
+    return 0
+
+
+def command_consume_pending(args: argparse.Namespace) -> int:
+    result = consume_pending(Path(args.pending_file).expanduser().resolve())
+    print_json(result)
+    return 0
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="Lode raw storage helper")
     subparsers = parser.add_subparsers(dest="command", required=True)
@@ -652,6 +777,25 @@ def build_parser() -> argparse.ArgumentParser:
     register_parser.add_argument("--slug", help="Project slug override")
     register_parser.add_argument("--priority", choices=["core", "supporting", "exploratory"])
     register_parser.set_defaults(func=command_register_project)
+
+    write_pending_parser = subparsers.add_parser("write-pending", help="Write a pending capture marker before compaction")
+    write_pending_parser.add_argument("--cwd", default=os.getcwd(), help="Project working directory")
+    write_pending_parser.add_argument("--vault", help="Knowledge vault override")
+    write_pending_parser.add_argument("--session-id", help="Session identifier (auto-generated if omitted)")
+    write_pending_parser.add_argument("--transcript", help="Path to session transcript file")
+    write_pending_parser.add_argument("--trigger", choices=["manual", "auto"], default="manual")
+    write_pending_parser.add_argument("--platform", choices=["claude-code", "codex"], default="claude-code")
+    write_pending_parser.set_defaults(func=command_write_pending)
+
+    list_pending_parser = subparsers.add_parser("list-pending", help="List pending captures for a project")
+    list_pending_parser.add_argument("--cwd", default=os.getcwd(), help="Project working directory")
+    list_pending_parser.add_argument("--vault", help="Knowledge vault override")
+    list_pending_parser.add_argument("--slug", help="Project slug override")
+    list_pending_parser.set_defaults(func=command_list_pending)
+
+    consume_pending_parser = subparsers.add_parser("consume-pending", help="Mark a pending capture as consumed")
+    consume_pending_parser.add_argument("--pending-file", required=True, help="Path to pending JSON file")
+    consume_pending_parser.set_defaults(func=command_consume_pending)
 
     return parser
 

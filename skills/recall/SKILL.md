@@ -38,6 +38,7 @@ Before running the recall helper, do a quick health check:
 3. If no raw entries exist at all: suggest `/lode:capture` and stop
 4. If raw entries exist but are older than 14 days: note staleness in output
 5. If `recall_context.py` is missing: warn and suggest re-install
+6. Check for pending captures (see Pending Capture Check below)
 
 If the pre-check passes, continue to the main workflow:
 
@@ -54,6 +55,57 @@ or config provides a vault path, pass `--vault <path>`.
 3. Read `references/recall-output-template.md`.
 4. Produce Markdown in the conversation.
 
+## Pending Capture Check
+
+When a session experiences context compaction (manual or auto), the PreCompact
+hook writes a pending marker to `{vault}/raw/pending/{session_id}.json`. This
+check surfaces those markers so the context that was about to be lost can still
+be captured.
+
+### Check
+
+```bash
+python <this-skill>/scripts/lode_raw.py list-pending --cwd "$PWD"
+```
+
+If the helper is unavailable or returns an error, skip this check silently. It
+is a best-effort enhancement, not a blocker.
+
+### When Pending Captures Exist
+
+Include a "Pending Captures" section at the end of the recall output:
+
+```text
+⚠️ 上次 session 经历了上下文压缩，有 {N} 条待处理的 capture：
+  - {timestamp} ({trigger}) — transcript: {transcript_path or "unavailable"}
+```
+
+Then ask the user whether they want to process the pending capture(s) now. If
+the user agrees:
+
+1. For each pending file, dispatch the capture subagent
+   (`skills/capture/agents/capture.md`) with:
+   - The transcript path from the pending file (if available)
+   - The project slug and cwd from the pending file
+   - A note that this is a delayed capture from a compacted session
+2. The subagent returns raw entries JSON.
+3. Write the entries via `lode_raw.py append-entry` (same as manual capture).
+4. Mark the pending as consumed:
+
+```bash
+python <this-skill>/scripts/lode_raw.py consume-pending \
+  --pending-file "{pending_file_path}"
+```
+
+5. Confirm to the user: "已补充记录 {N} 条进展 from compacted session."
+
+If the user declines, leave the pending markers in place. They will be surfaced
+again on the next recall.
+
+### When No Pending Captures Exist
+
+Do not mention pending captures in the output. The check is invisible.
+
 ## Output Contract
 
 The response must include:
@@ -67,6 +119,7 @@ The response must include:
 - Risks to check before implementation
 - Repo-local docs worth reading
 - Potentially stale intent artifacts
+- Pending captures from compacted sessions, when any exist
 - Suggested entry point for the current session
 
 If there is no vault or no raw data, say that Lode has no durable memory for the
@@ -98,6 +151,7 @@ This skill reads:
 - `{vault}/raw/weeks/{YYYY-WNN}/{project-slug}.json`
 - `{vault}/raw/artifacts/{project-slug}.json` when present
 - `{vault}/raw/decisions/{project-slug}.json` when present
+- `{vault}/raw/pending/*.json` for pending captures from compacted sessions
 
 This skill writes `{vault}/raw/decisions/{project-slug}.json` only when the
 derived decision index is missing, invalid, empty, or older than raw entries.

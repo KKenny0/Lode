@@ -12,6 +12,7 @@ fi
 TARGETS=(
   "$REPO_ROOT/skills/capture/scripts/"
   "$REPO_ROOT/skills/cold-start-interview/scripts/"
+  "$REPO_ROOT/skills/recall/scripts/"
   "$REPO_ROOT/cli/skills/capture/scripts/"
 )
 

@@ -1,4 +1,7 @@
 interface:
   display_name: "Lode Capture"
   short_description: "Record session changes for weekly reports"
-  default_prompt: "Use $capture to record the key changes from this work session."
+  default_prompt: >
+    Use $capture to record the key changes from this work session.
+    Follow the instructions in agents/capture.md to produce structured raw
+    entries as a JSON array. Return only the JSON.
