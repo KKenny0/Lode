@@ -1,4 +1,4 @@
-# robots.txt for Tracework (https://github.com/KKenny0/Lode)
+# robots.txt for Tracework (https://github.com/KKenny0/Tracework)
 #
 # GEO policy: allow search/retrieval + user-triggered AI, block training + undeclared.
 

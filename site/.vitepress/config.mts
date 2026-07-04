@@ -3,17 +3,17 @@ import llmstxt from 'vitepress-plugin-llms'
 
 export default defineConfig({
   title: 'Tracework',
-  base: '/Lode/',
+  base: '/Tracework/',
   cleanUrls: true,
   lastUpdated: true,
   appearance: 'dark',
 
   sitemap: {
-    hostname: 'https://kkenny0.github.io/Lode/'
+    hostname: 'https://kkenny0.github.io/Tracework/'
   },
 
   head: [
-    ['link', { rel: 'icon', type: 'image/svg+xml', href: '/Lode/mark.svg' }],
+    ['link', { rel: 'icon', type: 'image/svg+xml', href: '/Tracework/mark.svg' }],
     ['meta', { name: 'theme-color', content: '#0B0F14' }]
   ],
 
@@ -32,7 +32,7 @@ export default defineConfig({
           { text: 'Skills', link: '/skills' },
           { text: 'Workflow', link: '/workflow' },
           { text: 'Quick Start', link: '/quick-start' },
-          { text: 'GitHub', link: 'https://github.com/KKenny0/Lode' }
+          { text: 'GitHub', link: 'https://github.com/KKenny0/Tracework' }
         ],
         footer: {
           message: 'Released under the MIT License.',
@@ -51,7 +51,7 @@ export default defineConfig({
           { text: '技能', link: '/zh/skills' },
           { text: '工作流', link: '/zh/workflow' },
           { text: '快速开始', link: '/zh/quick-start' },
-          { text: 'GitHub', link: 'https://github.com/KKenny0/Lode' }
+          { text: 'GitHub', link: 'https://github.com/KKenny0/Tracework' }
         ],
         footer: {
           message: '基于 MIT 许可发布。',
@@ -64,7 +64,7 @@ export default defineConfig({
   themeConfig: {
     logo: '/mark.svg',
     socialLinks: [
-      { icon: 'github', link: 'https://github.com/KKenny0/Lode' }
+      { icon: 'github', link: 'https://github.com/KKenny0/Tracework' }
     ]
   }
 })

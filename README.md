@@ -7,7 +7,7 @@
 <p align="center"><strong>Turn agent sessions into evidence-backed work memory.</strong></p>
 
 <p align="center">
-  <a href="https://kkenny0.github.io/Lode/"><strong>Documentation</strong></a> · <a href="https://kkenny0.github.io/Lode/showcase">Showcase</a> · <a href="README.cn.md">中文</a>
+  <a href="https://kkenny0.github.io/Tracework/"><strong>Documentation</strong></a> · <a href="https://kkenny0.github.io/Tracework/showcase">Showcase</a> · <a href="README.cn.md">中文</a>
 </p>
 
 Tracework gives agent work a trace that can be inspected, questioned, and

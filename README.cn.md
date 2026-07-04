@@ -7,7 +7,7 @@
 <p align="center"><strong>把 agent session 沉淀成可追问、可汇总、可复盘的证据型工作记忆。</strong></p>
 
 <p align="center">
-  <a href="https://kkenny0.github.io/Lode/zh/"><strong>文档</strong></a> · <a href="README.md">English</a>
+  <a href="https://kkenny0.github.io/Tracework/zh/"><strong>文档</strong></a> · <a href="README.md">English</a>
 </p>
 
 Tracework 让 agent work 留下可检查、可追问、可继续推进的工作痕迹。
