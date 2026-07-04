@@ -94,7 +94,7 @@ try {
   const missingInstallJson = parseJson(missingInstall.stdout);
   const installResult = assertResult(missingInstallJson.results, 'skill installation', false);
   assert(installResult.message.includes('Missing skills'), 'Expected missing-install message');
-  assert(installResult.fix.includes('codex plugin marketplace add KKenny0/Lode'), 'Expected install fix to mention native marketplace add');
+  assert(installResult.fix.includes('codex plugin marketplace add KKenny0/Tracework'), 'Expected install fix to mention native marketplace add');
   assert(installResult.fix.includes('codex plugin add tracework@tracework'), 'Expected install fix to mention native plugin add');
   const legacyInstallerCommand = ['install', 'codex', 'plugin'].join('-');
   assert(!installResult.fix.includes(legacyInstallerCommand), 'Expected install fix to omit legacy fallback');

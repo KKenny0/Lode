@@ -7,8 +7,8 @@
     "email": "jdlow@live.cn"
   },
   "license": "MIT",
-  "repository": "https://github.com/KKenny0/Lode",
-  "homepage": "https://github.com/KKenny0/Lode",
+  "repository": "https://github.com/KKenny0/Tracework",
+  "homepage": "https://github.com/KKenny0/Tracework",
   "keywords": [
     "agent sessions",
     "work memory",
@@ -28,7 +28,7 @@
       "Read",
       "Write"
     ],
-    "websiteURL": "https://github.com/KKenny0/Lode",
+    "websiteURL": "https://github.com/KKenny0/Tracework",
     "composerIcon": "./assets/mark.svg",
     "logo": "./assets/logo.png",
     "brandColor": "#B87508",

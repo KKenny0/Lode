@@ -67,7 +67,7 @@ It does not install skills. Public installation should use the native plugin
 marketplace path:
 
 ```bash
-codex plugin marketplace add KKenny0/Lode
+codex plugin marketplace add KKenny0/Tracework
 codex plugin add tracework@tracework
 ```
 

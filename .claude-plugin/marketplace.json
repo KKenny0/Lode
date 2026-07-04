@@ -16,7 +16,7 @@
         "email": "jdlow@live.cn"
       },
       "source": "./plugins/tracework",
-      "repository": "https://github.com/KKenny0/Lode",
+      "repository": "https://github.com/KKenny0/Tracework",
       "license": "MIT",
       "keywords": [
         "agent sessions",

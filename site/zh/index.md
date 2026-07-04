@@ -27,7 +27,7 @@ features:
 <section class="tw-command-panel">
 
 ```bash
-codex plugin marketplace add KKenny0/Lode
+codex plugin marketplace add KKenny0/Tracework
 codex plugin add tracework@tracework
 ```
 

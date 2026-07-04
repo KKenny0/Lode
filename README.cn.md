@@ -68,7 +68,7 @@ entry、被拒方案、风险和 source refs。如果记录不足以支持回答
 ### Codex
 
 ```bash
-codex plugin marketplace add KKenny0/Lode
+codex plugin marketplace add KKenny0/Tracework
 codex plugin add tracework@tracework
 ```
 
@@ -82,7 +82,7 @@ codex plugin add tracework@tracework
 ### Claude Code
 
 ```bash
-claude plugin marketplace add KKenny0/Lode
+claude plugin marketplace add KKenny0/Tracework
 claude plugin install tracework@tracework
 ```
 

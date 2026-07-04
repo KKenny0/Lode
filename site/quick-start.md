@@ -3,7 +3,7 @@
 ## 1. Install
 
 ```bash
-codex plugin marketplace add KKenny0/Lode
+codex plugin marketplace add KKenny0/Tracework
 codex plugin add tracework@tracework
 ```
 

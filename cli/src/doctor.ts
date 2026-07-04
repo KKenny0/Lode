@@ -80,7 +80,7 @@ function checkSkillInstallation(skipInstallCheck: boolean | undefined): CheckRes
   return fail(
     'skill installation',
     `Missing skills. Codex plugin missing: ${missingCodexPlugin.join(', ') || 'none'}; Claude Code plugin missing: ${missingClaude.join(', ') || 'none'}`,
-    'Run `codex plugin marketplace add KKenny0/Lode` then `codex plugin add tracework@tracework`.',
+    'Run `codex plugin marketplace add KKenny0/Tracework` then `codex plugin add tracework@tracework`.',
   );
 }
 
