@@ -8,10 +8,135 @@ import { fileURLToPath } from 'node:url';
 const scriptDir = path.dirname(fileURLToPath(import.meta.url));
 const repoRoot = path.resolve(scriptDir, '..');
 const fixturesPath = path.join(scriptDir, 'regression-fixtures.json');
-const captureRaw = path.join(repoRoot, 'skills', 'capture', 'scripts', 'lode_raw.py');
+const captureRaw = path.join(repoRoot, 'skills', 'capture', 'scripts', 'tracework_raw.py');
 const decisionGraph = path.join(repoRoot, 'skills', 'query', 'scripts', 'decision_graph.py');
 const roadmapGraph = path.join(repoRoot, 'skills', 'roadmap', 'scripts', 'decision_graph.py');
 const recallContext = path.join(repoRoot, 'skills', 'recall', 'scripts', 'recall_context.py');
+
+const STORYBOARD_PIPELINE_RAW_WEEKS = {
+  '2026-W18': [
+    {
+      timestamp: '2026-04-28T16:20:00+08:00',
+      type: 'feature',
+      summary: 'Split storyboard validation into deterministic schema checks and LLM-assisted repair loops',
+      context: 'Single-pass validation hid recurring panel continuity failures until export time. The split gives weekly reporting a clear reliability story and gives future debugging a stable contract boundary.',
+      source: 'session-recap',
+      status: 'done',
+      impact: 'Weekly reporting can explain the reliability improvement without re-reading implementation commits.',
+      project_area: 'validation',
+      work_stream: 'Storyboard reliability',
+      evidence_refs: ['abc1234', 'eval:continuity-regression-07'],
+    },
+    {
+      timestamp: '2026-04-29T11:45:00+08:00',
+      type: 'decision',
+      summary: 'Kept panel layout generation separate from dialogue generation to preserve independent retry boundaries',
+      context: 'Combining both stages made repair cheaper in the happy path but caused dialogue rewrites during layout-only failures. Separate contracts trade a small orchestration cost for more predictable retries.',
+      source: 'session-recap',
+      status: 'decision',
+      impact: 'Architecture docs now preserve the retry-boundary decision for future stage changes.',
+      project_area: 'pipeline orchestration',
+      work_stream: 'Stage contract design',
+      evidence_refs: ['doc:pipeline-evolution-v1'],
+    },
+  ],
+  '2026-W19': [
+    {
+      timestamp: '2026-05-05T18:10:00+08:00',
+      type: 'decision',
+      summary: 'Kept validation repair loops inside the validation stage while preserving orchestration-level retry boundaries',
+      context: 'Moving repair ownership upstream would make orchestration aware of validation internals. Keeping ownership local preserves stage encapsulation, while artifact index metadata gives future recall a stable document entry point.',
+      source: 'session-recap',
+      status: 'decision',
+      impact: 'Future session-start recall can point directly to the validation-stage architecture doc instead of re-reading all weekly entries.',
+      project_area: 'validation',
+      work_stream: 'Stage contract design',
+      evidence_refs: ['doc:validation-stage-v1'],
+      motivation: 'Repair ownership was becoming ambiguous between validation and orchestration.',
+      exploration_paths: [
+        'Move repair ownership upstream into orchestration -> centralizes retries but leaks validation internals',
+        'Keep repair ownership inside validation -> preserves encapsulation and narrower retry scope',
+      ],
+      abandoned_alternatives: [
+        'Orchestration-level repair ownership: rejected because it would make orchestration depend on validation internals',
+      ],
+      open_questions: [
+        'Should repair-loop latency be tracked at validation-stage level or orchestration level?',
+      ],
+    },
+    {
+      timestamp: '2026-05-06T09:30:00+08:00',
+      type: 'risk',
+      summary: 'Identified stale architecture docs as a recall risk when stage contracts change without re-indexing',
+      context: 'Session-start recall can only be trusted if indexed docs remain tied to current contracts. Session recap should record sync suggestions after implementation changes.',
+      source: 'session-recap',
+      status: 'risk',
+      impact: 'Decision roadmap and weekly outline can surface stale indexed docs before they mislead future sessions.',
+      project_area: 'documentation',
+      work_stream: 'Artifact governance',
+      motivation: 'Artifact index introduces a new source navigation layer that can become stale.',
+      open_questions: [
+        'What signal should mark an indexed artifact as stale: file mtime, raw entry lifecycle, or explicit sync suggestion?',
+      ],
+      sync_suggestions: [
+        'Review architecture docs and artifact metadata when stage contracts change.',
+      ],
+    },
+  ],
+  '2026-W20': [
+    {
+      timestamp: '2026-05-12T10:15:00+08:00',
+      archetype: 'decision',
+      type: 'decision',
+      summary: 'Chose explicit retry budget policy for validation repair loops',
+      context: 'Validation repair loops needed a durable thread separate from broader orchestration governance. The raw entry records the policy thread directly so decision replay does not infer the topic from artifact hints.',
+      source: 'session-recap',
+      status: 'decision',
+      project_area: 'orchestration',
+      work_stream: 'Artifact governance',
+      decision_threads: ['retry-budget-policy'],
+      lifecycle_transition: {
+        subject: 'decision:retry-budget-policy',
+        from: 'proposed',
+        to: 'chosen',
+        reason: 'Validation repair retries need an explicit budget before orchestration retries are considered.',
+      },
+      source_refs: [
+        {
+          type: 'conversation',
+          ref: 'session:2026-05-12-validation-retry-budget',
+          note: 'Session discussion selected the validation-local retry budget policy.',
+        },
+      ],
+      motivation: 'Without an explicit retry budget policy, validation-stage repair could be confused with orchestration-level retry governance.',
+      exploration_paths: [
+        'Infer retry policy from artifact topics -> keeps raw entries shorter but lets artifact metadata dominate thread assignment',
+        'Record retry-budget-policy as an explicit decision thread -> preserves the intended replay topic',
+      ],
+      abandoned_alternatives: [
+        'Artifact-derived retry thread: rejected because artifact governance hints should not override raw-entry decision intent',
+      ],
+      impact: 'Decision replay can group validation retry budget decisions without relying on artifact metadata.',
+      evidence_refs: ['conversation:2026-05-12-validation-retry-budget'],
+      artifact_context: [
+        {
+          artifact_path: '/Users/example/projects/storyboard-pipeline/DESIGN.md',
+          scope: 'Orchestration retry governance and artifact lifecycle review.',
+          delta: 'Noted that validation repair retry budget is owned by the validation stage.',
+          open_questions: [],
+          source_of_truth: ['src/stages/validation.py', 'tests/test_validation_retry_budget.py'],
+        },
+      ],
+    },
+  ],
+};
+
+const FIXTURE_PRESETS = {
+  'storyboard-pipeline-decision-replay': {
+    project_slug: 'storyboard-pipeline',
+    raw_weeks: STORYBOARD_PIPELINE_RAW_WEEKS,
+  },
+};
 
 const failures = [];
 const skipped = [];
@@ -73,30 +198,47 @@ function assertNoSymlinks(root, sourceLabel) {
   }
 }
 
+function writeRawWeek(tempVault, week, slug, entries) {
+  if (!slug) throw new Error('raw fixture requires project_slug');
+  if (!Array.isArray(entries)) throw new Error(`raw fixture week ${week} must be an array`);
+  const rawPath = path.join(tempVault, 'raw', 'weeks', week, `${slug}.json`);
+  fs.mkdirSync(path.dirname(rawPath), { recursive: true });
+  fs.writeFileSync(rawPath, `${JSON.stringify(entries, null, 2)}\n`, 'utf-8');
+}
+
 function copyFixtureVault(config) {
-  if (Array.isArray(config.raw_entries)) {
-    const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'lode-regression-'));
+  const preset = config.fixture_preset ? FIXTURE_PRESETS[config.fixture_preset] : null;
+  if (config.fixture_preset && !preset) {
+    throw new Error(`unknown fixture preset: ${config.fixture_preset}`);
+  }
+  const effectiveConfig = preset ? { ...preset, ...config } : config;
+  if (effectiveConfig.raw_weeks && typeof effectiveConfig.raw_weeks === 'object') {
+    const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'tracework-regression-'));
     const tempVault = path.join(tempRoot, 'vault');
-    const week = config.week || '2026-W24';
-    const slug = config.project_slug;
-    const rawPath = path.join(tempVault, 'raw', 'weeks', week, `${slug}.json`);
-    fs.mkdirSync(path.dirname(rawPath), { recursive: true });
-    fs.writeFileSync(rawPath, `${JSON.stringify(config.raw_entries, null, 2)}\n`, 'utf-8');
+    for (const [week, entries] of Object.entries(effectiveConfig.raw_weeks)) {
+      writeRawWeek(tempVault, week, effectiveConfig.project_slug, entries);
+    }
     return { tempRoot, tempVault };
   }
-  const sourceVault = path.resolve(repoRoot, config.vault);
+  if (Array.isArray(effectiveConfig.raw_entries)) {
+    const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'tracework-regression-'));
+    const tempVault = path.join(tempRoot, 'vault');
+    const week = effectiveConfig.week || '2026-W24';
+    writeRawWeek(tempVault, week, effectiveConfig.project_slug, effectiveConfig.raw_entries);
+    return { tempRoot, tempVault };
+  }
+  const sourceVault = path.resolve(repoRoot, effectiveConfig.vault);
   const realSourceVault = fs.realpathSync(sourceVault);
   const allowedRoots = [
-    fs.realpathSync(path.join(repoRoot, 'examples')),
     fs.realpathSync(path.join(repoRoot, 'benchmarks')),
   ];
   if (!allowedRoots.some(root => realSourceVault === root || realSourceVault.startsWith(`${root}${path.sep}`))) {
-    throw new Error(`fixture vault must be under examples/ or benchmarks/: ${config.vault}`);
+    throw new Error(`fixture vault must be under benchmarks/: ${effectiveConfig.vault}`);
   }
-  const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'lode-regression-'));
+  const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'tracework-regression-'));
   const tempVault = path.join(tempRoot, 'vault');
   fs.cpSync(realSourceVault, tempVault, { recursive: true, dereference: false });
-  assertNoSymlinks(tempVault, config.vault);
+  assertNoSymlinks(tempVault, effectiveConfig.vault);
   return { tempRoot, tempVault };
 }
 
@@ -167,7 +309,7 @@ function roadmapDecisionIndex(tempVault, slug, limitThreads = 10) {
 }
 
 function assertBuiltIndex(index, slug, fixtureId) {
-  assert(index.schema_version === 'lode.decision_replay.v1', `${fixtureId}: bad index schema`);
+  assert(index.schema_version === 'tracework.decision_replay.v1', `${fixtureId}: bad index schema`);
   assert(index.project_slug === slug, `${fixtureId}: bad project slug`);
   assert(index.source?.builder_version === 2, `${fixtureId}: bad decision index builder version`);
   assert(Array.isArray(index.nodes), `${fixtureId}: index nodes must be an array`);
@@ -187,7 +329,7 @@ function runQueryPositiveFixture(fixture) {
     assertBuiltIndex(index, slug, fixture.id);
 
     const queryPack = queryDecisionIndex(tempVault, slug, query, mode);
-    assert(queryPack.schema_version === 'lode.decision_query.v1', `${fixture.id}: bad query schema`);
+    assert(queryPack.schema_version === 'tracework.decision_query.v1', `${fixture.id}: bad query schema`);
     assert(queryPack.answerable === true, `${fixture.id}: expected query to be answerable`);
     assertQueryMetadata(queryPack, fixture);
     assertMatchedTerms(queryPack, config.expected_matched_terms, fixture.id);
@@ -316,7 +458,7 @@ function runQueryIndexFallbackFixture(fixture) {
     );
 
     fs.writeFileSync(decisionPath, JSON.stringify({
-      schema_version: 'lode.decision_replay.v1',
+      schema_version: 'tracework.decision_replay.v1',
       project_slug: slug,
       generated_at: '2000-01-01T00:00:00+00:00',
       source: {
@@ -428,7 +570,7 @@ function runRoadmapThreadsFixture(fixture) {
 
   try {
     const roadmapPack = roadmapDecisionIndex(tempVault, slug, config.limit_threads || 10);
-    assert(roadmapPack.schema_version === 'lode.decision_roadmap.v1', `${fixture.id}: bad roadmap schema`);
+    assert(roadmapPack.schema_version === 'tracework.decision_roadmap.v1', `${fixture.id}: bad roadmap schema`);
     assert(roadmapPack.project_slug === slug, `${fixture.id}: bad project slug`);
     assert(Array.isArray(roadmapPack.threads), `${fixture.id}: roadmap threads must be an array`);
     assert(
@@ -541,7 +683,7 @@ function runCaptureHelperRepairFixture(fixture) {
   const config = fixture.fixture || {};
   const slug = config.project_slug;
   const entry = config.entry;
-  const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'lode-regression-'));
+  const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'tracework-regression-'));
   const tempVault = path.join(tempRoot, 'vault');
   const entryPath = path.join(tempRoot, 'repair-entry.json');
 

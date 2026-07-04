@@ -1,234 +1,130 @@
 <p align="center">
-  <img src="assets/mark.svg" alt="Lode" width="132" />
+  <img src="assets/mark.svg" alt="Tracework" width="132" />
 </p>
 
-<p align="center"><strong>Agentic coding 的 decision replay：记录为什么，复利成周报、月报和路线图。</strong></p>
+<h1 align="center">Tracework</h1>
+
+<p align="center"><strong>把 agent session 沉淀成可追问、可汇总、可复盘的证据型工作记忆。</strong></p>
 
 <p align="center">
-  <a href="https://kkenny0.github.io/Lode/zh/">文档</a> · <a href="README.md">English</a>
+  <a href="https://kkenny0.github.io/Lode/zh/"><strong>文档</strong></a> · <a href="README.md">English</a>
 </p>
 
-## Why
+Tracework 让 agent work 留下可检查、可追问、可继续推进的工作痕迹。
 
-AI 让软件探索变便宜，也让上下文延续变困难。
+它捕获 session 里的决策、证据、风险、artifact 和下一步，把一次性对话沉淀为
+本地工作记录，用于召回、追问、汇报和复盘。
 
-一次 coding session 里，你可能会比较多个设计、放弃看似可行的路径、发现隐藏约束、更新 prompts、修改 schemas，并做出只有结合探索过程才说得清的决策。Git 记录最终 diff。Issue tracker 记录计划中的工作。它们都不会保存让这次工作成立的推理过程。
+## Tracework 能做什么
 
-Session 结束，这些上下文通常就消失了。
+Tracework 可以：
 
-Lode 是一个本地优先、依赖很轻的 agentic coding persistent memory 工具箱。它的主要价值路径是 decision replay：捕获决策、风险、放弃路径、开放问题和 durable artifacts，之后用带引用的证据回放当时为什么这么选。周报、月报和路线图都是同一份 raw record 之上的复利视图。
+- 捕获 session 里的决策、放弃路径、风险、artifact 和下一步
+- 在本地证据足够时回答“当时为什么这么选”
+- 在后续 session 前召回有用上下文
+- 把 raw session 记录汇总成日报、周报、月报或 roadmap
+- 把 Markdown 和 JSON 记录留在你自己的 knowledge vault 里
 
-## Decision Replay Loop
-
-Lode 围绕一条主要价值路径打包：
-
-```text
-安装 -> demo -> capture 一次 session -> query 一个 decision
-```
-
-这条 loop 证明产品价值：coding agent 可以追问某个选择为什么发生，并得到带引用
-的本地证据，而不是普通 recap。`recall`、`roadmap`、日报、周报、月报都是同一份
-raw record 之上的复利视图，放在后面使用。
-
-## 技术职场场景：逐层收口
-
-**向上逐层收口，向下穿透核验。**
-
-Lode 把 AI 协作中的散乱工作，组织成可汇报、可核验的成果；需要追问时，
-可以沿着成果回到决策、取舍与证据。
+核心循环很小：
 
 ```text
-向上汇报：session signals -> 工作主线 -> 成果与影响
-向下核验：成果与影响 -> 决策与取舍 -> source refs
+捕获 session 信号 -> 回放决策 -> 汇总成 brief、review 或 roadmap
 ```
 
-`capture` 保存报告原料，`weekly` 和 `monthly` 把原料归并为成果与进展，
-`query` 再沿着结论回到带引用的本地证据。活动数量只说明记录覆盖度，不能单独
-证明成果。这个场景面向需要解释技术工作的开发者、tech lead 和小型技术团队；
-Lode 不扩张到会议、审批或绩效监控等泛职场流程。
+Decision replay 是可信机制：后来的 agent 或读者可以从一个结论向下追到 raw
+entry、被拒方案、风险和 source refs。如果记录不足以支持回答，Tracework 应该
+明确说证据不足，而不是编造历史。
+
+它不是会议纪要工具、审批流、绩效包装工具、员工监控界面或泛办公室套件。活动数、
+提交数、代码行数只能说明记录覆盖度，不能单独证明成果。
 
 ## Skills
 
-每个 skill 对应一个你已经有的工作习惯。插件形态下，用统一的
-namespaced command 激活。
-
-### Tier 1 — 第一天就用的（无需积累数据，即刻生效）
-
-| Skill | 时机 | 功能 |
+| Command | 时机 | 输出 |
 | :--- | :--- | :--- |
-| `/lode:cold-start-interview` | 首次使用 | 创建包含 vault path、项目身份、语言和报告偏好的 `~/.lode/config.yaml` |
-| `/lode:capture` | 收工或阶段记录 | 安静捕获 decision/build/repair 等深度信号、阶段进展，并在需要时索引 durable artifacts |
-| `/lode:recall` | 已有历史后的开工 | 召回最近决策、风险、开放问题、放弃方案、相关 docs 和可能过期的 intent artifacts |
+| `/tracework:cold-start-interview` | 首次运行 | 配置本地 vault 和项目画像 |
+| `/tracework:capture` | 收工或阶段记录 | 捕获决策、构建、调查、修复、风险和 artifact |
+| `/tracework:recall` | 开工 | 召回最近决策、风险、开放问题和相关 artifact |
+| `/tracework:query` | 定向追问 | 用本地证据回答“当时为什么这么选？” |
+| `/tracework:weekly` | 每周 | 把 raw session 记录汇总成 brief-ready outline |
+| `/tracework:monthly` | 每月 | 生成月度回顾和重复证据中的候选规则 |
+| `/tracework:roadmap` | 阶段复盘 | 生成叙事性决策历史 |
+| `/tracework:daily` | 每天 | 从 raw entries 和 git history 更新 Obsidian 风格日报 |
 
-先用 capture + recall 坚持 1-2 周。等 raw entry 积累起来后，Tier 2 的 skill 就会自动变丰富。
+核心 habit loop 很小：
 
-### Tier 2 — 积累一周后用的（有几条 raw entry 后效果更好）
-
-| Skill | 时机 | 功能 |
-| :--- | :--- | :--- |
-| `/lode:daily` | 每天按需 | 从 raw entries 和 git history 更新 Obsidian 日报 |
-| `/lode:weekly` | 每周按需 | 基于 raw entries 生成 PPT 制作参考文档，有证据时加入本周难点 |
-| `/lode:query` | 定向追问 | 用带引用的 decision replay evidence 回答”当时为什么这么选？” |
-
-### Tier 3 — 积累一个月后用的（复利视图，需要足够历史）
-
-| Skill | 时机 | 功能 |
-| :--- | :--- | :--- |
-| `/lode:monthly` | 每月按需 | 生成月度工作回顾，并从重复证据中提出 candidate rules |
-| `/lode:roadmap` | 阶段性复盘 | 生成叙事性决策路线图，并汇总累积风险与反复开放问题 |
-
-Skills 是独立的。Lode 不是一个强制流水线 — 每个 skill 可以单独使用，但它们共享同一套本地存储约定，所以后续报告可以复用之前沉淀的上下文。
-
-### 推荐使用节奏
-
-**第一天**：运行一次 `/lode:cold-start-interview` 配置 vault。
-
-**每次工作**：收工时 `/lode:capture`（”收工”），长任务中途用 `/lode:capture checkpoint` 记录阶段进展，开工时 `/lode:recall`（”开工”）。这几个动作构成核心 habit loop。
-
-**积累 1-2 周后**：`/lode:daily`、`/lode:weekly` 生成周期报告，`/lode:query` 定向追问决策。
-
-**积累 1 个月以上**：`/lode:monthly` 做月度回顾，`/lode:roadmap` 做决策演变复盘。
-
-## Decision Replay
-
-Lode 把“当时为什么这么选？”变成一条明确工作流。raw entries 仍然是事实源，
-`{vault}/raw/decisions/{slug}.json` 为 coding agent 提供回答定向决策问题
-所需的带引用证据包。见 [`examples/decision-replay-proof.md`](examples/decision-replay-proof.md)：
-里面包含一次真实的 Lode-on-Lode dogfood，以及一个在缺少决策历史时正确返回
-无答案的负例查询。
-
-### 第一条有效路径
-
-1. 安装 Lode。
-2. 运行确定性的 fixture：
-
-```bash
-node examples/decision-replay-demo.mjs
+```text
+首次运行 /tracework:cold-start-interview
+收工或 /tracework:capture 结束 session
+开工或 /tracework:recall 开始 session
+需要解释原因时用 /tracework:query
 ```
 
-它会打印 `/lode:query` 应该交给 coding agent 的紧凑证据形状：answerability
-metadata、top decision node、raw `source_entry_refs`、matched terms，以及
-rejected alternatives。
+日报、周报、月报和路线图都需要 raw entry 积累后才会更有价值。它们是同一份
+记录上的视图，不是另一套 reporting database。
 
-3. 运行一次 `/lode:cold-start-interview`。
-4. 在一次真实 coding session 结束时，说 `收工` 或运行 `/lode:capture`。配置了 vault 后，capture 默认只做简短确认。
-5. 追问：`/lode:query why did we choose <the decision>?`
+## 安装
 
-有价值的结果不是普通总结，而是带引用的回答：包含匹配到的 decision nodes、
-`source_entry_refs`、被记录下来的 rejected alternatives；如果 vault 里没有这段历史，
-它应该明确说证据不足，而不是编答案。
-这条 loop 跑通之后，再用 `/lode:recall`、`/lode:roadmap`、`/lode:daily`、
-`/lode:weekly` 和 `/lode:monthly` 让同一份记录继续复利。
+### Codex
 
-## Install
+```bash
+codex plugin marketplace add KKenny0/Lode
+codex plugin add tracework@tracework
+```
+
+更新：
+
+```bash
+codex plugin marketplace upgrade tracework
+codex plugin add tracework@tracework
+```
 
 ### Claude Code
 
 ```bash
-# GitHub marketplace（推荐）
 claude plugin marketplace add KKenny0/Lode
-
-# 或本地开发
-claude plugin marketplace add ./path/to/Lode
+claude plugin install tracework@tracework
 ```
 
-安装后，namespaced commands（`/lode:capture`、`/lode:recall` 等）会在每个
-Claude Code session 中可用。
-
-也可以用 CLI 做验证：
+更新：
 
 ```bash
-npx @lode/cli doctor
+claude plugin marketplace update tracework
+claude plugin update tracework@tracework
 ```
 
-### Codex
+## Storage
 
-Codex 主路径使用原生 plugin marketplace 安装：
+- 配置：`~/.tracework/config.yaml` 或 `{project}/.tracework/config.yaml`
+- Raw entries：`{vault}/raw/weeks/{week}/{slug}.json`
+- Decision indexes：`{vault}/raw/decisions/{slug}.json`
+- 可读输出：`{vault}/Daily Note.md` 和 `{vault}/Work Diary/`
 
-```bash
-codex plugin marketplace add KKenny0/Lode
-codex plugin add lode@lode
-```
+公开产品名、命令、配置路径和 schema namespace 都是 `tracework`。Tracework 不再使用
+legacy storage fallback；请在上面的配置文件中写入 `knowledge_vault`。
 
-更新到最新版时：
-
-```bash
-codex plugin marketplace upgrade lode
-codex plugin add lode@lode
-```
-
-如果你之前使用过 legacy bridge install，先安装当前 plugin，再移除旧的
-plugin key：
-
-```bash
-codex plugin remove lode@lode-marketplace
-```
-
-如果 Codex 已经打开，重启 Codex，然后开一个新 thread。此时应该能看到
-`/lode:capture`、`/lode:recall`、`/lode:query` 等 Lode plugin skills。
-
-本地开发时，从当前 checkout 安装前先重建 plugin bundle：
-
-```bash
-npm --prefix cli run copy-skills
-codex plugin marketplace add ./path/to/Lode
-codex plugin add lode@lode
-```
-
-只有当前 Codex 版本不可用 `codex plugin add` 时，才使用 legacy fallback：
-
-```bash
-npx @lode/cli install-codex-plugin
-```
-
-然后先证明 replay loop：运行 demo，运行一次 `/lode:cold-start-interview`，
-用 `收工` 或 `/lode:capture` 捕获一次真实 session，再用 `/lode:query`
-追问一个 decision。长任务中途可以用 `/lode:capture checkpoint` 安静保存阶段进展。
-跑通之后，再在 session 开始时用 `开工` 或 `/lode:recall`，用 `/lode:roadmap`
-回顾决策演变，在 raw record 足够厚之后生成报告。
-
-不配置 vault 也可以开始 — `收工` 会直接在对话中输出结构化 Markdown。
-
-配置细节见 [docs/configuration.md](docs/configuration.md)。数据模型见 [docs/data-model.md](docs/data-model.md)。产物归属和路线图存储规则见 [docs/artifact-governance.md](docs/artifact-governance.md)。合成示例见 [`examples/`](examples/)。
-
-## Background
-
-Lode 这个名字来自英文里的 lode：矿脉，矿物在地下富集的地方。commits、sessions、diffs 是原矿，Lode 把它们提炼成值得长期保存的工作知识。这个词和 load 同源，也和中文的载（zài，承载、记录）同源。原来的标语 "the knowledge vein in your codebase" 仍然描述这个隐喻；现在更明确的产品承诺是：为 agentic coding 提供人能阅读、复盘和分享的 persistent memory。
-
-Lode 只写本地 Markdown 和 JSON。和代码强绑定的架构文档默认留在项目 repo；共享记忆、索引和报告放在你的 knowledge vault。不引入远程服务、账号、同步后端或托管数据库。如果你的 knowledge vault 是 git repo，push 到哪里由你控制。
-
-<details>
-<summary>Development</summary>
+## 开发
 
 ```bash
 npm --prefix cli run build
 npm --prefix cli run copy-skills
 npm --prefix cli run check-skills
-npm --prefix cli run test:regression
+npm --prefix cli run test
+npm --prefix site run build
 ```
 
-Design principles:
+修改 `.codex-plugin/`、`skills/` 或 `assets/` 后运行：
 
-- **Self-contained skills**: each skill carries its own references so it can be installed individually.
-- **Decision replay first**: `/lode:query` 和 `/lode:roadmap` 把捕获的 rationale 变成带引用回答和叙事性决策历史。
-- **Raw-first reporting**: weekly reports use raw entries as the primary semantic source; git is fallback and coverage evidence.
-- **Adaptive-depth recap**: 收工条目携带 archetype-specific fields，让周报能解释 decisions、repairs、investigations 和 builds，而不需要第二个写入 skill。
-- **Artifact governance**: full repo-local docs stay near the code, while capture-owned vault indexes make them discoverable for recall and reports.
-- **Graceful side effects**: when a raw write is only a side effect, failures do not block the primary deliverable.
-- **Deterministic helpers**: scripts handle path resolution, date calculation, parsing, and aggregation where consistency matters.
-- **Local evals, public protocols**: local fixtures stay ignored; public benchmark guidance lives under [`benchmarks/`](benchmarks/).
+```bash
+npm --prefix cli run copy-skills
+npm --prefix cli run check-skills
+```
 
-</details>
+核心文档：
 
-<details>
-<summary>Benchmarks</summary>
-
-Public benchmark protocols document the quality bar without publishing local fixtures:
-
-- [`benchmarks/README.md`](benchmarks/README.md)
-- [`benchmarks/weekly-outline.md`](benchmarks/weekly-outline.md)
-
-</details>
+- [配置](docs/configuration.md)
+- [数据模型](docs/data-model.md)
+- [Artifact governance](docs/artifact-governance.md)
 
 ## License
 

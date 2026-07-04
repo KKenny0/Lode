@@ -1,27 +1,30 @@
 {
   "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
-  "name": "lode",
-  "description": "Local marketplace for the Lode plugin.",
+  "name": "tracework",
+  "description": "Local marketplace for the Tracework plugin.",
   "owner": {
     "name": "Kennywu",
     "email": "jdlow@live.cn"
   },
   "plugins": [
     {
-      "name": "lode",
-      "description": "Agentic coding persistent memory and decision replay.",
+      "name": "tracework",
+      "description": "Evidence-backed work memory for agent sessions.",
+      "version": "0.1.0",
       "author": {
         "name": "Kennywu",
         "email": "jdlow@live.cn"
       },
-      "source": "./",
+      "source": "./plugins/tracework",
       "repository": "https://github.com/KKenny0/Lode",
       "license": "MIT",
       "keywords": [
-        "agentic coding",
-        "memory",
-        "weekly reports",
-        "decision roadmap"
+        "agent sessions",
+        "work memory",
+        "decision replay",
+        "work briefs",
+        "decision roadmap",
+        "local-first"
       ]
     }
   ]

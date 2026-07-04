@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Build a Decision Replay Index from Lode raw entries.
+"""Build a Decision Replay Index from Tracework raw entries.
 
 The index is derived from weekly raw entries only. Artifact metadata may help
 connect entries, but it must not create decision facts.
@@ -23,9 +23,9 @@ except Exception:  # pragma: no cover - optional dependency
     yaml = None
 
 
-SCHEMA_VERSION = "lode.decision_replay.v1"
-QUERY_SCHEMA_VERSION = "lode.decision_query.v1"
-ROADMAP_SCHEMA_VERSION = "lode.decision_roadmap.v1"
+SCHEMA_VERSION = "tracework.decision_replay.v1"
+QUERY_SCHEMA_VERSION = "tracework.decision_query.v1"
+ROADMAP_SCHEMA_VERSION = "tracework.decision_roadmap.v1"
 INDEX_BUILDER_VERSION = 2
 SAFE_SLUG_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]*$")
 EXPLICIT_FIELDS = (
@@ -129,7 +129,7 @@ def parse_simple_yaml(raw: str) -> dict[str, Any]:
 def find_project_config(cwd: Path) -> Path | None:
     current = cwd.resolve()
     for directory in (current, *current.parents):
-        candidate = directory / ".lode" / "config.yaml"
+        candidate = directory / ".tracework" / "config.yaml"
         if candidate.exists():
             return candidate
     return None
@@ -149,7 +149,7 @@ def merge_configs(global_cfg: dict[str, Any], project_cfg: dict[str, Any]) -> di
 
 def resolve_config(cwd: Path) -> tuple[dict[str, Any], list[str]]:
     sources: list[str] = []
-    global_path = Path.home() / ".lode" / "config.yaml"
+    global_path = Path.home() / ".tracework" / "config.yaml"
     project_path = find_project_config(cwd)
 
     global_cfg = load_yaml_config(global_path)
@@ -162,14 +162,6 @@ def resolve_config(cwd: Path) -> tuple[dict[str, Any], list[str]]:
         sources.append(str(project_path))
 
     cfg = merge_configs(global_cfg, project_cfg)
-    if not cfg.get("knowledge_vault"):
-        env_vault = os.environ.get("WEEKLY_PPT_PATH")
-        if env_vault:
-            cfg["knowledge_vault"] = env_vault
-            sources.append("$WEEKLY_PPT_PATH")
-        else:
-            cfg["knowledge_vault"] = str(Path.home() / ".weekly-ppt")
-            sources.append("~/.weekly-ppt")
 
     if cfg.get("knowledge_vault"):
         cfg["knowledge_vault"] = str(Path(cfg["knowledge_vault"]).expanduser().resolve())
@@ -1265,7 +1257,7 @@ def command_roadmap(args: argparse.Namespace) -> int:
 
 
 def build_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(description="Build a Lode Decision Replay Index")
+    parser = argparse.ArgumentParser(description="Build a Tracework Decision Replay Index")
     subparsers = parser.add_subparsers(dest="command", required=True)
 
     build_parser = subparsers.add_parser(

@@ -2,7 +2,7 @@ import { defineConfig } from 'vitepress'
 import llmstxt from 'vitepress-plugin-llms'
 
 export default defineConfig({
-  title: 'Lode',
+  title: 'Tracework',
   base: '/Lode/',
   cleanUrls: true,
   lastUpdated: true,
@@ -25,7 +25,7 @@ export default defineConfig({
     root: {
       label: 'English',
       lang: 'en',
-      description: 'Git tells you what changed. Lode tells your next coding agent why.',
+      description: 'Evidence-backed work memory for agent sessions.',
       themeConfig: {
         nav: [
           { text: 'Showcase', link: '/showcase' },
@@ -44,10 +44,10 @@ export default defineConfig({
       label: '简体中文',
       lang: 'zh-CN',
       link: '/zh/',
-      description: 'Git 记录了改了什么。Lode 让下一个 coding agent 知道为什么。',
+      description: '把 agent session 沉淀成证据型工作记忆。',
       themeConfig: {
         nav: [
-          { text: '效果展示', link: '/showcase' },
+          { text: '效果展示', link: '/zh/showcase' },
           { text: '技能', link: '/zh/skills' },
           { text: '工作流', link: '/zh/workflow' },
           { text: '快速开始', link: '/zh/quick-start' },

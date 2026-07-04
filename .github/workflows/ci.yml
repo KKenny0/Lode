@@ -26,5 +26,5 @@ jobs:
         run: npm --prefix cli run test:doctor
       - name: Run doctor smoke test
         run: |
-          mkdir -p "$RUNNER_TEMP/lode-vault"
-          node cli/dist/index.js doctor --vault "$RUNNER_TEMP/lode-vault" --skip-install-check --json
+          mkdir -p "$RUNNER_TEMP/tracework-vault"
+          node cli/dist/index.js doctor --vault "$RUNNER_TEMP/tracework-vault" --skip-install-check --json

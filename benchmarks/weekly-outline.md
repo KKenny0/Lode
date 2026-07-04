@@ -11,7 +11,7 @@ examples, transcripts, and grading notes without publishing them.
 Verify that `weekly` stays raw-first while implementing the report-local 3+1
 contract:
 
-- Use Lode raw change entries as the primary semantic source.
+- Use Tracework raw change entries as the primary semantic source.
 - Use git logs only for coverage checks and fallback evidence.
 - Preserve architecture decisions, risks, and follow-up work instead of flattening
   everything into a success-only weekly report.
@@ -180,6 +180,6 @@ Run this benchmark after changes to:
 
 - `skills/weekly/SKILL.md`
 - `skills/weekly/references/subagent-prompt.md`
-- `references/weekly-ppt-convention.md`
+- `references/tracework-storage-convention.md`
 - `capture` raw entry production rules
 - evidence grading, Fruit Check, or report-local traceability rules

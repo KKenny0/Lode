@@ -62,7 +62,7 @@ function shouldSkipCopy(entryName: string): boolean {
   return entryName.endsWith('-workspace') || EXCLUDED_RESOURCE_DIRS.has(entryName);
 }
 
-/** List all installable Lode skill directories in stable product order. */
+/** List all installable Tracework skill directories in stable product order. */
 export function listSkills(): string[] {
   const dir = getSkillsDir();
   return OFFICIAL_SKILLS.filter(name => isSkillDirectory(dir, name));

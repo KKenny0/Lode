@@ -1,6 +1,6 @@
 # Benchmarks
 
-This directory publishes benchmark protocols and quality bars for Lode skills.
+This directory publishes benchmark protocols and quality bars for Tracework skills.
 
 Local fixtures, transcripts, grader outputs, and workspace snapshots are intentionally
 not committed. Keep them under ignored `skills/*/evals/` or `*-workspace/`

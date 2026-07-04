@@ -147,9 +147,9 @@
         "kind": "query-positive"
       },
       "skill": "query",
-      "prompt": "用 /lode:query 回答：为什么 validation repair ownership 留在 validation stage？",
+      "prompt": "用 /tracework:query 回答：为什么 validation repair ownership 留在 validation stage？",
       "fixture": {
-        "vault": "examples/vault",
+        "fixture_preset": "storyboard-pipeline-decision-replay",
         "project_slug": "storyboard-pipeline",
         "query": "why validation repair ownership",
         "mode": "why",
@@ -166,11 +166,11 @@
       "assertions": [
         {
           "name": "derived_index_schema",
-          "description": "The generated index uses schema_version `lode.decision_replay.v1` with nodes, edges, and mandatory `source_entry_refs` on every node."
+          "description": "The generated index uses schema_version `tracework.decision_replay.v1` with nodes, edges, and mandatory `source_entry_refs` on every node."
         },
         {
           "name": "query_pack_grounded",
-          "description": "The query output uses schema_version `lode.decision_query.v1`, returns `answerable=true`, and includes top_nodes with raw source entry references."
+          "description": "The query output uses schema_version `tracework.decision_query.v1`, returns `answerable=true`, and includes top_nodes with raw source entry references."
         },
         {
           "name": "rejected_alternative_preserved",
@@ -188,9 +188,9 @@
         "kind": "query-positive"
       },
       "skill": "query",
-      "prompt": "用 /lode:query 回答：why retry budget policy",
+      "prompt": "用 /tracework:query 回答：why retry budget policy",
       "fixture": {
-        "vault": "examples/vault",
+        "fixture_preset": "storyboard-pipeline-decision-replay",
         "project_slug": "storyboard-pipeline",
         "query": "why retry budget policy",
         "mode": "why",
@@ -228,9 +228,9 @@
         "kind": "query-positive"
       },
       "skill": "query",
-      "prompt": "用 /lode:query 回答：why stale architecture docs recall risk",
+      "prompt": "用 /tracework:query 回答：why stale architecture docs recall risk",
       "fixture": {
-        "vault": "examples/vault",
+        "fixture_preset": "storyboard-pipeline-decision-replay",
         "project_slug": "storyboard-pipeline",
         "query": "why stale architecture docs recall risk",
         "mode": "why",
@@ -263,7 +263,7 @@
         "kind": "query-positive"
       },
       "skill": "query",
-      "prompt": "用 /lode:query 回答：修复责任为什么保留在验证阶段？",
+      "prompt": "用 /tracework:query 回答：修复责任为什么保留在验证阶段？",
       "fixture": {
         "project_slug": "cjk-query",
         "week": "2026-W24",
@@ -324,7 +324,7 @@
         "kind": "query-negative"
       },
       "skill": "query",
-      "prompt": "用 /lode:query 回答：移动同步为何采用本地数据库索引？",
+      "prompt": "用 /tracework:query 回答：移动同步为何采用本地数据库索引？",
       "fixture": {
         "project_slug": "cjk-query",
         "week": "2026-W24",
@@ -363,9 +363,9 @@
         "kind": "query-negative"
       },
       "skill": "query",
-      "prompt": "用 /lode:query 回答：why did we choose sqlite indexing for mobile sync",
+      "prompt": "用 /tracework:query 回答：why did we choose sqlite indexing for mobile sync",
       "fixture": {
-        "vault": "examples/vault",
+        "fixture_preset": "storyboard-pipeline-decision-replay",
         "project_slug": "storyboard-pipeline",
         "query": "why did we choose sqlite indexing for mobile sync",
         "mode": "why",
@@ -395,13 +395,13 @@
       "skill": "query",
       "prompt": "Use raw weekly entries when the saved decision index is invalid or stale.",
       "fixture": {
-        "vault": "examples/vault",
+        "fixture_preset": "storyboard-pipeline-decision-replay",
         "project_slug": "storyboard-pipeline",
         "query": "why validation repair ownership",
         "mode": "why",
         "expected_top_node": "storyboard-pipeline:2026-W19:003"
       },
-      "expected_behavior": "`/lode:query` rebuilds from raw weekly entries when the saved derived index is invalid JSON or older than the latest raw entry.",
+      "expected_behavior": "`/tracework:query` rebuilds from raw weekly entries when the saved derived index is invalid JSON or older than the latest raw entry.",
       "assertions": [
         {
           "name": "invalid_index_fallback",
@@ -419,9 +419,9 @@
         "kind": "recall-rebuild"
       },
       "skill": "recall",
-      "prompt": "开工。examples/vault 里 raw/decisions 缺失时，从 raw/weeks 重建 decision context，并标明来源。",
+      "prompt": "开工。fixture vault 里 raw/decisions 缺失时，从 raw/weeks 重建 decision context，并标明来源。",
       "fixture": {
-        "vault": "examples/vault",
+        "fixture_preset": "storyboard-pipeline-decision-replay",
         "project_slug": "storyboard-pipeline",
         "limit": 5,
         "expected_decision_id": "storyboard-pipeline:2026-W19:003"
@@ -448,9 +448,9 @@
         "kind": "roadmap-threads"
       },
       "skill": "roadmap",
-      "prompt": "用 /lode:roadmap 生成 decision narrative 前，先从 decision replay index 生成 thread-level evidence pack。",
+      "prompt": "用 /tracework:roadmap 生成 decision narrative 前，先从 decision replay index 生成 thread-level evidence pack。",
       "fixture": {
-        "vault": "examples/vault",
+        "fixture_preset": "storyboard-pipeline-decision-replay",
         "project_slug": "storyboard-pipeline",
         "limit_threads": 10,
         "expected_node_count": 5,
@@ -468,7 +468,7 @@
         "expected_source_ref_type": "conversation",
         "expected_risk_text": "stale architecture docs"
       },
-      "expected_behavior": "Return a `lode.decision_roadmap.v1` evidence pack that groups decision nodes by thread, preserves explicit versus inferred density, cites source raw entries, carries rejected alternatives and open questions into the thread summary, preserves lifecycle/source metadata for explicit decision threads, and lifts accumulating risks for roadmap synthesis.",
+      "expected_behavior": "Return a `tracework.decision_roadmap.v1` evidence pack that groups decision nodes by thread, preserves explicit versus inferred density, cites source raw entries, carries rejected alternatives and open questions into the thread summary, preserves lifecycle/source metadata for explicit decision threads, and lifts accumulating risks for roadmap synthesis.",
       "assertions": [
         {
           "name": "thread_grouping_preserved",
@@ -492,7 +492,7 @@
       "skill": "query",
       "prompt": "Do not allow a project slug with path separators to write outside raw/decisions.",
       "fixture": {
-        "vault": "examples/vault",
+        "fixture_preset": "storyboard-pipeline-decision-replay",
         "unsafe_slug": "../outside"
       },
       "expected_behavior": "Decision index helpers reject filename-unsafe slugs before reading or writing `{vault}/raw/decisions/{slug}.json`.",

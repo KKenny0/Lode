@@ -2,107 +2,63 @@
 layout: home
 
 hero:
-  name: Lode
-  text: Git tells you what changed. Lode tells your next coding agent why.
-  tagline: Install, run the demo, capture one session, then query one decision with cited local evidence.
+  name: Tracework
+  text: Inspectable traces for agent work.
+  tagline: Capture decisions, evidence, risks, artifacts, and next steps, then carry them into recall, query, briefs, reviews, and roadmaps.
   actions:
     - theme: brand
-      text: See It in Action
-      link: /showcase
-    - theme: alt
-      text: Get Started
+      text: Install
       link: /quick-start
     - theme: alt
-      text: View on GitHub
-      link: https://github.com/KKenny0/Lode
+      text: See the Loop
+      link: /workflow
 
 features:
-  - title: Decision Replay
-    details: Ask why a path was chosen and get cited evidence from local entries and derived decision indexes.
-    icon: 🔍
-  - title: Persistent Memory
-    details: Capture decisions, abandoned paths, risks, and open questions at wrap-up. Recall them after history exists.
-    icon: 💎
-  - title: Report-ready Outcomes
-    details: Roll session signals into work streams and outcomes while preserving decisions, tradeoffs, and evidence for drill-down.
-    icon: 📈
-  - title: Zero-Config Start
-    details: One command captures your first session. No vault required. Structured Markdown appears right in the conversation.
-    icon: ⚡
+  - title: Trace the work
+    details: Preserve decisions, rejected paths, risks, artifacts, source refs, and next steps from agent sessions.
+  - title: Question the record
+    details: Ask why a path was chosen and get cited local evidence when the record supports it.
+  - title: Carry it forward
+    details: Turn raw records into recall context, briefs, reviews, and decision roadmaps without losing drill-down paths.
+  - title: Keep it local
+    details: Store Markdown and JSON in your own vault. No hosted service, account, or remote database.
 ---
 
-## For Technical Professionals: Roll Work Up, Drill Down
-
-**Roll work up for reporting. Drill down to verify.**
-
-Lode turns scattered work from AI collaboration into report-ready, verifiable
-outcomes. When questions arise, trace each outcome back to decisions, tradeoffs,
-and evidence.
-
-```text
-Report upward: session signals → work streams → outcomes and impact
-Verify downward: outcomes and impact → decisions and tradeoffs → source refs
-```
-
-This use case is for developers, tech leads, and small technical teams that need
-to explain technical work. Activity counts measure record coverage; they do not
-prove outcomes by themselves. Lode does not expand into generic meetings,
-approvals, or employee monitoring.
-
-## Skills
-
-Each skill maps to a habit you already have. Activate it with a namespaced command.
-
-| Skill | When | What it does |
-| :--- | :--- | :--- |
-| `/lode:cold-start-interview` | First run | Creates `~/.lode/config.yaml` with vault path, project identity, and report preferences |
-| `/lode:capture` | Wrap-up or checkpoint | Quietly captures session depth, stage progress, and artifacts |
-| `/lode:query` | Targeted follow-up | Answers "why did we choose this?" with cited decision replay evidence |
-| `/lode:recall` | Session start, after history exists | Recalls recent decisions, risks, open questions, and relevant docs |
-| `/lode:roadmap` | After multiple decisions | Generates narrative decision roadmap with accumulating risks |
-| `/lode:daily` | Daily, on demand | Updates Obsidian daily notes from raw entries and git history |
-| `/lode:weekly` | Weekly, on demand | Builds weekly outline from raw entries with conditional hard-stuff section |
-| `/lode:monthly` | Monthly, on demand | Generates monthly review and candidate rules from repeated evidence |
-
-## The Replay Loop
-
-```text
-install → demo → capture one session → query one decision
-```
-
-This is the first value path. Weekly, monthly, recall, and roadmap outputs are
-compounding layers on top of the same local record. Skills are independent, but
-they share one storage convention so downstream views reuse earlier evidence.
-
-## Decision Replay
-
-Lode dogfoods a derived decision replay index for its own project history. Raw entries remain the source of truth; `{vault}/raw/decisions/{slug}.json` gives coding agents compact evidence packs for targeted "why did we choose this?" queries.
-
-See the [dogfood proof on GitHub](https://github.com/KKenny0/Lode/blob/main/examples/decision-replay-proof.md).
-
-## Install
+<section class="tw-command-panel">
 
 ```bash
 codex plugin marketplace add KKenny0/Lode
-codex plugin add lode@lode
+codex plugin add tracework@tracework
 ```
 
-Update:
+<p>Public namespace: <code>tracework</code>. Config lives under <code>.tracework</code>; records stay in your own vault.</p>
 
-```bash
-codex plugin marketplace upgrade lode
-codex plugin add lode@lode
+</section>
+
+## Work Trace Loop
+
+```text
+agent session -> capture signals -> query decisions -> brief / review / roadmap
 ```
 
-Only use the legacy fallback when `codex plugin add` is unavailable:
+Tracework is built for agent work that needs a durable trace: choices made,
+paths rejected, evidence cited, risks carried, and next steps preserved. Coding
+sessions are the strongest fit, but the same record shape also fits research,
+writing, and product narrative work when the session has decisions and evidence.
 
-```bash
-npx @lode/cli install-codex-plugin
-```
+## Proof Chain
 
-Then run the demo, run `/lode:cold-start-interview` once, capture one real
-session with `收工`, and query one decision with `/lode:query`.
+| Layer | Question | Tracework surface |
+| :--- | :--- | :--- |
+| Raw record | What happened in the session? | `/tracework:capture` |
+| Decision evidence | Why this path, not another? | `/tracework:query` |
+| Work context | What should the next session carry forward? | `/tracework:recall` |
+| Brief or review | What changed, what is risky, what is next? | `/tracework:weekly`, `/tracework:monthly` |
+| History | How did the decisions evolve? | `/tracework:roadmap` |
 
-No vault? No problem. `收工` outputs structured Markdown directly in the conversation.
-With a vault, capture writes quietly by default; use `/lode:capture checkpoint`
-during long sessions.
+## Boundary
+
+Tracework is not a meeting-notes tool, approval workflow, generic office suite,
+performance packaging layer, or employee-monitoring surface. It does not turn
+activity counts into outcomes. It preserves evidence so a later reader can
+check the work.

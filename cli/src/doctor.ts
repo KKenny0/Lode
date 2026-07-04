@@ -1,10 +1,12 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import chalk from 'chalk';
-import { readConfigForCwd, getConfigPath, expandHome, type LodeConfig } from './config.js';
+import { readConfigForCwd, getConfigPath, expandHome, type TraceworkConfig } from './config.js';
 import { OFFICIAL_SKILLS } from './utils.js';
-import * as codex from './installers/codex.js';
-import * as claudeCode from './installers/claude-code.js';
+import {
+  getClaudePluginSkillsPath,
+  getCodexPluginSkillsPath,
+} from './plugin-paths.js';
 
 interface DoctorOptions {
   cwd?: string;
@@ -57,38 +59,32 @@ function checkSkillInstallation(skipInstallCheck: boolean | undefined): CheckRes
     return pass('skill installation', 'Skipped by --skip-install-check');
   }
 
-  const codexDir = codex.getInstallPath();
-  const codexPluginDir = codex.getPluginSkillsPath();
-  const claudeMarketplace = claudeCode.getInstallPath();
-  const claudeSkillsDir = path.join(claudeMarketplace, 'lode', 'skills');
+  const codexPluginDir = getCodexPluginSkillsPath();
+  const claudeSkillsDir = getClaudePluginSkillsPath();
 
-  const codexSkills = installedSkillsIn(codexDir);
   const codexPluginSkills = installedSkillsIn(codexPluginDir);
   const claudeSkills = installedSkillsIn(claudeSkillsDir);
-  const installed = codexSkills.length === OFFICIAL_SKILLS.length
-    || codexPluginSkills.length === OFFICIAL_SKILLS.length
+  const installed = codexPluginSkills.length === OFFICIAL_SKILLS.length
     || claudeSkills.length === OFFICIAL_SKILLS.length;
 
   if (installed) {
     const targets = [
       codexPluginSkills.length === OFFICIAL_SKILLS.length ? `Codex plugin: ${codexPluginDir}` : null,
-      codexSkills.length === OFFICIAL_SKILLS.length ? `Codex: ${codexDir}` : null,
       claudeSkills.length === OFFICIAL_SKILLS.length ? `Claude Code: ${claudeSkillsDir}` : null,
     ].filter(Boolean).join('; ');
     return pass('skill installation', `Found all official skills (${targets})`);
   }
 
-  const missingCodex = OFFICIAL_SKILLS.filter(skill => !codexSkills.includes(skill));
   const missingCodexPlugin = OFFICIAL_SKILLS.filter(skill => !codexPluginSkills.includes(skill));
   const missingClaude = OFFICIAL_SKILLS.filter(skill => !claudeSkills.includes(skill));
   return fail(
     'skill installation',
-    `Missing skills. Codex plugin missing: ${missingCodexPlugin.join(', ') || 'none'}; Codex standalone missing: ${missingCodex.join(', ') || 'none'}; Claude Code missing: ${missingClaude.join(', ') || 'none'}`,
-    'Run `codex plugin marketplace add KKenny0/Lode` then `codex plugin add lode@lode`. Legacy fallback: run `lode install-codex-plugin`. Standalone skills: run `lode setup`.',
+    `Missing skills. Codex plugin missing: ${missingCodexPlugin.join(', ') || 'none'}; Claude Code plugin missing: ${missingClaude.join(', ') || 'none'}`,
+    'Run `codex plugin marketplace add KKenny0/Lode` then `codex plugin add tracework@tracework`.',
   );
 }
 
-function resolveVault(options: DoctorOptions, results: CheckResult[], cfg: LodeConfig | null): string | null {
+function resolveVault(options: DoctorOptions, results: CheckResult[], cfg: TraceworkConfig | null): string | null {
   if (options.vault) {
     const resolved = path.resolve(expandHome(options.vault));
     results.push(pass('config', `Using --vault override: ${resolved}`));
@@ -99,26 +95,26 @@ function resolveVault(options: DoctorOptions, results: CheckResult[], cfg: LodeC
     results.push(fail(
       'config',
       `No usable config found at ${getConfigPath()}`,
-      'Run `lode setup` or pass `lode doctor --vault /path/to/vault`.',
+      'Run `/tracework:cold-start-interview` or pass `tracework doctor --vault /path/to/vault`.',
     ));
     return null;
   }
 
-  results.push(pass('config', 'Loaded Lode config'));
+  results.push(pass('config', 'Loaded Tracework config'));
   return path.resolve(expandHome(cfg.knowledge_vault));
 }
 
-function resolveArchDocOutputDir(cfg: LodeConfig | null, cwd: string): string {
+function resolveArchDocOutputDir(cfg: TraceworkConfig | null, cwd: string): string {
   const configured = cfg?.arch_doc?.output_dir || 'docs';
   const expanded = expandHome(configured);
   return path.isAbsolute(expanded) ? path.resolve(expanded) : path.resolve(cwd, expanded);
 }
 
-function artifactIndexEnabled(cfg: LodeConfig | null): boolean {
+function artifactIndexEnabled(cfg: TraceworkConfig | null): boolean {
   return cfg?.artifact_index?.enabled !== false;
 }
 
-function checkArtifactGovernanceConfig(cfg: LodeConfig | null, cwd: string): CheckResult[] {
+function checkArtifactGovernanceConfig(cfg: TraceworkConfig | null, cwd: string): CheckResult[] {
   const archDocDir = resolveArchDocOutputDir(cfg, cwd);
   const artifactState = artifactIndexEnabled(cfg) ? 'enabled' : 'disabled';
   return [
@@ -133,7 +129,7 @@ function checkTemporaryWrite(vault: string, cwd: string, noWrite: boolean | unde
   }
 
   const slug = slugify(path.basename(cwd));
-  const doctorDir = path.join(vault, '.lode-doctor');
+  const doctorDir = path.join(vault, '.tracework-doctor');
   const weekDir = path.join(doctorDir, 'raw', 'weeks', '2099-W01');
   const rawFile = path.join(weekDir, `${slug}.json`);
   const weeklyDir = path.join(doctorDir, 'Work Diary', 'Weekly');
@@ -144,8 +140,8 @@ function checkTemporaryWrite(vault: string, cwd: string, noWrite: boolean | unde
       {
         timestamp: '2099-01-01T00:00:00+00:00',
         type: 'decision',
-        summary: 'Verified Lode doctor can write a temporary raw entry',
-        context: 'This entry is created under .lode-doctor and removed before the command exits.',
+        summary: 'Verified Tracework doctor can write a temporary raw entry',
+        context: 'This entry is created under .tracework-doctor and removed before the command exits.',
         source: 'session-recap',
         status: 'done',
       },
@@ -206,7 +202,7 @@ export async function runDoctor(options: DoctorOptions = {}): Promise<void> {
   if (options.json) {
     console.log(JSON.stringify({ ok: results.every(result => result.ok), results }, null, 2));
   } else {
-    console.log(chalk.bold('\nLode doctor\n'));
+    console.log(chalk.bold('\nTracework doctor\n'));
     for (const result of results) {
       const marker = result.ok ? chalk.green('PASS') : chalk.red('FAIL');
       console.log(`${marker} ${chalk.bold(result.name)} - ${result.message}`);

@@ -1,253 +1,135 @@
 <p align="center">
-  <img src="assets/mark.svg" alt="Lode" width="132" />
+  <img src="assets/mark.svg" alt="Tracework" width="132" />
 </p>
 
-<p align="center"><strong>Decision replay for agentic coding: capture the why, then compound it into reports, reviews, and roadmaps.</strong></p>
+<h1 align="center">Tracework</h1>
+
+<p align="center"><strong>Turn agent sessions into evidence-backed work memory.</strong></p>
 
 <p align="center">
-  <a href="https://kkenny0.github.io/Lode/showcase"><strong>See Lode in Action</strong></a> · <a href="https://kkenny0.github.io/Lode/">Documentation</a> · <a href="README.cn.md">中文</a>
+  <a href="https://kkenny0.github.io/Lode/"><strong>Documentation</strong></a> · <a href="https://kkenny0.github.io/Lode/showcase">Showcase</a> · <a href="README.cn.md">中文</a>
 </p>
 
-> **New:** [See real Lode outputs](https://kkenny0.github.io/Lode/showcase) — Daily Notes, Weekly Reports, Decision Replay, and Monthly Reviews from 14 months of daily use.
+Tracework gives agent work a trace that can be inspected, questioned, and
+carried forward.
 
-## Why
+It captures the decisions, evidence, risks, artifacts, and next steps inside
+agent sessions, then turns them into local records for recall, query, briefs,
+reviews, and roadmaps.
 
-AI makes software exploration cheap. It also makes continuity expensive.
+## What Tracework Does
 
-In one coding session, you can compare multiple designs, reject plausible paths, discover hidden constraints, update prompts, change schemas, and make decisions that only make sense because of everything you tried along the way. Git records the final diff. Issue trackers record planned work. Neither keeps the reasoning that made the work possible.
+Tracework can:
 
-When the session ends, that context usually disappears.
+- Capture session decisions, rejected paths, risks, artifacts, and next steps
+- Answer why a path was chosen when local evidence supports it
+- Recall useful context before a later session
+- Roll raw session records into daily, weekly, monthly, or roadmap views
+- Keep Markdown and JSON records in your own knowledge vault
 
-Lode is a local-first, dependency-light habit toolbox for agentic coding's persistent memory. Its primary value path is decision replay: capture decisions, risks, abandoned paths, open questions, and durable artifacts, then replay the reasoning later with cited evidence. Weekly outlines, monthly reviews, and roadmaps are compounding views over the same raw record.
-
-## Decision Replay Loop
-
-Lode is packaged around one primary value path:
-
-```text
-install -> demo -> capture one session -> query one decision
-```
-
-That loop proves the product: a coding agent can ask why a choice was made and
-get cited local evidence instead of a vague recap. `recall`, `roadmap`, daily,
-weekly, and monthly outputs come later as compounding views over the same raw
-record.
-
-## For Technical Professionals: Roll Work Up, Drill Down
-
-**Roll work up for reporting. Drill down to verify.**
-
-Lode turns scattered work from AI collaboration into report-ready, verifiable
-outcomes. When questions arise, trace each outcome back to decisions, tradeoffs,
-and evidence.
+The core loop stays small:
 
 ```text
-Report upward: session signals -> work streams -> outcomes and impact
-Verify downward: outcomes and impact -> decisions and tradeoffs -> source refs
+capture session signals -> replay decisions -> brief, review, or roadmap
 ```
 
-`capture` preserves the reporting inputs, `weekly` and `monthly` roll them into
-outcomes and progress, and `query` traces a claim back to cited local evidence.
-Activity counts measure record coverage; they do not prove an outcome by
-themselves. This use case is for developers, tech leads, and small technical
-teams that need to explain technical work—not generic meetings, approvals, or
-employee monitoring.
+Decision replay is the trust mechanism: a later agent or reader can drill from
+a claim back to raw entries, rejected alternatives, risks, and source refs. If
+the record does not support an answer, Tracework should say so instead of
+inventing history.
+
+Tracework is not a meeting-notes tool, approval workflow, performance packaging
+tool, employee-monitoring surface, or generic office suite. Activity counts are
+coverage metadata, not proof of outcomes.
 
 ## Skills
 
-Each skill maps to a habit you already have. In plugin form, activate it with a
-namespaced command.
-
-### Tier 1 — Start here (immediate value, no accumulated data needed)
-
-| Skill | When | What it does |
+| Command | When | Output |
 | :--- | :--- | :--- |
-| `/lode:cold-start-interview` | First run | Creates `~/.lode/config.yaml` with vault path, project identity, language, and report preferences |
-| `/lode:capture` | Wrap-up or checkpoint | Quietly captures decision/build/repair depth, stage progress, and durable artifacts when relevant |
-| `/lode:recall` | Session start, after history exists | Recalls recent decisions, risks, open questions, abandoned alternatives, relevant docs, and possible stale intent artifacts |
+| `/tracework:cold-start-interview` | First run | Configures the local vault and project profile |
+| `/tracework:capture` | Wrap-up or checkpoint | Captures decisions, builds, investigations, repairs, risks, and artifacts |
+| `/tracework:recall` | Session start | Recalls recent decisions, risks, open questions, and relevant artifacts |
+| `/tracework:query` | Targeted follow-up | Answers "why did we choose this?" with cited local evidence |
+| `/tracework:weekly` | Weekly | Rolls raw session records into a brief-ready outline |
+| `/tracework:monthly` | Monthly | Builds a monthly review and candidate repeated rules |
+| `/tracework:roadmap` | Phase review | Synthesizes a narrative decision history |
+| `/tracework:daily` | Daily | Updates Obsidian-style daily notes from raw entries and git history |
 
-Start with the capture+recall loop for 1-2 weeks. Once raw entries accumulate, Tier 2 skills become richer.
+The habit loop is intentionally small:
 
-### Tier 2 — Week 1+ (better after a few sessions of raw entries)
-
-| Skill | When | What it does |
-| :--- | :--- | :--- |
-| `/lode:daily` | Daily, on demand | Updates Obsidian daily notes from raw entries and git history |
-| `/lode:weekly` | Weekly, on demand | Builds a PPT preparation reference from raw entries, with a conditional hard-stuff section when evidence exists |
-| `/lode:query` | Targeted follow-up | Answers "why did we choose this?" with cited decision replay evidence |
-
-### Tier 3 — Month+ (compounding views, need accumulated history)
-
-| Skill | When | What it does |
-| :--- | :--- | :--- |
-| `/lode:monthly` | Monthly, on demand | Generates a monthly review and candidate rules from repeated evidence |
-| `/lode:roadmap` | Phase reviews, after multiple decisions | Generates a narrative decision roadmap, including accumulating risks and recurring open questions |
-
-Skills are independent. Lode is not a strict pipeline — each skill works on its own, but they share one local storage convention so downstream reports can reuse earlier context.
-
-### Recommended Habit Loop
-
-**Day 1**: Run `/lode:cold-start-interview` once to configure the vault.
-
-**Every session**: End with `/lode:capture` ("收工"), checkpoint long work with `/lode:capture checkpoint`, and start with `/lode:recall` ("开工"). These form the core habit loop.
-
-**After 1-2 weeks**: Use `/lode:daily` and `/lode:weekly` for periodic reports, `/lode:query` for targeted decision follow-up.
-
-**After 1+ months**: Use `/lode:monthly` for monthly reviews and `/lode:roadmap` for decision evolution retrospectives.
-
-## Decision Replay
-
-Lode turns "why did we choose this?" into a first-class workflow. Raw entries
-remain the source of truth, while `{vault}/raw/decisions/{slug}.json` gives
-coding agents a compact, cited evidence pack for targeted decision questions.
-See
-[`examples/decision-replay-proof.md`](examples/decision-replay-proof.md) for a
-real Lode-on-Lode dogfood run, including a negative query that correctly
-returns no answer when the decision history is missing.
-
-### First useful path
-
-1. Install Lode.
-2. Run the deterministic fixture:
-
-```bash
-node examples/decision-replay-demo.mjs
+```text
+/tracework:cold-start-interview once
+收工 or /tracework:capture at session end
+开工 or /tracework:recall at session start
+/tracework:query when someone needs the why
 ```
 
-It prints the same compact evidence shape `/lode:query` is meant to give a
-coding agent: answerability metadata, the top decision node, raw
-`source_entry_refs`, matched terms, and rejected alternatives.
-
-3. Run `/lode:cold-start-interview` once.
-4. At the end of one real coding session, say `收工` or run `/lode:capture`. With a configured vault, capture writes quietly by default.
-5. Ask `/lode:query why did we choose <the decision>?`.
-
-The useful result is not a summary. It is a cited answer with matched decision
-nodes, `source_entry_refs`, rejected alternatives when recorded, and an explicit
-"not enough evidence" response when the vault does not contain that history.
-After that loop works, use `/lode:recall`, `/lode:roadmap`, `/lode:daily`,
-`/lode:weekly`, and `/lode:monthly` to compound the same record.
+Weekly, monthly, daily, and roadmap views compound after enough raw entries
+exist. They are views over the same record, not a separate reporting database.
 
 ## Install
+
+### Codex
+
+```bash
+codex plugin marketplace add KKenny0/Lode
+codex plugin add tracework@tracework
+```
+
+Update:
+
+```bash
+codex plugin marketplace upgrade tracework
+codex plugin add tracework@tracework
+```
 
 ### Claude Code
 
 ```bash
-# GitHub marketplace (recommended)
 claude plugin marketplace add KKenny0/Lode
-
-# Or local development
-claude plugin marketplace add ./path/to/Lode
+claude plugin install tracework@tracework
 ```
 
-After installation the namespaced commands (`/lode:capture`, `/lode:recall`, etc.) are available in every Claude Code session.
-
-To update to the latest version:
+Update:
 
 ```bash
-claude plugin marketplace update lode
-claude plugin update lode@lode
+claude plugin marketplace update tracework
+claude plugin update tracework@tracework
 ```
 
-CLI verification is also available:
+## Storage
 
-```bash
-npx @lode/cli doctor
-```
+- Config: `~/.tracework/config.yaml` or `{project}/.tracework/config.yaml`
+- Raw entries: `{vault}/raw/weeks/{week}/{slug}.json`
+- Decision indexes: `{vault}/raw/decisions/{slug}.json`
+- Human-readable outputs: `{vault}/Daily Note.md` and `{vault}/Work Diary/`
 
-### Codex
+The public product, command, config, and schema namespace is `tracework`.
+Tracework does not use legacy storage fallbacks; configure `knowledge_vault` in
+one of the config files above.
 
-Install Lode through the native Codex plugin marketplace flow:
-
-```bash
-codex plugin marketplace add KKenny0/Lode
-codex plugin add lode@lode
-```
-
-To update to the latest version:
-
-```bash
-codex plugin marketplace upgrade lode
-codex plugin add lode@lode
-```
-
-If you previously used the legacy bridge install, install the current plugin
-first, then remove the old plugin key:
-
-```bash
-codex plugin remove lode@lode-marketplace
-```
-
-Restart Codex if it is open, then start a new thread. You should see the Lode
-plugin skills as available commands such as `/lode:capture`, `/lode:recall`,
-and `/lode:query`.
-
-For local development from this checkout, rebuild the plugin bundle before
-installing it:
-
-```bash
-npm --prefix cli run copy-skills
-codex plugin marketplace add ./path/to/Lode
-codex plugin add lode@lode
-```
-
-Only use the legacy fallback when your Codex build does not provide
-`codex plugin add`:
-
-```bash
-npx @lode/cli install-codex-plugin
-```
-
-Then prove the replay loop: run the demo, run `/lode:cold-start-interview`
-once, capture one real session with `收工` or `/lode:capture`, and query one
-decision with `/lode:query`. During long sessions, use `/lode:capture checkpoint`
-to quietly save stage progress. After that, use `开工` or `/lode:recall` at
-session start, `/lode:roadmap` for decision evolution, and reports when the raw
-record has enough history.
-
-No vault? No problem — `收工` outputs structured Markdown directly in the conversation.
-
-For configuration details see [docs/configuration.md](docs/configuration.md). For the data model see [docs/data-model.md](docs/data-model.md). Artifact ownership and roadmap storage rules are documented in [docs/artifact-governance.md](docs/artifact-governance.md). Synthetic examples live in [`examples/`](examples/).
-
-## Background
-
-The name comes from **lode**: a vein of ore where valuable mineral is concentrated. Commits, sessions, diffs, code changes — that is the ore. Lode refines it into work knowledge worth keeping. The word shares its root with *load* and with the Chinese character 载 (zài, to carry, to record). The original tagline, "the knowledge vein in your codebase", still describes the metaphor; the product promise is persistent memory for agentic coding that humans can read, review, and share.
-
-Lode writes local Markdown and JSON only. Code-adjacent artifacts such as architecture docs stay in the project repo by default; shared memory, indexes, and reports live in your knowledge vault. No remote services, accounts, sync backends, or hosted databases. If your knowledge vault is a git repo, you control where it gets pushed.
-
-<details>
-<summary>Development</summary>
+## Development
 
 ```bash
 npm --prefix cli run build
 npm --prefix cli run copy-skills
 npm --prefix cli run check-skills
-npm --prefix cli run test:regression
+npm --prefix cli run test
+npm --prefix site run build
 ```
 
-Design principles:
+After editing `.codex-plugin/`, `skills/`, or `assets/`, run:
 
-- **Self-contained skills**: each skill carries its own references so it can be installed individually.
-- **Decision replay first**: `/lode:query` and `/lode:roadmap` turn captured rationale into cited answers and narrative decision history.
-- **Raw-first reporting**: weekly reports use raw entries as the primary semantic source; git is fallback and coverage evidence.
-- **Adaptive-depth recap**: session wrap-up entries carry archetype-specific fields so reports can explain decisions, repairs, investigations, and builds without a second write skill.
-- **Artifact governance**: full repo-local docs stay near the code, while capture-owned vault indexes make them discoverable for recall and reports.
-- **Graceful side effects**: when a raw write is only a side effect, failures do not block the primary deliverable.
-- **Deterministic helpers**: scripts handle path resolution, date calculation, parsing, and aggregation where consistency matters.
-- **Local evals, public protocols**: local fixtures stay ignored; public benchmark guidance lives under [`benchmarks/`](benchmarks/).
+```bash
+npm --prefix cli run copy-skills
+npm --prefix cli run check-skills
+```
 
-</details>
+Core docs:
 
-<details>
-<summary>Benchmarks</summary>
-
-Public benchmark protocols document the quality bar without publishing local fixtures:
-
-- [`benchmarks/README.md`](benchmarks/README.md)
-- [`benchmarks/weekly-outline.md`](benchmarks/weekly-outline.md)
-- [`docs/release-artifact-inventory.md`](docs/release-artifact-inventory.md)
-
-</details>
+- [Configuration](docs/configuration.md)
+- [Data model](docs/data-model.md)
+- [Artifact governance](docs/artifact-governance.md)
 
 ## License
 

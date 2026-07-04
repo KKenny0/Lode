@@ -1,68 +1,60 @@
 # 工作流
 
-## Replay Loop
-
-Lode 围绕最短的价值证明路径组织：
+## 最小 Loop
 
 ```text
-安装 → demo → capture 一次 session → query 一个 decision
+安装 -> 配置 -> capture 一次真实 session -> query 一个 decision
 ```
 
-每一步映射到你工作流中的自然时刻：
+1. 以 `tracework@tracework` 安装插件。
+2. 运行 `/tracework:cold-start-interview`。
+3. 用 `收工` 或 `/tracework:capture` 结束一次真实 session。
+4. 用 `/tracework:query why did we choose <the decision>?` 追问一个选择。
 
-1. **安装** — 添加插件，必要时验证 CLI。
-2. **Demo** — 运行 `node examples/decision-replay-demo.mjs` 查看 evidence-pack 形状。
-3. **收工一次真实 session** — `收工` 或 `/lode:capture` 分类会话，捕获决策、风险、放弃的方案、制品变更和 source references。
-4. **追问一个 decision** — agent 需要知道项目当时为什么选择某条路径时运行 `/lode:query`。
-5. **之后复利** — 有历史后再用 `/lode:recall`、`/lode:roadmap`、`/lode:daily`、`/lode:weekly` 或 `/lode:monthly`。
+这条路径证明核心价值：后来的读者不需要重翻完整 transcript，也能恢复一个选择
+为什么发生。
 
-## 积累层次
-
-Lode 不是严格的流水线。技能独立触发，但会在可用时复用彼此的制品。
+## 复用地图
 
 ```text
-Capture → raw/weeks/{week}/{slug}.json    → 原始条目 + 制品索引
-Query   ← raw/decisions/ + raw/weeks/      → 带引用的决策回放证据包
-Recall ← raw/weeks/ + raw/artifacts/      → 会话上下文
-Roadmap ← raw/weeks/ + raw/decisions/      → 决策叙事
-Daily   ← raw/weeks/ JSON + git log       → Daily Note.md
-Weekly  ← raw/weeks/ + git 覆盖           → 周报大纲
-Monthly ← Daily Note.md                   → 月度回顾 + 候选规则
+Capture -> raw/weeks/{week}/{slug}.json
+Query   <- raw/decisions/ + raw/weeks/
+Recall  <- raw/weeks/ + raw/artifacts/ + raw/decisions/
+Weekly  <- raw/weeks/ + fallback git coverage
+Monthly <- Daily Note.md + matching raw entries
+Roadmap <- raw entries + decision indexes
 ```
 
-关键洞察：`capture` 的原始条目具有报告价值。它们携带原型特定字段（决策理由、修复根因、调查发现），使 `/lode:query`、`/lode:roadmap` 和周期报告无需二次写入即可解释发生了什么。
+Skills 独立触发，没有强制流水线。共享 storage convention 让后续视图可以复用早期
+证据。
 
-日报、周报和月报是复利层。它们会随着 decision evidence 积累而变好，但不是
-Lode 第一次使用时必须跑通的路径。
+## 逐层收口
 
-## 汇报收口路径
-
-Lode 在报告层使用同一条可逆路径：向上把 session 信号收口成成果，向下让每个
-重要结论回到决策与证据。
+Brief 和 review 应该向上汇总工作，同时保留向下核验路径：
 
 ```text
-向上逐层收口：raw entries → 决策/取舍 → 工作主线 → 成果/进展
-向下穿透核验：成果/进展 → 支撑主线 → 决策/取舍 → raw/source/evidence refs
+向上：raw entries -> decisions -> work streams -> outcomes / risks / next steps
+向下：outcome claim -> stream -> decision -> raw entry / evidence ref
 ```
 
-- `capture` 记录具体变化、影响、状态、工作主线和证据引用。
-- `weekly` / `monthly` 只把通过成果检验的变化放进成果层；进行中、风险、探索和维护保持原状态。
-- `query` 使用本地引用解释为什么形成该结论、放弃过什么，以及有哪些证据或证据缺口。
-- raw entries 始终是事实源；报告只是可追溯的阅读视图，不会反向创造事实。
+周报和月报可以使用本地标签：
 
-提交数、代码行数、任务数、工作日和日志量只能说明活动或覆盖度，不能单独证明成果。
+- `O#`：成果、进展、风险或决策
+- `W#`：支撑工作主线
+- `D#`：决策或取舍
+- `E#`：证据审计
 
-## 存储约定
+这些标签让报告可检查。它们不改变 raw schema。
 
-数据分为两个层次存放在你的知识库中：
+## 零配置
 
-- **原始层** (`raw/`) — 不可变的中间数据：weekly entries、decision replay indexes、制品索引、信号、骨架
-- **Wiki 层** — 人类可读的输出：日报、周报大纲、月度回顾、决策路线图
+没有 vault 时，capture 仍然可以直接在对话里返回结构化 recap。当你需要安静写入、
+跨 session recall、query、brief 或 review 时，再配置 vault。
 
-你的知识库是一个 git 仓库（通常是 Obsidian vault），通过 git push/pull 实现跨机器同步。
+## 证据规则
 
-## 零配置模式
-
-没有 vault？没问题。`capture` 直接在对话中输出结构化 Markdown，所以第一个会话无需设置也有价值。等你希望 `/lode:recall`、`/lode:query` 和报告复用持久历史时，再配置 vault。
-
-当你准备好使用持久存储时，运行 `/lode:cold-start-interview` 配置 vault 路径。已有的纯对话会话仍然有用 — 只是不会积累到报告中。
+- Source ref 是记录出处，不自动等于证明。
+- 只有 git 的工作属于 fallback evidence。
+- 活动数量不能证明 outcome。
+- 不支持的 query 应该返回 evidence gap。
+- 新事实应该追加成新的 raw entry，不写进旧记录。

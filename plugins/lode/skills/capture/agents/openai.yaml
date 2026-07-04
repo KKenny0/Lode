@@ -1,4 +1,0 @@
-interface:
-  display_name: "Lode Capture"
-  short_description: "Record session changes for weekly reports"
-  default_prompt: "Use $capture to record the key changes from this work session."

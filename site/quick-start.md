@@ -4,117 +4,78 @@
 
 ```bash
 codex plugin marketplace add KKenny0/Lode
-codex plugin add lode@lode
+codex plugin add tracework@tracework
 ```
 
-To update:
+Update:
 
 ```bash
-codex plugin marketplace upgrade lode
-codex plugin add lode@lode
+codex plugin marketplace upgrade tracework
+codex plugin add tracework@tracework
 ```
 
-Use the legacy fallback only when `codex plugin add` is unavailable:
+## 2. Configure the Vault
 
-```bash
-npx @lode/cli install-codex-plugin
+Run once:
+
+```text
+/tracework:cold-start-interview
 ```
 
-## 2. Run the Demo
+This writes config under `~/.tracework/config.yaml` or
+`{project}/.tracework/config.yaml`.
 
-Run the deterministic replay fixture before setting up a vault:
+## 3. Capture One Real Session
 
-```bash
-node examples/decision-replay-demo.mjs
-```
+At the end of work, say:
 
-It prints the evidence-pack shape that `/lode:query` should return:
-answerability metadata, the top decision node, raw source references, matched
-terms, and rejected alternatives.
-
-## 3. First Run
-
-Run the cold-start interview once to configure Lode:
-
-```
-/lode:cold-start-interview
-```
-
-This creates `~/.lode/config.yaml` with your vault path, project identity, language, and report preferences.
-
-## 4. Capture One Session
-
-At the end of one real coding session, say:
-
-```
+```text
 收工
 ```
 
-or run `/lode:capture`. Lode classifies the session archetype and captures what
-matters: decisions, risks, abandoned paths, artifact changes, and source
-references. With a configured vault, capture writes quietly by default.
+or run:
 
-During a long session, run `/lode:capture checkpoint` to quietly save a durable
-stage signal before continuing.
-
-## 5. Query One Decision
-
-After one captured session, ask a concrete question:
-
-```
-/lode:query why did we choose <the decision>?
+```text
+/tracework:capture
 ```
 
-The pass condition is a grounded answer: matched decision node ids,
-`source_entry_refs` for provenance, direct evidence references when available,
-rejected alternatives when they exist, and an explicit evidence gap when Lode
-has only a record but no independent verification—or no supporting record at all.
+For long work, capture a durable checkpoint:
 
-## Later: Recall and Reports
+```text
+/tracework:capture checkpoint
+```
 
-Once there is history, start sessions with `开工` or `/lode:recall`. Use
-`/lode:roadmap` when several decisions have accumulated. Use daily, weekly, and
-monthly outputs when the raw record is thick enough to synthesize.
+Capture should record decisions, rejected paths, risks, evidence, artifact
+changes, and next steps. If no vault is configured, it can still return a
+structured recap in the conversation.
 
-## Compounding Outputs
+## 4. Query One Decision
 
-| Command | When | Output |
+Ask a concrete why question:
+
+```text
+/tracework:query why did we choose <the decision>?
+```
+
+A good answer includes matched decision nodes, raw `source_entry_refs`, rejected
+alternatives when recorded, and an explicit evidence gap when the record is not
+strong enough.
+
+## 5. Reuse the Record
+
+| Command | Use after | Purpose |
 | :--- | :--- | :--- |
-| `/lode:query` | Any time | Cited answer to a targeted decision-history question |
-| `/lode:recall` | Session start, after history exists | Compact Decision Context |
-| `/lode:roadmap` | After multiple decisions | Narrative decision roadmap with accumulating risks |
-| `/lode:daily` | Daily | Obsidian daily note from raw entries + git history |
-| `/lode:weekly` | Weekly | Weekly outline with conditional hard-stuff section |
-| `/lode:monthly` | Monthly | Monthly review + candidate rules from repeated evidence |
+| `/tracework:recall` | A few captured sessions | Start the next session with relevant context |
+| `/tracework:weekly` | A week of records | Build a brief-ready outline |
+| `/tracework:monthly` | A month of records | Generate a review and repeated-rule candidates |
+| `/tracework:roadmap` | Multiple decisions | Review how decisions evolved |
 
-Use `/lode:query` when the next agent needs to know why a choice was made. It
-answers from local evidence and should return no answer when the vault has no
-supporting record.
+## Storage
 
-## Configuration
+Tracework reads config from:
 
-Lode reads config from (in priority order):
+1. `{project}/.tracework/config.yaml`
+2. `~/.tracework/config.yaml`
 
-1. `{project}/.lode/config.yaml` — project-level
-2. `~/.lode/config.yaml` — global
-3. `$WEEKLY_PPT_PATH` — legacy environment fallback
-4. `~/.weekly-ppt/` — legacy default fallback
-
-```yaml
-knowledge_vault: /path/to/your/knowledge-vault
-project_slug: my-project
-
-profile:
-  project_name: My Project
-  report_language: mixed
-  weekly_mode: tech
-  team_context: solo
-```
-
-See the [config template](https://github.com/KKenny0/Lode/blob/main/references/lode-config-template.yaml) for all options.
-
-## Zero-Config
-
-Skip the vault entirely. `capture` outputs structured Markdown right in the conversation, so the first session still has immediate value. Configure a vault before expecting quiet writes, `/lode:recall`, `/lode:query`, or reports to reuse that record across sessions.
-
-Configure a vault later when you want compounding reports.
+Configure `knowledge_vault` in one of those files. Tracework writes raw entries,
+decision indexes, and readable outputs into that vault.

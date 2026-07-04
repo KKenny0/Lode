@@ -3,8 +3,8 @@ import path from 'node:path';
 import os from 'node:os';
 import yaml from 'js-yaml';
 
-export interface LodeConfig {
-  knowledge_vault: string;
+export interface TraceworkConfig {
+  knowledge_vault?: string;
   project_slug?: string;
   profile?: {
     project_name?: string;
@@ -21,7 +21,7 @@ export interface LodeConfig {
   };
 }
 
-const CONFIG_DIR = path.join(os.homedir(), '.lode');
+const CONFIG_DIR = path.join(os.homedir(), '.tracework');
 const CONFIG_FILE = path.join(CONFIG_DIR, 'config.yaml');
 
 export function expandHome(value: string): string {
@@ -34,11 +34,11 @@ export function getConfigPath(): string {
   return CONFIG_FILE;
 }
 
-export function readConfig(): LodeConfig | null {
+export function readConfig(): TraceworkConfig | null {
   if (!fs.existsSync(CONFIG_FILE)) return null;
   try {
     const raw = fs.readFileSync(CONFIG_FILE, 'utf-8');
-    return yaml.load(raw) as LodeConfig;
+    return yaml.load(raw) as TraceworkConfig;
   } catch {
     return null;
   }
@@ -47,7 +47,7 @@ export function readConfig(): LodeConfig | null {
 function findProjectConfig(cwd: string): string | null {
   let current = path.resolve(cwd);
   while (true) {
-    const candidate = path.join(current, '.lode', 'config.yaml');
+    const candidate = path.join(current, '.tracework', 'config.yaml');
     if (fs.existsSync(candidate)) return candidate;
     const parent = path.dirname(current);
     if (parent === current) return null;
@@ -55,9 +55,9 @@ function findProjectConfig(cwd: string): string | null {
   }
 }
 
-function mergeConfigs(globalCfg: LodeConfig | null, projectCfg: LodeConfig | null): LodeConfig | null {
+function mergeConfigs(globalCfg: TraceworkConfig | null, projectCfg: TraceworkConfig | null): TraceworkConfig | null {
   if (!globalCfg && !projectCfg) return null;
-  const merged = { ...(globalCfg || {}) } as LodeConfig;
+  const merged = { ...(globalCfg || {}) } as TraceworkConfig;
   const mergedRecord = merged as unknown as Record<string, unknown>;
   for (const [key, value] of Object.entries(projectCfg || {})) {
     const existing = mergedRecord[key];
@@ -80,29 +80,20 @@ function mergeConfigs(globalCfg: LodeConfig | null, projectCfg: LodeConfig | nul
   return merged;
 }
 
-export function readConfigForCwd(cwd: string): LodeConfig | null {
+export function readConfigForCwd(cwd: string): TraceworkConfig | null {
   const globalCfg = readConfig();
   const projectPath = findProjectConfig(cwd);
-  if (!projectPath) return withLegacyFallback(globalCfg);
+  if (!projectPath) return globalCfg;
   try {
     const raw = fs.readFileSync(projectPath, 'utf-8');
-    const projectCfg = yaml.load(raw) as LodeConfig;
-    return withLegacyFallback(mergeConfigs(globalCfg, projectCfg));
+    const projectCfg = yaml.load(raw) as TraceworkConfig;
+    return mergeConfigs(globalCfg, projectCfg);
   } catch {
-    return withLegacyFallback(globalCfg);
+    return globalCfg;
   }
 }
 
-function withLegacyFallback(cfg: LodeConfig | null): LodeConfig | null {
-  if (cfg?.knowledge_vault) return cfg;
-  const envVault = process.env.WEEKLY_PPT_PATH;
-  if (envVault && envVault.trim()) {
-    return { ...(cfg || {}), knowledge_vault: envVault };
-  }
-  return { ...(cfg || {}), knowledge_vault: '~/.weekly-ppt' };
-}
-
-export function writeConfig(cfg: LodeConfig): void {
+export function writeConfig(cfg: TraceworkConfig): void {
   if (!fs.existsSync(CONFIG_DIR)) {
     fs.mkdirSync(CONFIG_DIR, { recursive: true });
   }

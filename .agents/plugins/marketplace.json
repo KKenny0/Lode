@@ -1,14 +1,14 @@
 {
-  "name": "lode",
+  "name": "tracework",
   "interface": {
-    "displayName": "Lode"
+    "displayName": "Tracework"
   },
   "plugins": [
     {
-      "name": "lode",
+      "name": "tracework",
       "source": {
         "source": "local",
-        "path": "./plugins/lode"
+        "path": "./plugins/tracework"
       },
       "policy": {
         "installation": "AVAILABLE",

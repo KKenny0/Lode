@@ -9,12 +9,15 @@ const cliRoot = path.resolve(scriptDir, '..');
 const repoRoot = path.resolve(cliRoot, '..');
 const sourceSkillsDir = path.join(repoRoot, 'skills');
 const bundledSkillsDir = path.join(cliRoot, 'skills');
-const codexPluginBundleDir = path.join(repoRoot, 'plugins', 'lode');
+const codexPluginBundleDir = path.join(repoRoot, 'plugins', 'tracework');
 const codexPluginSkillsDir = path.join(codexPluginBundleDir, 'skills');
 const codexPluginManifest = path.join(codexPluginBundleDir, '.codex-plugin', 'plugin.json');
+const claudePluginManifest = path.join(codexPluginBundleDir, '.claude-plugin', 'plugin.json');
 const sourceCodexPluginManifest = path.join(repoRoot, '.codex-plugin', 'plugin.json');
+const sourceClaudePluginManifest = path.join(repoRoot, '.claude-plugin', 'plugin.json');
+const claudeMarketplace = path.join(repoRoot, '.claude-plugin', 'marketplace.json');
 const codexMarketplace = path.join(repoRoot, '.agents', 'plugins', 'marketplace.json');
-const canonicalConvention = path.join(repoRoot, 'references', 'weekly-ppt-convention.md');
+const canonicalConvention = path.join(repoRoot, 'references', 'tracework-storage-convention.md');
 const canonicalDecisionReplay = path.join(repoRoot, 'references', 'decision_replay.py');
 
 const officialSkills = [
@@ -29,14 +32,14 @@ const officialSkills = [
 ];
 
 const conventionCopies = [
-  path.join(sourceSkillsDir, 'capture', 'references', 'weekly-ppt-convention.md'),
-  path.join(sourceSkillsDir, 'recall', 'references', 'weekly-ppt-convention.md'),
-  path.join(sourceSkillsDir, 'roadmap', 'references', 'weekly-ppt-convention.md'),
-  path.join(sourceSkillsDir, 'monthly', 'references', 'weekly-ppt-convention.md'),
-  path.join(bundledSkillsDir, 'capture', 'references', 'weekly-ppt-convention.md'),
-  path.join(bundledSkillsDir, 'recall', 'references', 'weekly-ppt-convention.md'),
-  path.join(bundledSkillsDir, 'roadmap', 'references', 'weekly-ppt-convention.md'),
-  path.join(bundledSkillsDir, 'monthly', 'references', 'weekly-ppt-convention.md'),
+  path.join(sourceSkillsDir, 'capture', 'references', 'tracework-storage-convention.md'),
+  path.join(sourceSkillsDir, 'recall', 'references', 'tracework-storage-convention.md'),
+  path.join(sourceSkillsDir, 'roadmap', 'references', 'tracework-storage-convention.md'),
+  path.join(sourceSkillsDir, 'monthly', 'references', 'tracework-storage-convention.md'),
+  path.join(bundledSkillsDir, 'capture', 'references', 'tracework-storage-convention.md'),
+  path.join(bundledSkillsDir, 'recall', 'references', 'tracework-storage-convention.md'),
+  path.join(bundledSkillsDir, 'roadmap', 'references', 'tracework-storage-convention.md'),
+  path.join(bundledSkillsDir, 'monthly', 'references', 'tracework-storage-convention.md'),
 ];
 
 const syncedScriptPairs = [
@@ -108,9 +111,18 @@ function validateSkillDirectory(baseDir, skill) {
 }
 
 assert(exists(bundledSkillsDir), 'cli/skills is missing. Run npm run copy-skills first.');
-assert(exists(codexPluginBundleDir), 'plugins/lode is missing. Run npm run copy-skills first.');
-assert(exists(codexPluginManifest), 'plugins/lode/.codex-plugin/plugin.json is missing. Run npm run copy-skills first.');
+assert(exists(codexPluginBundleDir), 'plugins/tracework is missing. Run npm run copy-skills first.');
+assert(exists(codexPluginManifest), 'plugins/tracework/.codex-plugin/plugin.json is missing. Run npm run copy-skills first.');
+assert(exists(claudePluginManifest), 'plugins/tracework/.claude-plugin/plugin.json is missing. Run npm run copy-skills first.');
 assert(exists(sourceCodexPluginManifest), '.codex-plugin/plugin.json is missing');
+assert(exists(sourceClaudePluginManifest), '.claude-plugin/plugin.json is missing');
+
+const allowedPluginBundleEntries = new Set(['.codex-plugin', '.claude-plugin', 'skills', 'assets']);
+if (exists(codexPluginBundleDir)) {
+  for (const entry of fs.readdirSync(codexPluginBundleDir)) {
+    assert(allowedPluginBundleEntries.has(entry), `Unexpected plugin bundle entry: plugins/tracework/${entry}`);
+  }
+}
 
 for (const skill of officialSkills) {
   validateSkillDirectory(sourceSkillsDir, skill);
@@ -149,29 +161,51 @@ for (const dir of forbiddenCodexPlugin) {
 if (exists(sourceCodexPluginManifest) && exists(codexPluginManifest)) {
   const sourceManifest = fs.readFileSync(sourceCodexPluginManifest, 'utf-8');
   const bundleManifest = fs.readFileSync(codexPluginManifest, 'utf-8');
-  assert(bundleManifest === sourceManifest, 'Codex plugin manifest copy is stale: plugins/lode/.codex-plugin/plugin.json');
+  assert(bundleManifest === sourceManifest, 'Codex plugin manifest copy is stale: plugins/tracework/.codex-plugin/plugin.json');
+}
+
+if (exists(sourceClaudePluginManifest) && exists(claudePluginManifest)) {
+  const sourceManifest = fs.readFileSync(sourceClaudePluginManifest, 'utf-8');
+  const bundleManifest = fs.readFileSync(claudePluginManifest, 'utf-8');
+  assert(bundleManifest === sourceManifest, 'Claude plugin manifest copy is stale: plugins/tracework/.claude-plugin/plugin.json');
 }
 
 if (exists(sourceCodexPluginManifest)) {
   const manifest = JSON.parse(fs.readFileSync(sourceCodexPluginManifest, 'utf-8'));
   assert(!('$schema' in manifest), '.codex-plugin/plugin.json must not include $schema; Codex plugin validation rejects it');
-  assert(manifest.name === 'lode', '.codex-plugin/plugin.json name must be lode');
+  assert(manifest.name === 'tracework', '.codex-plugin/plugin.json name must be tracework');
   assert(manifest.skills === './skills/', '.codex-plugin/plugin.json skills must point to ./skills/');
 }
 
 if (exists(codexMarketplace)) {
   const marketplace = JSON.parse(fs.readFileSync(codexMarketplace, 'utf-8'));
-  assert(marketplace.name === 'lode', '.agents/plugins/marketplace.json name must be lode');
+  assert(marketplace.name === 'tracework', '.agents/plugins/marketplace.json name must be tracework');
   assert(Array.isArray(marketplace.plugins) && marketplace.plugins.length === 1, '.agents/plugins/marketplace.json must expose exactly one plugin');
   const plugin = marketplace.plugins?.[0];
-  assert(plugin?.name === 'lode', '.agents/plugins/marketplace.json plugin name must be lode');
+  assert(plugin?.name === 'tracework', '.agents/plugins/marketplace.json plugin name must be tracework');
   assert(plugin?.source?.source === 'local', '.agents/plugins/marketplace.json plugin source must be local');
-  assert(plugin?.source?.path === './plugins/lode', '.agents/plugins/marketplace.json plugin source path must be ./plugins/lode');
+  assert(plugin?.source?.path === './plugins/tracework', '.agents/plugins/marketplace.json plugin source path must be ./plugins/tracework');
   assert(!('interface' in plugin), '.agents/plugins/marketplace.json plugin entry should not carry non-standard interface metadata');
 }
 
+if (exists(sourceClaudePluginManifest)) {
+  const manifest = JSON.parse(fs.readFileSync(sourceClaudePluginManifest, 'utf-8'));
+  assert(manifest.name === 'tracework', '.claude-plugin/plugin.json name must be tracework');
+  assert(manifest.version === '0.1.0', '.claude-plugin/plugin.json version must be 0.1.0');
+}
+
+if (exists(claudeMarketplace)) {
+  const marketplace = JSON.parse(fs.readFileSync(claudeMarketplace, 'utf-8'));
+  assert(marketplace.name === 'tracework', '.claude-plugin/marketplace.json name must be tracework');
+  assert(Array.isArray(marketplace.plugins) && marketplace.plugins.length === 1, '.claude-plugin/marketplace.json must expose exactly one plugin');
+  const plugin = marketplace.plugins?.[0];
+  assert(plugin?.name === 'tracework', '.claude-plugin/marketplace.json plugin name must be tracework');
+  assert(plugin?.version === '0.1.0', '.claude-plugin/marketplace.json plugin version must be 0.1.0');
+  assert(plugin?.source === './plugins/tracework', '.claude-plugin/marketplace.json plugin source must be ./plugins/tracework');
+}
+
 const canonical = exists(canonicalConvention) ? fs.readFileSync(canonicalConvention, 'utf-8') : null;
-assert(Boolean(canonical), 'Canonical weekly-ppt-convention.md is missing');
+assert(Boolean(canonical), 'Canonical tracework-storage-convention.md is missing');
 if (canonical) {
   for (const copy of conventionCopies) {
     assert(exists(copy), `Convention copy is missing: ${copy}`);

@@ -11,8 +11,10 @@ const bundledSkillsDir = path.join(cliRoot, 'skills');
 const sourceAssetsDir = path.join(repoRoot, 'assets');
 const bundledAssetsDir = path.join(cliRoot, 'assets');
 const sourceCodexPluginDir = path.join(repoRoot, '.codex-plugin');
-const codexPluginBundleDir = path.join(repoRoot, 'plugins', 'lode');
+const sourceClaudePluginDir = path.join(repoRoot, '.claude-plugin');
+const codexPluginBundleDir = path.join(repoRoot, 'plugins', 'tracework');
 const bundledCodexPluginDir = path.join(codexPluginBundleDir, '.codex-plugin');
+const bundledClaudePluginDir = path.join(codexPluginBundleDir, '.claude-plugin');
 const bundledCodexSkillsDir = path.join(codexPluginBundleDir, 'skills');
 const bundledCodexAssetsDir = path.join(codexPluginBundleDir, 'assets');
 
@@ -45,6 +47,11 @@ function copyDir(src, dest) {
   }
 }
 
+function copyFile(src, dest) {
+  fs.mkdirSync(path.dirname(dest), { recursive: true });
+  fs.copyFileSync(src, dest);
+}
+
 fs.rmSync(bundledSkillsDir, { recursive: true, force: true });
 fs.mkdirSync(bundledSkillsDir, { recursive: true });
 
@@ -61,8 +68,13 @@ if (fs.existsSync(sourceAssetsDir)) {
 
 fs.rmSync(codexPluginBundleDir, { recursive: true, force: true });
 fs.mkdirSync(bundledCodexPluginDir, { recursive: true });
+fs.mkdirSync(bundledClaudePluginDir, { recursive: true });
 fs.mkdirSync(bundledCodexSkillsDir, { recursive: true });
 copyDir(sourceCodexPluginDir, bundledCodexPluginDir);
+copyFile(
+  path.join(sourceClaudePluginDir, 'plugin.json'),
+  path.join(bundledClaudePluginDir, 'plugin.json'),
+);
 
 for (const skill of officialSkills) {
   const skillPath = path.join(sourceSkillsDir, skill);
@@ -78,4 +90,4 @@ console.log(`Copied skills to ${bundledSkillsDir}`);
 if (fs.existsSync(bundledAssetsDir)) {
   console.log(`Copied assets to ${bundledAssetsDir}`);
 }
-console.log(`Synced Codex plugin bundle to ${codexPluginBundleDir}`);
+console.log(`Synced plugin bundle to ${codexPluginBundleDir}`);

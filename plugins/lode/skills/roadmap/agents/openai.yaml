@@ -1,4 +1,0 @@
-interface:
-  display_name: "Lode Roadmap"
-  short_description: "Generate narrative decision roadmaps"
-  default_prompt: "Use $roadmap to synthesize decision threads, abandoned alternatives, and open questions from Lode raw entries."

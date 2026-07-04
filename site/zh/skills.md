@@ -1,104 +1,67 @@
 # 技能
 
-Lode 包含八个技能。主路径是 `capture -> query`：保存一次 session 的决策证据，
-再用引用回放一个 decision。其它技能把同一份记录复利成开工上下文、路线图叙事
-和报告。
+Tracework 包含八个独立 skills。它们共享同一套 storage convention，所以一次
+capture 的输出可以继续服务 recall、query、brief、review 和 roadmap。
 
-## 冷启动访谈
+## 开始
 
-**触发：** `/lode:cold-start-interview`
+### Cold Start Interview
 
-首次运行配置。创建 `~/.lode/config.yaml`，包含：
-- 知识库路径（Lode 存储数据的位置）
-- 项目标识和 slug
-- 报告语言（英语、中文或混合）
-- 周报模式和团队上下文
+**触发：** `/tracework:cold-start-interview`
 
-运行一次即可。之后所有技能会自动读取配置。
+完成 Tracework 的首次设置：选择本地 knowledge vault，记录项目身份，并保存后续
+capture、recall 和 review 会复用的偏好。
 
-## Query（查询）
+### Capture
 
-**触发：** `/lode:query`、`why did we choose this?`、`为什么当时这么选`
+**触发：** `/tracework:capture`、`/tracework:capture checkpoint`、`收工`
 
-主要价值路径：定向决策回放。优先读取 `{vault}/raw/decisions/`，
-再 fallback 到 weekly raw entries，回答具体项目历史问题：
-- 为什么选择某条路径
-- 哪些方案被拒绝或延后
-- 哪些开放问题值得重新评估
-- 某个决策产生了什么影响
+捕获一次 session 或 checkpoint。它应该保留目标、状态变化、决策、放弃路径、
+风险、source refs、artifact 变化和下一步。零配置模式会直接在对话中返回
+结构化 Markdown。
 
-该技能会在紧凑结果中区分原始记录出处（`source_entry_refs`）与直接证据链接
-（`evidence_refs` 或带类型的 `source_refs`）。出处说明一条说法记录在哪里，
-不等于已经核验；缺失证据会被明确标出，已有引用则保留给读者检查。如果 Lode
-没有支持记录，必须拒绝编造答案。
+### Recall
 
-## Capture（捕获）
+**触发：** `/tracework:recall`、`开工`
 
-**触发：** `/lode:capture`、`/lode:capture checkpoint`、`收工`、`done`、`今天到这`、`checkpoint`
+读取最近 raw entries、decision indexes 和 artifact indexes，为下一次 session
+准备上下文。它应该浮现决策、风险、开放问题、放弃方案和可能过期的 artifact。
 
-自适应深度会话回顾和阶段记录。将会话分为五种原型之一：
-- **决策** — 设计选择、权衡、放弃的路径
-- **构建** — 实现的功能、变更的契约
-- **调查** — 探索、发现、死胡同
-- **修复** — 修复的 bug、根因、缓解措施
-- **维护** — 重构、升级、清理
+## 追问
 
-写入报告级别的信号（`work_stream`、状态变化、诚实状态、影响、决策、风险、
-契约与证据），而非过程日志。Fruit Check 会阻止 commit 数、代码行数、任务数
-或模糊的「完成优化」在缺少可观察状态变化、影响和来源路径时被包装成成果。
-Capture 还会生成架构文档、计划和 README 文件的轻量同步建议。
+### Query
 
-零配置模式：直接在对话中输出结构化 Markdown，无需写入任何 vault。
+**触发：** `/tracework:query`、`why did we choose this?`、`为什么当时这么选`
 
-Vault 模式默认安静写入。长任务中途可以用 checkpoint 捕获决策、阶段进展、风险或下一步入口，而不会在主对话里展开完整 recap。
+从本地证据回答具体项目历史问题。它区分 provenance 和 verification：
+`source_entry_refs` 说明说法记录在哪里，direct evidence refs 才支持更强的
+claim。如果记录不足，query 应拒绝编造答案。
 
-## Recall（回忆）
+### Roadmap
 
-**触发：** `/lode:recall`、`开工`、`session start`、`继续上次`
+**触发：** `/tracework:roadmap`、`决策路线图`
 
-面向已有历史项目的 session-start context recall。从知识库读取最近的原始条目、
-decision indexes 和制品索引，呈现：
-- 最近的决策及其理由
-- 开放的风险和未解决的问题
-- 值得记住的放弃方案
-- 可能需要关注的过期意图制品
+从 raw entries 和 decision indexes 中综合决策线索、累积风险、反复开放问题和被
+重新讨论的替代方案。
 
-无 vault 也可用 — 退回到纯对话上下文。
+## 回顾
 
-## Daily（日报）
+### Daily
 
-**触发：** `/lode:daily`、`更新日报`、`日报`、`daily note`
+**触发：** `/tracework:daily`、`日报`
 
-从原始条目和 git 历史更新 Obsidian 日报。将多个会话的活动聚合为单日视图。
+从 raw entries 和 git history 更新 Obsidian 风格的日报。
 
-## Weekly（周报）
+### Weekly
 
-**触发：** `/lode:weekly`、`周报`、`weekly PPT`
+**触发：** `/tracework:weekly`、`周报`
 
-围绕至多三条头部成果或进展构建周报大纲。每份报告使用本地 3+1 链路：
-`O#` 成果/进展、`W#` 工作流、`D#` 决策/取舍、`E#` 证据审计。
-原始条目是主要语义来源；git 日志仅作为 fallback 和覆盖证据。
-只有 fallback 的工作只能写成有限进展，不能写成已核验交付。
+优先使用 raw entries 构建周度 brief outline，git 只作为 coverage 和 fallback
+evidence。本地 `O#`、`W#`、`D#`、`E#` 链路让 brief 可以被检查。
 
-## Monthly（月度回顾）
+### Monthly
 
-**触发：** `/lode:monthly`、`月度回顾`、`月报`、`monthly review`
+**触发：** `/tracework:monthly`、`月报`
 
-从日报生成成果优先的月度回顾，并可用匹配的 raw entries 补充证据；同时沿用
-周报的 report-local `O#`/`W#`/`D#`/`E#` 核验关系。
-任务数、活跃天数、分类计数和代码规模只进入覆盖附录，不能升级为成果。
-风险、证据缺口、下月交接和候选规则继续保留。Python 脚本处理解析和聚合，
-确保确定性。
-
-## Roadmap（路线图）
-
-**触发：** `/lode:roadmap`、`决策路线图`、`decision roadmap`
-
-从积累的原始条目生成叙事性决策路线图。追踪：
-- 已做出的决策及其背景
-- 未解决的累积风险
-- 反复出现的开放问题
-- 思维方式的演变过程
-- 每个决策点的置信度、证据引用和证据缺口
-
-路线图不是功能列表 — 它讲述发生了什么以及为什么。
+从日报和匹配到的 raw evidence 构建月度 review。计数和活动指标留在覆盖度语境，
+不能直接升级成 outcome claim。

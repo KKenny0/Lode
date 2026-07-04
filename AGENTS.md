@@ -4,22 +4,32 @@ This file provides guidance to Codex (Codex.ai/code) when working with code in t
 
 ## What This Is
 
-**Lode** — a cross-runtime plugin and skill monorepo (Codex plugin + Claude Code plugin) for agentic coding's persistent memory. It contains six workflow skills for session-start recall, adaptive-depth context capture, decision roadmaps, daily notes, weekly outlines, and monthly reviews, one targeted decision-query skill, plus one cold-start setup skill.
+**Tracework** is a cross-runtime plugin and skill monorepo for evidence-backed work memory from agent sessions. It ships a Codex plugin, a Claude Code plugin, and eight Markdown-first skills for capture, recall, query, daily notes, weekly briefs, monthly reviews, decision roadmaps, and cold-start setup.
 
-Lode is positioned as a reporting and decision-replay engine, not a generic memory layer. Capture/retrieval is the input; structured weekly outlines, monthly reviews, and decision roadmaps are the product.
+Tracework is not a generic memory layer. Capture/retrieval is the input; recall, decision query, brief/review, and roadmap surfaces are the product.
 
-For technical workplace reporting, Lode rolls scattered AI-assisted work upward into report-ready outcomes and lets readers drill back down to decisions, tradeoffs, and evidence. This is a secondary use case built on the decision-replay loop, not a separate generic-office product.
+The strongest use case is coding work: architecture choices, repairs, schemas, prompts, tests, and delivery risk. The product boundary is wider than coding only: any agent session with goals, choices, evidence, outcomes, risks, or next-step value can be recorded. Tracework is not a meeting workflow, approval system, generic office suite, performance packaging tool, or employee-monitoring surface.
 
-The skills themselves are Markdown-first and dependency-light. The repository also includes a Node-based CLI installer under `cli/`, local-only eval fixtures, and public benchmark guidance.
+Public product and command namespace:
 
-The name comes from **lode**: a vein of ore where valuable mineral is concentrated. These skills extract lasting value from raw development activity. The word shares its root with "load" and the Chinese character 载 (zài, to carry, to record).
+- Product name: `Tracework`
+- Plugin namespace: `tracework`
+- Commands: `/tracework:*`
+- Native install target: `tracework@tracework`
+- Raw helper filename: `tracework_raw.py`
+
+Storage namespace:
+
+- Config lives at `~/.tracework/config.yaml` and `{project}/.tracework/config.yaml`
+- JSON schema strings use `tracework.*`, such as `tracework.decision_replay.v1`
+- No legacy storage fallback is supported
 
 ## Configuration
 
 All skills share a unified configuration system:
 
 ```yaml
-# ~/.lode/config.yaml (global) or {project}/.lode/config.yaml (project-level)
+# ~/.tracework/config.yaml (global) or {project}/.tracework/config.yaml (project-level)
 knowledge_vault: /path/to/your/knowledge-vault
 project_slug: my-project
 
@@ -30,174 +40,111 @@ profile:
   team_context: solo
 ```
 
-Resolution: project `.lode/config.yaml` → `~/.lode/config.yaml` → `$WEEKLY_PPT_PATH` → `~/.weekly-ppt/`.
+Resolution order:
 
-`$WEEKLY_PPT_PATH` and `~/.weekly-ppt/` are legacy fallbacks. New setups should use `knowledge_vault` in `.lode/config.yaml` or `~/.lode/config.yaml`.
-
-See `references/lode-config-template.yaml` for full template including daily-note-specific settings.
-
-Artifact governance options:
-
-```yaml
-artifact_index:
-  enabled: true
-```
+1. Project `.tracework/config.yaml`
+2. `~/.tracework/config.yaml`
 
 ## Repository Structure
 
-```
+```text
 references/
-  weekly-ppt-convention.md             # Shared schema + storage rules (canonical source)
+  tracework-storage-convention.md             # Shared schema and storage rules
   decision_replay.py                    # Canonical decision replay graph/query helper
-  lode-config-template.yaml             # Config file template
+  tracework-config-template.yaml             # Config template
 .codex-plugin/plugin.json               # Codex plugin manifest
 .claude-plugin/plugin.json              # Claude Code plugin manifest
 .claude-plugin/marketplace.json         # Claude-style marketplace metadata
-.agents/plugins/marketplace.json        # Codex repo marketplace metadata
-plugins/lode/                           # Generated Codex installable plugin bundle
-scripts/sync-convention.sh              # Sync convention to skill directories
-scripts/sync-decision-replay.sh         # Sync decision replay helper to skill directories
-benchmarks/
-  weekly-outline.md                     # Public benchmark guidance (fixtures stay local)
-cli/                                     # Installer CLI for Codex / Claude Code
-  src/
-  package.json
+.agents/plugins/marketplace.json        # Codex marketplace metadata
+plugins/tracework/                      # Generated Codex installable plugin bundle
+scripts/sync-convention.sh              # Sync convention to skill-local references
+scripts/sync-decision-replay.sh         # Sync decision replay helper to skill-local copies
+benchmarks/                             # Public benchmark protocols and fixtures
+cli/                                    # Maintenance CLI and packaging checks
+site/                                   # VitePress documentation site
 skills/
-  cold-start-interview/       # First-run config setup
-    SKILL.md
-    references/
-      lode-config-template.yaml
-  capture/                   # Session-end change log extraction
-    SKILL.md
-    scripts/lode_raw.py
-    references/
-      weekly-ppt-convention.md
-  recall/            # Session-start project memory recall
-    SKILL.md
-    scripts/recall_context.py
-    scripts/decision_replay.py
-    references/
-      recall-output-template.md
-      weekly-ppt-convention.md
-  query/             # Targeted decision replay queries
-    SKILL.md
-    scripts/decision_graph.py
-    scripts/decision_replay.py
-  roadmap/                # Narrative decision history
-    SKILL.md
-    scripts/decision_graph.py
-    scripts/decision_replay.py
-    references/
-      weekly-ppt-convention.md
-  daily/                  # Obsidian daily notes from git history
-    SKILL.md
-    scripts/git-stats.sh
-    references/config-template.yaml
-  weekly/                  # Raw-first multi-project weekly PPT outline
-    SKILL.md
-    agents/openai.yaml
-    references/
-      slide-template.md
-      subagent-prompt.md
-  monthly/                  # Monthly work review from daily notes
-    SKILL.md
-    scripts/
-      split_daily_note.py
-      prepare_monthly_data.py
-    references/
-      daily-note-format.md
-      worklog-summary-template.md
-      project-tagging-guide.md
-      weekly-ppt-convention.md
+  cold-start-interview/
+  capture/
+  recall/
+  query/
+  roadmap/
+  daily/
+  weekly/
+  monthly/
 ```
 
-Local-only artifacts:
+Ignored local artifacts:
 
-```
-skills/*/evals/                         # Ignored local eval fixtures
-skills/*-workspace/                     # Ignored benchmark workspaces/results
+```text
+skills/*/evals/
+skills/*-workspace/
+cli/dist/
+cli/skills/
+cli/assets/
+site/.vitepress/dist/
 ```
 
 ## Skills Overview
 
 | Skill | Purpose | Triggers |
-|-------|---------|----------|
-| cold-start-interview | First-run setup for `~/.lode/config.yaml` | `/lode:cold-start-interview`, "configure Lode" |
-| capture | Adaptive-depth session recap plus artifact context and sync suggestions | `/lode:capture`, "收工", "done", "今天到这" |
-| recall | Session-start recall from raw entries + artifact index | `/lode:recall`, "开工", "session start", "继续上次" |
-| query | Targeted decision replay evidence pack | `/lode:query`, "why did we choose this?", "为什么当时这么选" |
-| daily | Obsidian daily notes from git history | `/lode:daily`, "更新日报", "日报", "daily note" |
-| weekly | Raw-first weekly PPT outline with conditional hard-stuff section | `/lode:weekly`, "周报", "weekly PPT" |
-| monthly | Monthly work review with candidate rules from repeated evidence | `/lode:monthly`, "月度回顾", "月报", "monthly review" |
-| roadmap | Narrative decision roadmap with risk accumulation and recurring open questions | `/lode:roadmap`, "决策路线图", "decision roadmap" |
+|---|---|---|
+| cold-start-interview | First-run setup for `~/.tracework/config.yaml` | `/tracework:cold-start-interview`, "configure Tracework" |
+| capture | Adaptive-depth session recap plus artifact context and sync suggestions | `/tracework:capture`, "收工", "done", "今天到这" |
+| recall | Session-start recall from raw entries and artifact index | `/tracework:recall`, "开工", "session start", "继续上次" |
+| query | Targeted decision replay evidence pack | `/tracework:query`, "why did we choose this?", "为什么当时这么选" |
+| daily | Obsidian daily notes from raw entries and git history | `/tracework:daily`, "更新日报", "日报", "daily note" |
+| weekly | Raw-first weekly brief outline | `/tracework:weekly`, "周报", "weekly PPT" |
+| monthly | Monthly review with candidate rules from repeated evidence | `/tracework:monthly`, "月度回顾", "月报", "monthly review" |
+| roadmap | Narrative decision roadmap with accumulating risks and recurring questions | `/tracework:roadmap`, "决策路线图", "decision roadmap" |
 
 ## Reusable Data Map
 
-Lode is not a strict pipeline. Skills are independently triggered, but they can reuse each other's artifacts when available.
+Tracework is not a strict pipeline. Skills are independently triggered, but they reuse artifacts when available.
 
-```
+```text
 首次配置:
-  cold-start-interview → ~/.lode/config.yaml (vault path + project/report profile)
+  cold-start-interview -> ~/.tracework/config.yaml + {project}/.tracework/config.yaml
 
 开发过程中:
-  recall ← {vault}/raw/weeks/ + {vault}/raw/artifacts/ → 开工上下文
-  query ← {vault}/raw/decisions/ + {vault}/raw/weeks/ → 定向决策证据包
-  capture ──→ {vault}/raw/weeks/{week}/{slug}.json
-                     ├─→ artifact_context embedded in raw entries
-                     ├─→ {vault}/raw/artifacts/{slug}.json when durable artifacts change
-                     └─→ lightweight sync suggestions for DESIGN/PLAN/AGENTS/README review
-  roadmap ← raw entries + artifact index → decisions + accumulating risks + recurring questions
-          └─→ {vault}/raw/decisions/{slug}.json derived decision replay index
+  recall <- {vault}/raw/weeks/ + {vault}/raw/artifacts/ + {vault}/raw/decisions/
+  query  <- {vault}/raw/decisions/ + {vault}/raw/weeks/
+  capture -> {vault}/raw/weeks/{week}/{slug}.json
+          -> {vault}/raw/artifacts/{slug}.json when durable artifacts change
+  roadmap <- raw entries + decision index + artifact index
 
 每天:
-  daily ← {vault}/raw/weeks/ JSON + git log → {vault}/Daily Note.md
+  daily <- raw entries + git log -> {vault}/Daily Note.md
 
 每周:
-  weekly ← {vault}/raw/weeks/ + fallback git coverage → 周报大纲 + hard stuff when supported
+  weekly <- raw entries + fallback git coverage -> weekly outline
 
 每月:
-  monthly ← Daily Note.md → {vault}/raw/months/{MM}/ (signals + skeleton)
-                                          {vault}/Work Diary/ (archive + summary)
-                                     └─→ candidate rules (proposal-only)
+  monthly <- Daily Note.md + matching raw entries -> monthly review
 ```
 
-## Storage Convention
+## Storage Surfaces
 
-Data is organized in two layers within the knowledge vault:
-
-- **Raw layer** (`{vault}/raw/`): immutable intermediate data (JSON entries, artifact indexes, signals, skeletons)
-- **Wiki layer** (`{vault}/Daily Note.md`, `{vault}/Work Diary/`): human-readable outputs
-
-The knowledge vault is a git repo (typically an Obsidian vault), enabling cross-machine sync via git push/pull.
-
-Lode uses four storage surfaces:
-
-- **Project repo**: code-adjacent artifacts that evolve with implementation, such as arch docs, `DESIGN.md`, `PLAN.md`, `AGENTS.md`, prompt contracts, and schema contracts
-- **Vault raw layer**: machine-readable memory and indexes, including weekly raw entries and `{vault}/raw/artifacts/{slug}.json`
+- **Project repo**: code-adjacent artifacts that evolve with implementation, such as architecture docs, `DESIGN.md`, `PLAN.md`, `AGENTS.md`, prompt contracts, and schema contracts
+- **Vault raw layer**: machine-readable memory and indexes, including weekly raw entries, decision indexes, artifact indexes, and monthly signals
 - **Vault wiki layer**: human-readable synthesis outputs such as Daily Note, weekly outline, monthly review, and decision roadmap
 - **Conversation fallback**: zero-config immediate value when durable storage is unavailable
 
 ## Key Design Decisions
 
-- **Self-contained skills**: each skill has its own copy of shared files in its `references/` directory, so skills work correctly when installed individually. Skills cannot reference files outside their directory via `../`
-- **Convention sync**: the canonical version lives at `references/weekly-ppt-convention.md`; after editing it, run `scripts/sync-convention.sh` to copy to all skill directories that need it
-- **Decision replay helper sync**: the canonical implementation lives at `references/decision_replay.py`; after editing it, run `scripts/sync-decision-replay.sh` so `query`, `roadmap`, and `recall` keep identical local copies
-- **Codex plugin bundle sync**: `.agents/plugins/marketplace.json` points at `plugins/lode`; after editing `.codex-plugin/`, `skills/`, or `assets/`, run `npm --prefix cli run copy-skills` and `npm --prefix cli run check-skills` so the installable bundle stays in sync
-- **Derived-index builder version**: bump `INDEX_BUILDER_VERSION` whenever decision node, edge, or retrieval derivation semantics change so apparently current v1 indexes rebuild safely without migrating weekly raw data
-- **Unified config**: all skills read vault path from `.lode/config.yaml`; project-level config overrides global
-- **Explicit primary outputs, graceful side effects**: if a skill needs the vault for its main output, it asks for `knowledge_vault`; if a raw change entry is only a side effect, it can skip that write gracefully
-- **Artifact governance**: full repo-local artifacts stay near code by default; vault artifact indexes make them discoverable without turning weekly raw entries into a document catalog
-- **Decision replay query boundary**: `recall` surfaces session-start context; `query` handles targeted "why/alternatives/revisit/impact" questions with cited evidence packs
-- **Raw-first weekly reporting**: `weekly` consumes weekly raw change entries as the primary semantic source; git logs are fallback and coverage evidence only
-- **Adaptive-depth recap**: `capture` classifies sessions as decision/build/investigation/repair/maintenance and writes archetype-specific signals for downstream reports
-- **Legacy arch-doc compatibility**: historical `source: arch-doc` raw entries remain readable, but new write output uses `source: session-recap`
-- **Weekly-report-quality raw entries**: `capture` should write report-worthy signals, decisions, risks, contracts, and impact rather than process logs or "updated docs" entries
-- **Progressive-closure reporting**: weekly and monthly reports derive a report-local `O# -> W# -> D# -> E#` chain from raw truth; activity metrics are coverage metadata, not outcomes, and provenance alone is not verification
-- **Local evals, public benchmarks**: `skills/*/evals/` and `*-workspace/` stay local; public benchmark guidance lives under `benchmarks/`
-- **Scripts for deterministic work**: monthly uses Python scripts for parsing and aggregation; the agent handles interpretation and writing
+- **Self-contained skills**: each skill has local copies of needed references, so installed skills do not read `../` paths outside their own directory.
+- **Public namespace migration**: user-facing names, plugin metadata, docs, site, and command examples use Tracework and `/tracework:*`.
+- **Tracework storage namespace**: `.tracework` paths and `tracework.*` schema strings are canonical. Legacy fallback paths and schema strings are not supported.
+- **Codex plugin bundle sync**: `.agents/plugins/marketplace.json` points at `plugins/tracework`; after editing `.codex-plugin/`, `skills/`, or `assets/`, run `npm --prefix cli run copy-skills` and `npm --prefix cli run check-skills`.
+- **Convention sync**: canonical storage rules live in `references/tracework-storage-convention.md`; after editing it, run `scripts/sync-convention.sh`.
+- **Decision replay helper sync**: canonical implementation lives at `references/decision_replay.py`; after editing it, run `scripts/sync-decision-replay.sh`.
+- **Raw-first reporting**: weekly and monthly reports use raw entries as the semantic source; git logs are fallback and coverage evidence only.
+- **Progressive-closure reporting**: reports may derive local `O# -> W# -> D# -> E#` chains from raw truth, but activity metrics and provenance alone are not outcomes.
+- **Local evals, public benchmarks**: private evals and workspaces stay ignored; public benchmark guidance lives under `benchmarks/`.
+- **No legacy CLI install surface**: the CLI is for maintenance diagnostics and packaging checks, not user-facing installation. Public install docs should use native plugin marketplace commands.
 
 ## Conventions
 
-- Conventional commits (`feat:`, `docs:`, `init:`)
-- Bilingual: English for technical spec, Chinese for user-facing triggers and slide content
-- Each SKILL.md is self-contained — includes enough context to understand its workflow without reading other files
+- Conventional commits (`feat:`, `docs:`, `chore:`)
+- Bilingual docs are acceptable: English for technical specs, Chinese for user-facing triggers and report content
+- Keep public docs current-only. Do not keep stale historical positioning docs in public navigation or tracked docs.
+- Keep the repository clean: no generated caches, dead files, stale examples, or local planning artifacts in the tracked tree.

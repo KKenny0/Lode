@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
-# Sync the canonical weekly-ppt-convention.md to all skill directories that need it.
+# Sync the canonical Tracework storage convention to all skill directories that need it.
 set -euo pipefail
 REPO_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
-CANONICAL="$REPO_ROOT/references/weekly-ppt-convention.md"
+CANONICAL="$REPO_ROOT/references/tracework-storage-convention.md"
 
 if [ ! -f "$CANONICAL" ]; then
   echo "Error: canonical file not found at $CANONICAL"

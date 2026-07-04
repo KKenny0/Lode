@@ -1,25 +1,18 @@
 #!/usr/bin/env node
 import { Command } from 'commander';
-import { runWizard } from './wizard.js';
 import { runDoctor } from './doctor.js';
-import * as codex from './installers/codex.js';
 import { VERSION } from './logo.js';
 
 const program = new Command();
 
 program
-  .name('lode')
-  .description('Lode CLI — install and configure Lode skills')
+  .name('tracework')
+  .description('Tracework maintenance CLI')
   .version(VERSION);
 
 program
-  .command('setup')
-  .description('Run the interactive setup wizard')
-  .action(runWizard);
-
-program
   .command('doctor')
-  .description('Check Lode configuration, vault access, and skill installation')
+  .description('Check Tracework configuration, vault access, and plugin installation')
   .option('--cwd <path>', 'Project directory to inspect')
   .option('--vault <path>', 'Knowledge vault override for diagnostics')
   .option('--skip-install-check', 'Skip checking installed Codex/Claude Code skills')
@@ -27,24 +20,8 @@ program
   .option('--json', 'Print machine-readable JSON')
   .action(runDoctor);
 
-program
-  .command('install-codex-plugin')
-  .description('Install Lode as a Codex plugin using the legacy cache fallback')
-  .option('--codex-home <path>', 'Codex home directory, defaults to $CODEX_HOME or ~/.codex')
-  .option('--skip-config', 'Copy the plugin cache without editing Codex config.toml')
-  .action((options: codex.PluginInstallOptions) => {
-    const result = codex.installPlugin(options);
-    console.log('Legacy fallback: prefer `codex plugin marketplace add KKenny0/Lode` then `codex plugin add lode@lode`.');
-    console.log(`Plugin key: ${result.pluginKey}`);
-    console.log(`Plugin cache: ${result.pluginDir}`);
-    if (result.configured) {
-      console.log(`Enabled in: ${result.configPath}`);
-    } else {
-      console.log(`Skipped config update: ${result.configPath}`);
-    }
-  });
-
-// Default: run wizard if no command specified
-program.action(runWizard);
+program.action(() => {
+  program.help();
+});
 
 program.parse();

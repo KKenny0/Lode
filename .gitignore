@@ -3,8 +3,7 @@ docs/*
 !docs/configuration.md
 !docs/data-model.md
 !docs/artifact-governance.md
-!docs/release-artifact-inventory.md
-!docs/progressive-closure-implementation.md
+examples/
 demo/
 ROADMAP.md
 TODO*.md
