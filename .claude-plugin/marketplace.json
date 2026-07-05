@@ -10,7 +10,7 @@
     {
       "name": "tracework",
       "description": "Evidence-backed work memory for agent sessions.",
-      "version": "0.1.1",
+      "version": "0.1.2",
       "author": {
         "name": "Kennywu",
         "email": "jdlow@live.cn"

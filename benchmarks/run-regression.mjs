@@ -12,6 +12,7 @@ const captureRaw = path.join(repoRoot, 'skills', 'capture', 'scripts', 'tracewor
 const decisionGraph = path.join(repoRoot, 'skills', 'query', 'scripts', 'decision_graph.py');
 const roadmapGraph = path.join(repoRoot, 'skills', 'roadmap', 'scripts', 'decision_graph.py');
 const recallContext = path.join(repoRoot, 'skills', 'recall', 'scripts', 'recall_context.py');
+const pythonEnv = { ...process.env, PYTHONDONTWRITEBYTECODE: '1' };
 
 const STORYBOARD_PIPELINE_RAW_WEEKS = {
   '2026-W18': [
@@ -158,6 +159,7 @@ function runJson(command, args, options = {}) {
     cwd: repoRoot,
     encoding: 'utf-8',
     ...options,
+    env: { ...pythonEnv, ...(options.env || {}) },
   });
   if (result.status !== 0) {
     throw new Error([
@@ -637,6 +639,7 @@ function runUnsafeSlugFixture(fixture) {
     ], {
       cwd: repoRoot,
       encoding: 'utf-8',
+      env: pythonEnv,
     });
     assert(buildResult.status !== 0, `${fixture.id}: decision graph build should reject unsafe slug`);
     assert(
@@ -657,6 +660,7 @@ function runUnsafeSlugFixture(fixture) {
     ], {
       cwd: repoRoot,
       encoding: 'utf-8',
+      env: pythonEnv,
     });
     assert(queryResult.status !== 0, `${fixture.id}: decision graph query should reject unsafe slug`);
 
@@ -671,6 +675,7 @@ function runUnsafeSlugFixture(fixture) {
     ], {
       cwd: repoRoot,
       encoding: 'utf-8',
+      env: pythonEnv,
     });
     assert(recallResult.status !== 0, `${fixture.id}: recall should reject unsafe slug`);
     assert(!fs.existsSync(escapedPath), `${fixture.id}: unsafe slug created escaped path ${escapedPath}`);

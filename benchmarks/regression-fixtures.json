@@ -142,6 +142,58 @@
       ]
     },
     {
+      "id": "monthly-review-3plus1-evidence-downgrade",
+      "execution": {
+        "kind": "documented-only",
+        "reason": "Monthly review generation remains agent-authored; this fixture documents outcome-first 3+1 and evidence-grade expectations."
+      },
+      "skill": "monthly",
+      "prompt": "用 $monthly 生成 2026-05 月报。Daily Note 里同一项目有两天 raw-entry-backed 记录、一条 git-only 修复记录和一个仍未关闭的风险。",
+      "fixture": {
+        "daily_note_excerpt": [
+          "### 2026.05.05",
+          "- [Storyboard Pipeline] raw-entry-backed: chose validation-local repair ownership; evidence_refs include doc:validation-stage-v1.",
+          "### 2026.05.06",
+          "- [Storyboard Pipeline] raw-entry-backed: identified stale architecture docs as recall risk; status risk.",
+          "### 2026.05.07",
+          "- [Storyboard Pipeline] git-only: fix empty panel list handling."
+        ],
+        "raw_entries": [
+          {
+            "timestamp": "2026-05-05T18:10:00+08:00",
+            "type": "decision",
+            "summary": "Kept validation repair ownership inside the validation stage",
+            "source": "session-recap",
+            "status": "decision",
+            "impact": "Future debugging can preserve validation-stage encapsulation.",
+            "evidence_refs": ["doc:validation-stage-v1"]
+          },
+          {
+            "timestamp": "2026-05-06T09:30:00+08:00",
+            "type": "risk",
+            "summary": "Identified stale architecture docs as a recall risk",
+            "source": "session-recap",
+            "status": "risk"
+          }
+        ]
+      },
+      "expected_behavior": "Produce a monthly review that starts with at most three O# outcome/progress claims, maps each claim to W#/D#/E# where supported, keeps the stale-doc item as risk rather than completed outcome, and downgrades the git-only repair to limited coverage evidence instead of using it as verified impact.",
+      "assertions": [
+        {
+          "name": "outcome_first_3plus1",
+          "description": "The summary uses report-local O#/W#/D#/E# identifiers without writing them back to raw data."
+        },
+        {
+          "name": "risk_not_promoted",
+          "description": "An unresolved risk remains a risk or next-month concern, not a completed achievement."
+        },
+        {
+          "name": "git_only_limited",
+          "description": "Git-only work appears in coverage or limited evidence, not as verified outcome impact."
+        }
+      ]
+    },
+    {
       "id": "decision-replay-query-positive",
       "execution": {
         "kind": "query-positive"

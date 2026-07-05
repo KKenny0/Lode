@@ -1,4 +1,4 @@
 interface:
   display_name: "Tracework Daily"
-  short_description: "Generate daily notes from git activity"
-  default_prompt: "Use $daily to update today's daily note from git activity."
+  short_description: "Generate daily notes from Tracework raw entries"
+  default_prompt: "Use $daily to update today's daily note from Tracework raw entries, using git only for uncovered activity."

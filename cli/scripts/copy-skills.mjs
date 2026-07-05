@@ -29,6 +29,12 @@ const officialSkills = [
   'cold-start-interview',
 ];
 
+const officialAssets = [
+  'logo.png',
+  'mark.svg',
+  'tracework-three-actions.png',
+];
+
 function shouldSkip(name) {
   return name === 'evals' || name.endsWith('-workspace') || name === '__pycache__';
 }
@@ -63,7 +69,9 @@ for (const skill of officialSkills) {
 
 fs.rmSync(bundledAssetsDir, { recursive: true, force: true });
 if (fs.existsSync(sourceAssetsDir)) {
-  copyDir(sourceAssetsDir, bundledAssetsDir);
+  for (const asset of officialAssets) {
+    copyFile(path.join(sourceAssetsDir, asset), path.join(bundledAssetsDir, asset));
+  }
 }
 
 fs.rmSync(codexPluginBundleDir, { recursive: true, force: true });
@@ -83,7 +91,9 @@ for (const skill of officialSkills) {
 }
 
 if (fs.existsSync(sourceAssetsDir)) {
-  copyDir(sourceAssetsDir, bundledCodexAssetsDir);
+  for (const asset of officialAssets) {
+    copyFile(path.join(sourceAssetsDir, asset), path.join(bundledCodexAssetsDir, asset));
+  }
 }
 
 console.log(`Copied skills to ${bundledSkillsDir}`);

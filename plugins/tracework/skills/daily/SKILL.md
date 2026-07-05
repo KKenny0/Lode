@@ -1,20 +1,20 @@
 ---
 name: daily
 description: >
-  Generate or update structured Obsidian daily notes from weekly change entries
-  and git commit history. Use this skill for "/tracework:daily". Triggers on
-  updating daily notes/work logs/diary from git commits, generating work
-  reports from git history, filling in missing daily notes for past dates, or
+  Generate or update structured Obsidian daily notes from Tracework raw entries,
+  using git commit history only as fallback coverage. Use this skill for
+  "/tracework:daily". Triggers on updating daily notes/work logs/diary from
+  recorded Tracework entries, filling in missing daily notes for past dates, or
   summarizing today's work across repos.
   Key phrases: "更新日报", "写日报", "日报", "工作日志", "生成工作日志",
-  "根据git提交写日报", "补日报", "daily note", "work log", "git daily".
+  "根据 tracework 写日报", "补日报", "daily note", "work log".
   Do NOT trigger for writing code, git operations (merge/rebase/conflict),
-  meeting notes, or generic reports without git context.
+  meeting notes, or generic reports without Tracework or repo activity context.
 ---
 
-# Git 日报更新器
+# Tracework 日报更新器
 
-从 Tracework weekly change entries 和 git 提交统计生成结构化的 Obsidian 日报内容。日报是 Tracework habit loop 的日级复利层：不只记录今天做了什么，也保留明天开工时应该记得的决策、风险、开放问题和高价值 source links。
+从 Tracework raw entries 生成结构化的 Obsidian 日报内容，并只用 git 提交统计补足未被 raw entries 覆盖的活动。日报是 Tracework habit loop 的日级复利层：不只记录今天做了什么，也保留明天开工时应该记得的决策、风险、开放问题和高价值 source links。
 
 ---
 
@@ -149,10 +149,10 @@ git log --since="<date> 00:00:00" --until="<date> 23:59:59" --pretty=format:"%h 
 - 用分类系统的关键词匹配分类（不需要 LLM 语义分类）
 - 生成轻量日报条目
 
-如果 `scripts/git-stats.sh` 可访问，也可用它获取结构化数据（但仍然跳过完整 diff）：
+如果 `<this-skill>/scripts/git-stats.sh` 可访问，也可用它获取结构化数据（但仍然跳过完整 diff）：
 
 ```bash
-bash <skill-path>/scripts/git-stats.sh <repo_path> <date>
+bash <this-skill>/scripts/git-stats.sh <repo_path> <date>
 ```
 
 ### Step 4: 分类（仅用于 Step 3 补漏的 commit）

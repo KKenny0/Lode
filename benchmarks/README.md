@@ -24,7 +24,7 @@ For each local benchmark run, record:
 - `run-regression.mjs` executes fixture-backed checks. It currently runs
   decision replay, decision roadmap thread evidence, recall rebuild,
   unsafe-slug, and capture-helper repair gates end to end, then reports
-  remaining agent-authored scenarios as documented-only protocols.
+  weekly and monthly agent-authored scenarios as documented-only protocols.
 
 New roadmap and query skills should keep local eval fixtures under ignored
 `skills/*/evals/` directories. Public benchmark writeups should describe the

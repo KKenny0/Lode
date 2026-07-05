@@ -102,7 +102,7 @@ These counts describe source coverage, not outcomes. If raw entry coverage < 50%
 
 ### Step 2：按月拆分归档
 
-运行 `scripts/split_daily_note.py`，将 Daily Note.md 拆分为 `YYYY-MM.md` 月度归档文件，保存到 `{vault}/Work Diary/Monthly/`。
+运行 `<this-skill>/scripts/split_daily_note.py`，将 Daily Note.md 拆分为 `YYYY-MM.md` 月度归档文件，保存到 `{vault}/Work Diary/Monthly/`。
 
 - 保留原始内容，不做改写
 - 缺少月级标题时自动从日期推断
@@ -110,10 +110,10 @@ These counts describe source coverage, not outcomes. If raw entry coverage < 50%
 
 ### Step 3：提取信号 + 构建骨架
 
-运行 `scripts/prepare_monthly_data.py`（合并了原 extract + build 两个脚本）：
+运行 `<this-skill>/scripts/prepare_monthly_data.py`（合并了原 extract + build 两个脚本）：
 
 ```bash
-python scripts/prepare_monthly_data.py \
+python <this-skill>/scripts/prepare_monthly_data.py \
   --input {vault}/Work\ Diary/Monthly/{YYYY-MM}.md \
   --signals-output {vault}/raw/months/{YYYY-MM}/signals.json \
   --skeleton-output {vault}/raw/months/{YYYY-MM}/skeleton.json \

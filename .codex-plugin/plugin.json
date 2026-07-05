@@ -1,6 +1,6 @@
 {
   "name": "tracework",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Evidence-backed work memory for agent sessions: capture what happened, replay why, and roll work into briefs, reviews, and roadmaps.",
   "author": {
     "name": "Kennywu",

@@ -64,40 +64,15 @@ explicit request to inspect the recap as a request to print the full Markdown
 recap after writing. Quiet output remains the default in vault mode for both
 session-end and checkpoint captures.
 
-## Auto-Capture (Optional)
+## Operational References
 
-When configured, `/tracework:capture` can run automatically at session end via a
-Claude Code `Stop` hook. This eliminates the dependency on remembering to say
-"收工".
+Keep this file focused on signal extraction. Read
+`references/capture-operations.md` when you need any of these mechanics:
 
-**Enable**: Set `auto_capture.enabled: true` in `~/.tracework/config.yaml`.
-`/tracework:cold-start-interview` sets this by default for new configurations.
-
-**Hook configuration**: Add to `~/.claude/settings.json` under `hooks.Stop`:
-
-```json
-{
-  "hooks": {
-    "Stop": [
-      {
-        "matcher": "",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "/tracework:capture"
-          }
-        ]
-      }
-    ]
-  }
-}
-```
-
-**Disable**: Set `auto_capture.enabled: false` in `~/.tracework/config.yaml`.
-Remove the hook entry from `~/.claude/settings.json` to fully deactivate.
-
-The hook runs best-effort — if the vault is not configured or the helper is
-unavailable, the skill falls back to Markdown output in the conversation.
+- Enabling, disabling, or troubleshooting auto-capture hooks
+- Writing raw entries or artifact index entries through `tracework_raw.py`
+- Handling helper failures and zero-config fallback
+- Formatting vault-mode confirmations and capture receipts
 
 ## Step 1: Classify The Session Archetype
 
@@ -281,8 +256,8 @@ Each artifact context must include:
 - `open_questions`: unresolved artifact-level questions, when present
 
 When `artifact_context` is present and a vault is configured, also upsert an
-artifact index entry with `scripts/tracework_raw.py upsert-artifact`. Use
-`source: "capture"`. If `artifact_index.enabled` is `false`, config
+artifact index entry with `<this-skill>/scripts/tracework_raw.py upsert-artifact`.
+Use `source: "capture"`. If `artifact_index.enabled` is `false`, config
 cannot be resolved, or the helper fails, skip the artifact-index side effect and
 continue.
 
@@ -297,113 +272,15 @@ not "this file is stale" and not "apply this diff".
 
 ## Step 4: Output Or Write
 
-### Output Policy
+Read `references/capture-operations.md` before writing to the vault, upserting
+artifact indexes, registering the project, or handling helper failures.
 
-Use quiet output by default whenever a vault write succeeds. This applies to
-manual `/tracework:capture`, checkpoint capture, and auto-capture. Return only a
-short confirmation such as:
+Default behavior:
 
-```text
-已记录 {N} 条进展 -> {slug} ({week})
-```
-
-If the user requested verbose output, also include the Markdown recap after the
-write confirmation.
-
-Zero-config mode is always verbose because the conversation output is the only
-deliverable. Helper failures must not be silent: report the specific failure
-briefly, then provide the Markdown fallback recap.
-
-### Helper Resilience
-
-The `tracework_raw.py` helper is the canonical write path, but capture must not fail
-when the helper is unreachable:
-
-1. **Helper timeout**: If `python tracework_raw.py resolve-config` takes > 10 seconds,
-   briefly report the timeout and fall back to Markdown output.
-2. **Helper missing**: If the script file is not found (e.g., incomplete
-   installation), briefly report the missing helper and fall back to Markdown
-   output.
-3. **Parse errors**: If the helper returns non-JSON, fall back to Markdown output
-   and report the error to the user.
-4. **Write errors**: If `append-entry` fails with a disk/permission error, fall
-   back to Markdown output and report the specific error.
-
-In all fallback cases, the Markdown output is the primary deliverable. The vault
-write is a side effect that must not block the recap.
-
-Resolve `{vault}` using the standard priority order:
-
-| Priority | Location | Scope |
-|---|---|---|
-| 1 | `.tracework/config.yaml` | Project-level override |
-| 2 | `~/.tracework/config.yaml` | Global default |
-
-Use the bundled helper when available. Each helper call requires the JSON to be
-on disk as a file — the scripts read `--entry` / `--artifact` paths, not stdin.
-
-### Step 4a: Resolve config and write entry JSON to a temp file
-
-```bash
-python <this-skill>/scripts/tracework_raw.py resolve-config --cwd "$PWD"
-```
-
-Then use the **Write tool** (not bash heredoc, pipe, or redirect) to write the
-entry JSON array to `{project}/.tracework/tmp-entry.json`. The Write tool guarantees
-the file content is flushed to disk before the helper reads it. Do NOT use
-heredoc or `cat > file` — those can leave stale content from a previous session.
-
-### Step 4b: Append the entry
-
-```bash
-python <this-skill>/scripts/tracework_raw.py append-entry \
-  --entry .tracework/tmp-entry.json \
-  --cwd "$PWD"
-```
-
-The helper resolves config, calculates the ISO week, resolves the project slug,
-validates required fields, logs adaptive-depth warnings, and appends the entry
-object or array.
-
-### Step 4c: Clean up
-
-```bash
-rm .tracework/tmp-entry.json
-```
-
-Delete the temp file only after Step 4b succeeds. If the helper fails, keep the
-temp file for debugging and fall back to Markdown output.
-
-### Artifact index entries
-
-For each durable artifact index entry, follow the same Write → call → cleanup
-pattern:
-
-1. Use the **Write tool** to write the artifact JSON to
-   `{project}/.tracework/tmp-artifact.json`.
-2. Call the helper:
-   ```bash
-   python <this-skill>/scripts/tracework_raw.py upsert-artifact \
-     --artifact .tracework/tmp-artifact.json \
-     --cwd "$PWD"
-   ```
-3. On success, delete `rm .tracework/tmp-artifact.json`.
-
-If any helper call fails, fall back to Markdown output instead of blocking the
-recap.
-
-### Auto-registration
-
-After successfully appending entries, ensure the project is registered in the
-knowledge vault:
-
-```bash
-python <this-skill>/scripts/tracework_raw.py register-project --cwd "$PWD"
-```
-
-This is a best-effort side effect that keeps `{vault}/raw/projects.json` current
-for weekly and daily multi-project discovery. If the helper is unavailable or the
-call fails, do not block the recap.
+- Vault write succeeds: return a short confirmation plus the capture receipt.
+- User requested verbose output: include the Markdown recap after confirmation.
+- No vault or helper failure: return the Markdown recap directly and include the
+  setup hint.
 
 ## Markdown Output Template
 
@@ -465,78 +342,9 @@ After the final entry, append:
 
 ## Confirmation
 
-Vault mode:
-
-```text
-已记录 {N} 条进展 -> {slug} ({week})
-```
-
-Use the fuller confirmation only when the user requested verbose output or when
-debugging a write issue:
-
-```text
-记录了 {N} 条变更 -> {slug} ({week})
-  写入: {vault}/raw/weeks/{week}/{slug}.json
-  - [{archetype}/{type}] {summary}
-```
-
-Zero-config mode needs no extra confirmation because the Markdown recap is the
-deliverable.
-
-## Capture Receipt
-
-After the vault-mode confirmation, append a 2-3 line receipt that gives the
-user immediate signal from what was just captured. Zero-config mode does not
-need a receipt because the full Markdown output already serves this purpose.
-
-**Receipt template:**
-
-```text
-📋 {最关键的 summary}
-   ⚠️ {N} 个风险 · ❓ {N} 个开放问题 · 🔄 {N} 个放弃方案
-```
-
-**Selection rules for the top summary:**
-
-1. If any entry has `archetype: decision`, use its `summary`.
-2. Otherwise, if any entry has an `impact` field, use that entry's `summary`.
-3. Otherwise, use the first entry's `summary`.
-4. If there is only one entry, use its `summary` directly.
-
-**Signal counts** — count across all entries written in this capture:
-
-- Risks: count of entries with `status: "risk"` plus entries whose
-  `open_questions` contain risk-related phrasing.
-- Open questions: total count of all `open_questions` items across entries.
-- Abandoned alternatives: total count of all `abandoned_alternatives` items
-  across entries.
-
-**Omission rules:**
-
-- When a count is 0, omit that segment entirely rather than showing "0 个".
-- When all entries are `archetype: "maintenance"`, omit the 📋 prefix and use
-  plain wording (e.g., the summary text without the emoji).
-
-**Checkpoint receipt** is shorter — show only the top summary and open questions
-(if any). Skip the full signal-count line.
-
-**Example receipts:**
-
-```
-已记录 3 条进展 -> my-project (2026-W23)
-📋 选择了 SQLite 而非 LevelDB 做本地缓存
-   ⚠️ 1 个风险 · ❓ 2 个开放问题 · 🔄 1 个放弃方案
-```
-
-```
-已记录 1 条进展 -> my-app (2026-W23)
-📋 完成了用户认证模块的 API 端点
-```
-
-```
-已记录 2 条进展 -> tools (2026-W23)
-更新了依赖版本并清理了无用导入
-```
+Use the quiet confirmation and receipt rules in
+`references/capture-operations.md`. Zero-config mode needs no extra confirmation
+because the Markdown recap is the deliverable.
 
 ## Quality Gate
 
