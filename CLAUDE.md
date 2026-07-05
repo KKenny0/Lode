@@ -88,6 +88,7 @@ skills/
 - **Public namespace migration**: user-facing names, plugin metadata, docs, site, and command examples use Tracework and `/tracework:*`.
 - **Tracework storage namespace**: `.tracework` paths and `tracework.*` schema strings are canonical. Legacy fallback paths and schema strings are not supported.
 - **Codex plugin bundle sync**: `.agents/plugins/marketplace.json` points at `plugins/tracework`; after editing `.codex-plugin/`, `skills/`, or `assets/`, run `npm --prefix cli run copy-skills` and `npm --prefix cli run check-skills`.
+- **Plugin release versioning**: user-visible plugin updates must bump the same semver in `.codex-plugin/plugin.json`, `.claude-plugin/plugin.json`, and `.claude-plugin/marketplace.json`; then run `npm --prefix cli run copy-skills`, `npm --prefix cli run check-skills`, `npm --prefix cli run test`, `claude plugin validate .claude-plugin/plugin.json`, `claude plugin validate .claude-plugin/marketplace.json`, and `claude plugin tag --dry-run .` from a clean worktree before tagging.
 - **Convention sync**: canonical storage rules live in `references/tracework-storage-convention.md`; after editing it, run `scripts/sync-convention.sh`.
 - **Decision replay helper sync**: canonical implementation lives at `references/decision_replay.py`; after editing it, run `scripts/sync-decision-replay.sh`.
 - **No legacy CLI install surface**: the CLI is for maintenance diagnostics and packaging checks, not user-facing installation.

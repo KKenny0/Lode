@@ -125,6 +125,18 @@ npm --prefix cli run copy-skills
 npm --prefix cli run check-skills
 ```
 
+Before releasing a user-visible plugin update:
+
+1. Bump the plugin version in `.codex-plugin/plugin.json`,
+   `.claude-plugin/plugin.json`, and `.claude-plugin/marketplace.json`.
+2. Run `npm --prefix cli run copy-skills` so `plugins/tracework` mirrors the
+   source manifests, skills, and assets.
+3. Run `npm --prefix cli run check-skills` and `npm --prefix cli run test`.
+4. Run `claude plugin validate .claude-plugin/plugin.json` and
+   `claude plugin validate .claude-plugin/marketplace.json`.
+5. Run `claude plugin tag --dry-run .` from a clean worktree before creating the
+   release tag.
+
 Core docs:
 
 - [Configuration](docs/configuration.md)

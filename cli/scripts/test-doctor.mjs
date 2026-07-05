@@ -55,6 +55,12 @@ function writeConfig(home, content) {
   fs.writeFileSync(path.join(configDir, 'config.yaml'), content, 'utf-8');
 }
 
+function readCodexPluginVersion() {
+  const manifestPath = path.join(repoRoot, '.codex-plugin', 'plugin.json');
+  const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf-8'));
+  return manifest.version;
+}
+
 function homeEnv(home) {
   return { HOME: home, USERPROFILE: home };
 }
@@ -103,7 +109,7 @@ try {
   const codexInstallHome = mkTempDir('doctor-codex-install-home');
   const codexInstallVault = mkTempDir('doctor-codex-install-vault');
   tempDirs.push(codexHome, codexInstallHome, codexInstallVault);
-  const nativeSkillsPath = path.join(codexHome, 'plugins', 'cache', 'tracework', 'tracework', '0.1.0', 'skills');
+  const nativeSkillsPath = path.join(codexHome, 'plugins', 'cache', 'tracework', 'tracework', readCodexPluginVersion(), 'skills');
   fs.mkdirSync(path.dirname(nativeSkillsPath), { recursive: true });
   fs.cpSync(path.join(repoRoot, 'skills'), nativeSkillsPath, { recursive: true });
   const codexDoctor = runDoctor(['--cwd', codexInstallHome, '--vault', codexInstallVault, '--no-write', '--json'], {

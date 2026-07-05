@@ -17,6 +17,7 @@ const sourceCodexPluginManifest = path.join(repoRoot, '.codex-plugin', 'plugin.j
 const sourceClaudePluginManifest = path.join(repoRoot, '.claude-plugin', 'plugin.json');
 const claudeMarketplace = path.join(repoRoot, '.claude-plugin', 'marketplace.json');
 const codexMarketplace = path.join(repoRoot, '.agents', 'plugins', 'marketplace.json');
+const pluginPathsSource = path.join(repoRoot, 'cli', 'src', 'plugin-paths.ts');
 const canonicalConvention = path.join(repoRoot, 'references', 'tracework-storage-convention.md');
 const canonicalDecisionReplay = path.join(repoRoot, 'references', 'decision_replay.py');
 
@@ -70,6 +71,14 @@ function assert(condition, message) {
 
 function exists(filePath) {
   return fs.existsSync(filePath);
+}
+
+function readJson(filePath) {
+  return JSON.parse(fs.readFileSync(filePath, 'utf-8'));
+}
+
+function isSemver(version) {
+  return typeof version === 'string' && /^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-[0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*)?(?:\+[0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*)?$/.test(version);
 }
 
 function walk(dir, predicate, matches = []) {
@@ -171,14 +180,15 @@ if (exists(sourceClaudePluginManifest) && exists(claudePluginManifest)) {
 }
 
 if (exists(sourceCodexPluginManifest)) {
-  const manifest = JSON.parse(fs.readFileSync(sourceCodexPluginManifest, 'utf-8'));
+  const manifest = readJson(sourceCodexPluginManifest);
   assert(!('$schema' in manifest), '.codex-plugin/plugin.json must not include $schema; Codex plugin validation rejects it');
   assert(manifest.name === 'tracework', '.codex-plugin/plugin.json name must be tracework');
+  assert(isSemver(manifest.version), '.codex-plugin/plugin.json version must be valid semver');
   assert(manifest.skills === './skills/', '.codex-plugin/plugin.json skills must point to ./skills/');
 }
 
 if (exists(codexMarketplace)) {
-  const marketplace = JSON.parse(fs.readFileSync(codexMarketplace, 'utf-8'));
+  const marketplace = readJson(codexMarketplace);
   assert(marketplace.name === 'tracework', '.agents/plugins/marketplace.json name must be tracework');
   assert(Array.isArray(marketplace.plugins) && marketplace.plugins.length === 1, '.agents/plugins/marketplace.json must expose exactly one plugin');
   const plugin = marketplace.plugins?.[0];
@@ -189,19 +199,32 @@ if (exists(codexMarketplace)) {
 }
 
 if (exists(sourceClaudePluginManifest)) {
-  const manifest = JSON.parse(fs.readFileSync(sourceClaudePluginManifest, 'utf-8'));
+  const manifest = readJson(sourceClaudePluginManifest);
   assert(manifest.name === 'tracework', '.claude-plugin/plugin.json name must be tracework');
-  assert(manifest.version === '0.1.0', '.claude-plugin/plugin.json version must be 0.1.0');
+  assert(isSemver(manifest.version), '.claude-plugin/plugin.json version must be valid semver');
 }
 
 if (exists(claudeMarketplace)) {
-  const marketplace = JSON.parse(fs.readFileSync(claudeMarketplace, 'utf-8'));
+  const marketplace = readJson(claudeMarketplace);
   assert(marketplace.name === 'tracework', '.claude-plugin/marketplace.json name must be tracework');
   assert(Array.isArray(marketplace.plugins) && marketplace.plugins.length === 1, '.claude-plugin/marketplace.json must expose exactly one plugin');
   const plugin = marketplace.plugins?.[0];
   assert(plugin?.name === 'tracework', '.claude-plugin/marketplace.json plugin name must be tracework');
-  assert(plugin?.version === '0.1.0', '.claude-plugin/marketplace.json plugin version must be 0.1.0');
+  assert(isSemver(plugin?.version), '.claude-plugin/marketplace.json plugin version must be valid semver');
   assert(plugin?.source === './plugins/tracework', '.claude-plugin/marketplace.json plugin source must be ./plugins/tracework');
+}
+
+if (exists(sourceCodexPluginManifest) && exists(sourceClaudePluginManifest) && exists(claudeMarketplace)) {
+  const codexVersion = readJson(sourceCodexPluginManifest).version;
+  const claudeVersion = readJson(sourceClaudePluginManifest).version;
+  const claudeMarketplaceVersion = readJson(claudeMarketplace).plugins?.[0]?.version;
+  const pluginPathsContent = exists(pluginPathsSource) ? fs.readFileSync(pluginPathsSource, 'utf-8') : '';
+  const pluginPathsVersion = pluginPathsContent.match(/PLUGIN_VERSION\s*=\s*'([^']+)'/)?.[1];
+  assert(
+    codexVersion === claudeVersion && claudeVersion === claudeMarketplaceVersion,
+    `Plugin versions must match across Codex, Claude, and Claude marketplace manifests: ${codexVersion}, ${claudeVersion}, ${claudeMarketplaceVersion}`,
+  );
+  assert(pluginPathsVersion === codexVersion, `cli/src/plugin-paths.ts PLUGIN_VERSION must match plugin manifests: ${pluginPathsVersion}, ${codexVersion}`);
 }
 
 const canonical = exists(canonicalConvention) ? fs.readFileSync(canonicalConvention, 'utf-8') : null;
