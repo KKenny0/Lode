@@ -145,6 +145,23 @@ Group related work into logical units. A session that touched many files for one
 feature should usually produce one entry. Maximum 5 entries; 1-3 is the normal
 range.
 
+### Downstream 3+1 Mapping
+
+Capture does not assign report-local `O#`, `W#`, `D#`, or `E#` identifiers.
+Weekly and monthly reports assign those labels after they have gathered the full
+period's raw entries and can compare claims across streams.
+
+Instead, make each raw entry easy for downstream reports to map:
+
+- `summary`, `status`, and `impact` provide candidate `O#` material, bounded by
+  the Fruit Check.
+- `work_stream` provides an optional `W#` grouping hint when the narrative group
+  is obvious from the session. Leave it absent rather than guessing.
+- `decision_threads`, `exploration_paths`, `abandoned_alternatives`, and
+  `lifecycle_transition` provide candidate `D#` material.
+- `evidence_refs`, `source_refs`, and `artifact_context.source_of_truth` provide
+  candidate `E#` material.
+
 ## Step 3: Generate Raw Entries
 
 Follow `references/tracework-storage-convention.md`. The change entry JSON shape is:
@@ -158,6 +175,7 @@ Follow `references/tracework-storage-convention.md`. The change entry JSON shape
   "context": "1-2 sentences explaining why and impact",
   "source": "session-recap",
   "status": "done | ongoing | risk | decision",
+  "work_stream": "optional report grouping hint when obvious",
   "related_docs": ["/absolute/path/to/doc"],
   "impact": "report-ready user, system, reliability, or workflow impact",
   "evidence_refs": ["commit SHA, issue ID, eval ID, or doc path"],
@@ -533,6 +551,8 @@ Before finalizing each entry, check:
   expected effect?
 - Does `status` limit the claim correctly, especially for ongoing work, risks,
   and decisions?
+- If `work_stream` is present, is it an obvious grouping hint rather than a
+  report-local `W#` label or invented narrative?
 - Do evidence references support the claim rather than merely exist beside it?
 - Are durable artifacts represented through `artifact_context`, not vague prose?
 - For checkpoint mode, is this a durable stage signal rather than a progress log?
@@ -544,5 +564,7 @@ Before finalizing each entry, check:
 - Do not preserve process noise that would never appear in a weekly review.
 - Do not use checkpoint mode to record command-by-command progress.
 - Do not split one coherent feature across many entries.
+- Do not assign `O#`, `W#`, `D#`, or `E#` labels in capture output or raw JSON.
+  Those labels belong to weekly and monthly reports only.
 - Do not write new entries with `source: "arch-doc"`; that source is legacy-only.
 - Do not generate formal Stage/Pipeline architecture documents from this skill.
