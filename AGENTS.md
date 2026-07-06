@@ -4,7 +4,7 @@ This file provides guidance to Codex (Codex.ai/code) when working with code in t
 
 ## What This Is
 
-**Tracework** is a cross-runtime plugin and skill monorepo for evidence-backed work memory from agent sessions. It ships a Codex plugin, a Claude Code plugin, and eight Markdown-first skills for capture, recall, query, daily notes, weekly briefs, monthly reviews, decision roadmaps, and cold-start setup.
+**Tracework** is a cross-runtime plugin and skill monorepo for evidence-backed work memory from agent sessions. It ships a Codex plugin, a Claude Code plugin, and eight Markdown-first skills for capture, recall, query, workplace daily reports, weekly briefs, monthly reviews, decision roadmaps, and cold-start setup.
 
 Tracework is not a generic memory layer. Capture/retrieval is the input; recall, decision query, brief/review, and roadmap surfaces are the product.
 
@@ -92,9 +92,9 @@ site/.vitepress/dist/
 | capture | Adaptive-depth session recap plus artifact context and sync suggestions | `/tracework:capture`, "收工", "done", "今天到这" |
 | recall | Session-start recall from raw entries and artifact index | `/tracework:recall`, "开工", "session start", "继续上次" |
 | query | Targeted decision replay evidence pack | `/tracework:query`, "why did we choose this?", "为什么当时这么选" |
-| daily | Obsidian daily notes from raw entries and git history | `/tracework:daily`, "更新日报", "日报", "daily note" |
+| daily | Workplace daily reports from raw entries, with git as coverage fallback | `/tracework:daily`, "更新日报", "日报", "daily note" |
 | weekly | Raw-first weekly brief outline | `/tracework:weekly`, "周报", "weekly PPT" |
-| monthly | Monthly review with candidate rules from repeated evidence | `/tracework:monthly`, "月度回顾", "月报", "monthly review" |
+| monthly | Monthly review from workplace daily reports and matching raw evidence | `/tracework:monthly`, "月度回顾", "月报", "monthly review" |
 | roadmap | Narrative decision roadmap with accumulating risks and recurring questions | `/tracework:roadmap`, "决策路线图", "decision roadmap" |
 
 ## Reusable Data Map
@@ -113,13 +113,13 @@ Tracework is not a strict pipeline. Skills are independently triggered, but they
   roadmap <- raw entries + decision index + artifact index
 
 每天:
-  daily <- raw entries + git log -> {vault}/Daily Note.md
+  daily <- raw entries + fallback git coverage -> {vault}/Daily Note.md workplace report
 
 每周:
   weekly <- raw entries + fallback git coverage -> weekly outline
 
 每月:
-  monthly <- Daily Note.md + matching raw entries -> monthly review
+  monthly <- workplace Daily Note.md + matching raw entries -> monthly review
 ```
 
 ## Storage Surfaces
