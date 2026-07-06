@@ -18,9 +18,10 @@ review skills will use.
 
 **Trigger:** `/tracework:capture`, `/tracework:capture checkpoint`, `收工`
 
-Captures a session or checkpoint. It should preserve goals, state changes,
-decisions, rejected paths, risks, source refs, artifact changes, and next steps.
-Zero-config mode returns structured Markdown in the conversation.
+Captures a session or checkpoint. It dynamically routes the session to lite,
+standard, or deep depth, then preserves the goals, state changes, decisions,
+rejected paths, risks, source refs, artifact changes, and next steps worth
+reusing. Zero-config mode returns structured Markdown in the conversation.
 
 ### Recall
 
@@ -57,6 +58,8 @@ revisited alternatives from raw entries and decision indexes.
 Writes a workplace-facing daily report from raw entries. Git history is used
 only to fill coverage gaps, and the output keeps project, status, risk, next
 step, and evidence-boundary fields stable for monthly review.
+Git-only output is usable but `limited`; capture improves the why and evidence
+boundary.
 
 ### Weekly
 
@@ -65,6 +68,8 @@ step, and evidence-boundary fields stable for monthly review.
 Builds a weekly brief outline from raw entries first, with git as coverage and
 fallback evidence only. Report-local `O#`, `W#`, `D#`, and `E#` chains make the
 brief inspectable.
+It can run before capture coverage is complete, but fallback-only streams stay
+limited.
 
 ### Monthly
 

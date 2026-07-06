@@ -89,6 +89,7 @@ Ask for any missing values in one compact pass:
 6. Team context: `solo`, `team`, or `mixed`. Target: **global config**.
 7. Auto-capture: should `/tracework:capture` run automatically at session end?
    Default: yes for configured vaults. Target: **global config**. Explain that
+   capture dynamically routes each session to lite, standard, or deep depth, and
    this config is Tracework's intent flag; Claude Code only runs it automatically
    when a `Stop` hook is present in `~/.claude/settings.json`.
 
@@ -220,13 +221,14 @@ Report:
 4. Auto-capture status: active, enabled-but-missing-hook, or disabled
 5. Confirmation that the project was registered in `projects.json`
 
-Then recommend the Tier 1 habit loop:
+Then recommend the report/query-first workflow:
 
-> Tracework 已配置完成。从今天开始只需两个动作：
-> - 每次结束工作说 **"收工"** 或运行 `/tracework:capture`
-> - 下次开始工作运行 `/tracework:recall`
+> Tracework 已配置完成。你可以直接运行 `/tracework:daily`、`/tracework:weekly`、
+> `/tracework:monthly` 或 `/tracework:query` 获得当前可用结果。
 >
-> 坚持 1-2 周积累数据后，日报 (`/tracework:daily`)、周报 (`/tracework:weekly`) 和决策查询 (`/tracework:query`) 会自动变得更丰富。
+> 每次结束关键工作时说 **"收工"** 或运行 `/tracework:capture`，Tracework 会自动选择
+> lite / standard / deep 深度。capture 越覆盖关键决策、风险和证据缺口，后续日报、
+> 周报、月报和 query 越可靠；没有 capture 时，报告仍可用 git 生成 limited 版本。
 
 If auto-capture is enabled and the Stop hook is present, mention that ending a
 Claude Code session can now trigger capture automatically. If the hook is

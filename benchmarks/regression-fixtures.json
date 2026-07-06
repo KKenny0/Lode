@@ -60,12 +60,14 @@
       "fixture": {
         "project_slug": "storyboard-pipeline",
         "date": "2026-07-06",
+        "expected_capture_depth": "standard",
         "expected_kind": "progress",
         "expected_impact_boundary": "expected",
         "expected_evidence_boundary": "recorded",
         "expected_hard_signal_kind": "open_question",
         "entry": {
           "timestamp": "2026-07-06T19:00:00+08:00",
+          "capture_depth": "standard",
           "archetype": "build",
           "type": "feature",
           "summary": "Added report-led Daily output contract while keeping monthly parsing stable",
@@ -105,6 +107,64 @@
         {
           "name": "reporting_metadata_accepted",
           "description": "Valid outcome_candidate, impact_boundary, evidence_boundary, carry_forward, and hard_signals pass helper validation."
+        }
+      ]
+    },
+    {
+      "id": "capture-helper-capture-depth-invalid-enum",
+      "execution": {
+        "kind": "capture-helper-capture-depth-invalid"
+      },
+      "skill": "capture",
+      "prompt": "Reject invalid capture_depth values before writing raw data.",
+      "fixture": {
+        "project_slug": "storyboard-pipeline",
+        "date": "2026-07-06",
+        "expected_error_text": "capture_depth",
+        "entry": {
+          "timestamp": "2026-07-06T19:00:00+08:00",
+          "capture_depth": "maximal",
+          "archetype": "maintenance",
+          "type": "refactor",
+          "summary": "Added invalid capture depth to test enum rejection",
+          "context": "The helper should reject unsupported capture depth values rather than writing ambiguous cost boundaries.",
+          "source": "session-recap"
+        }
+      },
+      "expected_behavior": "The capture helper exits non-zero and reports the invalid capture_depth path.",
+      "assertions": [
+        {
+          "name": "invalid_capture_depth_rejected",
+          "description": "Unsupported capture_depth values do not enter raw storage."
+        }
+      ]
+    },
+    {
+      "id": "capture-helper-capture-depth-invalid-type",
+      "execution": {
+        "kind": "capture-helper-capture-depth-invalid"
+      },
+      "skill": "capture",
+      "prompt": "Reject non-string capture_depth values before writing raw data.",
+      "fixture": {
+        "project_slug": "storyboard-pipeline",
+        "date": "2026-07-06",
+        "expected_error_text": "capture_depth",
+        "entry": {
+          "timestamp": "2026-07-06T19:00:00+08:00",
+          "capture_depth": ["deep"],
+          "archetype": "maintenance",
+          "type": "refactor",
+          "summary": "Added invalid capture depth type to test enum rejection",
+          "context": "The helper should reject unsupported capture depth types with a stable validation error.",
+          "source": "session-recap"
+        }
+      },
+      "expected_behavior": "The capture helper exits non-zero and reports the invalid capture_depth path.",
+      "assertions": [
+        {
+          "name": "invalid_capture_depth_type_rejected",
+          "description": "Non-string capture_depth values do not enter raw storage."
         }
       ]
     },

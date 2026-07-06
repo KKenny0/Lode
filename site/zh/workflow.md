@@ -3,16 +3,16 @@
 ## 最小 Loop
 
 ```text
-安装 -> 配置 -> capture 一次真实 session -> query 一个 decision
+安装 -> 配置 -> 生成报告或追问 -> capture 关键 session
 ```
 
 1. 以 `tracework@tracework` 安装插件。
 2. 运行 `/tracework:cold-start-interview`。
-3. 用 `收工` 或 `/tracework:capture` 结束一次真实 session。
-4. 用 `/tracework:query why did we choose <the decision>?` 追问一个选择。
+3. 运行 `/tracework:daily`、`/tracework:weekly` 或一个具体的 `/tracework:query`。
+4. 关键工作结束后用 `收工` 或 `/tracework:capture`，让后续报告和决策查询有更强证据。
 
-这条路径证明核心价值：后来的读者不需要重翻完整 transcript，也能恢复一个选择
-为什么发生。
+这条路径能更快证明核心价值：报告可以马上有用，capture 负责保存 git 无法恢复的
+“为什么”。
 
 ## 复用地图
 
@@ -28,6 +28,9 @@ Roadmap <- raw entries + decision indexes
 
 Skills 独立触发，没有强制流水线。共享 storage convention 让后续视图可以复用早期
 证据。
+
+日报和周报可以在没有 raw entries 时用 git fallback coverage 运行。但这些输出必须
+保持 `limited`：它们可以描述活动和进展，不能补写动机、取舍、风险或已验证影响。
 
 ## 逐层收口
 
@@ -50,7 +53,7 @@ Brief 和 review 应该向上汇总工作，同时保留向下核验路径：
 ## 零配置
 
 没有 vault 时，capture 仍然可以直接在对话里返回结构化 recap。当你需要安静写入、
-跨 session recall、query、brief 或 review 时，再配置 vault。
+跨 session recall、decision query，以及更高质量的 brief 或 review 时，再配置 vault。
 
 ## 证据规则
 

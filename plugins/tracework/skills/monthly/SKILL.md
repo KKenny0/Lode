@@ -99,7 +99,7 @@ reports vs git-only entries in the Daily Note:
    - Git-only days: {M}/{total_days}
    - Empty days: {K}/{total_days}
 
-These counts describe source coverage, not outcomes. If raw entry coverage < 50%, include a note in the coverage appendix: "本月大部分工作记录来自 git log，缺少决策和动机上下文。建议坚持使用 /tracework:capture 以提升月报质量。"
+These counts describe source coverage, not outcomes. If raw entry coverage < 50%, include a note in the coverage appendix: "本月大部分工作记录来自 git log，可作为 limited 月度回顾使用；它缺少决策、动机和取舍上下文。下月只需对关键决策、风险或证据缺口补充 /tracework:capture。"
 
 ### Step 2：按月拆分归档
 
@@ -173,7 +173,7 @@ signals/skeleton schema 或存储路径：
 - 如果多个日期记录同一工作流，合并为一个主题，按最新状态表述；不要把同一 raw/git 来源在日报中的重复痕迹放大成多个成果
 - 如果同一主题同时包含完成项、风险项、决策项，按"完成了什么 + 保留了什么风险/决策"组织，避免只写成功叙事
 - 识别 recurring open questions、stale threads、unresolved risks，并说明它们如何影响下月计划
-- 总结 `开工` / `收工` 等 Tracework habit loop 的使用情况：哪些 session 有记录，哪些上下文可能缺失
+- 总结 Tracework 记录覆盖与证据边界：哪些关键 session 有 raw-entry 支撑，哪些只是 git-only limited，哪些上下文可能缺失
 - 输出 candidate rules：从重复证据中提出可能值得固化的 AGENTS rules、checklists、playbooks 或 skill ideas。单次弱信号只能写成观察或 checklist 建议，不能升级成强规则。
 
 ### Step 5：输出执行摘要

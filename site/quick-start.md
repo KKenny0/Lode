@@ -25,9 +25,22 @@ Run once:
 This writes config under `~/.tracework/config.yaml` or
 `{project}/.tracework/config.yaml`.
 
-## 3. Capture One Real Session
+## 3. Generate Useful Output
 
-At the end of work, say:
+You can start with the output you need:
+
+```text
+/tracework:daily
+/tracework:weekly
+/tracework:query why did we choose <the decision>?
+```
+
+If raw entries are missing, daily and weekly use git as limited fallback
+coverage. They should not invent motivation, trade-offs, or verified impact.
+
+## 4. Capture Key Sessions
+
+At the end of important work, say:
 
 ```text
 收工
@@ -45,11 +58,12 @@ For long work, capture a durable checkpoint:
 /tracework:capture checkpoint
 ```
 
-Capture should record decisions, rejected paths, risks, evidence, artifact
-changes, and next steps. If no vault is configured, it can still return a
-structured recap in the conversation.
+Capture routes itself to lite, standard, or deep depth from the session signal.
+It should record the decisions, rejected paths, risks, evidence, artifact
+changes, and next steps that git cannot explain. If no vault is configured, it
+can still return a structured recap in the conversation.
 
-## 4. Query One Decision
+## 5. Query One Decision
 
 Ask a concrete why question:
 
@@ -61,13 +75,13 @@ A good answer includes matched decision nodes, raw `source_entry_refs`, rejected
 alternatives when recorded, and an explicit evidence gap when the record is not
 strong enough.
 
-## 5. Reuse the Record
+## 6. Reuse the Record
 
 | Command | Use after | Purpose |
 | :--- | :--- | :--- |
-| `/tracework:recall` | A few captured sessions | Start the next session with relevant context |
-| `/tracework:weekly` | A week of records | Build a brief-ready outline |
-| `/tracework:monthly` | A month of records | Generate a review and repeated-rule candidates |
+| `/tracework:recall` | A few captured sessions | Start the next session with durable context |
+| `/tracework:weekly` | Now, or after a week of records | Build a brief-ready outline |
+| `/tracework:monthly` | Now, or after a month of daily reports | Generate a review and repeated-rule candidates |
 | `/tracework:roadmap` | Multiple decisions | Review how decisions evolved |
 
 ## Storage

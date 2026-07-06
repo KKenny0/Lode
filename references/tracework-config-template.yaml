@@ -17,7 +17,7 @@ artifact_index:
 
 # Auto-capture settings (optional)
 auto_capture:
-  enabled: true                        # Tracework preference flag; Claude Code also needs a Stop hook in ~/.claude/settings.json
+  enabled: true                        # Tracework preference flag; capture routes lite/standard/deep dynamically; Claude Code also needs a Stop hook
 
 # Weekly outline settings (optional)
 # weekly_outline:

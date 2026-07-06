@@ -119,6 +119,11 @@ When the source is fallback git only, set `状态：git-only` or include `limite
 in `来源/证据边界：`. Do not imply decision intent, motivation, or verified
 impact from commits alone.
 
+Git-only output is still useful as a workplace daily report. Phrase it as
+limited coverage, not as a setup failure. Suggest `/tracework:capture` only for
+specific key decisions, risks, or evidence gaps that should survive into monthly
+review or decision query.
+
 When the source records several raw entries for one project, use multiple
 project blocks only if they represent separate work streams. Otherwise merge
 them into one block and keep risks/next steps visible.

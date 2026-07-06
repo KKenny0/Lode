@@ -52,11 +52,18 @@ raw, and every synthesized view must be traceable back to them.
 Skills are independently triggered. The shared storage convention lets their
 outputs compound.
 
+Daily, weekly, monthly, and query can be useful before capture coverage is
+complete. When only git evidence is available, report skills must label the
+result as `limited` and avoid inventing motivation, trade-offs, or verified
+impact. Capture improves the evidence boundary; it is not a prerequisite for
+every report.
+
 ## Raw Entries
 
 Raw entries should preserve report-worthy signals:
 
 - goal or state change
+- capture depth (`lite`, `standard`, or `deep`) chosen by the capture skill
 - report-ready boundary metadata in optional `reporting`
 - decision and rationale
 - rejected or deferred alternatives
@@ -73,6 +80,9 @@ over prose inference for outcome/progress/activity treatment, impact boundary,
 evidence boundary, evidence gaps, module scope, work stream, carry-forward
 signals, and hard signals. Final `O#`, `W#`, `D#`, and `E#` ids are still
 report-local and are never stored in raw entries.
+
+`capture_depth` is also optional and additive. It describes how much detail the
+capture skill preserved, not how strong the evidence is.
 
 ## Artifact Dossiers
 

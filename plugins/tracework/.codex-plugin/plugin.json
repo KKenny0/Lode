@@ -1,7 +1,7 @@
 {
   "name": "tracework",
   "version": "0.1.3",
-  "description": "Evidence-backed work memory for agent sessions: capture what happened, replay why, and roll work into briefs, reviews, and roadmaps.",
+  "description": "Evidence-backed work reports and memory for agent sessions: generate reports now, capture key evidence, replay why, and roll work into reviews and roadmaps.",
   "author": {
     "name": "Kennywu",
     "email": "jdlow@live.cn"
@@ -20,8 +20,8 @@
   "skills": "./skills/",
   "interface": {
     "displayName": "Tracework",
-    "shortDescription": "Evidence-backed work memory for agent sessions",
-    "longDescription": "Capture agent-session goals, decisions, rejected paths, risks, evidence, and next steps, then reuse them for recall, decision replay, work briefs, reviews, and roadmaps.",
+    "shortDescription": "Evidence-backed work reports and memory for agent sessions",
+    "longDescription": "Generate daily, weekly, and monthly work reports from current evidence, capture key agent-session decisions and risks with dynamic depth, then reuse the record for recall, decision replay, reviews, and roadmaps.",
     "developerName": "Kennywu",
     "category": "Productivity",
     "capabilities": [
@@ -33,7 +33,8 @@
     "logo": "./assets/logo.png",
     "brandColor": "#B87508",
     "defaultPrompt": [
-      "Use Tracework to capture this session with /tracework:capture.",
+      "Use Tracework to write a daily report with /tracework:daily.",
+      "Use Tracework to capture this key session with /tracework:capture.",
       "Use Tracework to recall recent work context with /tracework:recall.",
       "Use Tracework to query cited decision evidence with /tracework:query."
     ],

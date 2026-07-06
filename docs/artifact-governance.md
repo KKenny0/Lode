@@ -7,10 +7,11 @@ indexes and synthesized outputs, not full copies of every project document.
 
 ## Rule
 
-Preserve enough provenance for this loop first:
+Preserve enough provenance for direct report/query value first:
 
 ```text
-/tracework:capture -> /tracework:query
+/tracework:daily or /tracework:weekly -> limited when only git exists
+/tracework:capture -> stronger /tracework:query and report evidence
 ```
 
 Recall, roadmap, weekly, and monthly views can reuse the same evidence later.

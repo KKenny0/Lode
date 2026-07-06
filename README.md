@@ -10,27 +10,28 @@
   <a href="https://kkenny0.github.io/Tracework/"><strong>Documentation</strong></a> · <a href="https://kkenny0.github.io/Tracework/showcase">Showcase</a> · <a href="README.cn.md">中文</a>
 </p>
 
-Tracework gives agent work a trace that can be inspected, questioned, and
-carried forward.
+Tracework gives agent work a trace that can be reported, questioned, and carried
+forward.
 
-It captures the decisions, evidence, risks, artifacts, and next steps inside
-agent sessions, then turns them into local records for recall, query, briefs,
-reviews, and roadmaps.
+It can write daily, weekly, and monthly work reports from the evidence already
+available, then improve those reports and future decision queries when sessions
+are captured into local raw records.
 
 ## What Tracework Does
 
 Tracework can:
 
+- Write workplace daily reports and weekly/monthly reviews from raw entries, or
+  from git as limited fallback coverage
 - Capture session decisions, rejected paths, risks, artifacts, and next steps
 - Answer why a path was chosen when local evidence supports it
 - Recall useful context before a later session
-- Roll raw session records into daily, weekly, monthly, or roadmap views
 - Keep Markdown and JSON records in your own knowledge vault
 
 The core loop stays small:
 
 ```text
-capture session signals -> replay decisions -> brief, review, or roadmap
+report or query current work -> capture key session signals -> improve later reports and decisions
 ```
 
 Decision replay is the trust mechanism: a later agent or reader can drill from
@@ -47,7 +48,7 @@ coverage metadata, not proof of outcomes.
 | Command | When | Output |
 | :--- | :--- | :--- |
 | `/tracework:cold-start-interview` | First run | Configures the local vault and project profile |
-| `/tracework:capture` | Wrap-up or checkpoint | Captures decisions, builds, investigations, repairs, risks, and artifacts |
+| `/tracework:capture` | Wrap-up or checkpoint | Dynamically captures lite, standard, or deep session memory |
 | `/tracework:recall` | Session start | Recalls recent decisions, risks, open questions, and relevant artifacts |
 | `/tracework:query` | Targeted follow-up | Answers "why did we choose this?" with cited local evidence |
 | `/tracework:weekly` | Weekly | Rolls raw session records into a brief-ready outline |
@@ -55,18 +56,19 @@ coverage metadata, not proof of outcomes.
 | `/tracework:roadmap` | Phase review | Synthesizes a narrative decision history |
 | `/tracework:daily` | Daily | Writes workplace daily reports from raw entries, using git only for coverage gaps |
 
-The habit loop is intentionally small:
+The direct-value loop is intentionally small:
 
 ```text
 /tracework:cold-start-interview once
-收工 or /tracework:capture at session end
-开工 or /tracework:recall at session start
+/tracework:daily, /tracework:weekly, or /tracework:monthly when you need a report
 /tracework:query when someone needs the why
+收工 or /tracework:capture after key work to improve future evidence
+开工 or /tracework:recall when durable memory exists
 ```
 
-Daily, weekly, monthly, and roadmap views compound after enough raw entries
-exist. Daily is a workplace-facing report and monthly input; these views remain
-over the same record, not a separate reporting database.
+Daily and weekly can still produce git-only `limited` reports when raw entries
+are missing. Capture is the quality multiplier: it preserves the decision,
+risk, artifact, and evidence boundaries that git cannot explain.
 
 ## Install
 

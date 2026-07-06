@@ -46,6 +46,7 @@ short confirmation plus the receipt:
 
 ```text
 已记录 {N} 条进展 -> {slug} ({week})
+depth={lite|standard|deep}: {one short routing reason}
 ```
 
 If the user requested verbose output, also include the Markdown recap after the
@@ -153,6 +154,7 @@ Vault mode:
 
 ```text
 已记录 {N} 条进展 -> {slug} ({week})
+depth={lite|standard|deep}: {one short routing reason}
 ```
 
 Use the fuller confirmation only when the user requested verbose output or when
@@ -177,6 +179,7 @@ Receipt template:
 
 ```text
 📋 {最关键的 summary}
+   depth={lite|standard|deep}: {one short routing reason}
    ⚠️ {N} 个风险 · ❓ {N} 个开放问题 · 🔄 {N} 个放弃方案
 ```
 
@@ -194,6 +197,10 @@ Signal counts:
 - Open questions: count all `open_questions` items across entries.
 - Abandoned alternatives: count all `abandoned_alternatives` items across
   entries.
+- Capture depth: use the highest `capture_depth` across the written entries.
+  The routing reason should be factual, for example "routine report atom",
+  "captured outcome and evidence boundary", or "preserved decision trade-off and
+  artifact context".
 
 Omission rules:
 

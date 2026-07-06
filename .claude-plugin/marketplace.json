@@ -9,7 +9,7 @@
   "plugins": [
     {
       "name": "tracework",
-      "description": "Evidence-backed work memory for agent sessions.",
+      "description": "Evidence-backed work reports and memory for agent sessions.",
       "version": "0.1.3",
       "author": {
         "name": "Kennywu",

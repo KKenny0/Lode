@@ -39,8 +39,9 @@ environment or default-directory fallbacks.
 - `profile.team_context`: `solo`, `team`, or `mixed`.
 - `artifact_index.enabled`: defaults to `true`; controls whether capture writes
   or updates `{vault}/raw/artifacts/{slug}.json`.
-- `auto_capture.enabled`: preference flag for automatic capture. Host tools
-  still need their own hook configuration.
+- `auto_capture.enabled`: preference flag for automatic capture. Capture routes
+  each session to lite, standard, or deep depth dynamically; host tools still
+  need their own hook configuration.
 
 ## First Run
 
@@ -74,7 +75,8 @@ codex plugin add tracework@tracework
 ## Auto-Capture Hook
 
 `auto_capture.enabled: true` means Tracework should capture at session end when
-the host supports hooks. For Claude Code, add a Stop hook that runs:
+the host supports hooks. The capture skill chooses the lightest useful depth for
+the session. For Claude Code, add a Stop hook that runs:
 
 ```json
 {

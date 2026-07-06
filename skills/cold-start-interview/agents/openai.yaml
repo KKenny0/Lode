@@ -1,4 +1,4 @@
 interface:
   display_name: "Tracework Cold-Start Interview"
   short_description: "Configure Tracework's knowledge vault and report profile"
-  default_prompt: "Use $cold-start-interview to create or update ~/.tracework/config.yaml for persistent Tracework memory."
+  default_prompt: "Use $cold-start-interview to create or update Tracework config for reports, decision query, and dynamically routed capture."

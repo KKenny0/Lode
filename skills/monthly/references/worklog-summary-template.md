@@ -74,9 +74,10 @@ Agent 读取原始月度归档后，按本模板的格式和规则撰写总结�
 - AI 漫剧生成：分镜 content/camera 完整覆盖、人物场景匹配准确性、镜头描述优化等，起始 03.31
 - 短剧成片：百度脚本接入成片联调测试，起始 03.30
 
-## 习惯与数据质量
+## 覆盖与数据质量
 
-- `开工` / `收工` / sync suggestions 等 Tracework habit loop 的使用情况。
+- Tracework capture 覆盖度：哪些关键 session 有 raw-entry 支撑，哪些部分只是
+  git-only limited，哪些决策、风险或证据缺口值得下月 targeted capture。
 - 哪些上下文缺失导致总结只能低置信度推断。
 
 ## Candidate Rules

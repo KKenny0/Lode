@@ -169,7 +169,7 @@ coverage = raw_entry_count / (raw_entry_count + uncovered_commit_count)
 Show one badge per project:
 
 - `coverage >= 0.7`: "High signal — {N} raw entries, {M} git-only gaps"
-- `0.3 <= coverage < 0.7`: "Moderate — {N} raw entries, {M} git-only gaps. Consider running /tracework:capture"
+- `0.3 <= coverage < 0.7`: "Moderate — {N} raw entries, {M} git-only gaps. Git-only streams stay limited; capture only the key decisions or risks that need future query/review."
 - `coverage < 0.3`: "Low signal — mostly git-only. Narrative may miss decisions and trade-offs"
 - `coverage = 0` (no raw entries at all): "No raw data — fallback git analysis only. Quality limited."
 

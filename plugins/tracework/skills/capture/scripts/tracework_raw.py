@@ -25,6 +25,7 @@ except Exception:  # pragma: no cover - optional dependency
 VALID_TYPES = {"feature", "fix", "refactor", "decision", "risk"}
 VALID_SOURCES = {"session-recap", "arch-doc"}
 VALID_STATUSES = {"done", "ongoing", "risk", "decision"}
+VALID_CAPTURE_DEPTHS = {"lite", "standard", "deep"}
 REQUIRED_FIELDS = ("timestamp", "type", "summary", "context", "source")
 VALID_ARCHETYPES = {"decision", "build", "investigation", "repair", "maintenance"}
 ARCHETYPE_REQUIRED_FIELDS = {
@@ -519,6 +520,14 @@ def validate_entry(entry: Any) -> dict[str, Any]:
             not isinstance(entry[field], str) or not entry[field].strip()
         ):
             raise ValueError(f"entry {field} must be a non-empty string when present")
+    if "capture_depth" in entry and (
+        not isinstance(entry["capture_depth"], str)
+        or entry["capture_depth"] not in VALID_CAPTURE_DEPTHS
+    ):
+        raise ValueError(
+            "entry capture_depth must be one of: "
+            + ", ".join(sorted(VALID_CAPTURE_DEPTHS))
+        )
     validate_source_refs(entry)
     validate_lifecycle_transition(entry)
     validate_reporting(entry)

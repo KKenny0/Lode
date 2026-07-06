@@ -10,25 +10,25 @@
   <a href="https://kkenny0.github.io/Tracework/zh/"><strong>文档</strong></a> · <a href="README.md">English</a>
 </p>
 
-Tracework 让 agent work 留下可检查、可追问、可继续推进的工作痕迹。
+Tracework 让 agent work 留下可汇报、可追问、可继续推进的工作痕迹。
 
-它捕获 session 里的决策、证据、风险、artifact 和下一步，把一次性对话沉淀为
-本地工作记录，用于召回、追问、汇报和复盘。
+它可以先用现有证据生成日报、周报和月报；当关键 session 被 capture 后，再把
+决策、风险、artifact 和证据边界沉淀为本地 raw records，服务后续追问和复盘。
 
 ## Tracework 能做什么
 
 Tracework 可以：
 
+- 从 raw entries 或 git fallback 生成面向职场的日报、周报和月报
 - 捕获 session 里的决策、放弃路径、风险、artifact 和下一步
 - 在本地证据足够时回答“当时为什么这么选”
 - 在后续 session 前召回有用上下文
-- 把 raw session 记录汇总成日报、周报、月报或 roadmap
 - 把 Markdown 和 JSON 记录留在你自己的 knowledge vault 里
 
 核心循环很小：
 
 ```text
-捕获 session 信号 -> 回放决策 -> 汇总成 brief、review 或 roadmap
+先生成当前报告或追问 -> capture 关键 session 信号 -> 提升后续报告和决策证据
 ```
 
 Decision replay 是可信机制：后来的 agent 或读者可以从一个结论向下追到 raw
@@ -43,7 +43,7 @@ entry、被拒方案、风险和 source refs。如果记录不足以支持回答
 | Command | 时机 | 输出 |
 | :--- | :--- | :--- |
 | `/tracework:cold-start-interview` | 首次运行 | 配置本地 vault 和项目画像 |
-| `/tracework:capture` | 收工或阶段记录 | 捕获决策、构建、调查、修复、风险和 artifact |
+| `/tracework:capture` | 收工或阶段记录 | 自动路由为 lite、standard 或 deep 的 session 记录 |
 | `/tracework:recall` | 开工 | 召回最近决策、风险、开放问题和相关 artifact |
 | `/tracework:query` | 定向追问 | 用本地证据回答“当时为什么这么选？” |
 | `/tracework:weekly` | 每周 | 把 raw session 记录汇总成 brief-ready outline |
@@ -51,17 +51,17 @@ entry、被拒方案、风险和 source refs。如果记录不足以支持回答
 | `/tracework:roadmap` | 阶段复盘 | 生成叙事性决策历史 |
 | `/tracework:daily` | 每天 | 从 raw entries 生成面向上级/协作者的日报，git 只补覆盖缺口 |
 
-核心 habit loop 很小：
+直接价值 loop 很小：
 
 ```text
 首次运行 /tracework:cold-start-interview
-收工或 /tracework:capture 结束 session
-开工或 /tracework:recall 开始 session
-需要解释原因时用 /tracework:query
+需要输出时直接运行 /tracework:daily、/tracework:weekly、/tracework:monthly 或 /tracework:query
+关键工作结束后说“收工”或运行 /tracework:capture，让后续证据更完整
+已有 durable memory 后，用 /tracework:recall 开工
 ```
 
-日报、周报、月报和路线图都需要 raw entry 积累后才会更有价值。Daily 面向职场
-汇报并服务月度回顾；这些输出仍是同一份记录上的视图，不是另一套 reporting database。
+没有 raw entries 时，日报和周报仍可从 git 生成 `limited` 版本。Capture 是质量增强：
+它保存 git 无法说明的动机、取舍、风险、artifact 和证据边界。
 
 ## 安装
 

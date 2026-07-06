@@ -11,7 +11,7 @@ description: Tracework 的输出形态与证据边界。
 
 | Surface | 应该展示什么 | 证据边界 |
 | :--- | :--- | :--- |
-| Capture | Session 目标、决策、放弃路径、风险、证据、下一步 | 这是 agent 捕获到的记录，本身不是独立 proof |
+| Capture | 路由深度、Session 目标、决策、放弃路径、风险、证据、下一步 | 这是 agent 捕获到的记录，本身不是独立 proof |
 | Query | 可回答性、核心决策、原因、替代方案、source refs | 本地记录不支持问题时，必须明确拒绝编造答案 |
 | Weekly | 成果或进展、工作主线、决策、证据审计 | 只有 git fallback 时要保持 evidence-limited，不应补写原因 |
 | Monthly | 回顾叙事、重复信号、风险、候选规则 | 计数留在 coverage appendix，不能直接升级成 outcome claim |

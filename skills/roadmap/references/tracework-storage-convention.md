@@ -409,6 +409,7 @@ Each `{vault}/raw/weeks/{week}/{slug}.json` file contains a **JSON array** of en
 [
   {
     "timestamp": "2026-04-11T14:30:00+08:00",
+    "capture_depth": "standard",
     "archetype": "build",
     "type": "feature",
     "summary": "Built scene composition system with auto-layout and overlap resolution",
@@ -472,6 +473,7 @@ Each `{vault}/raw/weeks/{week}/{slug}.json` file contains a **JSON array** of en
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
 | `timestamp` | ISO 8601 | Yes | When the change was made or recorded |
+| `capture_depth` | enum | No | `lite` \| `standard` \| `deep`; route chosen by capture to bound token cost and retained detail |
 | `archetype` | enum | Recommended for new entries | `decision` \| `build` \| `investigation` \| `repair` \| `maintenance`; describes the session shape |
 | `type` | enum | Yes | `feature` \| `fix` \| `refactor` \| `decision` \| `risk` |
 | `summary` | string | Yes | 1 factual sentence at the boundary actually reached; do not promote plans or partial work into shipped outcomes |
@@ -515,6 +517,24 @@ category of the entry. They are independent axes:
 
 New `session-recap` entries should include `archetype`. Historical entries
 without it are valid and must be treated as legacy raw signals.
+
+### Capture Depth
+
+`capture_depth` records how much context the capture skill chose to preserve for
+the session. It is additive; old entries without it remain valid.
+
+| Depth | Meaning |
+|---|---|
+| `lite` | Report-ready atoms for routine progress, small fixes, cleanup, or low-risk auto-capture |
+| `standard` | Normal session memory with motivation, impact, risks, evidence boundary, and report metadata when clear |
+| `deep` | High-value decision, contract, artifact dossier, root-cause, rejected-alternative, or recurring-risk memory |
+
+Capture chooses the lightest depth that preserves the reusable signal. Explicit
+user wording such as `/tracework:capture deep` may override the route, but most
+users should not need to choose a depth. Consumers must treat depth as a cost
+and detail hint, not as evidence strength. Evidence strength still comes from
+`reporting.evidence_boundary`, `evidence_refs`, typed `source_refs`, and source
+artifacts.
 
 ### Archetype Expectations
 
@@ -611,6 +631,8 @@ Recommended producer behavior:
 - Add `status` whenever it can be inferred from the session: `done` for completed work, `ongoing` for partially completed work, `risk` for open risk entries, and `decision` for design decisions.
 - Add `archetype` for new `session-recap` entries using the adaptive-depth
   classification rules from the skill.
+- Add `capture_depth` for new `session-recap` entries using the capture routing
+  rules from the skill.
 - Add `impact` when the entry has a clear user, system, reporting, reliability, migration, or developer-workflow effect. This should be more report-ready than `context`, not a duplicate.
 - Add `evidence_refs` for commit SHAs, issue IDs, eval IDs, or doc paths that are already known. Do not perform extra repository analysis only to populate this field.
 - Add `decision_threads` when the entry belongs to a durable decision topic.

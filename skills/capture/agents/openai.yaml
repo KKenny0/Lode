@@ -1,4 +1,4 @@
 interface:
   display_name: "Tracework Capture"
-  short_description: "Capture report-ready session memory"
-  default_prompt: "Use $capture to record report-ready session memory with evidence boundaries and artifact dossier context."
+  short_description: "Capture session memory with dynamic depth"
+  default_prompt: "Use $capture to route this session to lite, standard, or deep capture and record the report-ready evidence boundary."

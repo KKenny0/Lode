@@ -769,12 +769,57 @@ function runCaptureHelperReportingValidFixture(fixture) {
     ]);
     const entries = readJson(appendResult.path);
     const appended = entries[0] || {};
+    if (config.expected_capture_depth) {
+      assert(
+        appended.capture_depth === config.expected_capture_depth,
+        `${fixture.id}: capture_depth not preserved`,
+      );
+    }
     assert(appended.reporting?.outcome_candidate?.kind === config.expected_kind, `${fixture.id}: reporting kind not preserved`);
     assert(appended.reporting?.impact_boundary === config.expected_impact_boundary, `${fixture.id}: impact boundary not preserved`);
     assert(appended.reporting?.evidence_boundary === config.expected_evidence_boundary, `${fixture.id}: evidence boundary not preserved`);
     assert(
       appended.reporting?.hard_signals?.some(signal => signal.kind === config.expected_hard_signal_kind),
       `${fixture.id}: hard signal kind not preserved`,
+    );
+  } finally {
+    fs.rmSync(tempRoot, { recursive: true, force: true });
+  }
+}
+
+function runCaptureHelperCaptureDepthInvalidFixture(fixture) {
+  const config = fixture.fixture || {};
+  const slug = config.project_slug;
+  const entry = config.entry;
+  const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'tracework-regression-'));
+  const tempVault = path.join(tempRoot, 'vault');
+  const entryPath = path.join(tempRoot, 'bad-capture-depth-entry.json');
+
+  try {
+    fs.mkdirSync(tempVault, { recursive: true });
+    fs.writeFileSync(entryPath, JSON.stringify(entry, null, 2), 'utf-8');
+    const result = spawnSync('python3', [
+      captureRaw,
+      'append-entry',
+      '--entry',
+      entryPath,
+      '--cwd',
+      repoRoot,
+      '--vault',
+      tempVault,
+      '--slug',
+      slug,
+      '--date',
+      config.date,
+    ], {
+      cwd: repoRoot,
+      encoding: 'utf-8',
+      env: pythonEnv,
+    });
+    assert(result.status !== 0, `${fixture.id}: invalid capture_depth enum should fail`);
+    assert(
+      `${result.stderr}\n${result.stdout}`.includes(config.expected_error_text),
+      `${fixture.id}: missing validation error ${config.expected_error_text}`,
     );
   } finally {
     fs.rmSync(tempRoot, { recursive: true, force: true });
@@ -937,6 +982,8 @@ function runExecutableFixture(fixture) {
     runCaptureHelperRepairFixture(fixture);
   } else if (kind === 'capture-helper-reporting-valid') {
     runCaptureHelperReportingValidFixture(fixture);
+  } else if (kind === 'capture-helper-capture-depth-invalid') {
+    runCaptureHelperCaptureDepthInvalidFixture(fixture);
   } else if (kind === 'capture-helper-reporting-invalid') {
     runCaptureHelperReportingInvalidFixture(fixture);
   } else if (kind === 'artifact-upsert-dossier') {

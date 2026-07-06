@@ -12,6 +12,9 @@ the script narrows evidence, and the host agent writes the final answer.
 Use `query` when the current task touches an existing decision, architecture
 boundary, rejected option, long-running risk, or product tradeoff. Use `recall`
 for session-start orientation; use `query` for a specific follow-up question.
+Git-only report fallback is not decision evidence here. If the raw record does
+not support the question, return the evidence gap and suggest targeted capture
+after the user clarifies the decision.
 
 ## Scope
 

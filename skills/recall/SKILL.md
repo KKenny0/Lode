@@ -10,9 +10,13 @@ description: >
 
 # Session Start Recall
 
-This skill turns Tracework from write-only memory into a read/write habit loop. It
-prepares a bounded project context at the start of a session so the developer and
-AI do not restart from zero.
+This skill prepares a bounded project context at the start of a session so the
+developer and AI do not restart from zero. It is useful when durable Tracework
+memory exists; it is not required before daily, weekly, monthly, or query can
+produce their best available output.
+
+Recall is a durable-memory surface, not a report fallback. Unlike daily or
+weekly reports, it must not use git history to invent missing memory.
 
 ## Scope
 
