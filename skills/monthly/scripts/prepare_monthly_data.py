@@ -50,6 +50,9 @@ RE_MODULE = re.compile(r'^(\t| {4})-\s*\{([^}]+)\}')
 RE_CATEGORY = re.compile(r'【([^】]+)】')
 RE_TASK_DONE = re.compile(r'^\s*-\s*\[x\]')
 RE_TASK_TODO = re.compile(r'^\s*-\s*\[\s*\]')
+RE_REPORT_FIELD = re.compile(
+    r'^\s*-\s*(工作流|状态|进展|影响|风险/问题|风险|问题|下一步|来源/证据边界|证据边界)[：:]\s*(.*)$'
+)
 
 # --- 信号词库 ---
 STATUS_COMPLETE = frozenset([
@@ -147,6 +150,8 @@ def extract_status_signals(text):
 
 def extract_risk_signals(text):
     """从文本中提取风险信号。"""
+    if is_no_risk_text(text):
+        return []
     signals = []
     for word in RISK_WORDS:
         if word in text:
@@ -161,6 +166,29 @@ def extract_next_action_signals(text):
         if word in text:
             signals.append(word)
     return signals
+
+
+def extract_evidence_boundary(text):
+    """从来源/证据边界字段中提取 evidence boundary。"""
+    for boundary in ('verified', 'recorded', 'limited'):
+        if boundary in text:
+            return boundary
+    return ''
+
+
+def is_no_risk_text(text):
+    """识别新日报格式里明确声明无风险的占位句。"""
+    normalized = re.sub(r'\s+', '', text or '')
+    return normalized in {
+        '无',
+        '暂无',
+        '无明确风险',
+        '无明确问题',
+        '无明确风险记录',
+        '无风险记录',
+        '无风险/问题',
+        '无风险问题',
+    }
 
 
 def extract_keywords(text, top_n=20):
@@ -202,6 +230,7 @@ def parse_monthly_file(filepath):
     # 任务子条目追踪状态
     current_task = None      # {'task': str, 'details': [], '_indent': int}
     current_task_key = None  # 'completed_tasks' or 'incomplete_tasks'
+    current_project = None
 
     for line in lines:
         stripped = line.strip()
@@ -228,6 +257,8 @@ def parse_monthly_file(filepath):
                 'projects': [],
                 'modules': [],
                 'categories': [],
+                'report_items': [],
+                'evidence_boundaries': [],
                 'completed_tasks': [],
                 'incomplete_tasks': [],
                 'status_signals': [],
@@ -236,6 +267,7 @@ def parse_monthly_file(filepath):
                 'topics': [],
                 '_lines': [line],  # 临时保存原始行
             }
+            current_project = None
             continue
 
         if current_entry is None:
@@ -248,6 +280,7 @@ def parse_monthly_file(filepath):
         project = extract_project(stripped)
         if project:
             current_entry['projects'].append(project)
+            current_project = project
 
         # 提取模块标签
         module = extract_module(line)
@@ -258,6 +291,30 @@ def parse_monthly_file(filepath):
         categories = extract_categories(stripped)
         if categories:
             current_entry['categories'].extend(categories)
+
+        report_match = RE_REPORT_FIELD.match(stripped)
+        if report_match:
+            field, value = report_match.groups()
+            value = value.strip()
+            report_item = {
+                'project': current_project,
+                'field': field,
+                'text': value,
+            }
+            boundary = extract_evidence_boundary(value)
+            if boundary:
+                report_item['evidence_boundary'] = boundary
+                current_entry['evidence_boundaries'].append(boundary)
+            current_entry['report_items'].append(report_item)
+            if field in {'状态', '进展', '影响'}:
+                current_entry['status_signals'].extend(extract_status_signals(value))
+            if field in {'风险/问题', '风险', '问题'}:
+                if not is_no_risk_text(value):
+                    current_entry['risk_signals'].extend(extract_risk_signals(value) or ['report-risk'])
+            if field == '下一步':
+                current_entry['next_action_signals'].extend(
+                    extract_next_action_signals(value) or ['report-next-action']
+                )
 
         # --- 任务与子条目追踪 ---
         is_done = bool(RE_TASK_DONE.match(stripped))
@@ -336,6 +393,7 @@ def parse_monthly_file(filepath):
         entry['projects'] = list(dict.fromkeys(entry['projects']))  # 去重保序
         entry['modules'] = list(dict.fromkeys(entry['modules']))
         entry['categories'] = list(dict.fromkeys(entry['categories']))
+        entry['evidence_boundaries'] = list(dict.fromkeys(entry.get('evidence_boundaries', [])))
 
     # 全局关键词提取
     all_text_str = '\n'.join(all_text)
@@ -412,6 +470,37 @@ def collect_completed_items(project_entries):
                     'task': task_text,
                     'details': task_details,
                 })
+            for report_item in entry.get('report_items', []):
+                if report_item.get('project') not in (project, None, ''):
+                    continue
+                if report_item.get('field') == '进展' and report_item.get('text'):
+                    details = []
+                    if report_item.get('evidence_boundary'):
+                        details.append(f"evidence_boundary={report_item['evidence_boundary']}")
+                    items.append({
+                        'date': entry['date'],
+                        'task': f"[{report_item['field']}] {report_item['text']}",
+                        'details': details,
+                    })
+        result[project] = items
+    return result
+
+
+def collect_report_items(project_entries):
+    """按项目收集新日报格式中的 report-led 字段。"""
+    result = {}
+    for project, entries in project_entries.items():
+        items = []
+        for entry in entries:
+            for report_item in entry.get('report_items', []):
+                if report_item.get('project') not in (project, None, ''):
+                    continue
+                items.append({
+                    'date': entry['date'],
+                    'field': report_item.get('field', ''),
+                    'text': report_item.get('text', ''),
+                    'evidence_boundary': report_item.get('evidence_boundary', ''),
+                })
         result[project] = items
     return result
 
@@ -464,6 +553,18 @@ def collect_risks(entries):
                 'signal': signal,
                 'projects': entry.get('projects', []),
             })
+        for report_item in entry.get('report_items', []):
+            if (
+                report_item.get('field') in {'风险/问题', '风险', '问题'}
+                and report_item.get('text')
+                and not is_no_risk_text(report_item.get('text'))
+            ):
+                risks.append({
+                    'date': entry['date'],
+                    'signal': report_item['text'],
+                    'projects': [report_item.get('project')] if report_item.get('project') else entry.get('projects', []),
+                    'source': 'daily_report_field',
+                })
     return risks
 
 
@@ -477,6 +578,14 @@ def collect_next_actions(entries):
                 'signal': signal,
                 'projects': entry.get('projects', []),
             })
+        for report_item in entry.get('report_items', []):
+            if report_item.get('field') == '下一步' and report_item.get('text'):
+                actions.append({
+                    'date': entry['date'],
+                    'signal': report_item['text'],
+                    'projects': [report_item.get('project')] if report_item.get('project') else entry.get('projects', []),
+                    'source': 'daily_report_field',
+                })
     return actions
 
 
@@ -602,6 +711,7 @@ def build_review_skeleton(signals, summary_mode='project_focused', evidence_mode
 
     # 收集各维度数据
     completed = collect_completed_items(project_entries)
+    report_items = collect_report_items(project_entries)
     incomplete = collect_incomplete_items(project_entries)
     risks = collect_risks(entries)
     next_actions = collect_next_actions(entries)
@@ -611,6 +721,7 @@ def build_review_skeleton(signals, summary_mode='project_focused', evidence_mode
     # 统计
     total_completed = sum(len(items) for items in completed.values())
     total_incomplete = sum(len(items) for items in incomplete.values())
+    total_report_items = sum(len(items) for items in report_items.values())
 
     # 收集类别分布（所有模式都输出）
     all_categories = []
@@ -628,6 +739,7 @@ def build_review_skeleton(signals, summary_mode='project_focused', evidence_mode
             'total_projects': len(project_entries),
             'total_completed_tasks': total_completed,
             'total_incomplete_tasks': total_incomplete,
+            'total_report_items': total_report_items,
             'total_risk_signals': len(risks),
             'total_next_action_signals': len(next_actions),
             'total_categories': len(all_categories),
@@ -648,6 +760,7 @@ def build_review_skeleton(signals, summary_mode='project_focused', evidence_mode
         skeleton['by_project'][project] = {
             'completed_items': completed.get(project, []),
             'incomplete_items': incomplete.get(project, []),
+            'report_items': report_items.get(project, []),
             'active_days': len(set(e['date'] for e in project_entries[project])),
             'is_real_project': project in set(detected_real),
         }
@@ -662,8 +775,8 @@ def build_review_skeleton(signals, summary_mode='project_focused', evidence_mode
         skeleton['warnings'].append(
             f"有 {len(unassigned)} 条日志条目未归属到任何项目标签"
         )
-    if total_completed == 0:
-        skeleton['warnings'].append("本月未检测到明确的已完成任务标记")
+    if total_completed == 0 and total_report_items == 0:
+        skeleton['warnings'].append("本月未检测到明确的已完成任务或日报进展字段")
     if not high_freq:
         skeleton['warnings'].append("未能提取到高频主题关键词")
 

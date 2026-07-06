@@ -47,9 +47,9 @@ entry、被拒方案、风险和 source refs。如果记录不足以支持回答
 | `/tracework:recall` | 开工 | 召回最近决策、风险、开放问题和相关 artifact |
 | `/tracework:query` | 定向追问 | 用本地证据回答“当时为什么这么选？” |
 | `/tracework:weekly` | 每周 | 把 raw session 记录汇总成 brief-ready outline |
-| `/tracework:monthly` | 每月 | 生成月度回顾和重复证据中的候选规则 |
+| `/tracework:monthly` | 每月 | 从职场日报和 raw evidence 生成月度回顾 |
 | `/tracework:roadmap` | 阶段复盘 | 生成叙事性决策历史 |
-| `/tracework:daily` | 每天 | 从 raw entries 和 git history 更新 Obsidian 风格日报 |
+| `/tracework:daily` | 每天 | 从 raw entries 生成面向上级/协作者的日报，git 只补覆盖缺口 |
 
 核心 habit loop 很小：
 
@@ -60,8 +60,8 @@ entry、被拒方案、风险和 source refs。如果记录不足以支持回答
 需要解释原因时用 /tracework:query
 ```
 
-日报、周报、月报和路线图都需要 raw entry 积累后才会更有价值。它们是同一份
-记录上的视图，不是另一套 reporting database。
+日报、周报、月报和路线图都需要 raw entry 积累后才会更有价值。Daily 面向职场
+汇报并服务月度回顾；这些输出仍是同一份记录上的视图，不是另一套 reporting database。
 
 ## 安装
 

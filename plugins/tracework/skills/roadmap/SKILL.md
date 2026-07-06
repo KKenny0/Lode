@@ -41,7 +41,10 @@ Read all matching raw entry files:
 
 Each file contains a JSON array of entries. Load all files in scope, flatten into a single list, and sort by `timestamp` ascending.
 
-If `{vault}/raw/artifacts/{slug}.json` exists, load it as optional source navigation. Artifact index entries can provide document links and topic hints, but they must not create decision facts by themselves.
+If `{vault}/raw/artifacts/{slug}.json` exists, load it as optional source
+navigation and recorded context. Artifact dossier entries can provide document
+links, topic hints, scope, and recorded key claims, but they must not create
+decision facts by themselves.
 
 If no entries are found, tell the user and stop — there is nothing to build a roadmap from.
 
@@ -107,18 +110,22 @@ For each thread, extract:
 | Confidence | `explicit` when sourced from decision fields; `inferred` when reconstructed from summary/context |
 | Evidence | Raw entry timestamp/reference plus available `evidence_refs`, `source_refs`, or source-of-truth artifact references; general artifact refs remain navigation |
 
-### Cross-Referencing Artifact Index
+### Cross-Referencing Artifact Dossiers
 
-When the artifact index exists at `{vault}/raw/artifacts/{slug}.json`:
+When the artifact dossier index exists at `{vault}/raw/artifacts/{slug}.json`:
 
-1. For each identified decision thread, check if any artifact index entries
+1. For each identified decision thread, check if any artifact dossier entries
    carry `decision_threads` that match.
-2. When an artifact links to a thread, include its `title`, `path`, and
-   `topics` in the thread's supporting evidence.
+2. When an artifact links to a thread, include its `title`, `path`, `topics`,
+   `artifact_summary.scope`, `source_availability`, and `last_seen` in the
+   thread's supporting navigation or recorded-context notes.
 3. Artifacts with `status: superseded` or `superseded_by` may indicate decisions
    that have been revisited — flag these for the "Roadmap Correction" section.
 4. Do not create threads from artifact metadata alone. Artifacts can connect
    threads but cannot define them.
+5. Treat `artifact_summary.key_claims` as `navigation_only` or
+   `recorded_context` unless the claim or linked raw entry carries direct
+   evidence.
 
 ### Thread Merge Suggestions
 
@@ -170,7 +177,8 @@ The index schema is `tracework.decision_replay.v1` and contains:
 `open_questions`, `impact`, `topic_keys`, `artifact_refs`, `evidence_refs`, and
 `thread_id`. Edges are heuristic links between entries in the same thread or
 entries that share referenced artifacts. Raw entries remain the source of truth;
-artifact index data is navigation and edge-hint metadata only.
+artifact dossier data is navigation and edge-hint metadata plus recorded
+context only.
 
 For a targeted agent query, use the same helper to return a compact evidence
 pack rather than asking the agent to read every raw entry:

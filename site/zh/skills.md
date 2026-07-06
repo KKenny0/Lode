@@ -50,7 +50,8 @@ claim。如果记录不足，query 应拒绝编造答案。
 
 **触发：** `/tracework:daily`、`日报`
 
-从 raw entries 和 git history 更新 Obsidian 风格的日报。
+从 raw entries 生成面向上级/协作者的职场日报。git history 只用于补覆盖缺口；
+输出会保留项目、状态、风险、下一步和证据边界字段，方便月度回顾继续解析。
 
 ### Weekly
 
@@ -63,5 +64,5 @@ evidence。本地 `O#`、`W#`、`D#`、`E#` 链路让 brief 可以被检查。
 
 **触发：** `/tracework:monthly`、`月报`
 
-从日报和匹配到的 raw evidence 构建月度 review。计数和活动指标留在覆盖度语境，
+从职场日报和匹配到的 raw evidence 构建月度 review。计数和活动指标留在覆盖度语境，
 不能直接升级成 outcome claim。

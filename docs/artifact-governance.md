@@ -17,17 +17,25 @@ Recall, roadmap, weekly, and monthly views can reuse the same evidence later.
 They should not require users to maintain a parallel report-specific document
 catalog.
 
-## Artifact Index
+## Artifact Dossier
 
-`{vault}/raw/artifacts/{slug}.json` is a navigation layer. It should identify:
+`{vault}/raw/artifacts/{slug}.json` stores durable artifact dossiers. A dossier
+is more than a path index and less than a source document backup. It should
+identify:
 
 - where the durable artifact lives
 - which topics, decision threads, risks, or open questions it covers
 - whether it is active, superseded, obsolete, or missing
 - when a later skill should read or mention it
+- what the artifact governs and does not govern
+- which key claims, decisions, and open questions are worth preserving
+- when the source was last seen and whether it still exists
 
-The index should not duplicate the full artifact. Full content stays in the
-project repo unless the artifact is itself a vault wiki output.
+The dossier should be independently readable after the source moves or is
+deleted, but it is not independently authoritative. Treat its claims as
+navigation or recorded context unless they carry direct evidence. The dossier
+must not duplicate the full artifact. Full content stays in the project repo
+unless the artifact is itself a vault wiki output.
 
 ## Decision Index
 

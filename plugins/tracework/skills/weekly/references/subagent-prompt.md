@@ -24,8 +24,13 @@ analyzed.
 
 **Step 1: Classify signals**
 - Treat raw entries as authoritative semantic signals.
-- Use each raw entry's `summary`, `context`, `archetype`, `type`,
+- Use each raw entry's `reporting` metadata first when present, then
+  `summary`, `context`, `archetype`, `type`, `status`, `impact`,
   `artifact_context`, and `related_docs`.
+- Preserve `reporting.outcome_candidate.kind`, `impact_boundary`,
+  `evidence_boundary`, `evidence_gap`, `module_scope`, `work_stream`,
+  `carry_forward`, and `hard_signals`; do not strengthen these boundaries from
+  prose.
 - Preserve `motivation`, `exploration_paths`, `root_cause`,
   `open_questions`, `abandoned_alternatives`, `status`, and `impact` as
   compounding signals for next-week planning.
@@ -34,8 +39,9 @@ analyzed.
   questions, `repair` emphasizes root cause, and `maintenance` stays brief.
 - Use `artifact_context` scope/delta/source_of_truth as direct technical
   evidence before reading related files.
-- Use artifact index metadata only to find source documents when raw entries are
-  insufficient. Do not invent decision facts from artifact titles alone.
+- Use artifact dossier metadata only to find source documents and carry recorded
+  context when raw entries are insufficient. Do not invent decision facts from
+  artifact titles, summaries, or topics alone.
 - Map `type` directly: feature/fix/refactor/decision/risk.
 - Use fallback git commits only when they are not clearly covered by a raw entry.
 - Drop fallback commits that are only chore, docs, style, or formatting noise.
@@ -166,6 +172,11 @@ Grade each candidate using exactly one value:
   independent verification source.
 - `limited`: only fallback git or semantically incomplete material is
   available; phrase it as progress/activity, not a completed outcome.
+
+If `reporting.evidence_boundary` is present, it is the upper bound for the
+candidate's evidence grade unless stronger direct evidence is explicitly listed
+in the same raw entry. If `reporting.outcome_candidate.kind` is `activity`, the
+candidate cannot become an outcome.
 
 If the week's raw entries contain supported risks, recurring open questions,
 stale threads, or abandoned alternatives worth revisiting, include them in a

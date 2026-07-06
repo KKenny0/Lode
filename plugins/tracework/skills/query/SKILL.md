@@ -105,6 +105,11 @@ evidence. Include `missing_evidence` and suggest capturing the decision with
   direct evidence. General `artifact_refs` are navigation hints unless the raw
   entry explicitly marked them source-of-truth. Preserve both kinds so readers
   can drill down without overstating verification.
+- Treat artifact dossier fields from `{vault}/raw/artifacts/{slug}.json` as
+  navigation plus recorded context. `artifact_summary.key_claims` can explain
+  what a linked artifact was believed to cover, but only
+  `evidence_boundary: direct_evidence`, raw `artifact_context.source_of_truth`,
+  `evidence_refs`, or typed `source_refs` can strengthen verification.
 - Treat `evidence_strength=weak` as a prompt to hedge or ask for more evidence
   even when `answerable=true`.
 - An explicit, well-matched raw entry without direct evidence remains
@@ -120,6 +125,6 @@ This skill reads:
 
 - `{vault}/raw/decisions/{project-slug}.json` when present
 - `{vault}/raw/weeks/{YYYY-WNN}/{project-slug}.json` as rebuild fallback
-- `{vault}/raw/artifacts/{project-slug}.json` as optional navigation metadata
+- `{vault}/raw/artifacts/{project-slug}.json` as optional dossier navigation and recorded context
 
 This skill writes no files.

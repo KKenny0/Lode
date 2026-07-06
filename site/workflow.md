@@ -20,6 +20,7 @@ without rereading the whole transcript.
 Capture -> raw/weeks/{week}/{slug}.json
 Query   <- raw/decisions/ + raw/weeks/
 Recall  <- raw/weeks/ + raw/artifacts/ + raw/decisions/
+Daily   <- raw/weeks/ + fallback git coverage
 Weekly  <- raw/weeks/ + fallback git coverage
 Monthly <- Daily Note.md + matching raw entries
 Roadmap <- raw entries + decision indexes

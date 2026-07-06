@@ -54,7 +54,9 @@ revisited alternatives from raw entries and decision indexes.
 
 **Trigger:** `/tracework:daily`, `日报`
 
-Updates an Obsidian-style daily note from raw entries and git history.
+Writes a workplace-facing daily report from raw entries. Git history is used
+only to fill coverage gaps, and the output keeps project, status, risk, next
+step, and evidence-boundary fields stable for monthly review.
 
 ### Weekly
 
@@ -68,5 +70,5 @@ brief inspectable.
 
 **Trigger:** `/tracework:monthly`, `月报`
 
-Builds a monthly review from daily notes and matching raw evidence. Counts and
-activity metrics stay in coverage context, not outcome claims.
+Builds a monthly review from workplace daily reports and matching raw evidence.
+Counts and activity metrics stay in coverage context, not outcome claims.

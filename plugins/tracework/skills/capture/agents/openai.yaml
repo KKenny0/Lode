@@ -1,4 +1,4 @@
 interface:
   display_name: "Tracework Capture"
-  short_description: "Record session changes for weekly reports"
-  default_prompt: "Use $capture to record the key changes from this work session."
+  short_description: "Capture report-ready session memory"
+  default_prompt: "Use $capture to record report-ready session memory with evidence boundaries and artifact dossier context."

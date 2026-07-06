@@ -51,6 +51,248 @@
       ]
     },
     {
+      "id": "capture-helper-reporting-metadata-valid",
+      "execution": {
+        "kind": "capture-helper-reporting-valid"
+      },
+      "skill": "capture",
+      "prompt": "收工。本 session 形成了一个可用于日报和月报的 progress claim，影响是 expected，证据是 recorded。",
+      "fixture": {
+        "project_slug": "storyboard-pipeline",
+        "date": "2026-07-06",
+        "expected_kind": "progress",
+        "expected_impact_boundary": "expected",
+        "expected_evidence_boundary": "recorded",
+        "expected_hard_signal_kind": "open_question",
+        "entry": {
+          "timestamp": "2026-07-06T19:00:00+08:00",
+          "archetype": "build",
+          "type": "feature",
+          "summary": "Added report-led Daily output contract while keeping monthly parsing stable",
+          "context": "Daily now has a workplace-facing structure, but the parser still needs regression coverage before the claim can be verified.",
+          "source": "session-recap",
+          "status": "ongoing",
+          "impact": "Expected to make monthly review easier to generate from daily reports.",
+          "reporting": {
+            "outcome_candidate": {
+              "kind": "progress",
+              "statement": "Daily report structure now carries monthly-ready status and evidence boundaries."
+            },
+            "impact_boundary": "expected",
+            "evidence_boundary": "recorded",
+            "evidence_gap": "Monthly parser regression still needs to pass.",
+            "module_scope": [
+              "daily",
+              "monthly"
+            ],
+            "work_stream": "Reporting model upgrade",
+            "carry_forward": {
+              "monthly": [
+                "Keep the parser compatibility result visible."
+              ]
+            },
+            "hard_signals": [
+              {
+                "kind": "open_question",
+                "statement": "Whether legacy checkbox-heavy daily notes remain common enough to shape monthly summary language."
+              }
+            ]
+          }
+        }
+      },
+      "expected_behavior": "The capture helper accepts optional reporting metadata, preserves it unchanged, and keeps O#/W#/D#/E# labels out of raw entries.",
+      "assertions": [
+        {
+          "name": "reporting_metadata_accepted",
+          "description": "Valid outcome_candidate, impact_boundary, evidence_boundary, carry_forward, and hard_signals pass helper validation."
+        }
+      ]
+    },
+    {
+      "id": "capture-helper-reporting-invalid-enum",
+      "execution": {
+        "kind": "capture-helper-reporting-invalid"
+      },
+      "skill": "capture",
+      "prompt": "Reject invalid reporting enum values before writing raw data.",
+      "fixture": {
+        "project_slug": "storyboard-pipeline",
+        "date": "2026-07-06",
+        "expected_error_text": "reporting.outcome_candidate.kind",
+        "entry": {
+          "timestamp": "2026-07-06T19:00:00+08:00",
+          "archetype": "build",
+          "type": "feature",
+          "summary": "Added invalid reporting kind to test enum rejection",
+          "context": "The helper should reject unsupported reporting enum values rather than writing ambiguous report boundaries.",
+          "source": "session-recap",
+          "reporting": {
+            "outcome_candidate": {
+              "kind": "achievement",
+              "statement": "This kind is intentionally invalid."
+            }
+          }
+        }
+      },
+      "expected_behavior": "The capture helper exits non-zero and reports the invalid enum path.",
+      "assertions": [
+        {
+          "name": "invalid_reporting_enum_rejected",
+          "description": "Unsupported outcome_candidate.kind values do not enter raw storage."
+        }
+      ]
+    },
+    {
+      "id": "artifact-upsert-dossier-fields",
+      "execution": {
+        "kind": "artifact-upsert-dossier"
+      },
+      "skill": "capture",
+      "prompt": "Upsert an artifact dossier with source_entry_refs and summary fields, while keeping older thin artifact entries valid.",
+      "fixture": {
+        "project_slug": "storyboard-pipeline",
+        "expected_scope": "Daily, weekly, and monthly reporting model boundaries.",
+        "expected_source_availability": "available",
+        "expected_deletion_behavior": "summary_remains_usable",
+        "dossier_artifact": {
+          "id": "storyboard-pipeline:design-doc:reporting-model:v1",
+          "project_slug": "storyboard-pipeline",
+          "artifact_type": "design-doc",
+          "title": "Reporting Model Design",
+          "path": "/tmp/storyboard-pipeline/docs/reporting-model.md",
+          "repo_relative_path": "docs/reporting-model.md",
+          "created_at": "2026-07-06T19:00:00+08:00",
+          "updated_at": "2026-07-06T19:00:00+08:00",
+          "source": "capture",
+          "status": "active",
+          "topics": [
+            "daily",
+            "monthly",
+            "reporting"
+          ],
+          "source_entry_refs": [
+            {
+              "week": "2026-W28",
+              "path": "/tmp/vault/raw/weeks/2026-W28/storyboard-pipeline.json",
+              "timestamp": "2026-07-06T19:00:00+08:00",
+              "entry_index": 0
+            }
+          ],
+          "artifact_summary": {
+            "scope": "Daily, weekly, and monthly reporting model boundaries.",
+            "non_scope": "Does not store full daily reports or replace raw entries.",
+            "key_claims": [
+              {
+                "claim": "Artifact dossiers are readable after source deletion but not independently authoritative.",
+                "evidence_boundary": "recorded_context",
+                "evidence_refs": [
+                  "raw:2026-W28:0"
+                ]
+              }
+            ],
+            "key_decisions": [
+              "Keep raw/artifacts path and make schema changes additive."
+            ],
+            "open_questions": [
+              "Whether source availability should be refreshed automatically."
+            ]
+          },
+          "last_seen": {
+            "at": "2026-07-06T19:00:00+08:00",
+            "exists": true,
+            "content_hash": "sha256:test"
+          },
+          "source_availability": "available",
+          "deletion_behavior": "summary_remains_usable"
+        },
+        "thin_artifact": {
+          "id": "storyboard-pipeline:design-doc:thin-legacy:v1",
+          "project_slug": "storyboard-pipeline",
+          "artifact_type": "design-doc",
+          "title": "Thin Legacy Artifact",
+          "path": "/tmp/storyboard-pipeline/docs/thin.md",
+          "created_at": "2026-07-06T19:00:00+08:00",
+          "updated_at": "2026-07-06T19:00:00+08:00",
+          "source": "capture",
+          "status": "active"
+        }
+      },
+      "expected_behavior": "The helper accepts additive artifact dossier fields and still accepts an older thin artifact entry in the same artifact index file.",
+      "assertions": [
+        {
+          "name": "dossier_fields_preserved",
+          "description": "source_entry_refs, artifact_summary, last_seen, source_availability, and deletion_behavior survive upsert."
+        },
+        {
+          "name": "thin_entry_still_valid",
+          "description": "Existing thin artifact entries remain valid without migration."
+        }
+      ]
+    },
+    {
+      "id": "daily-report-led-output-from-raw",
+      "execution": {
+        "kind": "documented-only",
+        "reason": "Daily note generation is agent-authored; this fixture documents the expected report-led shape."
+      },
+      "skill": "daily",
+      "prompt": "用 $daily 生成今天日报。raw entries 带 reporting metadata、status、impact 和 evidence_refs。",
+      "fixture": {
+        "raw_entries": [
+          {
+            "timestamp": "2026-07-06T18:30:00+08:00",
+            "type": "feature",
+            "summary": "Repositioned Daily as a workplace-facing report",
+            "context": "The report now serves managers/collaborators and monthly review instead of tomorrow recall.",
+            "source": "session-recap",
+            "status": "done",
+            "reporting": {
+              "outcome_candidate": {
+                "kind": "outcome",
+                "statement": "Daily output has a report-led structure."
+              },
+              "impact_boundary": "observed",
+              "evidence_boundary": "recorded",
+              "module_scope": [
+                "daily"
+              ],
+              "work_stream": "Reporting model upgrade"
+            }
+          }
+        ]
+      },
+      "expected_behavior": "Daily output starts with 今日摘要, then 项目进展. Each project uses `- [项目名]` and includes 状态、进展、影响、风险/问题、下一步、来源/证据边界. It must not include tomorrow recall/agent handoff wording.",
+      "assertions": [
+        {
+          "name": "report_led_shape",
+          "description": "The daily note is workplace-facing and preserves project label, status, and evidence boundary."
+        }
+      ]
+    },
+    {
+      "id": "daily-git-only-limited-output",
+      "execution": {
+        "kind": "documented-only",
+        "reason": "Daily note generation is agent-authored; this fixture documents fallback confidence expectations."
+      },
+      "skill": "daily",
+      "prompt": "用 $daily 补今天日报。没有 raw entries，只有 git commit。",
+      "fixture": {
+        "raw_entries": [],
+        "fallback_git_logs": [
+          "aaa1111 feat: update daily report format",
+          "bbb2222 chore: format generated bundle"
+        ]
+      },
+      "expected_behavior": "Daily should generate a usable workplace-facing report from meaningful git commits only, mark the source/evidence boundary as limited or git-only, filter chore noise, and avoid inventing decisions, motivation, or verified impact.",
+      "assertions": [
+        {
+          "name": "git_only_limited_boundary",
+          "description": "Fallback-only output is visibly evidence-limited and does not claim verified outcomes."
+        }
+      ]
+    },
+    {
       "id": "weekly-outline-adaptive-artifact-context",
       "execution": {
         "kind": "documented-only",
@@ -190,6 +432,66 @@
         {
           "name": "git_only_limited",
           "description": "Git-only work appears in coverage or limited evidence, not as verified outcome impact."
+        }
+      ]
+    },
+    {
+      "id": "monthly-prepare-report-led-daily-format",
+      "execution": {
+        "kind": "monthly-prepare-daily-report-format"
+      },
+      "skill": "monthly",
+      "prompt": "Parse the new report-led Daily Note format and expose report_items for monthly review.",
+      "fixture": {
+        "archive_name": "2026-07.md",
+        "expected_project": "Tracework",
+        "expected_progress_text": "Daily",
+        "expected_risk_text": "旧日报格式",
+        "expected_absent_risk_text": "无明确风险记录",
+        "expected_next_text": "验证 monthly parser",
+        "expected_evidence_boundary": "recorded",
+        "expected_min_report_items": 6,
+        "daily_note_archive": [
+          "### 2026.07.06",
+          "",
+          "#### 今日摘要",
+          "- Tracework reporting model 进入 report-led 调整，来源 raw-entry-backed。",
+          "",
+          "#### 项目进展",
+          "- [Tracework]",
+          "\t- 工作流：Reporting model upgrade",
+          "\t- 状态：raw-entry-backed；done",
+          "\t- 进展：Daily 改为 workplace-facing report 结构，同时保留项目标签。",
+          "\t- 影响：Monthly review 可以直接读取状态、影响和证据边界。",
+          "\t- 风险/问题：旧日报格式仍需兼容解析。",
+          "\t- 下一步：验证 monthly parser 对新旧格式的兼容性。",
+          "\t- 来源/证据边界：recorded；raw 2026-W28 entry",
+          "",
+          "### 2026.07.07",
+          "",
+          "#### 今日摘要",
+          "- Tracework reporting model 继续补充验证，来源 raw-entry-backed。",
+          "",
+          "#### 项目进展",
+          "- [Tracework]",
+          "\t- 工作流：Reporting model upgrade",
+          "\t- 状态：raw-entry-backed；ongoing",
+          "\t- 进展：补充 Daily no-risk 占位句的月度解析保护。",
+          "\t- 影响：Monthly review 不会把无风险占位句误报为风险。",
+          "\t- 风险/问题：无明确风险记录",
+          "\t- 下一步：继续跑 regression。",
+          "\t- 来源/证据边界：recorded；raw 2026-W28 entry"
+        ]
+      },
+      "expected_behavior": "prepare_monthly_data.py parses the report-led Daily Note shape, preserves the project label, exposes report_items in signals/skeleton, and carries risk/next/evidence-boundary fields forward.",
+      "assertions": [
+        {
+          "name": "report_items_extracted",
+          "description": "The parser extracts progress, impact, risk, next step, and source/evidence boundary fields."
+        },
+        {
+          "name": "monthly_skeleton_consumable",
+          "description": "The skeleton exposes report_items by project for monthly review writing."
         }
       ]
     },

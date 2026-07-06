@@ -1,4 +1,4 @@
-# Tracework Storage Convention (v3.0)
+# Tracework Storage Convention (v3.1)
 
 This file defines the shared data schema and storage convention used by all skills in this monorepo. When generating change entries, follow this spec exactly so downstream consumers can reliably read them.
 
@@ -40,7 +40,7 @@ then store enough structured metadata for future skills to find and reuse it:
   such as `DESIGN.md`, `PLAN.md`, `AGENTS.md`, prompt contracts, schema
   contracts, migration notes, and architecture notes.
 - **Vault raw layer**: machine-readable memory and indexes, such as weekly raw
-  entries, artifact index entries, decision thread indexes, open question
+  entries, artifact dossier entries, decision thread indexes, open question
   indexes, and monthly signals.
 - **Vault wiki layer**: human-readable synthesis outputs, such as daily notes,
   weekly outlines, monthly reviews, and decision roadmaps.
@@ -55,7 +55,7 @@ pattern:
   raw/                            # Raw layer (immutable intermediate data)
     projects.json                 # Optional project registry
     artifacts/
-      my-project.json             # Array of durable artifact index entries
+      my-project.json             # Array of durable artifact dossier entries
     decisions/
       my-project.json             # Derived decision replay index for agent queries
     weeks/
@@ -222,8 +222,11 @@ decision evidence.
 ## Artifact Index
 
 Raw entries record chronological semantic work signals. Artifact index entries
-record durable artifact metadata and recall navigation. Do not overload weekly
-raw entries as a document catalog.
+record durable artifact dossiers: enough context for an agent to understand what
+an artifact governed, why it mattered, and where its evidence boundary sits even
+if the source document later moves or disappears. Do not overload weekly raw
+entries as a document catalog, and do not turn artifact entries into shadow
+copies of full documents.
 
 Each `{vault}/raw/artifacts/{slug}.json` file contains a JSON array of artifacts:
 
@@ -243,6 +246,34 @@ Each `{vault}/raw/artifacts/{slug}.json` file contains a JSON array of artifacts
     "decision_threads": ["schema-validation-boundary"],
     "open_questions": ["whether repair-loop ownership should move upstream"],
     "evidence_refs": ["doc:stage-parse-implementation-v1"],
+    "source_entry_refs": [
+      {
+        "week": "2026-W18",
+        "path": "/path/to/vault/raw/weeks/2026-W18/storyboard-pipeline.json",
+        "timestamp": "2026-05-08T10:00:00+08:00",
+        "entry_index": 0
+      }
+    ],
+    "artifact_summary": {
+      "scope": "Validation-stage contract between parse output, repair loops, and export.",
+      "non_scope": "Does not define orchestration-level retry policy.",
+      "key_claims": [
+        {
+          "claim": "Export is a consumer of validated panels, not the repair owner.",
+          "evidence_boundary": "recorded_context",
+          "evidence_refs": ["doc:stage-parse-implementation-v1"]
+        }
+      ],
+      "key_decisions": ["Keep schema repair inside validation-stage ownership."],
+      "open_questions": ["whether repair-loop ownership should move upstream"]
+    },
+    "last_seen": {
+      "at": "2026-05-08T10:00:00+08:00",
+      "exists": true,
+      "content_hash": "sha256:..."
+    },
+    "source_availability": "available",
+    "deletion_behavior": "summary_remains_usable",
     "status": "active",
     "supersedes": [],
     "superseded_by": null
@@ -269,8 +300,44 @@ Each `{vault}/raw/artifacts/{slug}.json` file contains a JSON array of artifacts
 | `open_questions` | string[] | No | Questions preserved by the artifact |
 | `risk_refs` | string[] | No | Risk ids or short risk labels |
 | `evidence_refs` | string[] | No | Commit SHAs, eval ids, issue ids, or doc refs |
+| `source_entry_refs` | object[] | No | Provenance pointers to raw capture entries that recorded this dossier context; not references to the artifact document itself |
+| `artifact_summary` | object | No | Agent-readable dossier summary with `scope`, `non_scope`, `key_claims`, `key_decisions`, and `open_questions` |
+| `last_seen` | object | No | Best-effort source file observation with `at`, `exists`, and optional `content_hash` |
+| `source_availability` | enum | No | `available` \| `missing` \| `moved` \| `unknown` |
+| `deletion_behavior` | enum | No | `summary_remains_usable` \| `source_required` |
 | `supersedes` | string[] | No | Artifact ids this artifact replaces |
 | `superseded_by` | string or null | No | Artifact id that replaces this artifact |
+
+### Artifact Dossier Semantics
+
+Artifact entries should be independently readable, not independently
+authoritative. A future agent should be able to answer "what was this artifact
+about, what did it not cover, why was it important, and what should I verify
+before relying on it?" without opening the source document. The dossier must not
+store full artifact content and must not become a second document repository.
+
+Use dossier fields this way:
+
+- `source_entry_refs` point to raw capture entries where the dossier context was
+  recorded. They establish provenance, not direct verification.
+- `artifact_summary.scope` and `artifact_summary.non_scope` define the boundary
+  the artifact governs and what remains outside it.
+- `artifact_summary.key_claims` may be strings or objects. If an object has
+  `evidence_boundary`, use exactly one of `navigation_only`,
+  `recorded_context`, or `direct_evidence`.
+- `artifact_summary.key_decisions` and `.open_questions` preserve reusable
+  agent context, but consumers must still check raw entries or direct evidence
+  before presenting them as verified facts.
+- `last_seen` records the last source-file observation when known. A missing or
+  stale source file does not invalidate the dossier summary, but it lowers what
+  consumers may claim from it.
+- `source_availability` and `deletion_behavior` tell recall/query/roadmap
+  whether the source can still be opened and whether the dossier remains useful
+  if it cannot.
+
+`deletion_behavior: "summary_remains_usable"` means the artifact entry can still
+orient a future agent after the source document is deleted. It does not mean the
+entry can reconstruct the document or verify every claim inside it.
 
 When `scripts/tracework_raw.py` supports artifact indexing, producers should write
 the artifact object to a temporary JSON file and delegate validation and upsert
@@ -282,9 +349,9 @@ python <skill-or-repo>/scripts/tracework_raw.py upsert-artifact \
   --cwd "$PWD"
 ```
 
-Consumers must tolerate missing artifact indexes. Artifact index metadata helps
-find source documents; it must not be treated as a replacement for raw-entry
-facts.
+Consumers must tolerate missing artifact indexes. Artifact dossier metadata
+helps find source documents and preserve recorded context; it must not be
+treated as a replacement for raw-entry facts or direct verification.
 
 ## ISO Week
 
@@ -351,6 +418,26 @@ Each `{vault}/raw/weeks/{week}/{slug}.json` file contains a **JSON array** of en
     "status": "done",
     "motivation": "Manual positioning caused recurring panel overlap failures during export.",
     "impact": "Weekly outline can explain the shipped layout capability without re-reading implementation commits.",
+    "reporting": {
+      "outcome_candidate": {
+        "kind": "outcome",
+        "statement": "Scene composition can resolve known panel overlap failures before export."
+      },
+      "impact_boundary": "observed",
+      "evidence_boundary": "verified",
+      "evidence_gap": "No production usage metric recorded yet.",
+      "module_scope": ["composition", "layout"],
+      "work_stream": "Scene composition reliability",
+      "carry_forward": {
+        "monthly": ["Mention remaining production-usage evidence gap."]
+      },
+      "hard_signals": [
+        {
+          "kind": "open_question",
+          "statement": "Whether dense panels need a separate export fallback."
+        }
+      ]
+    },
     "evidence_refs": ["abc1234", "/Users/dev/projects/my-project/docs/stage-composition-implementation.md"],
     "decision_threads": ["composition-layout-boundary"],
     "lifecycle_transition": {
@@ -412,6 +499,7 @@ Consumers must tolerate these fields being absent. Producers should add them whe
 | `open_questions` | string[] | Unresolved questions at session end; entry points for next session |
 | `root_cause` | string | Repair archetype root cause; 1-2 sentences |
 | `artifact_context` | object[] | Durable artifact scope/delta/source-of-truth blocks embedded in the raw entry |
+| `reporting` | object | Report-ready boundary metadata for daily, weekly, and monthly consumers |
 | `sync_suggestions` | string[] | Presence-based hints that repo-local intent artifacts may need review |
 
 ### `type` vs `archetype`
@@ -463,6 +551,61 @@ Each object has this shape:
 `artifact_path`, `scope`, `delta`, and `source_of_truth` are required when the
 object is present. `artifact_path` must be absolute.
 
+### `reporting`
+
+Use `reporting` when the session has a report-ready boundary that should survive
+into daily, weekly, or monthly outputs without forcing the consumer to infer it
+from prose. This field is optional and additive; historical entries without it
+remain valid.
+
+```json
+{
+  "reporting": {
+    "outcome_candidate": {
+      "kind": "outcome | progress | activity",
+      "statement": "The bounded claim a report may reuse."
+    },
+    "impact_boundary": "observed | expected | unknown",
+    "evidence_boundary": "verified | recorded | limited",
+    "evidence_gap": "What is still missing before strengthening the claim.",
+    "module_scope": ["module-or-area"],
+    "work_stream": "Stable report grouping hint",
+    "carry_forward": {
+      "daily": ["human-facing follow-up"],
+      "weekly": ["report carry-forward"],
+      "monthly": ["review carry-forward"]
+    },
+    "hard_signals": [
+      {
+        "kind": "risk | open_question | abandoned_alternative | candidate_rule_signal",
+        "statement": "The reusable hard signal."
+      }
+    ]
+  }
+}
+```
+
+Field semantics:
+
+- `outcome_candidate.kind` sets the highest defensible report treatment:
+  `outcome` for a recorded state change, `progress` for bounded advancement,
+  and `activity` for work that should be visible but not promoted.
+- `impact_boundary` says whether impact is observed, expected, or unknown.
+- `evidence_boundary` says whether the claim is verified by direct evidence,
+  recorded in the raw entry only, or limited by fallback/incomplete evidence.
+- `evidence_gap` names what would be needed to strengthen the claim.
+- `module_scope` and `work_stream` help consumers group entries without
+  inventing report-local `W#` labels.
+- `carry_forward` supports human reports and monthly review. It is not
+  next-session recall; agent handoff belongs to raw open questions, artifact
+  dossiers, recall, query, and roadmap.
+- `hard_signals` lift risks, open questions, rejected alternatives, and repeated
+  candidate-rule signals for weekly/monthly "hard stuff" sections.
+
+Do not store report-local `O#`, `W#`, `D#`, or `E#` identifiers in raw entries.
+Weekly and monthly assign those labels after collecting the full reporting
+period.
+
 Recommended producer behavior:
 
 - Add `status` whenever it can be inferred from the session: `done` for completed work, `ongoing` for partially completed work, `risk` for open risk entries, and `decision` for design decisions.
@@ -489,6 +632,9 @@ Recommended producer behavior:
   `DESIGN.md`, `PLAN.md`, `AGENTS.md`, README, architecture docs, prompt
   contracts, or schema contracts. This is lightweight flagging only; producers
   must not claim semantic diffing or automatic doc updates.
+- Add `reporting` when the entry already has a clear report boundary. Prefer
+  explicit `reporting` metadata in consumers, then fall back to
+  `summary`/`context`/`status`/`impact` for older entries.
 
 ### Fruit Check
 
@@ -617,9 +763,9 @@ containing `week`, `slug`, `path`, `entries_appended`, and `total_entries`.
 Downstream tools read these files to get high-quality development context:
 
 - **weekly** — reads change entries as the primary semantic source for weekly report generation. Git logs are only fallback and coverage evidence when raw entries are missing or incomplete.
-- **daily** — reads change entries as primary data source, with git log as fallback
-- **monthly** — reads daily notes (produced by daily) for monthly summaries
-- **recall** — reads recent raw entries first and uses artifact index entries as optional source navigation
+- **daily** — creates workplace-facing daily reports from raw entries, preferring `reporting` metadata and using git log only as fallback coverage
+- **monthly** — reads daily reports for monthly summaries, then optionally consults matching raw entries for `reporting`, status, impact, and direct evidence
+- **recall** — reads recent raw entries first and uses artifact dossiers as optional navigation plus recorded context
 - **roadmap** — derives decision threads, accumulating risks, and
   recurring open questions from raw entries
 - Any future reporting or review tool that needs structured change history
@@ -628,6 +774,10 @@ Downstream tools read these files to get high-quality development context:
 
 For weekly reporting, raw entries should carry the meaning of the work:
 
+- If `reporting` is present, use it before inferring outcome/progress/activity
+  treatment from prose. Preserve `outcome_candidate.kind`, `impact_boundary`,
+  `evidence_boundary`, `evidence_gap`, `module_scope`, `work_stream`, and
+  `hard_signals`.
 - `summary` should describe the engineering change at report granularity.
 - `context` should explain why it mattered and what changed as a result.
 - `archetype` should control treatment depth: decisions emphasize trade-offs,
@@ -640,8 +790,10 @@ For weekly reporting, raw entries should carry the meaning of the work:
 - `related_docs` are evidence and deep context; consumers should read them only
   when the raw entry is not enough to explain the technical approach.
 - Artifact index entries are optional source navigation. Consumers may use them
-  to find durable repo-local docs, but must not invent decision facts from
-  artifact titles alone.
+  to find durable repo-local docs and dossier context, but must not invent
+  decision facts from artifact titles or summaries alone. Treat dossier claims
+  as `navigation_only` or `recorded_context` unless a claim or source-of-truth
+  field provides direct evidence.
 - Git commits are useful for coverage checks, but they should not override explicit raw-entry intent.
 
 ### Duplicate and Conflict Handling

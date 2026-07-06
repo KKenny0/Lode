@@ -66,6 +66,22 @@ ARTIFACT_LIST_FIELDS = (
     "evidence_refs",
     "supersedes",
 )
+VALID_REPORTING_OUTCOME_KINDS = {"outcome", "progress", "activity"}
+VALID_REPORTING_IMPACT_BOUNDARIES = {"observed", "expected", "unknown"}
+VALID_REPORTING_EVIDENCE_BOUNDARIES = {"verified", "recorded", "limited"}
+VALID_REPORTING_HARD_SIGNAL_KINDS = {
+    "risk",
+    "open_question",
+    "abandoned_alternative",
+    "candidate_rule_signal",
+}
+VALID_ARTIFACT_SOURCE_AVAILABILITY = {"available", "missing", "moved", "unknown"}
+VALID_ARTIFACT_DELETION_BEHAVIOR = {"summary_remains_usable", "source_required"}
+VALID_ARTIFACT_CLAIM_BOUNDARIES = {
+    "navigation_only",
+    "recorded_context",
+    "direct_evidence",
+}
 
 
 def load_yaml_config(path: Path) -> dict[str, Any]:
@@ -222,6 +238,110 @@ def validate_string_list(entry: dict[str, Any], field: str) -> None:
             raise ValueError(f"entry {field} must be a list of strings when present")
 
 
+def validate_non_empty_string(owner: str, value: Any) -> None:
+    if not isinstance(value, str) or not value.strip():
+        raise ValueError(f"{owner} must be a non-empty string when present")
+
+
+def validate_string_list_value(owner: str, value: Any) -> None:
+    if not isinstance(value, list) or not all(isinstance(item, str) for item in value):
+        raise ValueError(f"{owner} must be a list of strings when present")
+
+
+def validate_source_entry_refs_value(owner: str, refs: Any) -> None:
+    if not isinstance(refs, list):
+        raise ValueError(f"{owner} must be a list when present")
+    for index, ref in enumerate(refs):
+        if not isinstance(ref, dict):
+            raise ValueError(f"{owner}[{index}] must be an object")
+        for field in ("week", "path", "timestamp", "entry_id"):
+            if field in ref:
+                validate_non_empty_string(f"{owner}[{index}].{field}", ref[field])
+        if "entry_index" in ref and not isinstance(ref["entry_index"], int):
+            raise ValueError(f"{owner}[{index}].entry_index must be an integer when present")
+
+
+def validate_reporting(entry: dict[str, Any]) -> None:
+    if "reporting" not in entry:
+        return
+    reporting = entry["reporting"]
+    if not isinstance(reporting, dict):
+        raise ValueError("entry reporting must be an object when present")
+
+    outcome = reporting.get("outcome_candidate")
+    if outcome is not None:
+        if not isinstance(outcome, dict):
+            raise ValueError("entry reporting.outcome_candidate must be an object when present")
+        kind = outcome.get("kind")
+        if kind is not None and kind not in VALID_REPORTING_OUTCOME_KINDS:
+            raise ValueError(
+                "entry reporting.outcome_candidate.kind must be one of: "
+                + ", ".join(sorted(VALID_REPORTING_OUTCOME_KINDS))
+            )
+        for field in ("statement", "rationale"):
+            if field in outcome:
+                validate_non_empty_string(f"entry reporting.outcome_candidate.{field}", outcome[field])
+
+    impact_boundary = reporting.get("impact_boundary")
+    if impact_boundary is not None and impact_boundary not in VALID_REPORTING_IMPACT_BOUNDARIES:
+        raise ValueError(
+            "entry reporting.impact_boundary must be one of: "
+            + ", ".join(sorted(VALID_REPORTING_IMPACT_BOUNDARIES))
+        )
+
+    evidence_boundary = reporting.get("evidence_boundary")
+    if evidence_boundary is not None and evidence_boundary not in VALID_REPORTING_EVIDENCE_BOUNDARIES:
+        raise ValueError(
+            "entry reporting.evidence_boundary must be one of: "
+            + ", ".join(sorted(VALID_REPORTING_EVIDENCE_BOUNDARIES))
+        )
+
+    for field in ("evidence_gap", "work_stream"):
+        if field in reporting:
+            validate_non_empty_string(f"entry reporting.{field}", reporting[field])
+
+    if "module_scope" in reporting:
+        validate_string_list_value("entry reporting.module_scope", reporting["module_scope"])
+
+    if "carry_forward" in reporting:
+        carry_forward = reporting["carry_forward"]
+        if isinstance(carry_forward, list):
+            validate_string_list_value("entry reporting.carry_forward", carry_forward)
+        elif isinstance(carry_forward, dict):
+            for key, value in carry_forward.items():
+                if not isinstance(key, str) or not key.strip():
+                    raise ValueError("entry reporting.carry_forward keys must be non-empty strings")
+                if isinstance(value, list):
+                    validate_string_list_value(f"entry reporting.carry_forward.{key}", value)
+                else:
+                    validate_non_empty_string(f"entry reporting.carry_forward.{key}", value)
+        else:
+            raise ValueError("entry reporting.carry_forward must be a list or object when present")
+
+    if "hard_signals" in reporting:
+        hard_signals = reporting["hard_signals"]
+        if not isinstance(hard_signals, list):
+            raise ValueError("entry reporting.hard_signals must be a list when present")
+        for index, signal in enumerate(hard_signals):
+            if isinstance(signal, str):
+                if not signal.strip():
+                    raise ValueError(f"entry reporting.hard_signals[{index}] must be non-empty")
+                continue
+            if not isinstance(signal, dict):
+                raise ValueError(f"entry reporting.hard_signals[{index}] must be a string or object")
+            kind = signal.get("kind")
+            if kind is not None and kind not in VALID_REPORTING_HARD_SIGNAL_KINDS:
+                raise ValueError(
+                    f"entry reporting.hard_signals[{index}].kind must be one of: "
+                    + ", ".join(sorted(VALID_REPORTING_HARD_SIGNAL_KINDS))
+                )
+            for field in ("statement", "subject", "evidence_gap", "recurrence_key"):
+                if field in signal:
+                    validate_non_empty_string(
+                        f"entry reporting.hard_signals[{index}].{field}", signal[field]
+                    )
+
+
 def validate_artifact_context(entry: dict[str, Any]) -> None:
     if "artifact_context" not in entry:
         return
@@ -288,6 +408,80 @@ def validate_lifecycle_transition(entry: dict[str, Any]) -> None:
             raise ValueError(f"entry lifecycle_transition.{field} must be a non-empty string when present")
 
 
+def validate_artifact_summary(summary: Any) -> None:
+    if not isinstance(summary, dict):
+        raise ValueError("artifact artifact_summary must be an object when present")
+    for field in ("scope", "non_scope"):
+        if field in summary:
+            validate_non_empty_string(f"artifact artifact_summary.{field}", summary[field])
+    for field in ("key_decisions", "open_questions"):
+        if field in summary:
+            validate_string_list_value(f"artifact artifact_summary.{field}", summary[field])
+    if "key_claims" in summary:
+        claims = summary["key_claims"]
+        if not isinstance(claims, list):
+            raise ValueError("artifact artifact_summary.key_claims must be a list when present")
+        for index, claim in enumerate(claims):
+            if isinstance(claim, str):
+                if not claim.strip():
+                    raise ValueError(f"artifact artifact_summary.key_claims[{index}] must be non-empty")
+                continue
+            if not isinstance(claim, dict):
+                raise ValueError(f"artifact artifact_summary.key_claims[{index}] must be a string or object")
+            if "claim" in claim:
+                validate_non_empty_string(
+                    f"artifact artifact_summary.key_claims[{index}].claim", claim["claim"]
+                )
+            boundary = claim.get("evidence_boundary")
+            if boundary is not None and boundary not in VALID_ARTIFACT_CLAIM_BOUNDARIES:
+                raise ValueError(
+                    f"artifact artifact_summary.key_claims[{index}].evidence_boundary "
+                    "must be one of: "
+                    + ", ".join(sorted(VALID_ARTIFACT_CLAIM_BOUNDARIES))
+                )
+            if "evidence_refs" in claim:
+                validate_string_list_value(
+                    f"artifact artifact_summary.key_claims[{index}].evidence_refs",
+                    claim["evidence_refs"],
+                )
+            if "source_entry_refs" in claim:
+                validate_source_entry_refs_value(
+                    f"artifact artifact_summary.key_claims[{index}].source_entry_refs",
+                    claim["source_entry_refs"],
+                )
+
+
+def validate_artifact_last_seen(last_seen: Any) -> None:
+    if not isinstance(last_seen, dict):
+        raise ValueError("artifact last_seen must be an object when present")
+    for field in ("at", "content_hash"):
+        if field in last_seen:
+            validate_non_empty_string(f"artifact last_seen.{field}", last_seen[field])
+    if "exists" in last_seen and not isinstance(last_seen["exists"], bool):
+        raise ValueError("artifact last_seen.exists must be a boolean when present")
+
+
+def validate_artifact_dossier(artifact: dict[str, Any]) -> None:
+    if "source_entry_refs" in artifact:
+        validate_source_entry_refs_value("artifact source_entry_refs", artifact["source_entry_refs"])
+    if "artifact_summary" in artifact:
+        validate_artifact_summary(artifact["artifact_summary"])
+    if "last_seen" in artifact:
+        validate_artifact_last_seen(artifact["last_seen"])
+    source_availability = artifact.get("source_availability")
+    if source_availability is not None and source_availability not in VALID_ARTIFACT_SOURCE_AVAILABILITY:
+        raise ValueError(
+            "artifact source_availability must be one of: "
+            + ", ".join(sorted(VALID_ARTIFACT_SOURCE_AVAILABILITY))
+        )
+    deletion_behavior = artifact.get("deletion_behavior")
+    if deletion_behavior is not None and deletion_behavior not in VALID_ARTIFACT_DELETION_BEHAVIOR:
+        raise ValueError(
+            "artifact deletion_behavior must be one of: "
+            + ", ".join(sorted(VALID_ARTIFACT_DELETION_BEHAVIOR))
+        )
+
+
 def validate_entry(entry: Any) -> dict[str, Any]:
     if not isinstance(entry, dict):
         raise ValueError("entry must be a JSON object")
@@ -327,6 +521,7 @@ def validate_entry(entry: Any) -> dict[str, Any]:
             raise ValueError(f"entry {field} must be a non-empty string when present")
     validate_source_refs(entry)
     validate_lifecycle_transition(entry)
+    validate_reporting(entry)
     if "status" in entry and entry["status"] not in VALID_STATUSES:
         raise ValueError(f"entry status must be one of: {', '.join(sorted(VALID_STATUSES))}")
     if "archetype" in entry and entry["archetype"] not in VALID_ARCHETYPES:
@@ -435,6 +630,7 @@ def validate_artifact(artifact: Any) -> dict[str, Any]:
     if "superseded_by" in artifact and artifact["superseded_by"] is not None:
         if not isinstance(artifact["superseded_by"], str) or not artifact["superseded_by"].strip():
             raise ValueError("artifact superseded_by must be a non-empty string or null")
+    validate_artifact_dossier(artifact)
     return artifact
 
 

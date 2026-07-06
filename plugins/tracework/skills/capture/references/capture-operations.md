@@ -109,9 +109,9 @@ object or array.
 Delete `.tracework/tmp-entry.json` only after append succeeds. If the helper
 fails, keep the temp file for debugging and fall back to Markdown output.
 
-## Artifact Index Write Path
+## Artifact Dossier Write Path
 
-For each durable artifact index entry, follow the same Write -> call -> cleanup
+For each durable artifact dossier entry, follow the same Write -> call -> cleanup
 pattern:
 
 1. Use the Write tool to write the artifact JSON to
@@ -128,6 +128,11 @@ pattern:
 
 If any helper call fails, fall back to Markdown output instead of blocking the
 recap.
+
+Artifact dossier JSON stays in the existing `{vault}/raw/artifacts/{slug}.json`
+path. Include dossier fields when known (`source_entry_refs`,
+`artifact_summary`, `last_seen`, `source_availability`, and
+`deletion_behavior`), but do not copy the full artifact text into the JSON.
 
 ## Auto-Registration
 

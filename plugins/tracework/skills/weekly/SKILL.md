@@ -45,7 +45,15 @@ same traceability while presenting a shorter management narrative. See
 
 **Priority (auto):** Prefer `projects.json` `priority` when present. Otherwise sort by raw entry count plus uncovered commit count: ≥5 signals → Core; 2-4 → Supporting; <2 → Exploratory. User override takes precedence.
 
-**Work streams:** Analyze raw entries first to identify narratively independent groups of changes. Use `summary`, `context`, `archetype`, `type`, `artifact_context`, and `related_docs` as the main semantic input. Use git commits only to fill gaps when raw entries are missing or incomplete. Multi-project mode: one stream per project by default. Single-project mode: decide whether to split into streams based on raw entry clustering. See [references/subagent-prompt.md](references/subagent-prompt.md) for the reusable analysis template and detection criteria.
+**Work streams:** Analyze raw entries first to identify narratively independent
+groups of changes. Use `reporting` metadata first when present, then
+`summary`, `context`, `archetype`, `type`, `status`, `impact`,
+`artifact_context`, and `related_docs` as semantic input. Use git commits only
+to fill gaps when raw entries are missing or incomplete. Multi-project mode:
+one stream per project by default. Single-project mode: decide whether to split
+into streams based on raw entry clustering. See
+[references/subagent-prompt.md](references/subagent-prompt.md) for the reusable
+analysis template and detection criteria.
 
 Merge duplicate signals before analysis. New adaptive-depth `session-recap` entries may contain both motivation and technical evidence through `artifact_context`. Historical `arch-doc` entries are legacy evidence; if one describes the same change as a `session-recap` entry, combine them into one work stream. Fallback git commits can add coverage notes, but must not create a duplicate stream for work already explained by raw entries.
 
@@ -133,6 +141,8 @@ Parse the user's prompt, resolve configuration, and collect missing parameters b
 For each project, read `{vault}/raw/weeks/{week}/{slug}.json` and filter entries whose `timestamp` falls inside the requested date range.
 
 Primary fields:
+- `reporting`: outcome/progress/activity candidate, impact boundary, evidence
+  boundary, evidence gap, module scope, work stream, carry-forward, hard signals
 - `summary` + `context`: main narrative signal
 - `archetype`: session shape and treatment depth
 - `type`: category and risk/decision signal
@@ -143,7 +153,10 @@ Primary fields:
 
 Use `artifact_context` before reading files from disk. If `related_docs` points to an existing architecture or design document, read it only when the raw entry is not enough to explain the technical approach. Do not read every related document by default.
 
-Read `{vault}/raw/artifacts/{slug}.json` when present. Use artifact index metadata as optional source navigation for high-value docs. Missing artifact index must not block output. Do not invent decision facts from artifact titles alone.
+Read `{vault}/raw/artifacts/{slug}.json` when present. Use artifact dossier
+metadata as optional source navigation and recorded context for high-value docs.
+Missing artifact dossier index must not block output. Do not invent decision facts from
+artifact titles, summaries, or topics alone.
 
 ### Raw Data Coverage
 
@@ -188,10 +201,11 @@ For each project, use the template in [references/subagent-prompt.md](references
 
 Raw entries are authoritative for intent and **recorded** impact because they
 were produced at session wrap-up time; they do not independently verify their
-own claims. Adaptive-depth `session-recap` entries may be both intent-rich and
-evidence-rich. Legacy `arch-doc` entries remain valid evidence. Fallback git
-commits are lower-confidence evidence and should never override or duplicate a
-clear raw entry.
+own claims. When `reporting` is present, preserve its claim kind and boundaries
+instead of re-inferring them from prose. Adaptive-depth `session-recap` entries
+may be both intent-rich and evidence-rich. Legacy `arch-doc` entries remain
+valid evidence. Fallback git commits are lower-confidence evidence and should
+never override or duplicate a clear raw entry.
 
 The analysis must preserve decisions revisited, open questions carried forward,
 and hard problems that changed next-week planning. Fallback-only streams must be

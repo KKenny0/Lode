@@ -18,7 +18,7 @@ AI do not restart from zero.
 
 - Intra-project only.
 - Raw entries are the semantic source of truth.
-- Artifact index entries are optional source navigation.
+- Artifact dossier entries are optional source navigation plus recorded context.
 - Decision context entries are optional synthesized decision-replay hints from
   `{vault}/raw/decisions/{project-slug}.json`.
 - If the saved decision index is missing, invalid, empty, or older than the raw
@@ -82,6 +82,10 @@ with git history or assumptions.
 - Cite decision context `source_entry_refs` when using `decision_context`;
   preserve `confidence` and `inference_notes` instead of presenting inferred
   nodes as fact.
+- Treat artifact dossiers as independently readable but not independently
+  authoritative. `artifact_summary` can explain scope and recorded context;
+  direct evidence still comes from raw entries, `evidence_refs`, typed
+  `source_refs`, or source-of-truth artifact references.
 - Include `decision_context_source` when present, especially if `rebuilt=true`,
   so the user can see whether the section came from a saved index or an
   in-memory freshness rebuild.
@@ -89,7 +93,7 @@ with git history or assumptions.
   "may need review" rather than facts. Do not write or propose diffs from this
   skill.
 - Use "Inferred" wording when the helper returns weak or old-schema entries.
-- Missing artifact index is acceptable and must not block output.
+- Missing artifact dossier index is acceptable and must not block output.
 
 ## Storage
 
@@ -105,24 +109,31 @@ Raw entries remain the source of truth.
 
 ## Artifact Discovery
 
-The artifact index at `{vault}/raw/artifacts/{slug}.json` is a structured
-catalog of durable project documents. When present, use it to enrich the recall
-output:
+The artifact dossier index at `{vault}/raw/artifacts/{slug}.json` is a
+structured catalog of durable project documents plus recorded context. When
+present, use it to enrich the recall output:
 
 1. **Find related docs**: When raw entries mention `related_docs` or
-   `artifact_context`, cross-reference the artifact index for topic tags and
-   decision threads to find adjacent documents.
+   `artifact_context`, cross-reference the artifact dossier index for topic tags,
+   decision threads, and `artifact_summary.scope` to find adjacent documents.
 2. **Detect stale documents**: Artifacts with `status: superseded` or a
    `superseded_by` field indicate documents that have been replaced — flag these
    so the next session doesn't rely on outdated references.
-3. **Navigate by topic**: Artifact `topics` and `decision_threads` fields provide
-   stable retrieval terms for finding documents relevant to the current session.
+3. **Navigate by topic**: Artifact `topics`, `decision_threads`, and
+   `artifact_summary.key_claims` provide stable retrieval terms for finding
+   documents relevant to the current session.
+4. **Respect availability**: Use `source_availability`, `last_seen`, and
+   `deletion_behavior` to show whether the source document can still be opened
+   and whether the dossier remains useful if it cannot.
 
 In the "Docs worth reading" section, include for each artifact:
-- Why the artifact matters (from its `scope` or `topics`)
+- Why the artifact matters (from `artifact_summary.scope`, `topics`, or recorded
+  raw `artifact_context.scope`)
 - Whether it is still active (from `status`)
+- Source availability and deletion behavior when present
+- Evidence boundary for any key claim when present
 
-Missing artifact index is acceptable — the recall output must not depend on it.
+Missing artifact dossier index is acceptable — the recall output must not depend on it.
 When absent, derive doc references from raw entry fields alone.
 
 ## Absorbed Intent-Artifact Flagging

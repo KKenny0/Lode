@@ -2,9 +2,10 @@
 name: capture
 description: >
   Adaptive-depth session recap and low-friction checkpoint capture for weekly
-  reporting and decision replay. Use this skill for "/tracework:capture" or when
-  the user signals end of a work session — e.g. "收工", "今天到这", "done",
-  "wrap up", "that's it for today", "好了", "先这样".
+  reporting, daily/monthly review inputs, artifact dossiers, and decision
+  replay. Use this skill for "/tracework:capture" or when the user signals end
+  of a work session — e.g. "收工", "今天到这", "done", "wrap up", "that's it for
+  today", "好了", "先这样".
   Also trigger on explicit requests like "记录变更", "log changes",
   "记一下今天做了什么", "记一下当前进展", or "checkpoint". Do NOT trigger when
   the user is simply saying goodbye or switching topics.
@@ -26,7 +27,7 @@ future sessions need to remember.
 This skill works with or without a configured knowledge vault:
 
 - **With vault**: entries are written to
-  `{vault}/raw/weeks/{ISO-week}/{project-slug}.json`; durable artifact indexes
+  `{vault}/raw/weeks/{ISO-week}/{project-slug}.json`; durable artifact dossiers
   are written to `{vault}/raw/artifacts/{project-slug}.json` when applicable.
   Output is quiet by default: after a successful write, return only a short
   confirmation unless the user explicitly asks for verbose output.
@@ -70,7 +71,7 @@ Keep this file focused on signal extraction. Read
 `references/capture-operations.md` when you need any of these mechanics:
 
 - Enabling, disabling, or troubleshooting auto-capture hooks
-- Writing raw entries or artifact index entries through `tracework_raw.py`
+- Writing raw entries or artifact dossier entries through `tracework_raw.py`
 - Handling helper failures and zero-config fallback
 - Formatting vault-mode confirmations and capture receipts
 
@@ -101,6 +102,8 @@ evidence. Extract in this order:
 - Abandoned alternatives: options rejected and why
 - What changed: shipped capability, fix, refactor, decision, or risk
 - Impact: what the work enables, prevents, simplifies, or changes downstream
+- Reporting boundary: whether this is an outcome, progress, or activity; what
+  impact and evidence boundary should survive into daily/weekly/monthly reports
 - Open questions: unresolved decisions, risks, or next-session entry points
 - Artifact context: durable artifacts created or materially changed
 
@@ -128,10 +131,12 @@ period's raw entries and can compare claims across streams.
 
 Instead, make each raw entry easy for downstream reports to map:
 
-- `summary`, `status`, and `impact` provide candidate `O#` material, bounded by
-  the Fruit Check.
-- `work_stream` provides an optional `W#` grouping hint when the narrative group
-  is obvious from the session. Leave it absent rather than guessing.
+- `reporting.outcome_candidate`, `status`, `impact`, `impact_boundary`, and
+  `evidence_boundary` provide candidate `O#` material, bounded by the Fruit
+  Check.
+- `reporting.work_stream` or top-level `work_stream` provides an optional `W#`
+  grouping hint when the narrative group is obvious from the session. Leave it
+  absent rather than guessing.
 - `decision_threads`, `exploration_paths`, `abandoned_alternatives`, and
   `lifecycle_transition` provide candidate `D#` material.
 - `evidence_refs`, `source_refs`, and `artifact_context.source_of_truth` provide
@@ -151,6 +156,28 @@ Follow `references/tracework-storage-convention.md`. The change entry JSON shape
   "source": "session-recap",
   "status": "done | ongoing | risk | decision",
   "work_stream": "optional report grouping hint when obvious",
+  "reporting": {
+    "outcome_candidate": {
+      "kind": "outcome | progress | activity",
+      "statement": "bounded report claim"
+    },
+    "impact_boundary": "observed | expected | unknown",
+    "evidence_boundary": "verified | recorded | limited",
+    "evidence_gap": "missing evidence before strengthening the claim",
+    "module_scope": ["module-or-area"],
+    "work_stream": "optional report grouping hint",
+    "carry_forward": {
+      "daily": ["human-facing follow-up"],
+      "weekly": ["report carry-forward"],
+      "monthly": ["review carry-forward"]
+    },
+    "hard_signals": [
+      {
+        "kind": "risk | open_question | abandoned_alternative | candidate_rule_signal",
+        "statement": "reusable hard signal"
+      }
+    ]
+  },
   "related_docs": ["/absolute/path/to/doc"],
   "impact": "report-ready user, system, reliability, or workflow impact",
   "evidence_refs": ["commit SHA, issue ID, eval ID, or doc path"],
@@ -214,6 +241,22 @@ an open question, risk, decision, or artifact. Use `subject`, `from`, `to`, and
 Add `source_refs` when evidence needs typed structure. Each object must include
 `type` and `ref`; optional fields are `path`, `url`, `note`, and `timestamp`.
 
+### Reporting Metadata
+
+Add `reporting` only when the report boundary is clear from the session. It is
+for human daily/weekly/monthly outputs, not for agent handoff. Use
+`outcome_candidate.kind` conservatively:
+
+- `outcome`: a recorded state change or deliverable exists.
+- `progress`: bounded advancement exists, but the outcome is not complete or
+  not independently verified.
+- `activity`: work happened and should remain visible, but it is not a
+  defensible outcome.
+
+Use `impact_boundary` and `evidence_boundary` to prevent later reports from
+overstating the claim. Name `evidence_gap` when verification is missing. Do not
+copy report-local `O#`, `W#`, `D#`, or `E#` labels into raw JSON.
+
 ### Fruit Check
 
 Before accepting an entry, make sure its report-level claim has a real
@@ -256,10 +299,15 @@ Each artifact context must include:
 - `open_questions`: unresolved artifact-level questions, when present
 
 When `artifact_context` is present and a vault is configured, also upsert an
-artifact index entry with `<this-skill>/scripts/tracework_raw.py upsert-artifact`.
+artifact dossier entry with `<this-skill>/scripts/tracework_raw.py upsert-artifact`.
 Use `source: "capture"`. If `artifact_index.enabled` is `false`, config
 cannot be resolved, or the helper fails, skip the artifact-index side effect and
 continue.
+
+The dossier should include enough `artifact_summary`, `source_entry_refs`,
+`last_seen`, `source_availability`, and `deletion_behavior` for a future agent
+to understand the artifact boundary even if the source file moves. Do not paste
+the full artifact content into the dossier.
 
 ### Sync Suggestions
 
@@ -273,7 +321,7 @@ not "this file is stale" and not "apply this diff".
 ## Step 4: Output Or Write
 
 Read `references/capture-operations.md` before writing to the vault, upserting
-artifact indexes, registering the project, or handling helper failures.
+artifact dossiers, registering the project, or handling helper failures.
 
 Default behavior:
 
@@ -301,6 +349,10 @@ Use this template in zero-config mode or helper-failure fallback:
 
 {if impact present:
 **影响**: {impact}
+}
+
+{if reporting present:
+**汇报边界**: {outcome_candidate.kind}; impact={impact_boundary}; evidence={evidence_boundary}
 }
 
 {if root_cause present:
@@ -357,6 +409,8 @@ Before finalizing each entry, check:
 - Is the summary a report-level outcome, not a file-level description?
 - Does the Fruit Check distinguish actual state change from activity or an
   expected effect?
+- If `reporting` is present, is `outcome_candidate.kind` no stronger than the
+  evidence supports?
 - Does `status` limit the claim correctly, especially for ongoing work, risks,
   and decisions?
 - If `work_stream` is present, is it an obvious grouping hint rather than a

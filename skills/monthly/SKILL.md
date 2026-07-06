@@ -1,8 +1,9 @@
 ---
 name: monthly
 description: >
-  Monthly work review from daily notes. Splits long Daily Note.md into monthly archives,
-  extracts structured signals, and generates fact-based monthly summaries.
+  Monthly work review from workplace daily reports. Splits long Daily Note.md
+  into monthly archives, extracts structured signals, and generates fact-based
+  monthly summaries.
   Use this skill for "/tracework:monthly" or when the user mentions: "月度总结",
   "月报", "月度回顾", "monthly review", "按月拆分日报", "生成本月工作总结",
   "工作日志整理", "月度分析".
@@ -12,7 +13,7 @@ description: >
 
 # Tracework Monthly Review
 
-面向工作沉淀的月度日志处理。从 Daily Note.md 中按月拆分归档，提取结构化信号，生成事实优先、成果优先的月度总结。月度回顾先回答本月形成了哪些有依据的成果、当前状态和证据缺口，再补充活动覆盖情况；同时识别反复出现的开放问题、风险、习惯变化和下月需要调整的工作方式。
+面向工作沉淀的月度日报处理。从 Daily Note.md 中按月拆分归档，提取结构化信号，生成事实优先、成果优先的月度总结。Daily 的默认输入是面向上级/协作者的 workplace daily report；旧 checkbox/category 工作日志仍作为历史格式兼容。月度回顾先回答本月形成了哪些有依据的成果、当前状态和证据缺口，再补充活动覆盖情况；同时识别反复出现的开放问题、风险、习惯变化和下月需要调整的工作方式。
 
 核心产物：
 
@@ -88,8 +89,8 @@ evidence_mode: strict            # strict | best_effort
 
 ### Step 1.5: Source Coverage Check
 
-Check how many days in the target month have raw entries vs git-only entries in
-the Daily Note:
+Check how many days in the target month have raw-entry-backed workplace daily
+reports vs git-only entries in the Daily Note:
 
 1. Parse the daily note for the target month
 2. Tag each day's content as: `raw-entry-backed`, `git-only`, or `empty`
@@ -122,7 +123,7 @@ python <this-skill>/scripts/prepare_monthly_data.py \
 ```
 
 脚本完成所有确定性工作：
-- 提取项目/模块/类别标签、任务状态、当日焦点、风险信号、下一步信号
+- 提取项目/模块/类别标签、任务状态、report-led 日报字段、当日焦点、风险信号、下一步信号
 - 按项目归并、统计分布、识别工作阶段
 - 自动识别真实项目（出现 >= 2 天的）
 - 输出 signals.json 和 skeleton.json
@@ -131,9 +132,9 @@ python <this-skill>/scripts/prepare_monthly_data.py \
 
 读取 `references/worklog-summary-template.md` 模板、`skeleton.json` 骨架数据、原始月度归档 `YYYY-MM.md`。
 
-为增强成果证据，agent 可以只读查询 `{vault}/raw/weeks/{YYYY-WNN}/{slug}.json` 中时间落在目标月份、且与归档项目/主题相匹配的 raw entries。该步骤是可选的证据补充，不改变 `prepare_monthly_data.py`，也不改变 signals/skeleton schema：
+为增强成果证据，agent 可以只读查询 `{vault}/raw/weeks/{YYYY-WNN}/{slug}.json` 中时间落在目标月份、且与归档项目/主题相匹配的 raw entries。优先消费 raw entry 的 `reporting` metadata；缺失时再 fallback 到 `summary`、`context`、`status`、`impact`。该步骤是可选的证据补充，不改变 `prepare_monthly_data.py`，也不改变 signals/skeleton schema：
 
-- 只补充 raw 中已经记录的 `status`、`impact`、`evidence_refs`、`source_refs`、决策与取舍；
+- 只补充 raw 中已经记录的 `reporting`、`status`、`impact`、`evidence_refs`、`source_refs`、决策与取舍；
 - 匹配不明确时不关联，不从相似关键词制造成果；
 - Daily Note 与 raw 冲突时保留冲突和证据缺口，不静默选择更积极的版本；
 - 没有 matching raw 时仍可生成总结，但必须按归档证据降低置信度。
@@ -161,7 +162,7 @@ signals/skeleton schema 或存储路径：
 - 不把"优化中"说成"已完成"
 - 不把多条独立小修复包装成"重大成果"
 - 某项目只有零星记录时如实说明"记录较少"
-- Daily Note 的 `[x]` 只表示记录中的活动项被标为完成，不单独证明形成成果
+- Daily Note 的 `[x]` 只表示记录中的活动项被标为完成，不单独证明形成成果；新格式中的 `进展`、`影响`、`来源/证据边界` 也必须按 evidence grade 保守解释
 - 已完成条目数、活跃天数、类别分布、代码增删行数全部放入“覆盖与活动附录”，并明确标注为 activity metadata，不进入成果排序或价值判断
 
 **取舍规则：**

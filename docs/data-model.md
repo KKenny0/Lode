@@ -43,6 +43,7 @@ raw, and every synthesized view must be traceable back to them.
 /tracework:capture -> raw/weeks/{week}/{slug}.json
 /tracework:query   <- raw/decisions/{slug}.json + raw/weeks/
 /tracework:recall  <- raw/weeks/ + raw/artifacts/ + raw/decisions/
+/tracework:daily   <- raw/weeks/ + fallback git coverage
 /tracework:weekly  <- raw/weeks/ + fallback git coverage
 /tracework:monthly <- Daily Note.md + matching raw entries
 /tracework:roadmap <- raw entries + decision indexes
@@ -56,6 +57,7 @@ outputs compound.
 Raw entries should preserve report-worthy signals:
 
 - goal or state change
+- report-ready boundary metadata in optional `reporting`
 - decision and rationale
 - rejected or deferred alternatives
 - risk, open question, or follow-up
@@ -65,6 +67,25 @@ Raw entries should preserve report-worthy signals:
 Raw entries are append-only for practical purposes. If a later session changes
 a decision, mitigates a risk, or invalidates an artifact, write a new entry.
 Do not rewrite historical entries for a naming or positioning migration.
+
+`reporting` is optional and additive. When present, reports should prefer it
+over prose inference for outcome/progress/activity treatment, impact boundary,
+evidence boundary, evidence gaps, module scope, work stream, carry-forward
+signals, and hard signals. Final `O#`, `W#`, `D#`, and `E#` ids are still
+report-local and are never stored in raw entries.
+
+## Artifact Dossiers
+
+`{vault}/raw/artifacts/{slug}.json` stores durable artifact dossiers. A dossier
+should be independently readable enough to tell an agent what the artifact
+covered, what it did not cover, which claims or decisions matter, what remains
+open, when the source was last seen, and whether the original source is still
+available.
+
+Dossiers are not independently authoritative. They preserve navigation plus
+recorded context; consumers still need raw entries or direct evidence before
+presenting a claim as verified. The vault does not store full artifact content
+or become a shadow document repository.
 
 ## Decision Index
 

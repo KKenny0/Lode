@@ -1,4 +1,4 @@
 interface:
   display_name: "Tracework Weekly"
   short_description: "Roll work up into outcomes and drill down to evidence"
-  default_prompt: "Use $weekly to create an outcome-first weekly report with report-local O#/W#/D#/E# traceability from Tracework raw entries."
+  default_prompt: "Use $weekly to create an outcome-first weekly report from Tracework raw entries, preferring reporting metadata and preserving report-local O#/W#/D#/E# traceability."

@@ -51,9 +51,9 @@ coverage metadata, not proof of outcomes.
 | `/tracework:recall` | Session start | Recalls recent decisions, risks, open questions, and relevant artifacts |
 | `/tracework:query` | Targeted follow-up | Answers "why did we choose this?" with cited local evidence |
 | `/tracework:weekly` | Weekly | Rolls raw session records into a brief-ready outline |
-| `/tracework:monthly` | Monthly | Builds a monthly review and candidate repeated rules |
+| `/tracework:monthly` | Monthly | Builds a monthly review from workplace daily reports and raw evidence |
 | `/tracework:roadmap` | Phase review | Synthesizes a narrative decision history |
-| `/tracework:daily` | Daily | Updates Obsidian-style daily notes from raw entries and git history |
+| `/tracework:daily` | Daily | Writes workplace daily reports from raw entries, using git only for coverage gaps |
 
 The habit loop is intentionally small:
 
@@ -64,8 +64,9 @@ The habit loop is intentionally small:
 /tracework:query when someone needs the why
 ```
 
-Weekly, monthly, daily, and roadmap views compound after enough raw entries
-exist. They are views over the same record, not a separate reporting database.
+Daily, weekly, monthly, and roadmap views compound after enough raw entries
+exist. Daily is a workplace-facing report and monthly input; these views remain
+over the same record, not a separate reporting database.
 
 ## Install
 

@@ -31,7 +31,29 @@ Daily Note 使用三级标题组织内容：
 
 ## 内容结构
 
-每个日期下的内容按如下结构组织：
+每个日期下默认使用 report-led 日报结构。它面向职场汇报，同时保留
+monthly 解析所需的项目标签、状态和证据边界：
+
+```markdown
+### 2026.03.02
+
+#### 今日摘要
+- 本日主要推进了 Tracework Daily 的日报汇报结构，来源为 raw-entry-backed。
+
+#### 项目进展
+- [Tracework]
+	- 工作流：reporting model
+	- 状态：raw-entry-backed；done
+	- 进展：将 Daily 从 checkbox/category-first 调整为日报汇报结构。
+	- 影响：monthly review 可以直接读取项目进展、风险和证据边界。
+	- 风险/问题：旧日报格式仍需兼容解析。
+	- 下一步：验证 monthly parser 对新旧格式的兼容性。
+	- 来源/证据边界：recorded；raw 2026-W28 entry + artifact dossier
+```
+
+### Legacy checkbox/category 格式
+
+历史 Daily Note 可能仍使用旧结构，解析脚本必须继续兼容：
 
 ```markdown
 ### 2026.03.02
@@ -56,6 +78,9 @@ Daily Note 使用三级标题组织内容：
 ```
 
 一天内可以有多个项目。
+
+新格式也必须保留 `- [项目名]`，这是 monthly project grouping 的稳定
+入口。不要把项目名只写在标题或自然语言里。
 
 ### 模块标签格式
 
@@ -95,6 +120,23 @@ Daily Note 使用三级标题组织内容：
 - [x] 已完成    ← 方括号内有 x
 - [ ] 未完成    ← 方括号内有空格
 ```
+
+### Report field 格式
+
+新格式使用以下字段，每个字段都是普通 Markdown list item：
+
+```markdown
+	- 工作流：reporting model
+	- 状态：raw-entry-backed；ongoing
+	- 进展：今天完成或推进了什么
+	- 影响：观察到或预期的汇报影响
+	- 风险/问题：风险、阻塞、未验证处；没有则写“无明确风险记录”
+	- 下一步：后续动作、关注点或升级事项
+	- 来源/证据边界：verified | recorded | limited；来源说明
+```
+
+这些字段会被解析为 `report_items`，并用于月报的进展、风险、下一步和
+证据边界。`状态` 和 `来源/证据边界` 不证明成果，只限定 claim 边界。
 
 ### 代码变更量标注
 

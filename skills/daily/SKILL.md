@@ -1,11 +1,12 @@
 ---
 name: daily
 description: >
-  Generate or update structured Obsidian daily notes from Tracework raw entries,
-  using git commit history only as fallback coverage. Use this skill for
-  "/tracework:daily". Triggers on updating daily notes/work logs/diary from
-  recorded Tracework entries, filling in missing daily notes for past dates, or
-  summarizing today's work across repos.
+  Generate or update workplace-facing daily reports from Tracework raw entries,
+  using git commit history only as fallback coverage. The output is intended
+  for managers/collaborators and as structured monthly-review input. Use this
+  skill for "/tracework:daily". Triggers on updating daily reports/work logs
+  from recorded Tracework entries, filling in missing daily notes for past
+  dates, or summarizing today's work across repos.
   Key phrases: "更新日报", "写日报", "日报", "工作日志", "生成工作日志",
   "根据 tracework 写日报", "补日报", "daily note", "work log".
   Do NOT trigger for writing code, git operations (merge/rebase/conflict),
@@ -14,7 +15,10 @@ description: >
 
 # Tracework 日报更新器
 
-从 Tracework raw entries 生成结构化的 Obsidian 日报内容，并只用 git 提交统计补足未被 raw entries 覆盖的活动。日报是 Tracework habit loop 的日级复利层：不只记录今天做了什么，也保留明天开工时应该记得的决策、风险、开放问题和高价值 source links。
+从 Tracework raw entries 生成面向职场汇报的 Obsidian 日报内容，并只用
+git 提交统计补足未被 raw entries 覆盖的活动。日报的直接受众是上级、
+协作者或月度回顾，不承担下一次 agent 开工接力职责；开工接力由
+artifact dossier、recall、query 和 roadmap 负责。
 
 ---
 
@@ -119,17 +123,23 @@ If coverage is `Partial` or `None`, include a warning at the top of the output:
 1. 计算 target date 的 ISO week（`date +%Y-W%V`）
 2. 遍历所有 repos 对应的 slug，读取 `{vault}/raw/weeks/{week}/{slug}.json`
 3. 筛选 timestamp 匹配 target date 的 entries（比较日期部分 YYYY-MM-DD）
-4. 按 `references/daily-note-writing.md` 将 entries 映射为日报分类。
+4. 按 `references/daily-note-writing.md` 将 entries 映射为日报项目进展。
 
-**JSON entries 已经是高质量结构化数据**（有 summary + context，可能有 impact/status/project_area/evidence_refs），不需要再做 diff 分析或分类。优先使用 `impact` 写日报描述；`status: ongoing` 不写成已完成，`status: risk` 保留风险语气。直接进入 Step 5 的智能合并。
+**JSON entries 已经是高质量结构化数据**（有 summary + context，可能有
+`reporting` / impact / status / project_area / evidence_refs），不需要再做
+diff 分析或重新分类。优先使用 `reporting` 的 outcome/progress/activity、
+impact boundary、evidence boundary 和 evidence_gap；缺失时再使用
+`impact`、`status`、`summary`、`context`。`status: ongoing` 不写成已完成，
+`status: risk` 保留风险语气。直接进入 Step 5 的智能合并。
 
 If multiple raw entries describe the same work from different sources, merge them into one daily-note item instead of duplicating the same change. Prefer adaptive-depth `session-recap` for intent and artifact evidence; treat legacy `arch-doc` as historical evidence/context. Preserve conflict or risk language explicitly when entries disagree.
 
-Compounding requirements:
+Report requirements:
 - Preserve raw-entry decisions, risks, open questions, and follow-up signals.
-- Link high-value artifacts from `{vault}/raw/artifacts/{slug}.json` when metadata is present.
+- Link high-value artifact dossiers from `{vault}/raw/artifacts/{slug}.json` when metadata is present.
 - Do not duplicate full architecture docs into the Daily Note.
-- Include what should matter tomorrow when an entry has `open_questions`, `status: risk`, or lifecycle language.
+- Keep next-step content workplace-facing: what should be done, watched, or
+  escalated after today. Do not turn Daily into an agent handoff document.
 - Missing artifact index is acceptable and must not block output.
 
 如果 `{vault}/raw/` 不存在或对应 week 目录不存在，跳过此步骤，全部走 Step 3 补漏。
@@ -167,7 +177,7 @@ fallback commits. Do not reclassify raw entries.
 
 **补漏 commits（来自 Step 3-4）**：按原合并规则处理 — 同功能多 commit 可合并为一条。
 
-最终将两组数据合并，按分类和模块排列进入 Step 6。
+最终将两组数据合并，按项目和工作流排列进入 Step 6。
 
 ### Step 6: 生成日报内容
 
@@ -201,11 +211,11 @@ Use the exact output format and module label rules in `references/daily-note-wri
 - [ ] 量化了改动规模（+N/-M 行）
 
 **输出质量**:
-- [ ] 语义化描述（意图/效果，非函数名/字段名）
-- [ ] 每条改动标注了模块归属
-- [ ] raw entry 的 `impact` / `status` 已正确反映在日报措辞中（如存在）
-- [ ] raw entry 的 open questions / risks / decisions 已保留为明日衔接信号（如存在）
-- [ ] artifact index 中的高价值 source links 已按需引用，未把全文复制进日报
+- [ ] 输出是面向上级/协作者的日报，而不是 agent 接力记录
+- [ ] 每个项目包含进展、影响、风险/问题、下一步和来源/证据边界
+- [ ] raw entry 的 `reporting` / `impact` / `status` 已正确反映在日报措辞中（如存在）
+- [ ] raw entry 的 open questions / risks / decisions 已保留为汇报风险或下一步（如存在）
+- [ ] artifact dossier 中的高价值 source links 已按需引用，未把全文复制进日报
 - [ ] 格式与现有日报一致
 - [ ] 已检查当天是否有重复条目
 - [ ] 相关 commit 已智能合并

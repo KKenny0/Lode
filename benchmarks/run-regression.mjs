@@ -12,6 +12,7 @@ const captureRaw = path.join(repoRoot, 'skills', 'capture', 'scripts', 'tracewor
 const decisionGraph = path.join(repoRoot, 'skills', 'query', 'scripts', 'decision_graph.py');
 const roadmapGraph = path.join(repoRoot, 'skills', 'roadmap', 'scripts', 'decision_graph.py');
 const recallContext = path.join(repoRoot, 'skills', 'recall', 'scripts', 'recall_context.py');
+const monthlyPrepare = path.join(repoRoot, 'skills', 'monthly', 'scripts', 'prepare_monthly_data.py');
 const pythonEnv = { ...process.env, PYTHONDONTWRITEBYTECODE: '1' };
 
 const STORYBOARD_PIPELINE_RAW_WEEKS = {
@@ -75,7 +76,7 @@ const STORYBOARD_PIPELINE_RAW_WEEKS = {
       impact: 'Decision roadmap and weekly outline can surface stale indexed docs before they mislead future sessions.',
       project_area: 'documentation',
       work_stream: 'Artifact governance',
-      motivation: 'Artifact index introduces a new source navigation layer that can become stale.',
+      motivation: 'Artifact dossier index introduces a new source navigation and recorded-context layer that can become stale.',
       open_questions: [
         'What signal should mark an indexed artifact as stale: file mtime, raw entry lifecycle, or explicit sync suggestion?',
       ],
@@ -741,10 +742,207 @@ function runCaptureHelperRepairFixture(fixture) {
   }
 }
 
+function runCaptureHelperReportingValidFixture(fixture) {
+  const config = fixture.fixture || {};
+  const slug = config.project_slug;
+  const entry = config.entry;
+  const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'tracework-regression-'));
+  const tempVault = path.join(tempRoot, 'vault');
+  const entryPath = path.join(tempRoot, 'reporting-entry.json');
+
+  try {
+    fs.mkdirSync(tempVault, { recursive: true });
+    fs.writeFileSync(entryPath, JSON.stringify(entry, null, 2), 'utf-8');
+    const appendResult = runJson('python3', [
+      captureRaw,
+      'append-entry',
+      '--entry',
+      entryPath,
+      '--cwd',
+      repoRoot,
+      '--vault',
+      tempVault,
+      '--slug',
+      slug,
+      '--date',
+      config.date,
+    ]);
+    const entries = readJson(appendResult.path);
+    const appended = entries[0] || {};
+    assert(appended.reporting?.outcome_candidate?.kind === config.expected_kind, `${fixture.id}: reporting kind not preserved`);
+    assert(appended.reporting?.impact_boundary === config.expected_impact_boundary, `${fixture.id}: impact boundary not preserved`);
+    assert(appended.reporting?.evidence_boundary === config.expected_evidence_boundary, `${fixture.id}: evidence boundary not preserved`);
+    assert(
+      appended.reporting?.hard_signals?.some(signal => signal.kind === config.expected_hard_signal_kind),
+      `${fixture.id}: hard signal kind not preserved`,
+    );
+  } finally {
+    fs.rmSync(tempRoot, { recursive: true, force: true });
+  }
+}
+
+function runCaptureHelperReportingInvalidFixture(fixture) {
+  const config = fixture.fixture || {};
+  const slug = config.project_slug;
+  const entry = config.entry;
+  const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'tracework-regression-'));
+  const tempVault = path.join(tempRoot, 'vault');
+  const entryPath = path.join(tempRoot, 'bad-reporting-entry.json');
+
+  try {
+    fs.mkdirSync(tempVault, { recursive: true });
+    fs.writeFileSync(entryPath, JSON.stringify(entry, null, 2), 'utf-8');
+    const result = spawnSync('python3', [
+      captureRaw,
+      'append-entry',
+      '--entry',
+      entryPath,
+      '--cwd',
+      repoRoot,
+      '--vault',
+      tempVault,
+      '--slug',
+      slug,
+      '--date',
+      config.date,
+    ], {
+      cwd: repoRoot,
+      encoding: 'utf-8',
+      env: pythonEnv,
+    });
+    assert(result.status !== 0, `${fixture.id}: invalid reporting enum should fail`);
+    assert(
+      `${result.stderr}\n${result.stdout}`.includes(config.expected_error_text),
+      `${fixture.id}: missing validation error ${config.expected_error_text}`,
+    );
+  } finally {
+    fs.rmSync(tempRoot, { recursive: true, force: true });
+  }
+}
+
+function runArtifactUpsertDossierFixture(fixture) {
+  const config = fixture.fixture || {};
+  const slug = config.project_slug;
+  const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'tracework-regression-'));
+  const tempVault = path.join(tempRoot, 'vault');
+  const dossierPath = path.join(tempRoot, 'artifact-dossier.json');
+  const thinPath = path.join(tempRoot, 'artifact-thin.json');
+
+  try {
+    fs.mkdirSync(tempVault, { recursive: true });
+    fs.writeFileSync(dossierPath, JSON.stringify(config.dossier_artifact, null, 2), 'utf-8');
+    fs.writeFileSync(thinPath, JSON.stringify(config.thin_artifact, null, 2), 'utf-8');
+    const dossierResult = runJson('python3', [
+      captureRaw,
+      'upsert-artifact',
+      '--artifact',
+      dossierPath,
+      '--cwd',
+      repoRoot,
+      '--vault',
+      tempVault,
+      '--slug',
+      slug,
+    ]);
+    runJson('python3', [
+      captureRaw,
+      'upsert-artifact',
+      '--artifact',
+      thinPath,
+      '--cwd',
+      repoRoot,
+      '--vault',
+      tempVault,
+      '--slug',
+      slug,
+    ]);
+    const artifacts = readJson(dossierResult.path);
+    assert(artifacts.length === 2, `${fixture.id}: expected dossier and old thin artifact`);
+    const dossier = artifacts.find(item => item.id === config.dossier_artifact.id) || {};
+    const thin = artifacts.find(item => item.id === config.thin_artifact.id) || {};
+    assert(dossier.artifact_summary?.scope === config.expected_scope, `${fixture.id}: dossier scope not preserved`);
+    assert(dossier.source_availability === config.expected_source_availability, `${fixture.id}: source availability not preserved`);
+    assert(dossier.deletion_behavior === config.expected_deletion_behavior, `${fixture.id}: deletion behavior not preserved`);
+    assert(thin.id === config.thin_artifact.id && !thin.artifact_summary, `${fixture.id}: old thin artifact was not preserved as thin`);
+  } finally {
+    fs.rmSync(tempRoot, { recursive: true, force: true });
+  }
+}
+
+function runMonthlyPrepareDailyReportFixture(fixture) {
+  const config = fixture.fixture || {};
+  const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'tracework-regression-'));
+  const inputPath = path.join(tempRoot, config.archive_name || '2026-07.md');
+  const signalsPath = path.join(tempRoot, 'signals.json');
+  const skeletonPath = path.join(tempRoot, 'skeleton.json');
+
+  try {
+    fs.writeFileSync(inputPath, `${config.daily_note_archive.join('\n')}\n`, 'utf-8');
+    const result = spawnSync('python3', [
+      monthlyPrepare,
+      '--input',
+      inputPath,
+      '--signals-output',
+      signalsPath,
+      '--skeleton-output',
+      skeletonPath,
+      '--summary-mode',
+      'project_focused',
+      '--real-projects',
+      config.expected_project,
+    ], {
+      cwd: repoRoot,
+      encoding: 'utf-8',
+      env: pythonEnv,
+    });
+    if (result.status !== 0) {
+      throw new Error([result.stdout.trim(), result.stderr.trim()].filter(Boolean).join('\n'));
+    }
+    const signals = readJson(signalsPath);
+    const skeleton = readJson(skeletonPath);
+    assert(signals.projects_detected.includes(config.expected_project), `${fixture.id}: project not detected`);
+    const entry = signals.entries[0] || {};
+    assert(
+      entry.report_items?.some(item => item.field === '进展' && String(item.text).includes(config.expected_progress_text)),
+      `${fixture.id}: progress report field not parsed`,
+    );
+    assert(
+      entry.evidence_boundaries?.includes(config.expected_evidence_boundary),
+      `${fixture.id}: evidence boundary not parsed`,
+    );
+    const projectData = skeleton.by_project?.[config.expected_project] || {};
+    assert(projectData.report_items?.length >= config.expected_min_report_items, `${fixture.id}: skeleton report_items missing`);
+    assert(
+      skeleton.risks?.some(item => String(item.signal).includes(config.expected_risk_text)),
+      `${fixture.id}: risk field not carried into skeleton`,
+    );
+    if (config.expected_absent_risk_text) {
+      assert(
+        !skeleton.risks?.some(item => String(item.signal).includes(config.expected_absent_risk_text)),
+        `${fixture.id}: no-risk placeholder leaked into skeleton risks`,
+      );
+    }
+    assert(
+      skeleton.next_actions?.some(item => String(item.signal).includes(config.expected_next_text)),
+      `${fixture.id}: next action field not carried into skeleton`,
+    );
+  } finally {
+    fs.rmSync(tempRoot, { recursive: true, force: true });
+  }
+}
+
 function runExecutableFixture(fixture) {
   const kind = fixture.execution?.kind || 'documented-only';
   if (kind === 'capture-helper-repair') {
     runCaptureHelperRepairFixture(fixture);
+  } else if (kind === 'capture-helper-reporting-valid') {
+    runCaptureHelperReportingValidFixture(fixture);
+  } else if (kind === 'capture-helper-reporting-invalid') {
+    runCaptureHelperReportingInvalidFixture(fixture);
+  } else if (kind === 'artifact-upsert-dossier') {
+    runArtifactUpsertDossierFixture(fixture);
+  } else if (kind === 'monthly-prepare-daily-report-format') {
+    runMonthlyPrepareDailyReportFixture(fixture);
   } else if (kind === 'query-positive') {
     runQueryPositiveFixture(fixture);
   } else if (kind === 'query-negative') {
