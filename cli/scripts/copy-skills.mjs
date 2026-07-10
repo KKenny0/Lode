@@ -10,6 +10,7 @@ const sourceSkillsDir = path.join(repoRoot, 'skills');
 const bundledSkillsDir = path.join(cliRoot, 'skills');
 const sourceAssetsDir = path.join(repoRoot, 'assets');
 const bundledAssetsDir = path.join(cliRoot, 'assets');
+const sitePublicDir = path.join(repoRoot, 'site', 'public');
 const sourceCodexPluginDir = path.join(repoRoot, '.codex-plugin');
 const sourceClaudePluginDir = path.join(repoRoot, '.claude-plugin');
 const codexPluginBundleDir = path.join(repoRoot, 'plugins', 'tracework');
@@ -33,6 +34,11 @@ const officialAssets = [
   'logo.png',
   'mark.svg',
   'tracework-three-actions.png',
+];
+
+const siteBrandAssets = [
+  'logo.png',
+  'mark.svg',
 ];
 
 function shouldSkip(name) {
@@ -94,6 +100,10 @@ if (fs.existsSync(sourceAssetsDir)) {
   for (const asset of officialAssets) {
     copyFile(path.join(sourceAssetsDir, asset), path.join(bundledCodexAssetsDir, asset));
   }
+
+  for (const asset of siteBrandAssets) {
+    copyFile(path.join(sourceAssetsDir, asset), path.join(sitePublicDir, asset));
+  }
 }
 
 console.log(`Copied skills to ${bundledSkillsDir}`);
@@ -101,3 +111,4 @@ if (fs.existsSync(bundledAssetsDir)) {
   console.log(`Copied assets to ${bundledAssetsDir}`);
 }
 console.log(`Synced plugin bundle to ${codexPluginBundleDir}`);
+console.log(`Synced site brand assets to ${sitePublicDir}`);

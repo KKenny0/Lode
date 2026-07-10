@@ -11,6 +11,7 @@ const sourceSkillsDir = path.join(repoRoot, 'skills');
 const bundledSkillsDir = path.join(cliRoot, 'skills');
 const sourceAssetsDir = path.join(repoRoot, 'assets');
 const bundledAssetsDir = path.join(cliRoot, 'assets');
+const sitePublicDir = path.join(repoRoot, 'site', 'public');
 const codexPluginBundleDir = path.join(repoRoot, 'plugins', 'tracework');
 const codexPluginSkillsDir = path.join(codexPluginBundleDir, 'skills');
 const codexPluginAssetsDir = path.join(codexPluginBundleDir, 'assets');
@@ -40,6 +41,11 @@ const officialAssets = [
   'logo.png',
   'mark.svg',
   'tracework-three-actions.png',
+];
+
+const siteBrandAssets = [
+  'logo.png',
+  'mark.svg',
 ];
 
 const conventionCopies = [
@@ -237,6 +243,18 @@ function assertAssetCopyMatches(sourceRoot, copyRoot, label) {
   }
 }
 
+function assertSelectedAssetCopies(sourceRoot, copyRoot, assets, label) {
+  for (const asset of assets) {
+    const sourceFile = path.join(sourceRoot, asset);
+    const copyFile = path.join(copyRoot, asset);
+    assert(exists(sourceFile), `Source asset is missing: assets/${asset}`);
+    assert(exists(copyFile), `${label} asset is missing: ${asset}`);
+    if (exists(sourceFile) && exists(copyFile)) {
+      assert(fs.readFileSync(sourceFile).equals(fs.readFileSync(copyFile)), `${label} asset is stale: ${asset}`);
+    }
+  }
+}
+
 function assertNoForbiddenSkillArtifacts(root, label) {
   const forbidden = walk(root, (fullPath, entry) => {
     if (entry.isDirectory()) return shouldSkipSkillCopyEntry(entry.name);
@@ -301,6 +319,7 @@ assertSkillTreeCopyMatches(sourceSkillsDir, bundledSkillsDir, 'cli/skills');
 assertSkillTreeCopyMatches(sourceSkillsDir, codexPluginSkillsDir, 'plugins/tracework/skills');
 assertAssetCopyMatches(sourceAssetsDir, bundledAssetsDir, 'cli/assets');
 assertAssetCopyMatches(sourceAssetsDir, codexPluginAssetsDir, 'plugins/tracework/assets');
+assertSelectedAssetCopies(sourceAssetsDir, sitePublicDir, siteBrandAssets, 'site/public');
 
 if (exists(sourceCodexPluginManifest) && exists(codexPluginManifest)) {
   const sourceManifest = fs.readFileSync(sourceCodexPluginManifest, 'utf-8');
