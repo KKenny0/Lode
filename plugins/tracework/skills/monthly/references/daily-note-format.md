@@ -37,12 +37,14 @@ monthly 解析所需的项目标签、状态和证据边界：
 ```markdown
 ### 2026.03.02
 
-#### 今日摘要
-- 本日主要推进了 Tracework Daily 的日报汇报结构，来源为 raw-entry-backed。
+#### 今日判断
 
-#### 项目进展
+Tracework 报告模型从字段堆叠进入按受众分区的管理收口，Monthly raw-first 仍待验证。
+
+#### 关键推进
 - [Tracework]
 	- 工作流：reporting model
+	- 收口类型：decision
 	- 状态：raw-entry-backed；done
 	- 进展：将 Daily 从 checkbox/category-first 调整为日报汇报结构。
 	- 影响：monthly review 可以直接读取项目进展、风险和证据边界。
@@ -50,6 +52,9 @@ monthly 解析所需的项目标签、状态和证据边界：
 	- 下一步：验证 monthly parser 对新旧格式的兼容性。
 	- 来源/证据边界：recorded；raw 2026-W28 entry + artifact dossier
 ```
+
+`all` 视图可以在日期下增加 `#### 公司工作`、`#### 个人项目` 等分组，
+但每个项目块仍必须保留下列稳定字段。解析器忽略分组标题，按项目标签归并。
 
 ### Legacy checkbox/category 格式
 
@@ -127,6 +132,7 @@ monthly 解析所需的项目标签、状态和证据边界：
 
 ```markdown
 	- 工作流：reporting model
+	- 收口类型：delivery | decision | risk | learning
 	- 状态：raw-entry-backed；ongoing
 	- 进展：今天完成或推进了什么
 	- 影响：观察到或预期的汇报影响

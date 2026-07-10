@@ -1,0 +1,96 @@
+# Reporting Narrative Contract
+
+Use this contract for Tracework daily, weekly, and monthly reports. Reports are
+human-facing management-closure views over raw evidence. They are not agent
+handoffs, activity inventories, or substitutes for the raw record.
+
+## Scope Before Selection
+
+Resolve the reporting scope before ranking work:
+
+- `<group>`: include only projects whose `reporting_group` exactly matches the
+  requested group, commonly `work` or `personal`.
+- `all`: keep every reporting group, but write a separate judgment and separate
+  headline set for each group. Never force a cross-group theme.
+
+Read `reporting_group` from the project-level
+`.tracework/config.yaml` `profile.reporting_group`, then from the matching
+`raw/projects.json` entry. When neither exists, classify the project as
+`unassigned`. Exclude unassigned projects from `work` and `personal` output and
+report the missing classification; keep them visibly separate only in `all`.
+Never guess that an unassigned project is safe for a scoped report.
+
+`profile.default_reporting_group` selects the default scope when configured.
+Without it, workplace-facing Daily and Weekly default to `work`; an explicit
+`all` request is the private combined view.
+
+The headline budget applies per reporting group, not across the whole vault.
+Personal projects must never displace work projects from a `work` report, and
+must never appear anywhere in that report, including evidence appendices.
+
+## Shared Narrative Spine
+
+Every headline narrative should explain:
+
+1. **Starting situation**: the goal, constraint, risk, or uncertainty at the
+   start of the period.
+2. **Decisive movement**: the action, choice, experiment, or repair that changed
+   the situation.
+3. **End state**: what is observably different now.
+4. **Management meaning**: why the change matters to the intended reader.
+5. **Closure boundary**: what is closed, what remains open, and the next gate.
+
+Do not promote implementation volume into narrative importance. Commits, files,
+line counts, tokens, and active days are evidence or coverage metadata.
+
+## Closure Types
+
+- `delivery`: a deliverable or usable state now exists.
+- `decision`: a direction is chosen and alternatives are bounded.
+- `risk`: the root cause or risk boundary is known even if remediation remains.
+- `learning`: evidence ruled out or narrowed a path and changes what happens next.
+
+Completion is not the only valid closure. Ongoing work can be report-worthy
+when the uncertainty, decision, or next gate is clear.
+
+## Selection and Coverage
+
+For each reporting group:
+
+- Write one period judgment.
+- Use three headline narratives by default. Two to four is acceptable when the
+  material genuinely requires it; never truncate a fourth material work stream
+  just to satisfy a number.
+- Put every remaining meaningful stream in a portfolio or other-activity
+  section. Coverage is not the same as headline prominence.
+- Keep risks and unresolved decisions visible even when they do not support a
+  success headline.
+
+Rank headline candidates by end-state significance, management relevance,
+evidence strength, and effect on the next planning decision. Do not rank by
+entry count or commit volume.
+
+## Evidence Boundary
+
+Use the existing evidence grades:
+
+- `verified`: a recorded claim plus direct independent evidence that supports
+  its actual wording.
+- `recorded`: a clear raw record with provenance but no independent proof.
+- `limited`: fallback, inference, conflict, or semantically incomplete input.
+
+Main prose should remain readable without report-local ids. Put `O#`, `W#`,
+`D#`, and `E#` in a compact evidence appendix when claim-level drill-down is
+useful. A source reference proves where something was recorded, not that the
+recorded effect was independently verified.
+
+## Audience Safety
+
+- `work` output must contain no personal or unassigned project titles,
+  summaries, paths, commits, artifacts, or evidence refs.
+- `personal` output must contain no work-project material unless the user
+  explicitly requests a combined private view.
+- `all` output is private by default and must visibly separate groups.
+- When scope is ambiguous and mixed groups exist, prefer the configured default;
+  otherwise produce separate group sections rather than mixing them. Never use
+  an unassigned project in a scoped report merely to avoid an empty result.

@@ -1,51 +1,21 @@
-# === Global Config: ~/.tracework/config.yaml ===
-# User preferences shared across all projects.
-
-# Knowledge vault path (required)
-# All Tracework skill data is stored here. Should be a git repo for cross-machine sync.
+# Global: ~/.tracework/config.yaml
 knowledge_vault: /path/to/your/knowledge-vault
 
-# User reporting preferences (shared defaults, overridable per-project)
 profile:
-  report_language: mixed             # zh | en | mixed
-  weekly_mode: tech                  # tech | report
-  team_context: solo                 # solo | team | mixed
+  default_reporting_group: work
 
-# Artifact index settings (optional)
-artifact_index:
-  enabled: true                      # default true; writes raw/artifacts/{slug}.json when vault exists
-
-# Auto-capture settings (optional)
-auto_capture:
-  enabled: true                      # Tracework preference flag; capture routes lite/standard/deep dynamically; Claude Code also needs a Stop hook
-
-# Weekly outline settings (optional)
-# weekly_outline:
-#   output_dir: /path/to/Work Diary/Weekly      # default {vault}/Work Diary/Weekly
-#   # output_path: /path/to/custom-weekly.md    # explicit path overrides output_dir
-
-# Monthly review settings (optional)
-# monthly_review:
-#   output_dir: /path/to/Work Diary/Monthly     # default {vault}/Work Diary/Monthly
-
-# Daily note settings (optional)
-# daily_note:
-#   path: /path/to/Daily Note.md      # default {vault}/Daily Note.md
-#   repos:                             # repo list; falls back to projects.json
-#     - /path/to/repo1
-#     - /path/to/repo2
-#   categories:                        # custom categories
-#     - name: 【安全加固】
-#       patterns: ["security", "auth", "permission"]
-#   enable_smart_classify: false        # LLM semantic classification (default false)
-
-# === Per-Project Config: {project-root}/.tracework/config.yaml ===
-# Project identity and per-project preference overrides.
-# The cold-start interview creates this when run inside a project directory.
-
-# project_slug: my-project           # optional; defaults to directory name
+# Optional preferences:
 # profile:
-#   project_name: My Project         # human-readable project name
-#   # Override any global preference for this project:
-#   # report_language: en
-#   # weekly_mode: report
+#   report_language: mixed
+#   weekly_mode: report
+#   team_context: solo
+# artifact_index:
+#   enabled: true
+# auto_capture:
+#   enabled: false
+
+# Project: {project-root}/.tracework/config.yaml
+# project_slug: my-project
+# profile:
+#   project_name: My Project
+#   reporting_group: work

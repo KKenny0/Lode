@@ -7,89 +7,38 @@ codex plugin marketplace add KKenny0/Tracework
 codex plugin add tracework@tracework
 ```
 
-Update:
+## 2. Configure Once Per Project
 
-```bash
-codex plugin marketplace upgrade tracework
-codex plugin add tracework@tracework
-```
+Run `/tracework:cold-start-interview`. Choose the local vault, project identity,
+and reporting group such as `work` or `personal`.
 
-## 2. Configure the Vault
+After upgrading from 0.2, run it once in each existing project. Unassigned
+projects are excluded from scoped reports rather than guessed into work output.
 
-Run once:
-
-```text
-/tracework:cold-start-interview
-```
-
-This writes config under `~/.tracework/config.yaml` or
-`{project}/.tracework/config.yaml`.
-
-## 3. Generate Useful Output
-
-You can start with the output you need:
+## 3. Close the Work
 
 ```text
-/tracework:daily
-/tracework:weekly
-/tracework:query why did we choose <the decision>?
+/tracework:daily work
+/tracework:weekly work
+/tracework:monthly work
 ```
 
-If raw entries are missing, daily and weekly use git as limited fallback
-coverage. They should not invent motivation, trade-offs, or verified impact.
+Use `personal` for personal projects or `all` for a private combined view with
+separate group sections. Weekly returns a Markdown brief by default; say
+`weekly PPT` when you need a slide outline.
 
-## 4. Capture Key Sessions
+Without raw entries, reports can use meaningful git activity as `limited`
+coverage. They do not invent intent, decisions, or verified impact.
 
-At the end of important work, say:
+## 4. Improve the Evidence
 
-```text
-收工
-```
+End key work with `收工` or `/tracework:capture`. Capture chooses lite,
+standard, or deep from the session signal and stores only durable facts.
 
-or run:
+## 5. Use Trust and Recovery When Needed
 
-```text
-/tracework:capture
-```
+- `/tracework:query why did we choose ...?`
+- `/tracework:recall` when resuming older work
+- `/tracework:roadmap` for a long-range decision review
 
-For long work, capture a durable checkpoint:
-
-```text
-/tracework:capture checkpoint
-```
-
-Capture routes itself to lite, standard, or deep depth from the session signal.
-It should record the decisions, rejected paths, risks, evidence, artifact
-changes, and next steps that git cannot explain. If no vault is configured, it
-can still return a structured recap in the conversation.
-
-## 5. Query One Decision
-
-Ask a concrete why question:
-
-```text
-/tracework:query why did we choose <the decision>?
-```
-
-A good answer includes matched decision nodes, raw `source_entry_refs`, rejected
-alternatives when recorded, and an explicit evidence gap when the record is not
-strong enough.
-
-## 6. Reuse the Record
-
-| Command | Use after | Purpose |
-| :--- | :--- | :--- |
-| `/tracework:recall` | A few captured sessions | Start the next session with durable context |
-| `/tracework:weekly` | Now, or after a week of records | Build a brief-ready outline |
-| `/tracework:monthly` | Now, or after a month of daily reports | Generate a review and repeated-rule candidates |
-| `/tracework:roadmap` | Multiple decisions | Review how decisions evolved |
-
-## Storage
-
-Tracework reads config from:
-
-1. `{project}/.tracework/config.yaml`
-2. `~/.tracework/config.yaml`
-
-Configure `knowledge_vault` in one of those files. Tracework writes raw entries,
-decision indexes, and readable outputs into that vault.
+These are lower-frequency surfaces; they do not need to become daily habits.

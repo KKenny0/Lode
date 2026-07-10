@@ -4,71 +4,81 @@
 
 <h1 align="center">Tracework</h1>
 
-<p align="center"><strong>Turn agent sessions into evidence-backed work memory.</strong></p>
+<p align="center"><strong>Turn agent work into evidence-backed daily, weekly, and monthly reports.</strong></p>
 
 <p align="center">
   <a href="https://kkenny0.github.io/Tracework/"><strong>Documentation</strong></a> · <a href="https://kkenny0.github.io/Tracework/showcase">Showcase</a> · <a href="README.cn.md">中文</a>
 </p>
 
-Tracework gives agent work a trace that can be reported, questioned, and carried
-forward.
+Tracework continuously closes agent work into reports people can use, while
+preserving enough local evidence to explain the decisions later.
 
-It can write daily, weekly, and monthly work reports from the evidence already
-available, then improve those reports and future decision queries when sessions
-are captured into local raw records.
+Daily, Weekly, and Monthly are the high-frequency product surfaces. Capture is
+the quiet evidence multiplier. Query, Recall, and Roadmap are lower-frequency
+trust and recovery tools for the moments when work is questioned or resumed.
 
-## What Tracework Does
-
-Tracework can:
-
-- Write workplace daily reports and weekly/monthly reviews from raw entries, or
-  from git as limited fallback coverage
-- Capture session decisions, rejected paths, risks, artifacts, and next steps
-- Answer why a path was chosen when local evidence supports it
-- Recall useful context before a later session
-- Keep Markdown and JSON records in your own knowledge vault
-
-The core loop stays small:
+## Core Loop
 
 ```text
-report or query current work -> capture key session signals -> improve later reports and decisions
+agent work
+  -> capture the durable facts
+  -> close the day
+  -> form a weekly judgment
+  -> review the monthly phase
+
+when needed
+  -> query why a choice was made
+  -> recall where to continue
 ```
 
-Decision replay is the trust mechanism: a later agent or reader can drill from
-a claim back to raw entries, rejected alternatives, risks, and source refs. If
-the record does not support an answer, Tracework should say so instead of
-inventing history.
+Tracework is reporting-first and decision-replay-backed. Reports can start from
+git-only fallback coverage, but those claims stay `limited` until raw entries
+explain intent, status, risks, trade-offs, and evidence boundaries.
 
-Tracework is not a meeting-notes tool, approval workflow, performance packaging
-tool, employee-monitoring surface, or generic office suite. Activity counts are
-coverage metadata, not proof of outcomes.
+## Reporting Scopes
+
+Projects can declare a reporting group:
+
+```yaml
+profile:
+  project_name: My Project
+  reporting_group: work   # or personal, open-source, consulting...
+```
+
+Daily, Weekly, and Monthly partition scope before selecting headlines:
+
+- `work`: workplace projects only; personal material is excluded everywhere.
+- `personal`: personal projects only.
+- `all`: a private combined view with separate judgments per group.
+
+The normal three-headline budget applies per reporting group, not across the
+whole vault. Remaining meaningful work stays visible in a portfolio section.
+
+Upgrading from 0.2: existing projects without `reporting_group` become
+`unassigned` and are excluded from scoped reports for safety. Run
+`/tracework:cold-start-interview` once in each project or add the field manually.
 
 ## Skills
 
-| Command | When | Output |
+| Command | Role | Output |
 | :--- | :--- | :--- |
-| `/tracework:cold-start-interview` | First run | Configures the local vault and project profile |
-| `/tracework:capture` | Wrap-up or checkpoint | Dynamically captures lite, standard, or deep session memory |
-| `/tracework:recall` | Session start | Recalls recent decisions, risks, open questions, and relevant artifacts |
-| `/tracework:query` | Targeted follow-up | Answers "why did we choose this?" with cited local evidence |
-| `/tracework:weekly` | Weekly | Rolls raw session records into a brief-ready outline |
-| `/tracework:monthly` | Monthly | Builds a monthly review from workplace daily reports and raw evidence |
-| `/tracework:roadmap` | Phase review | Synthesizes a narrative decision history |
-| `/tracework:daily` | Daily | Writes workplace daily reports from raw entries, using git only for coverage gaps |
+| `/tracework:daily` | High-frequency closure | What changed today, why it matters, and the next gate |
+| `/tracework:weekly` | High-frequency closure | Weekly management judgment; Markdown brief by default, slides when requested |
+| `/tracework:monthly` | High-frequency review | Raw-first phase outcomes, recurring risks, and next-month closure targets |
+| `/tracework:capture` | Evidence foundation | Adaptive lite/standard/deep raw session record |
+| `/tracework:query` | Low-frequency trust | Cited answer to why a path was chosen |
+| `/tracework:recall` | Low-frequency recovery | Bounded context for resuming older work |
+| `/tracework:roadmap` | Advanced review | Long-range decision-thread narrative |
+| `/tracework:cold-start-interview` | One-time setup | Vault, project identity, and reporting group |
 
-The direct-value loop is intentionally small:
+Decision replay remains the trust mechanism: a later reader can drill from a
+report claim to raw entries, rejected alternatives, risks, and direct evidence.
+When the record is insufficient, Tracework should expose the gap instead of
+inventing history.
 
-```text
-/tracework:cold-start-interview once
-/tracework:daily, /tracework:weekly, or /tracework:monthly when you need a report
-/tracework:query when someone needs the why
-收工 or /tracework:capture after key work to improve future evidence
-开工 or /tracework:recall when durable memory exists
-```
-
-Daily and weekly can still produce git-only `limited` reports when raw entries
-are missing. Capture is the quality multiplier: it preserves the decision,
-risk, artifact, and evidence boundaries that git cannot explain.
+Tracework is not a meeting-notes tool, approval workflow, performance packaging
+layer, employee-monitoring surface, or generic office suite. Activity counts are
+coverage metadata, not proof of outcomes.
 
 ## Install
 
@@ -79,13 +89,6 @@ codex plugin marketplace add KKenny0/Tracework
 codex plugin add tracework@tracework
 ```
 
-Update:
-
-```bash
-codex plugin marketplace upgrade tracework
-codex plugin add tracework@tracework
-```
-
 ### Claude Code
 
 ```bash
@@ -93,23 +96,17 @@ claude plugin marketplace add KKenny0/Tracework
 claude plugin install tracework@tracework
 ```
 
-Update:
-
-```bash
-claude plugin marketplace update tracework
-claude plugin update tracework@tracework
-```
-
 ## Storage
 
 - Config: `~/.tracework/config.yaml` or `{project}/.tracework/config.yaml`
 - Raw entries: `{vault}/raw/weeks/{week}/{slug}.json`
+- Artifact dossiers: `{vault}/raw/artifacts/{slug}.json`
 - Decision indexes: `{vault}/raw/decisions/{slug}.json`
-- Human-readable outputs: `{vault}/Daily Note.md` and `{vault}/Work Diary/`
+- Human outputs: `{vault}/Daily Note.md` and `{vault}/Work Diary/`
 
-The public product, command, config, and schema namespace is `tracework`.
-Tracework does not use legacy storage fallbacks; configure `knowledge_vault` in
-one of the config files above.
+Raw entries remain semantic truth. Decision indexes are rebuildable retrieval
+views. Artifact dossiers preserve navigation and recorded scope, not shadow
+copies of source documents.
 
 ## Development
 
@@ -121,30 +118,10 @@ npm --prefix cli run test
 npm --prefix site run build
 ```
 
-After editing `.codex-plugin/`, `skills/`, or `assets/`, run:
-
-```bash
-npm --prefix cli run copy-skills
-npm --prefix cli run check-skills
-```
-
-Before releasing a user-visible plugin update:
-
-1. Bump the plugin version in `.codex-plugin/plugin.json`,
-   `.claude-plugin/plugin.json`, and `.claude-plugin/marketplace.json`.
-2. Run `npm --prefix cli run copy-skills` so `plugins/tracework` mirrors the
-   source manifests, skills, and assets.
-3. Run `npm --prefix cli run check-skills` and `npm --prefix cli run test`.
-4. Run `claude plugin validate .claude-plugin/plugin.json` and
-   `claude plugin validate .claude-plugin/marketplace.json`.
-5. Run `claude plugin tag --dry-run .` from a clean worktree before creating the
-   release tag.
-
-Core docs:
-
-- [Configuration](docs/configuration.md)
-- [Data model](docs/data-model.md)
-- [Artifact governance](docs/artifact-governance.md)
+After editing `.codex-plugin/`, `skills/`, or `assets/`, run `copy-skills` before
+`check-skills`. See [Configuration](docs/configuration.md),
+[Data model](docs/data-model.md), and
+[Artifact governance](docs/artifact-governance.md).
 
 ## License
 

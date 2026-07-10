@@ -25,7 +25,7 @@ export default defineConfig({
     root: {
       label: 'English',
       lang: 'en',
-      description: 'Evidence-backed work memory for agent sessions.',
+      description: 'Evidence-backed daily, weekly, and monthly reports for agent work.',
       themeConfig: {
         nav: [
           { text: 'Showcase', link: '/showcase' },
@@ -44,7 +44,7 @@ export default defineConfig({
       label: '简体中文',
       lang: 'zh-CN',
       link: '/zh/',
-      description: '把 agent session 沉淀成证据型工作记忆。',
+      description: '把 Agent 工作收口成有证据的日报、周报和月报。',
       themeConfig: {
         nav: [
           { text: '效果展示', link: '/zh/showcase' },

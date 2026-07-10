@@ -1,4 +1,4 @@
 interface:
   display_name: "Tracework Cold-Start Interview"
-  short_description: "Configure Tracework's knowledge vault and report profile"
-  default_prompt: "Use $cold-start-interview to create or update Tracework config for reports, decision query, and dynamically routed capture."
+  short_description: "Configure the vault, project identity, and report scope"
+  default_prompt: "Use $cold-start-interview to configure Tracework's vault, project identity, and work or personal reporting group with the fewest required questions."

@@ -19,12 +19,14 @@ For each local benchmark run, record:
 
 ## Public Protocols
 
-- `weekly-outline.md` documents the quality bar for raw-first weekly outline generation.
+- `weekly-outline.md` documents the quality bar for scoped weekly management briefs.
+- `reporting-narrative.md` defines executable contract checks plus real-output evaluation.
+- `report-contract.mjs` validates scope, headline budgets, portfolio coverage, and audience safety.
 - `regression-fixtures.json` lists public, synthetic regression scenarios for behavior that should not regress.
 - `run-regression.mjs` executes fixture-backed checks. It currently runs
-  decision replay, decision roadmap thread evidence, recall rebuild,
-  unsafe-slug, and capture-helper repair gates end to end, then reports
-  weekly and monthly agent-authored scenarios as documented-only protocols.
+  report contracts, monthly raw loading, decision replay, roadmap thread
+  evidence, recall rebuild, unsafe-slug, and capture-helper gates end to end.
+  Agent-authored prose quality remains a documented real-output protocol.
 
 New roadmap and query skills should keep local eval fixtures under ignored
 `skills/*/evals/` directories. Public benchmark writeups should describe the

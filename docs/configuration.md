@@ -2,21 +2,27 @@
 
 [Back to README](../README.md)
 
-Tracework reads configuration from `.tracework` files and writes records into
-the knowledge vault you choose.
+Tracework needs only a vault path and project reporting identity for normal use.
 
-## Config Files
+## Minimum Config
+
+Global `~/.tracework/config.yaml`:
 
 ```yaml
-# ~/.tracework/config.yaml or {project}/.tracework/config.yaml
 knowledge_vault: /path/to/your/knowledge-vault
+
+profile:
+  default_reporting_group: work
+```
+
+Project `{project}/.tracework/config.yaml`:
+
+```yaml
 project_slug: my-project
 
 profile:
   project_name: My Project
-  report_language: mixed
-  weekly_mode: tech
-  team_context: solo
+  reporting_group: work
 ```
 
 Resolution order:
@@ -24,82 +30,70 @@ Resolution order:
 1. `{project}/.tracework/config.yaml`
 2. `~/.tracework/config.yaml`
 
-Set `knowledge_vault` in one of those files. Tracework does not read legacy
-environment or default-directory fallbacks.
+## Reporting Groups
 
-## Fields
+`profile.reporting_group` partitions projects before Daily, Weekly, or Monthly
+selects headlines. Recommended values are `work` and `personal`; other stable
+values such as `open-source` or `consulting` are valid.
 
-- `knowledge_vault`: required for quiet writes and cross-session reuse. The
-  directory must already exist.
-- `project_slug`: optional stable project id. If omitted, helpers infer it from
-  the repository directory.
-- `profile.project_name`: optional display name for briefs and reviews.
-- `profile.report_language`: `zh`, `en`, or `mixed`.
-- `profile.weekly_mode`: `tech` or `report`.
-- `profile.team_context`: `solo`, `team`, or `mixed`.
-- `artifact_index.enabled`: defaults to `true`; controls whether capture writes
-  or updates `{vault}/raw/artifacts/{slug}.json`.
-- `auto_capture.enabled`: preference flag for automatic capture. Capture routes
-  each session to lite, standard, or deep depth dynamically; host tools still
-  need their own hook configuration.
+`profile.default_reporting_group` selects the default report scope. `work` is
+the safest default because personal project material must never leak into a
+workplace report. Explicit `all` produces a private combined view with separate
+group sections.
+
+The project registry mirrors the group:
+
+```json
+{
+  "name": "My Project",
+  "slug": "my-project",
+  "path": "/absolute/path/to/project",
+  "reporting_group": "work"
+}
+```
+
+### Upgrading from 0.2
+
+Existing project configs and registry rows remain valid, but rows without a
+reporting group are treated as `unassigned`. Scoped reports exclude them rather
+than guessing that they are safe for work or personal output. Run
+`/tracework:cold-start-interview` in each existing project or add
+`profile.reporting_group` and the registry field manually.
+
+## Optional Fields
+
+```yaml
+profile:
+  report_language: mixed     # zh | en | mixed; otherwise inferred
+  weekly_mode: report        # report | tech; brief remains the default format
+  team_context: solo         # solo | team | mixed
+
+artifact_index:
+  enabled: true              # default true
+
+auto_capture:
+  enabled: false             # default false; host hook still required
+```
+
+Output paths remain optional under `daily_note`, `weekly_outline`, and
+`monthly_review`.
 
 ## First Run
 
-Run:
+Run `/tracework:cold-start-interview`. It asks only for missing vault, project
+identity, reporting group, and—when multiple groups exist—the default scope.
 
-```text
-/tracework:cold-start-interview
-```
-
-The skill writes the global and project config layers as needed. After that,
-`/tracework:capture`, `/tracework:recall`, `/tracework:query`, and the brief or
-review skills read the same storage convention.
+Auto-capture is an optional host-specific enhancement, not a required setup
+step. `auto_capture.enabled: true` does not install or activate a hook by itself.
+Manual `收工` and `/tracework:capture` always remain valid.
 
 ## Doctor
 
-The maintenance CLI can check config, vault access, and native plugin install
-state:
+The maintenance CLI checks config, vault access, and plugin install state:
 
 ```bash
 tracework doctor
 ```
 
-It does not install skills. Public installation should use the native plugin
-marketplace path:
-
-```bash
-codex plugin marketplace add KKenny0/Tracework
-codex plugin add tracework@tracework
-```
-
-## Auto-Capture Hook
-
-`auto_capture.enabled: true` means Tracework should capture at session end when
-the host supports hooks. The capture skill chooses the lightest useful depth for
-the session. For Claude Code, add a Stop hook that runs:
-
-```json
-{
-  "hooks": {
-    "Stop": [
-      {
-        "matcher": "",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "/tracework:capture"
-          }
-        ]
-      }
-    ]
-  }
-}
-```
-
-Manual capture always remains valid:
-
-```text
-收工
-/tracework:capture
-/tracework:capture checkpoint
-```
+Public installation uses the native marketplace commands documented in the
+README. The CLI is not a legacy installer.

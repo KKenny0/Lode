@@ -1,197 +1,77 @@
-# 月度工作总结模板（Agent 专用）
+# Monthly Management Review Template
 
----
-本文件是 agent 生成 `YYYY-MM.summary.md` 的指导模板。
-Agent 读取原始月度归档后，按本模板的格式和规则撰写总结。
-
----
-
-## 输出格式示例
-
-以下是一个完整的输出示例（以 2026-03 月为例）。
-**注意示例使用叙事段落风格，不是加粗标题列表。**
+Read `reporting-narrative-contract.md` first. Use this template per reporting
+group.
 
 ```markdown
-# 2026-03 工作总结
+# YYYY-MM 月度回顾
 
-## 本月成果
+**范围：** work | personal | all
 
-### O1 分镜自动化核心链路形成可运行闭环
+## 本月判断
 
-**状态**：已完成
+{One paragraph: starting phase, main movement, end state, and largest remaining
+gate.}
 
-**证据等级**：verified
+## 阶段结果弧线
 
-**支撑主线**：W1
+### {O1 headline}
 
-**证据**：E1、E2
+- **月初约束：** {starting constraint}
+- **关键变化：** {decisive movement or decision}
+- **月底状态：** {observable end state}
+- **管理意义：** {why it matters}
+- **剩余门槛：** {what remains open}
+- **证据边界：** {verified | recorded | limited}
 
-**证据缺口**：缺少端到端生产数据，不能表述为已验证业务效果。
+{Repeat for normally three and no more than four arcs.}
 
-本月完成 parse/scene/narrative/storyboard 四阶段核心链路，并记录了语义覆盖验证和分镜输出契约。该成果支持从长剧本输入推进到结构化分镜输出；生产稳定性仍需下月数据验证。
+## 工作组合状态
 
-### O2 百度多模态脚本链路完成集成
+| 项目/主线 | 状态 | 本月形成的变化 | 关系 | 下月关注 |
+|-----------|------|----------------|------|----------|
+| {stream} | {status} | {bounded change} | headline/supporting/portfolio | {gate} |
 
-**状态**：已完成集成，联调仍在进行
+## 反复风险与模式
 
-**证据等级**：recorded
+- **{risk or pattern}:** {timestamps or explicit carry evidence}; {effect on next month}
 
-**支撑主线**：W2
+Omit this section when no repeated or carried signal exists.
 
-**证据**：E3
+## 下月收口目标
 
-**证据缺口**：成片联调尚未完成。
+1. **{closure target}:** {uncertainty, acceptance gate, or decision to close}
+2. ...
 
-完成从 ASR 音频转录到百度多模态理解流程的切换，并加入断点续传、并发保护和代理视频上传。当前可以称为“集成完成”，不能称为“成片链路已验证”。
+## 需要决策或资源
 
-## 本月概览与主线
+{items or 当前无需要升级的决策或资源事项。}
 
-本月核心工作集中在两个方向：AI 漫剧生成形成了分镜自动化核心链路，短剧成片完成百度脚本集成但仍待成片联调。上半月集中搭建架构和核心能力，下半月转向模块重构、长剧本优化和外部服务集成。这里的主线来自有状态和证据的记录，不使用活跃天数或任务数量证明成果价值。
+---
 
-- **W1 AI 漫剧生成 → O1** — 分镜自动化系统建设，覆盖叙事时间线、场景分析、视觉锚点、分镜生成等核心模块
-- **W2 短剧成片 → O2** — 百度脚本集成、ASR 优化、人物一致性分析、视频合并模块重构
-
-## AI 漫剧生成
-
-月初完成分镜自动化系统（storyboard-automation-hub）的方案设计和初版开发，建立 parse/scene/narrative/storyboard 四阶段 Pipeline 架构。随后两周集中建设核心流程能力：叙事时间线实现剧集并行处理和语义覆盖验证（hard/soft 双模式），支持长句自动拆分和段落自动分割，辅助模块拆分为 scene_alignment、semantic_validation、text_normalization 三个子模块。场景分析从 local_spaces 升级为 visual_anchors 背景模板层，分镜生成支持段落级锚点偏好选择并强制镜头绑定合法锚点。分镜生成模块经过一次大规模拆分（batching/normalization/validation/repair 四个子模块），输出契约从 mood/visual_prompt 重构为 content/camera 职责分离。7 个核心模块的提示词体系持续迭代，新增视觉锚点约束、覆盖完整性规则和角色命名强制规范。日常优化包括 LLM API 使用量追踪、飞书 Webhook 通知、Pipeline 里程碑日志等运维能力建设。月末转向长剧本场景优化，Parse 阶段完成 Episode 切分与 Scene 正文保真改造，场景分析按集分批并支持按地点归并去重和并发 LLM 调用。
-
-## 短剧成片
-
-上半月以 ASR 模块优化为主，完成了 WebSocket 优雅关闭、音频转录错误处理改进和并发错误重试机制。同时完成了人物一致性方案分析（属性消歧逻辑简化、Pipeline 异步锁机制）。下半月核心工作是百度脚本集成：从 ASR 音频转录切换到百度多模态理解流程，引入 BaiduScriptClient 和 BaiduResourcePreparer，实现断点续传和并发保护，新增 480p 代理视频上传以降低带宽成本。期间还完成了视频合并模块缓存键统一重构和角色推断功能集成。
-
-## 问题与风险
-
-- AI 漫剧生成：场景一致性问题持续存在，多个子场景交叉绑定、场景资料卡乱序，月末仍在优化中
-- AI 漫剧生成：流水线编排模块重构（阶段注册表、动态启用/跳过）自 03.11 启动后尚未完成
-
-## 决策与开放问题
-
-- **D1（W1 → O1）**：选择四阶段 Pipeline，延后生产稳定性结论；证据 E1。
-- 本月反复出现的开放问题、风险或被修订的决策。每条必须有原始记录依据；没有记录的取舍明确写“未记录”。
-
-## 下月衔接
-
-- AI 漫剧生成：分镜 content/camera 完整覆盖、人物场景匹配准确性、镜头描述优化等，起始 03.31
-- 短剧成片：百度脚本接入成片联调测试，起始 03.30
-
-## 覆盖与数据质量
-
-- Tracework capture 覆盖度：哪些关键 session 有 raw-entry 支撑，哪些部分只是
-  git-only limited，哪些决策、风险或证据缺口值得下月 targeted capture。
-- 哪些上下文缺失导致总结只能低置信度推断。
-
-## Candidate Rules
-
-- 从本月重复出现的失败模式、风险、开放问题或工作习惯中提炼候选规则。
-- 每条必须写清证据、适用范围、过拟合风险和建议目标（AGENTS rule / checklist / playbook / skill idea）。
-- 只提出，不自动写入目标文件。
-
-## 主张—证据审计
+## 附录：主张—证据映射
 
 | 主张 | 表述 | 证据 | 核验说明 |
 |------|------|------|----------|
-| O1 | 分镜自动化核心链路形成可运行闭环 | E1、E2 | raw 记录边界，测试结果支撑可运行状态 |
-| W1 | 四阶段 Pipeline 主线 | E1 | Daily Note 与 matching raw entry 一致 |
-| D1 | 选择四阶段 Pipeline，延后稳定性结论 | E1 | 显式决策与证据缺口均保留 |
-| O2 | 百度多模态脚本链路完成集成 | E3 | 只有记录出处，故为 recorded；联调仍未完成 |
+| O1 | {claim} | E1, E2 | {grade rationale} |
+| W1 | {stream} | E1 | {status/scope support} |
+| D1 | {decision} | E3 | explicit / inferred |
 
 ### Evidence index
 
 | ID | 来源类型 | 引用 |
 |----|----------|------|
-| E1 | raw entry | 03.12 Pipeline 边界与决策记录 |
-| E2 | test/eval | 03.21 语义覆盖验证结果 |
-| E3 | Daily Note/raw provenance | 03.26、03.30 集成记录 |
+| E1 | raw entry | {timestamp + stable reference} |
 
-## 覆盖与活动附录
+## 附录：覆盖与活动
 
-> 以下数字是 activity metadata，只描述记录覆盖和变更规模，不代表成果、影响、质量或价值。
+> Counts describe coverage and activity, not outcome value.
 
-- 活跃工作日：24 天
-- Daily Note `[x]` 活动项：229 项；`[x]` 仅表示原记录将该活动标为完成
-- 进行中活动项：8 项
-- Raw entry coverage：14/24 天；Git-only：10/24 天；Empty：0/24 天
-
-### 活动类别分布
-
-| 类别 | 数量 | 占比 |
-|------|------|------|
-| 能力升级 | 142 | 62% |
-| 结构变更 | 45 | 20% |
-| 问题定位 | 22 | 10% |
-| 配置调整 | 14 | 6% |
-| 文档优化 | 6 | 3% |
-
-### 代码变更规模
-
-- 百度脚本集成：+949/-218 行。行数仅表示改动规模，不证明结果已完成或产生影响。
-
-## 数据说明
-
-> 本总结由 daily-note-monthly-review Skill 生成。数据来源于 Daily Note.md 中 2026-03 的原始记录。
-> 统计口径：project_focused + evidence_mode=strict。
-> 更多细节见 `2026-03.skeleton.json` 和 `2026-03.signals.json`。
-> 误检测说明：影视动画分镜设计、镜头画面组接、AI 解说漫 · 分镜自动化 为 Markdown 链接方括号文本被错误匹配为项目标签，非真实项目。
+- Raw-backed days: {N}
+- Daily-only or git-only days: {N}
+- Empty days: {N}
 ```
 
-## 撰写规则
-
-### 核心原则
-
-1. **事实优先**：每条总结必须能在原始月度归档中找到对应条目
-2. **成果优先**：先写有状态、证据和边界的成果，再写工作主线；活动统计只放在末尾附录
-3. **3+1 可逆关系**：用 report-local `O#`、`W#`、`D#`、`E#` 连接成果、主线、决策取舍和证据，不修改 raw schema
-4. **状态与证据透明**：每项成果写明状态、证据等级和证据缺口；matching raw entries 只能补充已记录事实
-5. **叙事而非罗列**：用自然段落串联工作脉络，不要用任务计数代替叙事
-6. **有取舍**：每个项目最多保留 2-3 个核心主题，其余合并为一句"日常优化包括..."
-7. **简洁有力**：整个总结控制在 80-120 行以内
-
-优先读取 `skeleton.by_project.*.report_items` 中的新日报结构化字段（进展、
-影响、风险/问题、下一步、来源/证据边界）。旧 `completed_items` 和
-`incomplete_items` 仍可用于历史格式和活动覆盖，但不能单独证明成果。
-
-### 叙事段落写法
-
-每个项目写 1-3 个自然段落（不是列表）。每段覆盖一个方向：
-
-1. 按时间线组织：从月初到月末，串联工作脉络
-2. 把同类工作归纳到同一句话里：如"完成了 A、B 和 C 三项优化"而不是分三条写
-3. 正文不使用代码行数证明成果；只有净增 >300 行或净减 >200 行时，才在覆盖与活动附录中保留为规模元数据
-4. 日常小项（配置调整、文档优化、<50 行变更）合并为一句带过
-5. 运维类工作（日志、监控、通知、CI）合并为一句
-
-### 去重规则
-
-- 同一条任务只出现在一个项目下（取首次出现的项目）
-- 不同项目下如果有完全相同的任务文本，只保留第一个项目下的
-
-### 误检测处理
-
-骨架数据中的 `real_projects` 字段列出了已知真实项目。不在该列表中的项目名属于误检测。
-
-- **本月主线** 和 **项目段落**：只展示真实项目
-- **问题与风险** 和 **下月衔接**：涉及误检测项目的，合并到对应日期的真实项目下
-- 在 **数据说明** 区域末尾加一行注释说明误检测情况
-
-### evidence_mode=strict 约束
-
-- 不要把"优化中"说成"已完成"
-- 不要把多条独立的小修复包装成"重大成果"
-- 如果某个项目在当月只有零星记录，如实说明"记录较少"
-- 不凭空生成不存在的成果或结论
-- `[x]`、已完成条目数、活跃天数、类别计数和代码行数都是活动元数据，不得单独作为成果证据
-- Daily Note 与 matching raw entry 的状态或证据冲突时，保留冲突并降低置信度
-
-### 长度控制
-
-- **本月成果**：最多三条 `O#` 头部成果或进展；每项包含状态、证据等级、支撑 `W#`、相关 `E#` 和证据缺口，溢出候选转为支撑进展
-- **本月概览与主线**：2-4 句话概括成果主线，不引用活动数量证明价值
-- **项目段落**：每个项目 1-3 个自然段落，每个项目总计 3-8 行
-- **问题与风险**：每个条目一行
-- **决策与开放问题**：列出 recurring open questions、stale threads、revised/superseded decisions
-- **下月衔接**：每个条目一行
-- **习惯与数据质量**：指出下月应该改变的记录习惯或 sync 习惯
-- **Candidate Rules**：列出有重复证据的候选规则；单次弱信号只能写成观察
-- **主张—证据审计**：将每个重要 `O#`、`W#`、`D#` 映射到具体 `E#`，并说明为什么能或不能核验
-- **覆盖与活动附录**：最后展示活跃天数、`[x]`/状态计数、raw/git coverage、类别分布和满足阈值的代码行数，并声明这些不是成果
-- **总行数目标**：80-120 行（取决于项目数和工作量）
+For `all`, repeat the complete review under separate group headings. Candidate
+Rules are opt-in and appear after appendices only when the user explicitly asks
+for reusable rule suggestions.

@@ -4,6 +4,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { validateReportContract } from './report-contract.mjs';
 
 const scriptDir = path.dirname(fileURLToPath(import.meta.url));
 const repoRoot = path.resolve(scriptDir, '..');
@@ -920,9 +921,22 @@ function runMonthlyPrepareDailyReportFixture(fixture) {
   const inputPath = path.join(tempRoot, config.archive_name || '2026-07.md');
   const signalsPath = path.join(tempRoot, 'signals.json');
   const skeletonPath = path.join(tempRoot, 'skeleton.json');
+  const tempVault = path.join(tempRoot, 'vault');
 
   try {
     fs.writeFileSync(inputPath, `${config.daily_note_archive.join('\n')}\n`, 'utf-8');
+    const rawDir = path.join(tempVault, 'raw', 'weeks', '2026-W28');
+    fs.mkdirSync(rawDir, { recursive: true });
+    fs.writeFileSync(
+      path.join(rawDir, `${config.expected_slug}.json`),
+      `${JSON.stringify(config.raw_entries || [], null, 2)}\n`,
+      'utf-8',
+    );
+    fs.writeFileSync(
+      path.join(tempVault, 'raw', 'projects.json'),
+      `${JSON.stringify([{ name: config.expected_project, slug: config.expected_slug, path: '/tmp/tracework', reporting_group: config.expected_reporting_group }], null, 2)}\n`,
+      'utf-8',
+    );
     const result = spawnSync('python3', [
       monthlyPrepare,
       '--input',
@@ -931,6 +945,10 @@ function runMonthlyPrepareDailyReportFixture(fixture) {
       signalsPath,
       '--skeleton-output',
       skeletonPath,
+      '--vault',
+      tempVault,
+      '--month',
+      '2026-07',
       '--summary-mode',
       'project_focused',
       '--real-projects',
@@ -946,6 +964,7 @@ function runMonthlyPrepareDailyReportFixture(fixture) {
     const signals = readJson(signalsPath);
     const skeleton = readJson(skeletonPath);
     assert(signals.projects_detected.includes(config.expected_project), `${fixture.id}: project not detected`);
+    assert(signals.raw_entries?.length === (config.raw_entries || []).length, `${fixture.id}: matching raw entries not loaded`);
     const entry = signals.entries[0] || {};
     assert(
       entry.report_items?.some(item => item.field === '进展' && String(item.text).includes(config.expected_progress_text)),
@@ -957,6 +976,9 @@ function runMonthlyPrepareDailyReportFixture(fixture) {
     );
     const projectData = skeleton.by_project?.[config.expected_project] || {};
     assert(projectData.report_items?.length >= config.expected_min_report_items, `${fixture.id}: skeleton report_items missing`);
+    assert(skeleton.raw_entries_by_project?.[config.expected_project]?.length === (config.raw_entries || []).length, `${fixture.id}: raw entries not exposed by project`);
+    assert(skeleton.reporting_groups?.[config.expected_reporting_group]?.includes(config.expected_project), `${fixture.id}: reporting group not preserved`);
+    assert(skeleton.raw_work_streams?.some(item => item.work_stream === config.expected_work_stream), `${fixture.id}: raw work stream not built`);
     assert(
       skeleton.risks?.some(item => String(item.signal).includes(config.expected_risk_text)),
       `${fixture.id}: risk field not carried into skeleton`,
@@ -990,6 +1012,8 @@ function runExecutableFixture(fixture) {
     runArtifactUpsertDossierFixture(fixture);
   } else if (kind === 'monthly-prepare-daily-report-format') {
     runMonthlyPrepareDailyReportFixture(fixture);
+  } else if (kind === 'report-contract') {
+    validateReportContract(fixture);
   } else if (kind === 'query-positive') {
     runQueryPositiveFixture(fixture);
   } else if (kind === 'query-negative') {

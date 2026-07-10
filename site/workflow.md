@@ -1,68 +1,44 @@
 # Workflow
 
-## Minimal Loop
+## Primary Loop
 
 ```text
-install -> configure -> generate a report or query -> capture key sessions
+install -> configure vault and project group -> Daily -> Weekly -> Monthly
+                                              \-> capture key sessions
 ```
 
-1. Install the plugin as `tracework@tracework`.
-2. Run `/tracework:cold-start-interview`.
-3. Run `/tracework:daily`, `/tracework:weekly`, or a concrete
-   `/tracework:query`.
-4. End key sessions with `收工` or `/tracework:capture` so future reports and
-   decision queries have stronger evidence.
+1. Install `tracework@tracework`.
+2. Run `/tracework:cold-start-interview` once per project to set its reporting
+   group.
+3. Use `/tracework:daily`, `/tracework:weekly`, and `/tracework:monthly` for
+   high-frequency management closure.
+4. End key sessions with `收工` or `/tracework:capture` so reports can explain
+   intent, risks, trade-offs, and evidence boundaries.
+5. Use Query, Recall, or Roadmap only when work is questioned, resumed, or
+   reviewed over a long horizon.
 
-This proves the core value quickly: reports can be useful immediately, while
-captured sessions preserve the why that git history cannot recover.
+## Scope Partition
+
+```text
+work     -> work projects only
+personal -> personal projects only
+all      -> separate group narratives in one private view
+```
+
+Partition happens before headline selection. Each group normally gets three
+headline arcs and a portfolio containing every other meaningful stream.
 
 ## Reuse Map
 
 ```text
 Capture -> raw/weeks/{week}/{slug}.json
-Query   <- raw/decisions/ + raw/weeks/
-Recall  <- raw/weeks/ + raw/artifacts/ + raw/decisions/
-Daily   <- raw/weeks/ + fallback git coverage
-Weekly  <- raw/weeks/ + fallback git coverage
-Monthly <- Daily Note.md + matching raw entries
-Roadmap <- raw entries + decision indexes
+Daily   <- raw entries + limited git fallback
+Weekly  <- raw entries + limited git fallback
+Monthly <- raw entries + Daily/Weekly editorial context
+Query   <- derived decisions + raw entries
+Recall  <- raw entries + artifact/decision navigation
+Roadmap <- decision evidence pack
 ```
 
-Skills are independent. There is no required pipeline. The shared storage
-convention lets later views reuse earlier evidence.
-
-Daily and weekly can run with no raw entries by using git fallback coverage.
-Those outputs must stay `limited`: they can describe activity and progress, but
-they must not invent motivation, trade-offs, risks, or verified impact.
-
-## Progressive Closure
-
-Briefs and reviews should roll work upward while preserving a route back down:
-
-```text
-upward: raw entries -> decisions -> work streams -> outcomes / risks / next steps
-downward: outcome claim -> stream -> decision -> raw entry / evidence ref
-```
-
-Weekly and monthly outputs can use report-local labels:
-
-- `O#`: outcome, progress, risk, or decision
-- `W#`: supporting work stream
-- `D#`: decision or tradeoff
-- `E#`: evidence audit
-
-These labels make a report inspectable. They do not change the raw schema.
-
-## Zero-Config
-
-Without a vault, capture can still return a structured recap in the
-conversation. Configure a vault when you want quiet writes, cross-session
-recall, decision query, and higher-quality brief/review outputs.
-
-## Evidence Rules
-
-- A source ref is provenance, not proof by itself.
-- Git-only work is fallback evidence.
-- Activity counts do not prove outcomes.
-- Unsupported queries should return an evidence gap.
-- New facts should be appended as new raw entries, not written into old records.
+Raw entries remain semantic truth. Report-local evidence ids belong to the
+appendix, not the raw schema or spoken narrative.

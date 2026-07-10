@@ -1,8 +1,7 @@
 {
-  "$schema": "https://anthropic.com/claude-code/plugin.schema.json",
   "name": "tracework",
-  "version": "0.2.0",
-  "description": "Evidence-backed work reports and memory for agent sessions: generate reports now, capture key evidence, replay why, and roll work into reviews and roadmaps.",
+  "version": "0.3.0",
+  "description": "Evidence-backed daily, weekly, and monthly reports for agent work, with local decision replay when the work is questioned later.",
   "author": {
     "name": "Kennywu",
     "email": "jdlow@live.cn"

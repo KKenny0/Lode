@@ -1,156 +1,130 @@
 # Daily Note Writing Rules
 
-Read this reference when generating or updating workplace daily reports from raw
-entries or fallback git commits.
+Use these rules after reading `reporting-narrative-contract.md`.
 
-## Classification
+## Source Priority
 
-Apply user-defined categories first. Use default categories only when no custom
-pattern matches.
+1. Raw entry factual fields: `summary`, `context`, `status`, `impact`,
+   `motivation`, `root_cause`, decisions, risks, and evidence refs.
+2. Optional `reporting` metadata for claim kind and impact/evidence boundary.
+3. Artifact dossiers for concise navigation and recorded scope.
+4. Git subjects and stats for uncovered activity only.
 
-| Priority | Category | Match |
-|----------|----------|-------|
-| 1 | 用户自定义 | `daily_note.categories` patterns |
-| 2 | 【能力升级】 | feat, enhance, add, new, implement |
-| 3 | 【问题定位】 | fix, bug, resolve, repair, patch |
-| 4 | 【结构变更】 | refactor, restructure, reorg, migrate |
-| 5 | 【配置调整】 | config, setting, env, manager |
-| 6 | 【文档优化】 | docs, doc, readme, comment |
-| 7 | 【测试覆盖】 | test, spec, coverage |
-| 8 | 【其他更新】 | fallback |
+Old rich `reporting` objects remain readable. Treat channel-specific
+`carry_forward` text as a hint, not as current truth; later entries may have
+changed the state.
 
-Raw change entry type mapping:
+## Merge and Selection
 
-| JSON type | Daily note category |
-|-----------|---------------------|
-| `feature` | 【能力升级】 |
-| `fix` | 【问题定位】 |
-| `refactor` | 【结构变更】 |
-| `decision` | 【其他更新】 |
-| `risk` | 【其他更新】 |
+- Merge entries that describe the same work-stream state transition.
+- Do not split one coherent arc by commit, file, module, or archetype.
+- Keep genuinely independent work separate.
+- Rank headline candidates by end-state significance, intended-reader
+  relevance, evidence strength, and effect on the next decision.
+- Use two to four headline advances per reporting group, normally three.
+- Put meaningful non-headline work under `其他活动`; do not drop it.
 
-When `enable_smart_classify: true`, use LLM semantic classification only for
-fallback commits that land in 【其他更新】 after keyword matching. Do not reclassify
-raw entries; they are already structured.
+Legacy category labels may still be parsed, but new reports do not organize the
+main narrative as 能力升级/问题定位/结构变更. Those labels describe activity
+type, not why the day matters.
 
-LLM classification guide:
+## Daily Judgment
 
-- New functional code → 【能力升级】
-- Error handling or edge-case fixes → 【问题定位】
-- Code organization changes → 【结构变更】
-- Configuration, environment, or parameter changes → 【配置调整】
-- Documentation or comments only → 【文档优化】
-- Tests only → 【测试覆盖】
-- Clear dependency, CI, or tooling work may use a new bracketed category with a
-  short note at the end of the daily note.
+Write one or two sentences per reporting group. State:
 
-## Writing Style
+- the most important end-state change;
+- the main remaining gate or risk;
+- whether any escalation is needed.
 
-Daily notes are workplace-facing daily reports. The primary reader is a manager
-or collaborator who needs to know what changed today, why it matters, what is
-blocked, and what should happen next. Monthly review is the second reader.
+Do not list projects in the judgment. Synthesize the day.
 
-- Start from report value, not implementation detail.
-- Prefer `reporting.outcome_candidate`, `reporting.impact_boundary`,
-  `reporting.evidence_boundary`, `reporting.evidence_gap`,
-  `reporting.module_scope`, and `reporting.hard_signals` when present.
-- When `reporting` is absent, use `impact` first, then `summary` + `context`.
-- Treat `impact` as a recorded claim whose wording must preserve its status and
-  evidence boundary; do not strengthen an expected effect into a verified result.
-- For `status: ongoing`, write progress language.
-- For `status: risk`, keep the risk visible instead of converting it into a
-  success statement.
-- Preserve `open_questions`, `abandoned_alternatives`, and `type/status:
-  decision` as workplace risk, decision, or next-step context. Do not use Daily
-  as the agent handoff surface.
-- If artifact dossier metadata points to a high-value source document, link the
-  artifact title or path concisely. Do not paste long architecture docs into the
-  daily note.
-- The `[x]` marker, when present in legacy or fallback content, means the source
-  activity was recorded as completed. It is activity metadata, not proof that
-  the activity produced an outcome or impact.
-- `+N/-M` line counts describe change size only. Never use line counts as
-  outcome, quality, importance, or value evidence.
+## Headline Item
 
-## Merge Rules
+Each project block should make the narrative spine visible through concise
+fields:
 
-Raw entries from `{vault}/raw/weeks/` are already high-quality signals. Do not
-merge them unless the same entry is duplicated exactly.
+- `收口类型`: `delivery`, `decision`, `risk`, or `learning`.
+- `状态`: source coverage plus `done`, `ongoing`, `risk`, or `decision`.
+- `进展`: starting situation, decisive movement, and current state.
+- `影响`: observed, expected, or unknown management meaning.
+- `风险/问题`: unresolved gate, conflict, or `无明确风险记录`.
+- `下一步`: the next acceptance gate, watch item, or escalation.
+- `来源/证据边界`: `verified`, `recorded`, or `limited`, plus concise refs.
 
-Fallback commits may be merged when they belong to the same task:
-
-- Same conventional commit scope
-- Same core files or module
-- Semantic relation such as "add X" followed by "fix X edge case"
-
-Merged fallback commits:
-
-- Use the highest-priority category, for example feat + fix → 【能力升级】.
-- Sum insertions and deletions.
-- Produce one semantic description with concise detail lines for important
-  commits.
-
-Do not merge unrelated commits only because they happened on the same day.
+The next step is not an agent handoff or a task dump.
 
 ## Output Format
+
+Single reporting group:
 
 ```markdown
 ### YYYY.MM.DD
 
-#### 今日摘要
-- {1-2 bullets summarizing the day for managers/collaborators. State whether the day is raw-entry-backed, mixed, or git-only.}
+#### 今日判断
 
-#### 项目进展
+{1-2 sentence management judgment. State raw-backed, mixed, or git-only when material.}
+
+#### 关键推进
+
 - [项目名称]
-	- 工作流：{work_stream or project_area}
-	- 状态：raw-entry-backed | mixed | git-only；done | ongoing | risk | decision
-	- 进展：{what moved today; outcome/progress/activity wording from reporting when present}
-	- 影响：{observed/expected/unknown impact boundary; preserve evidence gap when present}
-	- 风险/问题：{risk, open question, conflict, or "无明确风险记录"}
-	- 下一步：{workplace-facing next action, watch item, or escalation}
-	- 来源/证据边界：{verified | recorded | limited}；{raw timestamp, evidence_ref, commit, or artifact dossier link}
+  - 工作流：{work_stream}
+  - 收口类型：{delivery | decision | risk | learning}
+  - 状态：{raw-entry-backed | mixed | git-only}；{done | ongoing | risk | decision}
+  - 进展：{starting situation -> decisive movement -> end state}
+  - 影响：{observed | expected | unknown}；{management meaning}
+  - 风险/问题：{remaining gate, conflict, or 无明确风险记录}
+  - 下一步：{next acceptance gate, watch item, or escalation}
+  - 来源/证据边界：{verified | recorded | limited}；{concise refs}
+
+#### 其他活动
+
+- [项目名称] {bounded coverage statement and evidence boundary}
+
+#### 需要关注或决策
+
+- {only when an escalation, decision, or cross-team dependency exists}
 ```
 
-This is the default format. Preserve the `- [项目名称]` project label exactly so
-monthly parsing remains stable. Use `状态：` and `来源/证据边界：` on every
-project block so monthly review can preserve status and evidence gaps.
+Omit optional sections when empty.
 
-When the source is fallback git only, set `状态：git-only` or include `limited`
-in `来源/证据边界：`. Do not imply decision intent, motivation, or verified
-impact from commits alone.
-
-Git-only output is still useful as a workplace daily report. Phrase it as
-limited coverage, not as a setup failure. Suggest `/tracework:capture` only for
-specific key decisions, risks, or evidence gaps that should survive into monthly
-review or decision query.
-
-When the source records several raw entries for one project, use multiple
-project blocks only if they represent separate work streams. Otherwise merge
-them into one block and keep risks/next steps visible.
-
-Module labels:
-
-- Single module: `（模块名）`
-- Cross-module: `（模块A → 模块B → 模块C）`
-
-Legacy checkbox/category format remains valid for historical Daily Note
-content:
+For `all`, repeat the report body under separate group headings:
 
 ```markdown
-- [项目名称]
-	- {模块}
-		- 【类别】
-			- [x] （模块A → 模块B）语义化描述（+N/-M 行）
+### YYYY.MM.DD
+
+#### 公司工作
+
+##### 今日判断
+...
+
+##### 关键推进
+...
+
+#### 个人项目
+
+##### 今日判断
+...
 ```
 
-New output should use the report-led format above. Consumers must continue to
-treat checkbox and line-count metadata as coverage/activity signals rather than
-outcomes.
+Never create one judgment or headline ranking across groups.
 
-Incremental update rules:
+## Compatibility
 
-- Match existing date headings in `### YYYY.MM.DD` or `### YYYY-MM-DD` format.
-- Append under the existing date section when present.
-- Do not create duplicate date headings.
-- If no raw entries and no fallback commits exist for a date, report that there
-  is no work to write and do not create an empty section.
+- Preserve `- [项目名称]` exactly.
+- Preserve `状态：`, `进展：`, `影响：`, `风险/问题：`, `下一步：`, and
+  `来源/证据边界：` so Monthly can parse new reports.
+- Accept historical checkbox/category content without rewriting it.
+- `[x]` and line counts are activity metadata, not result evidence.
+- When updating an old-format date section, append the new report-led block
+  without deleting user-authored history.
+
+## Fallback Boundaries
+
+Git-only output is useful but limited:
+
+- Phrase it as activity or bounded progress.
+- Do not invent a starting constraint, management effect, decision, risk, or
+  evidence grade that the commit does not support.
+- Filter chore-only noise.
+- Suggest targeted capture only for a specific missing decision, risk, or
+  evidence gap worth preserving.

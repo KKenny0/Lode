@@ -54,20 +54,7 @@ Follow `references/tracework-storage-convention.md`. New entries should use:
     },
     "impact_boundary": "observed | expected | unknown",
     "evidence_boundary": "verified | recorded | limited",
-    "evidence_gap": "missing evidence before strengthening the claim",
-    "module_scope": ["module-or-area"],
-    "work_stream": "optional report grouping hint",
-    "carry_forward": {
-      "daily": ["human-facing follow-up"],
-      "weekly": ["report carry-forward"],
-      "monthly": ["review carry-forward"]
-    },
-    "hard_signals": [
-      {
-        "kind": "risk | open_question | abandoned_alternative | candidate_rule_signal",
-        "statement": "reusable hard signal"
-      }
-    ]
+    "evidence_gap": "missing evidence before strengthening the claim"
   },
   "impact": "report-ready user, system, reliability, or workflow impact",
   "evidence_refs": ["commit SHA, issue ID, eval ID, or doc path"],
@@ -132,6 +119,13 @@ daily/weekly/monthly outputs, not agent handoff.
 Use `impact_boundary` and `evidence_boundary` to prevent later reports from
 overstating the claim. Name `evidence_gap` when verification is missing. Do not
 store report-local `O#`, `W#`, `D#`, or `E#` labels.
+
+For new entries, keep `work_stream` at the top level. Do not generate
+`reporting.module_scope`, nested `reporting.work_stream`, channel-specific
+`reporting.carry_forward`, or `reporting.hard_signals`. Their facts already
+belong in `work_stream`, `impact`, `open_questions`, `abandoned_alternatives`,
+`decision_threads`, and evidence fields. Consumers remain compatible with old
+rich reporting objects.
 
 ## Fruit Check
 

@@ -36,6 +36,7 @@ import re
 import sys
 from collections import Counter, defaultdict
 from datetime import datetime
+from pathlib import Path
 
 
 # ============================================================================
@@ -51,7 +52,7 @@ RE_CATEGORY = re.compile(r'【([^】]+)】')
 RE_TASK_DONE = re.compile(r'^\s*-\s*\[x\]')
 RE_TASK_TODO = re.compile(r'^\s*-\s*\[\s*\]')
 RE_REPORT_FIELD = re.compile(
-    r'^\s*-\s*(工作流|状态|进展|影响|风险/问题|风险|问题|下一步|来源/证据边界|证据边界)[：:]\s*(.*)$'
+    r'^\s*-\s*(工作流|收口类型|状态|进展|影响|风险/问题|风险|问题|下一步|来源/证据边界|证据边界)[：:]\s*(.*)$'
 )
 
 # --- 信号词库 ---
@@ -419,6 +420,85 @@ def parse_monthly_file(filepath):
     }
 
 
+def load_monthly_raw_entries(vault_path, month_key):
+    """Load raw entries for the month without rewriting or interpreting them."""
+    vault = Path(vault_path).expanduser().resolve()
+    weeks_dir = vault / 'raw' / 'weeks'
+    projects_file = vault / 'raw' / 'projects.json'
+    registry = {}
+    if projects_file.is_file():
+        try:
+            projects = json.loads(projects_file.read_text(encoding='utf-8'))
+            for project in projects if isinstance(projects, list) else []:
+                if not isinstance(project, dict):
+                    continue
+                slug = project.get('slug')
+                if isinstance(slug, str) and slug:
+                    registry[slug] = project
+        except (json.JSONDecodeError, OSError):
+            pass
+
+    collected = []
+    if not weeks_dir.is_dir():
+        return collected
+
+    for raw_file in sorted(weeks_dir.glob('*/*.json')):
+        slug = raw_file.stem
+        try:
+            entries = json.loads(raw_file.read_text(encoding='utf-8'))
+        except (json.JSONDecodeError, OSError):
+            continue
+        if not isinstance(entries, list):
+            continue
+        project = registry.get(slug, {})
+        for index, entry in enumerate(entries):
+            if not isinstance(entry, dict):
+                continue
+            timestamp = entry.get('timestamp')
+            if not isinstance(timestamp, str) or not timestamp.startswith(month_key):
+                continue
+            collected.append({
+                'project_slug': slug,
+                'project_name': project.get('name') or slug,
+                'reporting_group': project.get('reporting_group') or 'unassigned',
+                'source_path': str(raw_file),
+                'entry_index': index,
+                'entry': entry,
+            })
+    return collected
+
+
+def build_raw_work_streams(raw_items):
+    """Group raw facts without ranking them by activity volume."""
+    grouped = {}
+    for item in raw_items:
+        entry = item.get('entry') if isinstance(item.get('entry'), dict) else {}
+        project_name = item.get('project_name') or item.get('project_slug') or 'unassigned'
+        reporting = entry.get('reporting') if isinstance(entry.get('reporting'), dict) else {}
+        stream = (
+            entry.get('work_stream')
+            or reporting.get('work_stream')
+            or entry.get('project_area')
+            or project_name
+        )
+        key = (item.get('reporting_group') or 'unassigned', project_name, str(stream))
+        bucket = grouped.setdefault(key, {
+            'reporting_group': key[0],
+            'project': key[1],
+            'work_stream': key[2],
+            'entries': [],
+        })
+        bucket['entries'].append({
+            'timestamp': entry.get('timestamp'),
+            'summary': entry.get('summary'),
+            'status': entry.get('status'),
+            'type': entry.get('type'),
+            'source_path': item.get('source_path'),
+            'entry_index': item.get('entry_index'),
+        })
+    return [grouped[key] for key in sorted(grouped)]
+
+
 # ============================================================================
 # Part 2: 骨架构建（源自 build_monthly_review.py）
 # ============================================================================
@@ -753,7 +833,19 @@ def build_review_skeleton(signals, summary_mode='project_focused', evidence_mode
         'daily_focuses': daily_focuses,
         'unassigned_entries_count': len(unassigned),
         'warnings': [],
+        'raw_entries': signals.get('raw_entries', []),
+        'raw_entries_by_project': {},
+        'reporting_groups': {},
+        'raw_work_streams': build_raw_work_streams(signals.get('raw_entries', [])),
     }
+
+    for raw_item in signals.get('raw_entries', []):
+        project_name = raw_item.get('project_name') or raw_item.get('project_slug') or 'unassigned'
+        skeleton['raw_entries_by_project'].setdefault(project_name, []).append(raw_item)
+        group = raw_item.get('reporting_group') or 'unassigned'
+        skeleton['reporting_groups'].setdefault(group, [])
+        if project_name not in skeleton['reporting_groups'][group]:
+            skeleton['reporting_groups'][group].append(project_name)
 
     # 按项目组织详细数据
     for project in project_entries:
@@ -777,6 +869,8 @@ def build_review_skeleton(signals, summary_mode='project_focused', evidence_mode
         )
     if total_completed == 0 and total_report_items == 0:
         skeleton['warnings'].append("本月未检测到明确的已完成任务或日报进展字段")
+    if not signals.get('raw_entries'):
+        skeleton['warnings'].append("本月未加载到 matching raw entries；月报只能使用 Daily 归档并降低证据等级")
     if not high_freq:
         skeleton['warnings'].append("未能提取到高频主题关键词")
 
@@ -797,6 +891,10 @@ def main():
                         help='信号 JSON 输出文件路径')
     parser.add_argument('--skeleton-output', required=True,
                         help='骨架 JSON 输出文件路径')
+    parser.add_argument('--vault', default=None,
+                        help='Tracework vault path; when provided, raw entries are the semantic source')
+    parser.add_argument('--month', default=None,
+                        help='Target month YYYY-MM; defaults to the input archive filename')
     parser.add_argument('--summary-mode', default='project_focused',
                         choices=['light', 'project_focused', 'engineering_review'],
                         help='总结模式 (默认: project_focused)')
@@ -819,6 +917,14 @@ def main():
     # --- Step 1: 解析月度归档，提取信号 ---
     print(f"正在解析：{args.input}")
     signals = parse_monthly_file(args.input)
+    target_month = args.month or signals['month']
+    if not re.fullmatch(r'\d{4}-\d{2}', target_month):
+        print(f"错误：月份格式必须是 YYYY-MM - {target_month}", file=sys.stderr)
+        sys.exit(1)
+    signals['month'] = target_month
+    signals['raw_entries'] = (
+        load_monthly_raw_entries(args.vault, target_month) if args.vault else []
+    )
 
     # light 模式：精简 signals 中的 entries
     if args.summary_mode == 'light':

@@ -1,241 +1,130 @@
 ---
 name: cold-start-interview
 description: >
-  Set up Tracework for first use. Use this skill when the user runs
-  "/tracework:cold-start-interview", asks to configure Tracework, or needs help creating
-  a Tracework config for persistent memory across sessions. Triggers on phrases like
-  "configure Tracework", "set up Tracework", "初始化 Tracework", "配置 Tracework".
+  Configure Tracework's knowledge vault, project identity, and reporting group
+  for first use. Use for "/tracework:cold-start-interview", "configure
+  Tracework", "set up Tracework", "初始化 Tracework", or "配置 Tracework".
 ---
 
-# Tracework Cold-Start Interview
+# Tracework Cold Start
 
-Configure Tracework's two-layer config: global user preferences and per-project identity.
+Create the minimum configuration needed for scoped Daily, Weekly, Monthly, and
+Capture. Ask only for information that cannot be inferred safely.
 
-Tracework separates concerns between **what's shared** (knowledge vault path, reporting
-preferences) and **what's project-specific** (project name, project slug). The global
-config lives at `~/.tracework/config.yaml`; project identity lives at
-`{project-root}/.tracework/config.yaml`. The interview detects context and writes to the
-appropriate target.
+## Required Result
 
-## Goal
+Global config:
 
-Create or update valid Tracework configuration:
-
-**Global config** (`~/.tracework/config.yaml`):
 - `knowledge_vault`
-- `profile.report_language`
-- `profile.weekly_mode`
-- `profile.team_context`
-- `artifact_index.enabled`
-- `auto_capture.enabled`
+- optional `profile.default_reporting_group`
 
-**Project config** (`{project-root}/.tracework/config.yaml`, when CWD is a project repo):
+Project config when inside a project:
+
 - `project_slug`
 - `profile.project_name`
+- `profile.reporting_group`
 
-Then register the project in `{vault}/raw/projects.json`.
+Then register the project in `{vault}/raw/projects.json`, including
+`reporting_group`.
 
-If an existing config is present, preserve fields that are unrelated to this
-interview, including `daily_note`, `weekly_outline`, `monthly_review`, and any
-custom keys.
+## Preflight
 
-## Step 0: Scope Detection — MUST Complete Before Step 1
+1. Detect the project root from `.git` or `.tracework`.
+2. Read global and project configs when present.
+3. Preserve all unknown and unrelated fields.
+4. Stop early when the required fields above are complete.
 
-**CRITICAL**: Step 0 is a mandatory gate. You MUST read both config files (if they exist) and check completeness BEFORE asking any questions. Do not skip to Step 1 until Step 0 is done.
+Do not re-ask existing values. Do not require report language, weekly mode,
+team context, artifact index, or auto-capture during first setup.
 
-Check the current working directory:
+## Interview
 
-1. Is there a `.git/` directory or `.tracework/` directory in CWD or its parents?
-   - **Yes**: This is a project setup. The interview will write project identity
-     to `{project-root}/.tracework/config.yaml` and user preferences to
-     `~/.tracework/config.yaml`.
-   - **No**: This is a global-preferences-only setup. Write everything to
-     `~/.tracework/config.yaml`.
+Ask for all missing required values in one compact pass:
 
-2. Read `~/.tracework/config.yaml` if it exists.
-   - **Global config is complete** when ALL of these are present and non-empty:
-     `knowledge_vault`, `profile.report_language`, `profile.weekly_mode`,
-     `profile.team_context`, `artifact_index.enabled`, `auto_capture.enabled`.
-   - **Partial**: Some fields present. Interview only asks for the missing fields.
-   - **Missing**: No file exists. Full interview needed.
+1. Knowledge vault absolute path. Ask before creating a missing directory.
+2. Human project name when in a project.
+3. Project slug, with a kebab-case suggestion from the repo name.
+4. Reporting group for the project. Recommend `work` or `personal`, but accept
+   another non-empty stable group such as `open-source` or `consulting`.
+5. When the user has multiple groups, ask which should be the default report
+   scope. Recommend `work` for audience safety.
 
-3. If CWD is a project (has `.git/` or `.tracework/`), read `{project-root}/.tracework/config.yaml` if it exists.
-   - **Project config is complete** when BOTH `project_slug` and `profile.project_name` are present and non-empty.
-   - **Missing**: Project identity not yet set. Interview only asks for these two fields (project_name, project_slug) — do NOT re-ask global questions.
+Reporting group is not cosmetic: it prevents personal projects from entering a
+workplace report. Never infer `work` from a path or repo name.
 
-### Early-Exit Gate
+## Write Config
 
-**If global config is complete AND (CWD is not a project OR project config is also complete), STOP immediately.** Reply with a brief status summary listing both config paths and their contents. Do not ask any questions. The setup is done.
-
-**If global config is complete but project config is missing (in a project), only ask project_name and project_slug.** Do not ask knowledge_vault, report_language, weekly_mode, team_context, auto_capture questions — they are already set.
-
-**If global config is partial, only ask the specific fields that are missing.** Do not re-ask fields that already have values.
-
-## Step 1: Interview
-
-Ask for any missing values in one compact pass:
-
-1. Knowledge vault path: directory where Tracework stores raw JSON and human-readable
-   reports. Expand `~` and accept absolute paths. If the path does not exist, ask
-   before creating it. Target: **global config**.
-2. Project name: human-readable name for reports. Target: **project config** (or
-   global config if no project context).
-3. Project slug: kebab-case identifier. Suggest a slug from the current repo
-   directory or project name. Target: **project config** (or global config if no
-   project context).
-4. Report language: `zh`, `en`, or `mixed`. Target: **global config**.
-5. Weekly mode: `tech` for engineering narrative or `report` for manager-facing
-   status. Target: **global config**.
-6. Team context: `solo`, `team`, or `mixed`. Target: **global config**.
-7. Auto-capture: should `/tracework:capture` run automatically at session end?
-   Default: yes for configured vaults. Target: **global config**. Explain that
-   capture dynamically routes each session to lite, standard, or deep depth, and
-   this config is Tracework's intent flag; Claude Code only runs it automatically
-   when a `Stop` hook is present in `~/.claude/settings.json`.
-
-Prefer sensible defaults over long discussion:
+Global minimum:
 
 ```yaml
-profile:
-  report_language: mixed
-  weekly_mode: tech
-  team_context: solo
-```
-
-## Step 2: Write Config
-
-### Global config
-
-Write to `~/.tracework/config.yaml`:
-
-```yaml
-knowledge_vault: /absolute/path/to/knowledge-vault
+knowledge_vault: /absolute/path/to/vault
 
 profile:
-  report_language: mixed
-  weekly_mode: tech
-  team_context: solo
-
-artifact_index:
-  enabled: true
-
-auto_capture:
-  enabled: true
+  default_reporting_group: work
 ```
 
-If an existing global config contains `project_slug` or `profile.project_name`,
-preserve them — do not remove fields that single-project users may depend on.
-
-### Project config (when in a project)
-
-Write to `{project-root}/.tracework/config.yaml`:
+Project minimum:
 
 ```yaml
 project_slug: my-project
 
 profile:
   project_name: My Project
+  reporting_group: work
 ```
 
-If the user wants to override a global preference for this project (e.g. different
-`report_language`), include that override in the project config.
+Rules:
 
-### Write rules
+- Normalize project slug to lowercase kebab-case.
+- Preserve existing custom keys and nested sections.
+- Do not overwrite an existing vault path without confirmation.
+- Do not store credentials or remote tokens.
+- Missing optional preferences are valid. Consumers infer language, use
+  management-brief Weekly by default, enable artifact indexing by default, and
+  treat absent auto-capture as disabled.
 
-- Keep YAML machine-readable and avoid prose comments in the written file.
-- Normalize `project_slug` to lowercase kebab-case.
-- Do not overwrite an existing `knowledge_vault` unless the user confirms.
-- Preserve unknown top-level keys and nested sections from existing configs.
-- Never store secrets, credentials, or remote sync tokens.
+## Register Project
 
-## Step 3: Check Auto-Capture Hook
-
-If `auto_capture.enabled` is true after config resolution, check whether
-`~/.claude/settings.json` exists and contains a `hooks.Stop` command hook that
-runs `/tracework:capture`.
-
-Use this as the expected minimal hook shape:
-
-```json
-{
-  "hooks": {
-    "Stop": [
-      {
-        "matcher": "",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "/tracework:capture"
-          }
-        ]
-      }
-    ]
-  }
-}
-```
-
-Check only; do not write or modify `~/.claude/settings.json` unless the user
-explicitly asks for that. Preserve the distinction in the final report:
-
-- `auto_capture.enabled: true` + hook present -> automatic capture is active.
-- `auto_capture.enabled: true` + hook missing -> Tracework's auto-capture preference is
-  enabled, but Claude Code will not trigger it until the Stop hook is added.
-- `auto_capture.enabled: false` -> automatic capture is disabled; users can still
-  run `/tracework:capture` or say "收工".
-
-If `~/.claude/settings.json` is missing, report the path and the minimal hook
-snippet. If it exists but has other hooks, tell the user to add the Tracework command
-under `hooks.Stop` without replacing unrelated hooks.
-
-## Step 4: Register Project
-
-After writing config, register the project in the knowledge vault:
+Run:
 
 ```bash
-python <this-skill>/scripts/tracework_raw.py register-project --cwd "$PWD"
+python <this-skill>/scripts/tracework_raw.py register-project \
+  --cwd "$PWD" \
+  --name "My Project" \
+  --slug my-project \
+  --reporting-group work
 ```
 
-If the helper is unavailable, manually write or update
-`{vault}/raw/projects.json` following this shape:
+Registration is path-deduplicated. Update an existing matching path rather than
+adding a duplicate.
 
-```json
-[
-  {
-    "name": "My Project",
-    "slug": "my-project",
-    "path": "/absolute/path/to/project",
-    "priority": "core"
-  }
-]
-```
+## Optional Auto-Capture
 
-Use path-based dedup: if an entry with a matching `path` already exists, update it
-in place rather than appending a duplicate.
+After setup, mention auto-capture as an opt-in enhancement. Do not ask about it
+during the required interview and do not modify host hooks without explicit
+permission.
 
-## After Setup
+Explain:
 
-Report:
-1. The global config path and what was written there
-2. The project config path (if created) and what was written there
-3. The resolved vault path
-4. Auto-capture status: active, enabled-but-missing-hook, or disabled
-5. Confirmation that the project was registered in `projects.json`
+- `auto_capture.enabled: true` is only a Tracework preference.
+- Each host still needs its own supported hook configuration.
+- Manual `收工` or `/tracework:capture` always works.
 
-Then recommend the report/query-first workflow:
+If the user explicitly opts in, inspect the current host configuration and
+show the minimal non-destructive addition. Never replace unrelated hooks.
 
-> Tracework 已配置完成。你可以直接运行 `/tracework:daily`、`/tracework:weekly`、
-> `/tracework:monthly` 或 `/tracework:query` 获得当前可用结果。
->
-> 每次结束关键工作时说 **"收工"** 或运行 `/tracework:capture`，Tracework 会自动选择
-> lite / standard / deep 深度。capture 越覆盖关键决策、风险和证据缺口，后续日报、
-> 周报、月报和 query 越可靠；没有 capture 时，报告仍可用 git 生成 limited 版本。
+## Completion Report
 
-If auto-capture is enabled and the Stop hook is present, mention that ending a
-Claude Code session can now trigger capture automatically. If the hook is
-missing, say clearly that the config switch is on but automatic capture is not
-active yet, and show the `~/.claude/settings.json` path.
+Return:
 
-Also mention:
-- Another project to set up: switch to that directory and run `/tracework:cold-start-interview` again
+- global and project config paths;
+- resolved vault;
+- project name, slug, and reporting group;
+- default report scope;
+- registry result;
+- auto-capture status only when configured.
 
-Keep the final response concise.
+Then suggest the primary loop:
+
+> 直接运行 `/tracework:daily`、`/tracework:weekly` 或
+> `/tracework:monthly` 完成工作收口。关键 session 结束时说“收工”，可以提升后续报告和证据下钻质量。

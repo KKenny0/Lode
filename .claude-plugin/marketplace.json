@@ -1,16 +1,17 @@
 {
-  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
   "name": "tracework",
-  "description": "Local marketplace for the Tracework plugin.",
   "owner": {
     "name": "Kennywu",
     "email": "jdlow@live.cn"
   },
+  "metadata": {
+    "description": "Tracework plugin marketplace for evidence-backed agent work reports."
+  },
   "plugins": [
     {
       "name": "tracework",
-      "description": "Evidence-backed work reports and memory for agent sessions.",
-      "version": "0.2.0",
+      "description": "Evidence-backed daily, weekly, and monthly reports for agent work.",
+      "version": "0.3.0",
       "author": {
         "name": "Kennywu",
         "email": "jdlow@live.cn"

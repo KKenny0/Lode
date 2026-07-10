@@ -696,11 +696,16 @@ def register_project(
     name: str | None,
     slug_override: str | None,
     priority: str | None,
+    reporting_group: str | None,
 ) -> dict[str, Any]:
     cfg, _ = resolve_config(cwd)
     vault = vault_override or Path(str(cfg["knowledge_vault"]))
     slug = slug_override or project_slug(cwd, vault)
     project_name = name or slug.replace("-", " ").title()
+    configured_group = cfg.get("profile", {}).get("reporting_group") if isinstance(cfg.get("profile"), dict) else None
+    resolved_group = reporting_group or configured_group
+    if resolved_group is not None:
+        validate_non_empty_string("reporting_group", resolved_group)
     project_path = str(cwd.resolve())
 
     target_dir = vault / "raw"
@@ -719,11 +724,15 @@ def register_project(
     updated = False
     for index, item in enumerate(existing):
         if isinstance(item, dict) and same_path(str(item.get("path", "")), cwd):
+            if not resolved_group and isinstance(item.get("reporting_group"), str):
+                resolved_group = item["reporting_group"]
             existing[index]["name"] = project_name
             existing[index]["slug"] = slug
             existing[index]["path"] = project_path
             if priority:
                 existing[index]["priority"] = priority
+            if resolved_group:
+                existing[index]["reporting_group"] = resolved_group
             updated = True
             break
 
@@ -735,6 +744,8 @@ def register_project(
         }
         if priority:
             entry["priority"] = priority
+        if resolved_group:
+            entry["reporting_group"] = resolved_group
         existing.append(entry)
 
     target_file.write_text(
@@ -746,6 +757,7 @@ def register_project(
         "name": project_name,
         "slug": slug,
         "path": project_path,
+        "reporting_group": resolved_group or "unassigned",
         "total_projects": len(existing),
     }
 
@@ -804,6 +816,7 @@ def command_register_project(args: argparse.Namespace) -> int:
         name=args.name,
         slug_override=args.slug,
         priority=args.priority,
+        reporting_group=args.reporting_group,
     )
     print_json(result)
     return 0
@@ -847,6 +860,7 @@ def build_parser() -> argparse.ArgumentParser:
     register_parser.add_argument("--name", help="Human-readable project name")
     register_parser.add_argument("--slug", help="Project slug override")
     register_parser.add_argument("--priority", choices=["core", "supporting", "exploratory"])
+    register_parser.add_argument("--reporting-group", help="Reporting partition such as work or personal")
     register_parser.set_defaults(func=command_register_project)
 
     return parser

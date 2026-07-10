@@ -15,7 +15,7 @@ examples as real proof.
 | Capture | Routed depth, session goal, decision, rejected path, risk, evidence, next step | A record of what the agent captured, not independent proof by itself |
 | Query | Answerability, top decision, why, alternatives, source refs | Must refuse when the local record does not support the question |
 | Weekly | Outcomes or progress, work streams, decisions, evidence audit | Git-only work stays limited unless raw records explain the why |
-| Monthly | Review narrative, repeated signals, risks, candidate rules | Counts stay in coverage appendix, not outcome claims |
+| Monthly | Raw-first phase narrative, repeated risks, next closure targets | Counts stay in coverage appendix, not outcome claims |
 | Roadmap | Decision thread, accumulating risks, recurring questions | Derived from raw entries and decision indexes |
 
 ## Example Claim Chain

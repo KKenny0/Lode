@@ -1,7 +1,7 @@
 {
   "name": "tracework",
-  "version": "0.2.0",
-  "description": "Evidence-backed work reports and memory for agent sessions: generate reports now, capture key evidence, replay why, and roll work into reviews and roadmaps.",
+  "version": "0.3.0",
+  "description": "Evidence-backed daily, weekly, and monthly reports for agent work, with local decision replay when the work is questioned later.",
   "author": {
     "name": "Kennywu",
     "email": "jdlow@live.cn"
@@ -20,8 +20,8 @@
   "skills": "./skills/",
   "interface": {
     "displayName": "Tracework",
-    "shortDescription": "Evidence-backed work reports and memory for agent sessions",
-    "longDescription": "Generate daily, weekly, and monthly work reports from current evidence, capture key agent-session decisions and risks with dynamic depth, then reuse the record for recall, decision replay, reviews, and roadmaps.",
+    "shortDescription": "Evidence-backed daily, weekly, and monthly reports for agent work",
+    "longDescription": "Close agent work into scoped daily, weekly, and monthly management narratives, capture key evidence with dynamic depth, and replay the decisions later when work is questioned or resumed.",
     "developerName": "Kennywu",
     "category": "Productivity",
     "capabilities": [
@@ -33,10 +33,10 @@
     "logo": "./assets/logo.png",
     "brandColor": "#B87508",
     "defaultPrompt": [
-      "Use Tracework to write a daily report with /tracework:daily.",
-      "Use Tracework to capture this key session with /tracework:capture.",
-      "Use Tracework to recall recent work context with /tracework:recall.",
-      "Use Tracework to query cited decision evidence with /tracework:query."
+      "Use Tracework to write a work-scoped daily report with /tracework:daily work.",
+      "Use Tracework to form this week's management judgment with /tracework:weekly work.",
+      "Use Tracework to create a raw-first monthly review with /tracework:monthly work.",
+      "Use Tracework to capture this key session with /tracework:capture."
     ],
     "screenshots": [
       "./assets/tracework-three-actions.png"

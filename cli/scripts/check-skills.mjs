@@ -23,6 +23,7 @@ const codexMarketplace = path.join(repoRoot, '.agents', 'plugins', 'marketplace.
 const pluginPathsSource = path.join(repoRoot, 'cli', 'src', 'plugin-paths.ts');
 const canonicalConvention = path.join(repoRoot, 'references', 'tracework-storage-convention.md');
 const canonicalDecisionReplay = path.join(repoRoot, 'references', 'decision_replay.py');
+const canonicalReportingContract = path.join(repoRoot, 'references', 'reporting-narrative-contract.md');
 
 const officialSkills = [
   'capture',
@@ -50,6 +51,15 @@ const conventionCopies = [
   path.join(bundledSkillsDir, 'recall', 'references', 'tracework-storage-convention.md'),
   path.join(bundledSkillsDir, 'roadmap', 'references', 'tracework-storage-convention.md'),
   path.join(bundledSkillsDir, 'monthly', 'references', 'tracework-storage-convention.md'),
+];
+
+const reportingContractCopies = [
+  path.join(sourceSkillsDir, 'daily', 'references', 'reporting-narrative-contract.md'),
+  path.join(sourceSkillsDir, 'weekly', 'references', 'reporting-narrative-contract.md'),
+  path.join(sourceSkillsDir, 'monthly', 'references', 'reporting-narrative-contract.md'),
+  path.join(bundledSkillsDir, 'daily', 'references', 'reporting-narrative-contract.md'),
+  path.join(bundledSkillsDir, 'weekly', 'references', 'reporting-narrative-contract.md'),
+  path.join(bundledSkillsDir, 'monthly', 'references', 'reporting-narrative-contract.md'),
 ];
 
 const syncedScriptPairs = [
@@ -360,6 +370,20 @@ if (canonical) {
     if (exists(copy)) {
       const content = fs.readFileSync(copy, 'utf-8');
       assert(content === canonical, `Convention copy is stale: ${copy}`);
+    }
+  }
+}
+
+const reportingContract = exists(canonicalReportingContract)
+  ? fs.readFileSync(canonicalReportingContract, 'utf-8')
+  : null;
+assert(Boolean(reportingContract), 'Canonical reporting-narrative-contract.md is missing');
+if (reportingContract) {
+  for (const copy of reportingContractCopies) {
+    assert(exists(copy), `Reporting contract copy is missing: ${copy}`);
+    if (exists(copy)) {
+      const content = fs.readFileSync(copy, 'utf-8');
+      assert(content === reportingContract, `Reporting contract copy is stale: ${copy}`);
     }
   }
 }

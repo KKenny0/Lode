@@ -3,7 +3,9 @@
 [Back to README](../README.md)
 
 Tracework data is organized around one source-of-truth rule: raw records stay
-raw, and every synthesized view must be traceable back to them.
+raw, and every synthesized view must be traceable back to them. Daily, Weekly,
+and Monthly are the primary human-facing views; query, recall, and roadmap are
+lower-frequency evidence and recovery views.
 
 ## Storage Surfaces
 
@@ -45,7 +47,7 @@ raw, and every synthesized view must be traceable back to them.
 /tracework:recall  <- raw/weeks/ + raw/artifacts/ + raw/decisions/
 /tracework:daily   <- raw/weeks/ + fallback git coverage
 /tracework:weekly  <- raw/weeks/ + fallback git coverage
-/tracework:monthly <- Daily Note.md + matching raw entries
+/tracework:monthly <- matching raw entries + Daily/Weekly editorial context
 /tracework:roadmap <- raw entries + decision indexes
 ```
 
@@ -75,11 +77,11 @@ Raw entries are append-only for practical purposes. If a later session changes
 a decision, mitigates a risk, or invalidates an artifact, write a new entry.
 Do not rewrite historical entries for a naming or positioning migration.
 
-`reporting` is optional and additive. When present, reports should prefer it
-over prose inference for outcome/progress/activity treatment, impact boundary,
-evidence boundary, evidence gaps, module scope, work stream, carry-forward
-signals, and hard signals. Final `O#`, `W#`, `D#`, and `E#` ids are still
-report-local and are never stored in raw entries.
+`reporting` is optional and additive. New entries keep it minimal: claim kind,
+impact boundary, evidence boundary, and evidence gap. Work-stream grouping,
+risks, questions, alternatives, and evidence remain in factual top-level fields.
+Historical rich reporting objects remain readable. Final `O#`, `W#`, `D#`, and
+`E#` ids are report-local and are never stored in raw entries.
 
 `capture_depth` is also optional and additive. It describes how much detail the
 capture skill preserved, not how strong the evidence is.
@@ -126,3 +128,15 @@ Evidence levels:
 
 Commit counts, line counts, task counts, active days, and token counts are
 coverage metadata. They cannot become outcomes on their own.
+
+## Reporting Scope
+
+Project config and `raw/projects.json` may carry a `reporting_group`. Reports
+partition projects before narrative ranking:
+
+- `work` excludes all personal content, including evidence refs.
+- `personal` excludes work content.
+- `all` keeps each group in a separate narrative lane.
+
+Headline budgets apply per group. Non-headline work remains in portfolio
+coverage rather than disappearing.

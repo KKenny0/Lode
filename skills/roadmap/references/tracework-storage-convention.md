@@ -21,15 +21,17 @@ project_slug: my-project  # optional, defaults to git repo directory name
 
 profile:
   project_name: My Project
+  reporting_group: work        # project-level: work | personal | another stable group
+  default_reporting_group: work # global default report scope
   report_language: mixed   # zh | en | mixed
-  weekly_mode: tech        # tech | report
+  weekly_mode: report      # tech | report; brief remains default unless PPT is explicit
   team_context: solo       # solo | team | mixed
 
 artifact_index:
   enabled: true
 ```
 
-All subsequent path references use `{vault}` as shorthand for the resolved knowledge vault path. `profile.*` fields are optional preferences written by `/tracework:cold-start-interview`; consumers should use them to choose language, report framing, and project labels when present, and fall back to local inference when absent. If a skill's primary output depends on `{vault}` and no path can be resolved, tell the user to run `/tracework:cold-start-interview` or configure `knowledge_vault`. If writing a weekly change entry is only a side effect, skip that write gracefully when `{vault}` cannot be resolved.
+All subsequent path references use `{vault}` as shorthand for the resolved knowledge vault path. Project `profile.reporting_group` and registry `reporting_group` partition report audiences before selection; `profile.default_reporting_group` selects the default scope. Other `profile.*` fields are optional preferences. If a skill's primary output depends on `{vault}` and no path can be resolved, tell the user to run `/tracework:cold-start-interview` or configure `knowledge_vault`. If writing a weekly change entry is only a side effect, skip that write gracefully when `{vault}` cannot be resolved.
 
 ## Storage Location
 
@@ -388,17 +390,18 @@ python <skill-or-repo>/scripts/tracework_raw.py project-slug --cwd "$PWD"
     "name": "My Project",
     "slug": "my-project",
     "path": "/Users/dev/projects/my-project",
-    "priority": "core"
+    "priority": "core",
+    "reporting_group": "work"
   }
 ]
 ```
 
-This file is maintained by the `register-project` helper. The cold-start interview calls it automatically during setup. The `capture` skill may also update it as a best-effort side effect. Skills should work correctly whether or not it exists — when absent, the project slug is derived from config or directory name.
+This file is maintained by the `register-project` helper. The cold-start interview calls it automatically during setup. The `capture` skill may also update it as a best-effort side effect. `reporting_group` partitions report audiences before headline selection; it is an open stable string, commonly `work` or `personal`. Skills should work correctly whether or not the registry exists, but an unassigned project must not be silently treated as safe for a work report.
 
 Helper command:
 
 ```bash
-python <skill-or-repo>/scripts/tracework_raw.py register-project --cwd "$PWD" [--name "My Project"] [--slug my-project] [--priority core]
+python <skill-or-repo>/scripts/tracework_raw.py register-project --cwd "$PWD" [--name "My Project"] [--slug my-project] [--priority core] [--reporting-group work]
 ```
 
 ## Change Entry Schema
@@ -417,6 +420,7 @@ Each `{vault}/raw/weeks/{week}/{slug}.json` file contains a **JSON array** of en
     "related_docs": ["/Users/dev/projects/my-project/docs/stage-composition-implementation.md"],
     "source": "session-recap",
     "status": "done",
+    "work_stream": "Scene composition reliability",
     "motivation": "Manual positioning caused recurring panel overlap failures during export.",
     "impact": "Weekly outline can explain the shipped layout capability without re-reading implementation commits.",
     "reporting": {
@@ -426,18 +430,7 @@ Each `{vault}/raw/weeks/{week}/{slug}.json` file contains a **JSON array** of en
       },
       "impact_boundary": "observed",
       "evidence_boundary": "verified",
-      "evidence_gap": "No production usage metric recorded yet.",
-      "module_scope": ["composition", "layout"],
-      "work_stream": "Scene composition reliability",
-      "carry_forward": {
-        "monthly": ["Mention remaining production-usage evidence gap."]
-      },
-      "hard_signals": [
-        {
-          "kind": "open_question",
-          "statement": "Whether dense panels need a separate export fallback."
-        }
-      ]
+      "evidence_gap": "No production usage metric recorded yet."
     },
     "evidence_refs": ["abc1234", "/Users/dev/projects/my-project/docs/stage-composition-implementation.md"],
     "decision_threads": ["composition-layout-boundary"],
@@ -587,20 +580,7 @@ remain valid.
     },
     "impact_boundary": "observed | expected | unknown",
     "evidence_boundary": "verified | recorded | limited",
-    "evidence_gap": "What is still missing before strengthening the claim.",
-    "module_scope": ["module-or-area"],
-    "work_stream": "Stable report grouping hint",
-    "carry_forward": {
-      "daily": ["human-facing follow-up"],
-      "weekly": ["report carry-forward"],
-      "monthly": ["review carry-forward"]
-    },
-    "hard_signals": [
-      {
-        "kind": "risk | open_question | abandoned_alternative | candidate_rule_signal",
-        "statement": "The reusable hard signal."
-      }
-    ]
+    "evidence_gap": "What is still missing before strengthening the claim."
   }
 }
 ```
@@ -614,13 +594,13 @@ Field semantics:
 - `evidence_boundary` says whether the claim is verified by direct evidence,
   recorded in the raw entry only, or limited by fallback/incomplete evidence.
 - `evidence_gap` names what would be needed to strengthen the claim.
-- `module_scope` and `work_stream` help consumers group entries without
-  inventing report-local `W#` labels.
-- `carry_forward` supports human reports and monthly review. It is not
-  next-session recall; agent handoff belongs to raw open questions, artifact
-  dossiers, recall, query, and roadmap.
-- `hard_signals` lift risks, open questions, rejected alternatives, and repeated
-  candidate-rule signals for weekly/monthly "hard stuff" sections.
+- New entries keep grouping in top-level `work_stream` and keep risks,
+  questions, alternatives, and decision threads in their factual top-level
+  fields. Do not pre-write channel-specific Daily/Weekly/Monthly prose.
+- Historical rich reporting objects with `module_scope`, nested `work_stream`,
+  `carry_forward`, or `hard_signals` remain valid and readable. Producers stop
+  generating those fields; consumers treat them as legacy hints rather than
+  current truth.
 
 Do not store report-local `O#`, `W#`, `D#`, or `E#` identifiers in raw entries.
 Weekly and monthly assign those labels after collecting the full reporting
@@ -654,9 +634,9 @@ Recommended producer behavior:
   `DESIGN.md`, `PLAN.md`, `AGENTS.md`, README, architecture docs, prompt
   contracts, or schema contracts. This is lightweight flagging only; producers
   must not claim semantic diffing or automatic doc updates.
-- Add `reporting` when the entry already has a clear report boundary. Prefer
-  explicit `reporting` metadata in consumers, then fall back to
-  `summary`/`context`/`status`/`impact` for older entries.
+- Add minimal `reporting` when the entry already has a clear claim and evidence
+  boundary. Consumers use it for claim treatment, while factual narrative comes
+  from `summary`/`context`/`status`/`impact` and the other top-level fields.
 
 ### Fruit Check
 
@@ -785,8 +765,8 @@ containing `week`, `slug`, `path`, `entries_appended`, and `total_entries`.
 Downstream tools read these files to get high-quality development context:
 
 - **weekly** — reads change entries as the primary semantic source for weekly report generation. Git logs are only fallback and coverage evidence when raw entries are missing or incomplete.
-- **daily** — creates workplace-facing daily reports from raw entries, preferring `reporting` metadata and using git log only as fallback coverage
-- **monthly** — reads daily reports for monthly summaries, then optionally consults matching raw entries for `reporting`, status, impact, and direct evidence
+- **daily** — creates scoped daily management-closure reports from raw entries and uses git only as limited fallback coverage
+- **monthly** — uses matching raw entries as semantic truth and Daily/Weekly reports as prior human judgments
 - **recall** — reads recent raw entries first and uses artifact dossiers as optional navigation plus recorded context
 - **roadmap** — derives decision threads, accumulating risks, and
   recurring open questions from raw entries
@@ -796,10 +776,9 @@ Downstream tools read these files to get high-quality development context:
 
 For weekly reporting, raw entries should carry the meaning of the work:
 
-- If `reporting` is present, use it before inferring outcome/progress/activity
-  treatment from prose. Preserve `outcome_candidate.kind`, `impact_boundary`,
-  `evidence_boundary`, `evidence_gap`, `module_scope`, `work_stream`, and
-  `hard_signals`.
+- If `reporting` is present, use its outcome, impact, evidence, and gap
+  boundaries before inferring claim treatment. Use top-level factual fields for
+  the narrative. Old rich reporting fields remain compatibility hints.
 - `summary` should describe the engineering change at report granularity.
 - `context` should explain why it mattered and what changed as a result.
 - `archetype` should control treatment depth: decisions emphasize trade-offs,

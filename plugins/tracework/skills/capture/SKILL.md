@@ -15,13 +15,13 @@ description: >
 # Adaptive-Depth Session Recap
 
 Capture session-end or checkpoint signals into Tracework raw entries. The goal
-is not a chronological diary. Preserve the durable work signal that can improve
-daily/weekly/monthly reports, decision replay, roadmap synthesis, and
-session-start recall.
+is not a chronological diary. Preserve the lightest durable work signal that
+can improve Daily, Weekly, and Monthly first, then support evidence drill-down,
+decision replay, roadmap synthesis, and session-start recall when needed.
 
-Tracework is report/query-first: daily, weekly, monthly, and query can still
-produce direct value without a fresh capture, but capture improves the evidence
-boundary and future reuse quality.
+Tracework is reporting-first: Daily, Weekly, and Monthly can still produce
+direct value without a fresh capture. Capture improves their evidence boundary
+and keeps lower-frequency Query, Recall, and Roadmap available when needed.
 
 ## Progressive References
 
@@ -74,7 +74,9 @@ optional fields.
 
 3. **Generate raw entries.**
    - Include `capture_depth` on every new `session-recap` entry.
-   - Add `reporting` only when the report boundary is clear.
+   - Add the minimal `reporting` object only when the report boundary is clear.
+     Keep `work_stream` at the top level and do not pre-write channel-specific
+     Daily/Weekly/Monthly carry-forward prose.
    - Add `artifact_context` and artifact dossier side effects only when the
      session materially changed durable artifacts or routed to `deep`.
    - Do not assign report-local `O#`, `W#`, `D#`, or `E#` labels.
@@ -109,6 +111,8 @@ Before finalizing each entry, check:
 - Does `status` bound the claim as done, ongoing, risk, or decision?
 - Does `reporting.outcome_candidate.kind`, when present, avoid overstating the
   evidence?
+- Can Daily, Weekly, and Monthly recover the state change and next gate from
+  factual fields without relying on pre-written channel prose?
 - Are git, files, docs, and logs treated as evidence or coverage rather than
   outcomes by themselves?
 - Are durable artifacts represented through `artifact_context` or dossier

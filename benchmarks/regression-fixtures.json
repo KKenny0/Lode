@@ -296,7 +296,7 @@
         "reason": "Daily note generation is agent-authored; this fixture documents the expected report-led shape."
       },
       "skill": "daily",
-      "prompt": "用 $daily 生成今天日报。raw entries 带 reporting metadata、status、impact 和 evidence_refs。",
+      "prompt": "用 $daily work 生成今天日报。raw entries 带 status、impact 和 evidence refs。",
       "fixture": {
         "raw_entries": [
           {
@@ -321,7 +321,7 @@
           }
         ]
       },
-      "expected_behavior": "Daily output starts with 今日摘要, then 项目进展. Each project uses `- [项目名]` and includes 状态、进展、影响、风险/问题、下一步、来源/证据边界. It must not include tomorrow recall/agent handoff wording.",
+      "expected_behavior": "Daily output starts with 今日判断, then normally three 关键推进 items and portfolio coverage. Each project preserves 状态、进展、影响、风险/问题、下一步、来源/证据边界. It must not include personal projects or agent-handoff wording.",
       "assertions": [
         {
           "name": "report_led_shape",
@@ -336,7 +336,7 @@
         "reason": "Daily note generation is agent-authored; this fixture documents fallback confidence expectations."
       },
       "skill": "daily",
-      "prompt": "用 $daily 补今天日报。没有 raw entries，只有 git commit。",
+      "prompt": "用 $daily work 补今天日报。没有 raw entries，只有 git commit。",
       "fixture": {
         "raw_entries": [],
         "fallback_git_logs": [
@@ -359,13 +359,14 @@
         "reason": "Weekly outline generation remains agent-authored; this fixture documents expected behavior until a deterministic renderer exists."
       },
       "skill": "weekly",
-      "prompt": "用 $weekly 写本周技术型周报。raw entries 包含 archetype-tagged session-recap，并带 artifact_context 描述 validation contract split；git log 也有同一变更的 commit。",
+      "prompt": "用 $weekly work 写本周管理 brief。raw entries 包含 archetype-tagged session-recap，并带 artifact_context 描述 validation contract split；git log 也有同一变更的 commit。",
       "fixture": {
         "project": {
           "name": "Storyboard Pipeline",
           "slug": "storyboard-pipeline",
           "path": "/tmp/storyboard-pipeline",
-          "priority": "core"
+          "priority": "core",
+          "reporting_group": "work"
         },
         "raw_entries": [
           {
@@ -382,7 +383,7 @@
               "Keep repair logic in export -> lower migration cost but preserves hidden ownership",
               "Move deterministic schema checks before repair loop -> clearer contract boundary"
             ],
-            "impact": "Weekly outline can explain the validation ownership split without reading implementation commits.",
+            "impact": "Weekly brief can explain the validation ownership split without reading implementation commits.",
             "artifact_context": [
               {
                 "artifact_path": "/tmp/storyboard-pipeline/DESIGN.md",
@@ -399,7 +400,7 @@
           "def5678 docs: document validation stage ownership"
         ]
       },
-      "expected_behavior": "Produce one Storyboard reliability work stream. Use motivation and artifact_context from session-recap as the primary narrative/evidence source, and use git commits only as coverage evidence.",
+      "expected_behavior": "Produce one Storyboard reliability arc or portfolio stream inside a work-scoped weekly judgment. Use motivation and artifact_context from session-recap as the primary evidence and git only for coverage.",
       "assertions": [
         {
           "name": "single_work_stream",
@@ -422,7 +423,7 @@
         "reason": "Weekly outline generation remains agent-authored; this fixture documents fallback confidence expectations."
       },
       "skill": "weekly",
-      "prompt": "用 $weekly 写本周周报。没有 raw entries，但 repo path 有效，请从 git log fallback 生成。",
+      "prompt": "用 $weekly work 写本周周报。没有 raw entries，但 repo path 有效，请从 git log fallback 生成。",
       "fixture": {
         "raw_entries": [],
         "fallback_git_logs": [
@@ -431,7 +432,7 @@
           "ccc3333 chore: format markdown tables"
         ]
       },
-      "expected_behavior": "Generate a usable outline, filter chore noise, and mark fallback-only streams as lower confidence or evidence-limited.",
+      "expected_behavior": "Generate a usable management brief, filter chore noise, preserve meaningful streams in headline or portfolio coverage, and mark fallback-only claims limited.",
       "assertions": [
         {
           "name": "fallback_only_labeled",
@@ -447,10 +448,10 @@
       "id": "monthly-review-3plus1-evidence-downgrade",
       "execution": {
         "kind": "documented-only",
-        "reason": "Monthly review generation remains agent-authored; this fixture documents outcome-first 3+1 and evidence-grade expectations."
+        "reason": "Monthly review generation remains agent-authored; this fixture documents raw-first phase narrative and evidence-grade expectations."
       },
       "skill": "monthly",
-      "prompt": "用 $monthly 生成 2026-05 月报。Daily Note 里同一项目有两天 raw-entry-backed 记录、一条 git-only 修复记录和一个仍未关闭的风险。",
+      "prompt": "用 $monthly work 生成 2026-05 月报。Raw 里有一条决策和一个未关闭风险；Daily 另有一条 git-only 修复。",
       "fixture": {
         "daily_note_excerpt": [
           "### 2026.05.05",
@@ -479,11 +480,11 @@
           }
         ]
       },
-      "expected_behavior": "Produce a monthly review that starts with at most three O# outcome/progress claims, maps each claim to W#/D#/E# where supported, keeps the stale-doc item as risk rather than completed outcome, and downgrades the git-only repair to limited coverage evidence instead of using it as verified impact.",
+      "expected_behavior": "Produce one work-scoped monthly judgment with normally three phase arcs, portfolio coverage, and evidence appendix. Raw state is semantic truth; the stale-doc item remains a risk and the git-only repair remains limited.",
       "assertions": [
         {
-          "name": "outcome_first_3plus1",
-          "description": "The summary uses report-local O#/W#/D#/E# identifiers without writing them back to raw data."
+          "name": "raw_first_phase_narrative",
+          "description": "The summary uses raw state for the main phase narrative and keeps O#/W#/D#/E# in the evidence appendix."
         },
         {
           "name": "risk_not_promoted",
@@ -505,21 +506,37 @@
       "fixture": {
         "archive_name": "2026-07.md",
         "expected_project": "Tracework",
+        "expected_slug": "tracework",
+        "expected_reporting_group": "work",
+        "expected_work_stream": "Reporting model upgrade",
         "expected_progress_text": "Daily",
         "expected_risk_text": "旧日报格式",
         "expected_absent_risk_text": "无明确风险记录",
         "expected_next_text": "验证 monthly parser",
         "expected_evidence_boundary": "recorded",
-        "expected_min_report_items": 6,
+        "expected_min_report_items": 8,
+        "raw_entries": [
+          {
+            "timestamp": "2026-07-06T18:30:00+08:00",
+            "type": "decision",
+            "summary": "Made raw entries the semantic source for monthly review",
+            "context": "Daily remains prior human judgment and coverage context.",
+            "source": "session-recap",
+            "status": "decision",
+            "work_stream": "Reporting model upgrade",
+            "impact": "Monthly can preserve later status changes without amplifying repeated Daily prose."
+          }
+        ],
         "daily_note_archive": [
           "### 2026.07.06",
           "",
-          "#### 今日摘要",
-          "- Tracework reporting model 进入 report-led 调整，来源 raw-entry-backed。",
+          "#### 今日判断",
+          "Tracework reporting model 进入按受众分区的管理收口。",
           "",
-          "#### 项目进展",
+          "#### 关键推进",
           "- [Tracework]",
           "\t- 工作流：Reporting model upgrade",
+          "\t- 收口类型：decision",
           "\t- 状态：raw-entry-backed；done",
           "\t- 进展：Daily 改为 workplace-facing report 结构，同时保留项目标签。",
           "\t- 影响：Monthly review 可以直接读取状态、影响和证据边界。",
@@ -529,12 +546,13 @@
           "",
           "### 2026.07.07",
           "",
-          "#### 今日摘要",
-          "- Tracework reporting model 继续补充验证，来源 raw-entry-backed。",
+          "#### 今日判断",
+          "Tracework reporting model 继续补充 parser 验证。",
           "",
-          "#### 项目进展",
+          "#### 关键推进",
           "- [Tracework]",
           "\t- 工作流：Reporting model upgrade",
+          "\t- 收口类型：risk",
           "\t- 状态：raw-entry-backed；ongoing",
           "\t- 进展：补充 Daily no-risk 占位句的月度解析保护。",
           "\t- 影响：Monthly review 不会把无风险占位句误报为风险。",
@@ -897,6 +915,61 @@
           "description": "Rejected alternatives, open questions, lifecycle transitions, typed source refs, and accumulating risks are available before prose generation."
         }
       ]
+    },
+    {
+      "id": "daily-work-scope-management-closure",
+      "execution": {
+        "kind": "report-contract"
+      },
+      "skill": "daily",
+      "fixture": {
+        "forbidden_terms": ["clipplane", "/personal/clipplane"],
+        "candidate_output": {
+          "scope": "work",
+          "groups": [
+            {
+              "name": "work",
+              "judgment": "Production evaluation moved from opaque execution to observable cost and bounded failover, while model acceptance remains open.",
+              "all_streams": ["evaluation-observability", "scene-reuse", "provider-failover", "docs"],
+              "headlines": ["evaluation-observability", "scene-reuse", "provider-failover"],
+              "portfolio": ["docs"],
+              "next_closure_targets": ["model acceptance", "scene regression sampling"]
+            }
+          ]
+        }
+      },
+      "expected_behavior": "Work-scoped Daily keeps a separate work judgment, bounded headlines, full portfolio coverage, and no personal-project material."
+    },
+    {
+      "id": "weekly-all-scope-separate-narratives",
+      "execution": {
+        "kind": "report-contract"
+      },
+      "skill": "weekly",
+      "fixture": {
+        "candidate_output": {
+          "scope": "all",
+          "groups": [
+            {
+              "name": "work",
+              "judgment": "The production pipeline converged on a single execution path and entered model acceptance.",
+              "all_streams": ["dag", "evaluation", "scene-reuse", "repair"],
+              "headlines": ["dag", "evaluation", "scene-reuse"],
+              "portfolio": ["repair"],
+              "next_closure_targets": ["provider decision", "end-to-end acceptance"]
+            },
+            {
+              "name": "personal",
+              "judgment": "Personal products advanced through one release and one deliberately deferred release gate.",
+              "all_streams": ["card-release", "clipplane-ui", "kami"],
+              "headlines": ["card-release", "clipplane-ui"],
+              "portfolio": ["kami"],
+              "next_closure_targets": ["browser acceptance", "usage feedback"]
+            }
+          ]
+        }
+      },
+      "expected_behavior": "All-scope Weekly gives work and personal separate judgments and headline budgets without dropping portfolio work."
     },
     {
       "id": "decision-replay-unsafe-slug-rejected",
