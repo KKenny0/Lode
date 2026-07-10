@@ -4,87 +4,84 @@
 
 <h1 align="center">Tracework</h1>
 
-<p align="center"><strong>Turn agent work into evidence-backed daily, weekly, and monthly reports.</strong></p>
+<p align="center"><strong>把 Agent 工作持续收口成有证据的日报、周报和月报。</strong></p>
 
 <p align="center">
-  <img src="assets/tracework-reporting-hero.webp" alt="Tracework turns scattered agent work into a clear, evidence-backed report that earns management confidence" width="1086" />
+  <img src="assets/tracework-reporting-hero.webp" alt="Tracework 把零散的 Agent 工作收口成清晰、有证据、能赢得管理者认可的汇报" width="1086" />
 </p>
 
 <p align="center">
-  <a href="https://kkenny0.github.io/Tracework/"><strong>Documentation</strong></a> · <a href="https://kkenny0.github.io/Tracework/showcase">Showcase</a> · <a href="README.cn.md">中文</a>
+  <a href="https://kkenny0.github.io/Tracework/zh/"><strong>文档</strong></a> · <a href="README.en.md">English</a>
 </p>
 
-Tracework continuously closes agent work into reports people can use, while
-preserving enough local evidence to explain the decisions later.
+Tracework 把 Agent 工作收口成人能直接使用的报告，同时保留足够的本地证据，供以后
+追问其中的决策。
 
-Daily, Weekly, and Monthly are the high-frequency product surfaces. Capture is
-the quiet evidence multiplier. Query, Recall, and Roadmap are lower-frequency
-trust and recovery tools for the moments when work is questioned or resumed.
+Daily、Weekly、Monthly 是高频主产品；Capture 是安静的数据基础；Query、Recall、
+Roadmap 是低频的可信度与恢复能力，只在工作被追问、继续或阶段复盘时使用。
 
-## Core Loop
+## 核心循环
 
 ```text
-agent work
-  -> capture the durable facts
-  -> close the day
-  -> form a weekly judgment
-  -> review the monthly phase
+Agent 工作
+  -> capture 持久事实
+  -> 完成当天收口
+  -> 形成本周判断
+  -> 回顾月度阶段
 
-when needed
-  -> query why a choice was made
-  -> recall where to continue
+需要时
+  -> query 当时为什么这么选
+  -> recall 从哪里继续
 ```
 
-Tracework is reporting-first and decision-replay-backed. Reports can start from
-git-only fallback coverage, but those claims stay `limited` until raw entries
-explain intent, status, risks, trade-offs, and evidence boundaries.
+Tracework 是 reporting-first、decision-replay-backed。没有 raw entries 时，报告仍可
+用 git 生成 `limited` 版本；capture 保存 git 无法解释的动机、状态、风险、取舍和
+证据边界。
 
-## Reporting Scopes
+## 公司与个人项目分区
 
-Projects can declare a reporting group:
+每个项目可以声明报告分组：
 
 ```yaml
 profile:
   project_name: My Project
-  reporting_group: work   # or personal, open-source, consulting...
+  reporting_group: work   # 也可以是 personal、open-source、consulting
 ```
 
-Daily, Weekly, and Monthly partition scope before selecting headlines:
+Daily、Weekly、Monthly 必须先分区，再选择主线：
 
-- `work`: workplace projects only; personal material is excluded everywhere.
-- `personal`: personal projects only.
-- `all`: a private combined view with separate judgments per group.
+- `work`：只包含公司项目，任何个人内容都不得进入正文或证据附录。
+- `personal`：只包含个人项目。
+- `all`：私人全景视图，各组分别拥有自己的判断和 headline。
 
-The normal three-headline budget applies per reporting group, not across the
-whole vault. Remaining meaningful work stays visible in a portfolio section.
+默认三条 headline 的预算按分组计算，不是整个 vault 共用。其余有意义的工作会保留
+在组合状态中，不会因为没有进入 headline 而消失。
 
-Upgrading from 0.2: existing projects without `reporting_group` become
-`unassigned` and are excluded from scoped reports for safety. Run
-`/tracework:cold-start-interview` once in each project or add the field manually.
+从 0.2 升级时，尚未配置 `reporting_group` 的项目会成为 `unassigned`，并出于安全
+原因被 scoped report 排除。请在每个项目中运行一次
+`/tracework:cold-start-interview`，或手动补上该字段。
 
 ## Skills
 
-| Command | Role | Output |
+| Command | 角色 | 输出 |
 | :--- | :--- | :--- |
-| `/tracework:daily` | High-frequency closure | What changed today, why it matters, and the next gate |
-| `/tracework:weekly` | High-frequency closure | Weekly management judgment; Markdown brief by default, slides when requested |
-| `/tracework:monthly` | High-frequency review | Raw-first phase outcomes, recurring risks, and next-month closure targets |
-| `/tracework:capture` | Evidence foundation | Adaptive lite/standard/deep raw session record |
-| `/tracework:query` | Low-frequency trust | Cited answer to why a path was chosen |
-| `/tracework:recall` | Low-frequency recovery | Bounded context for resuming older work |
-| `/tracework:roadmap` | Advanced review | Long-range decision-thread narrative |
-| `/tracework:cold-start-interview` | One-time setup | Vault, project identity, and reporting group |
+| `/tracework:daily` | 高频收口 | 今天改变了什么、为什么重要、下一道门是什么 |
+| `/tracework:weekly` | 高频收口 | 周级管理判断；默认 Markdown brief，明确请求时生成 PPT 大纲 |
+| `/tracework:monthly` | 高频回顾 | Raw-first 的阶段成果、反复风险和下月收口目标 |
+| `/tracework:capture` | 证据基础 | 动态选择 lite/standard/deep 的 session raw record |
+| `/tracework:query` | 低频可信度 | 用引用回答当时为什么这么选 |
+| `/tracework:recall` | 低频恢复 | 继续旧工作时恢复有边界的上下文 |
+| `/tracework:roadmap` | 高级复盘 | 长周期决策线程叙事 |
+| `/tracework:cold-start-interview` | 一次性设置 | Vault、项目身份和报告分组 |
 
-Decision replay remains the trust mechanism: a later reader can drill from a
-report claim to raw entries, rejected alternatives, risks, and direct evidence.
-When the record is insufficient, Tracework should expose the gap instead of
-inventing history.
+Decision replay 是可信机制，而不是需要每天使用的操作。读者可以从报告主张向下追到
+raw entry、被拒方案、风险和直接证据。记录不足时，Tracework 应该明确暴露缺口，而
+不是编造历史。
 
-Tracework is not a meeting-notes tool, approval workflow, performance packaging
-layer, employee-monitoring surface, or generic office suite. Activity counts are
-coverage metadata, not proof of outcomes.
+Tracework 不是会议纪要、审批流、绩效包装、员工监控或泛办公室套件。活动数、提交数
+和代码行数只能描述覆盖度，不能证明成果。
 
-## Install
+## 安装
 
 ### Codex
 
@@ -102,17 +99,16 @@ claude plugin install tracework@tracework
 
 ## Storage
 
-- Config: `~/.tracework/config.yaml` or `{project}/.tracework/config.yaml`
-- Raw entries: `{vault}/raw/weeks/{week}/{slug}.json`
-- Artifact dossiers: `{vault}/raw/artifacts/{slug}.json`
-- Decision indexes: `{vault}/raw/decisions/{slug}.json`
-- Human outputs: `{vault}/Daily Note.md` and `{vault}/Work Diary/`
+- 配置：`~/.tracework/config.yaml` 或 `{project}/.tracework/config.yaml`
+- Raw entries：`{vault}/raw/weeks/{week}/{slug}.json`
+- Artifact dossiers：`{vault}/raw/artifacts/{slug}.json`
+- Decision indexes：`{vault}/raw/decisions/{slug}.json`
+- 可读输出：`{vault}/Daily Note.md` 和 `{vault}/Work Diary/`
 
-Raw entries remain semantic truth. Decision indexes are rebuildable retrieval
-views. Artifact dossiers preserve navigation and recorded scope, not shadow
-copies of source documents.
+Raw entries 是语义真相；decision index 是可重建的查询视图；Artifact dossier 保存导航
+和已记录边界，不复制完整源文档。
 
-## Development
+## 开发
 
 ```bash
 npm --prefix cli run build
@@ -122,21 +118,17 @@ npm --prefix cli run test
 npm --prefix site run build
 ```
 
-After editing `.codex-plugin/`, `skills/`, or `assets/`, run `copy-skills` before
-`check-skills`. See [Configuration](docs/configuration.md),
-[Data model](docs/data-model.md), and
-[Artifact governance](docs/artifact-governance.md).
+核心文档：[配置](docs/configuration.md)、[数据模型](docs/data-model.md)、
+[Artifact governance](docs/artifact-governance.md)。
 
-## Support
+## 支持
 
-If Tracework helps you turn agent work into clearer reports while preserving
-the evidence behind important decisions, you can support continued maintenance
-here:
+如果 Tracework 帮你把 Agent 工作收口成了更清晰的报告，同时保留了重要决策背后的
+证据，你可以在这里支持项目继续维护：
 
 <https://kkenny0.github.io/support/>
 
-Support helps maintain reporting quality, cross-runtime plugin packaging,
-storage contracts, and documentation.
+你的支持将用于持续维护报告质量、跨运行时插件打包、存储契约和文档。
 
 ## License
 
