@@ -1,23 +1,21 @@
 <svg width="256" height="256" viewBox="0 0 256 256" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc">
   <title id="title">Tracework mark</title>
-  <desc id="desc">A dark faceted stone with a gold decision replay vein and three evidence nodes.</desc>
+  <desc id="desc">A gold evidence thread resolves into the headline of a finished brief.</desc>
   <defs>
-    <linearGradient id="bg" x1="34" y1="20" x2="224" y2="236" gradientUnits="userSpaceOnUse">
+    <linearGradient id="bg" x1="24" y1="20" x2="230" y2="236" gradientUnits="userSpaceOnUse">
       <stop stop-color="#151B22"/>
-      <stop offset="0.58" stop-color="#0B0F14"/>
+      <stop offset="0.6" stop-color="#0A0E13"/>
       <stop offset="1" stop-color="#050607"/>
     </linearGradient>
-    <linearGradient id="vein" x1="58" y1="190" x2="200" y2="62" gradientUnits="userSpaceOnUse">
-      <stop stop-color="#8A5705"/>
-      <stop offset="0.18" stop-color="#E2A51D"/>
-      <stop offset="0.52" stop-color="#FFE17A"/>
-      <stop offset="0.78" stop-color="#EDB638"/>
-      <stop offset="1" stop-color="#A96A06"/>
+    <linearGradient id="paper" x1="56" y1="40" x2="206" y2="215" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#222C37"/>
+      <stop offset="1" stop-color="#121820"/>
     </linearGradient>
-    <linearGradient id="node" x1="58" y1="58" x2="198" y2="198" gradientUnits="userSpaceOnUse">
-      <stop stop-color="#FFF1A6"/>
-      <stop offset="0.5" stop-color="#F6C642"/>
-      <stop offset="1" stop-color="#B87508"/>
+    <linearGradient id="thread" x1="39" y1="177" x2="183" y2="87" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#A96806"/>
+      <stop offset="0.3" stop-color="#E7AB20"/>
+      <stop offset="0.62" stop-color="#FFE17A"/>
+      <stop offset="1" stop-color="#D28B13"/>
     </linearGradient>
     <clipPath id="round">
       <rect width="256" height="256" rx="56"/>
@@ -27,33 +25,28 @@
   <g clip-path="url(#round)">
     <rect width="256" height="256" rx="56" fill="url(#bg)"/>
 
-    <path d="M46 85L96 50H166L211 91L218 163L171 207H82L39 163L46 85Z" fill="#11161C"/>
-    <path d="M46 85L96 50L95 108L39 163L46 85Z" fill="#242B35"/>
-    <path d="M96 50H166L142 103L95 108L96 50Z" fill="#080B0F"/>
-    <path d="M166 50L211 91L142 103L166 50Z" fill="#202631"/>
-    <path d="M211 91L218 163L163 132L142 103L211 91Z" fill="#0D1117"/>
-    <path d="M218 163L171 207L163 132L218 163Z" fill="#262D37"/>
-    <path d="M171 207H82L163 132L171 207Z" fill="#0A0D11"/>
-    <path d="M82 207L39 163L95 108L163 132L82 207Z" fill="#181E27"/>
+    <path d="M57 39H164L201 76V216H57V39Z" fill="#080C11" opacity="0.72"/>
+    <path d="M60 42H163L198 77V213H60V42Z" fill="url(#paper)" stroke="#3A4653" stroke-width="3" stroke-linejoin="round"/>
+    <path d="M163 42V77H198L163 42Z" fill="#435161" stroke="#526172" stroke-width="3" stroke-linejoin="round"/>
 
-    <path d="M61 186C86 153 108 138 136 137C168 136 180 111 196 70" stroke="#2C1A03" stroke-width="34" stroke-linecap="round" stroke-linejoin="round"/>
-    <path d="M61 186C86 153 108 138 136 137C168 136 180 111 196 70" stroke="url(#vein)" stroke-width="22" stroke-linecap="round" stroke-linejoin="round"/>
-    <path d="M65 181C87 154 108 142 135 141" stroke="#FFF2A7" stroke-width="5" stroke-linecap="round" opacity="0.58"/>
-    <path d="M164 127C178 114 187 94 196 72" stroke="#FFF2A7" stroke-width="5" stroke-linecap="round" opacity="0.48"/>
+    <path d="M95 86H167" stroke="#E3A921" stroke-width="10" stroke-linecap="round"/>
+    <path d="M95 116H171" stroke="#7E8B98" stroke-width="6" stroke-linecap="round"/>
+    <path d="M95 140H155" stroke="#657381" stroke-width="6" stroke-linecap="round"/>
+    <path d="M95 164H169" stroke="#485665" stroke-width="6" stroke-linecap="round"/>
+    <path d="M95 188H143" stroke="#313E4A" stroke-width="5" stroke-linecap="round"/>
 
-    <circle cx="61" cy="186" r="19" fill="#2C1A03"/>
-    <circle cx="61" cy="186" r="15" fill="url(#node)"/>
-    <circle cx="61" cy="186" r="6" fill="#0B0F14"/>
+    <path d="M41 178C58 168 65 156 76 145C86 135 91 129 101 122C114 113 125 113 137 106C150 99 158 90 171 86" stroke="#2C1A03" stroke-width="22" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M41 178C58 168 65 156 76 145C86 135 91 129 101 122C114 113 125 113 137 106C150 99 158 90 171 86" stroke="url(#thread)" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M46 175C60 166 67 154 78 145C87 137 94 130 103 125" stroke="#FFF1A5" stroke-width="3.5" stroke-linecap="round" opacity="0.62"/>
 
-    <circle cx="136" cy="137" r="20" fill="#2C1A03"/>
-    <circle cx="136" cy="137" r="16" fill="url(#node)"/>
-    <circle cx="136" cy="137" r="6" fill="#0B0F14"/>
-
-    <circle cx="196" cy="70" r="19" fill="#2C1A03"/>
-    <circle cx="196" cy="70" r="15" fill="url(#node)"/>
-    <circle cx="196" cy="70" r="6" fill="#0B0F14"/>
-
-    <path d="M72 78C87 67 104 62 126 61" stroke="#D39A20" stroke-width="5" stroke-linecap="round" opacity="0.36"/>
-    <path d="M186 177C174 185 159 190 139 193" stroke="#D39A20" stroke-width="5" stroke-linecap="round" opacity="0.32"/>
+    <circle cx="41" cy="178" r="14" fill="#2C1A03"/>
+    <circle cx="41" cy="178" r="10" fill="#F6C642"/>
+    <circle cx="41" cy="178" r="3.5" fill="#0B0F14"/>
+    <circle cx="101" cy="122" r="14" fill="#2C1A03"/>
+    <circle cx="101" cy="122" r="10" fill="#F6C642"/>
+    <circle cx="101" cy="122" r="3.5" fill="#0B0F14"/>
+    <circle cx="171" cy="86" r="14" fill="#2C1A03"/>
+    <circle cx="171" cy="86" r="10" fill="#F6C642"/>
+    <circle cx="171" cy="86" r="3.5" fill="#0B0F14"/>
   </g>
 </svg>
