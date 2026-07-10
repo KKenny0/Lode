@@ -7,6 +7,10 @@
 <p align="center"><strong>把 Agent 工作持续收口成有证据的日报、周报和月报。</strong></p>
 
 <p align="center">
+  <img src="assets/tracework-reporting-hero.webp" alt="Tracework 把零散的 Agent 工作收口成清晰、有证据、能赢得管理者认可的汇报" width="1086" />
+</p>
+
+<p align="center">
   <a href="https://kkenny0.github.io/Tracework/zh/"><strong>文档</strong></a> · <a href="README.md">English</a>
 </p>
 
@@ -116,6 +120,15 @@ npm --prefix site run build
 
 核心文档：[配置](docs/configuration.md)、[数据模型](docs/data-model.md)、
 [Artifact governance](docs/artifact-governance.md)。
+
+## 支持
+
+如果 Tracework 帮你把 Agent 工作收口成了更清晰的报告，同时保留了重要决策背后的
+证据，你可以在这里支持项目继续维护：
+
+<https://kkenny0.github.io/support/>
+
+你的支持将用于持续维护报告质量、跨运行时插件打包、存储契约和文档。
 
 ## License
 

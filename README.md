@@ -7,6 +7,10 @@
 <p align="center"><strong>Turn agent work into evidence-backed daily, weekly, and monthly reports.</strong></p>
 
 <p align="center">
+  <img src="assets/tracework-reporting-hero.webp" alt="Tracework turns scattered agent work into a clear, evidence-backed report that earns management confidence" width="1086" />
+</p>
+
+<p align="center">
   <a href="https://kkenny0.github.io/Tracework/"><strong>Documentation</strong></a> · <a href="https://kkenny0.github.io/Tracework/showcase">Showcase</a> · <a href="README.cn.md">中文</a>
 </p>
 
@@ -122,6 +126,17 @@ After editing `.codex-plugin/`, `skills/`, or `assets/`, run `copy-skills` befor
 `check-skills`. See [Configuration](docs/configuration.md),
 [Data model](docs/data-model.md), and
 [Artifact governance](docs/artifact-governance.md).
+
+## Support
+
+If Tracework helps you turn agent work into clearer reports while preserving
+the evidence behind important decisions, you can support continued maintenance
+here:
+
+<https://kkenny0.github.io/support/>
+
+Support helps maintain reporting quality, cross-runtime plugin packaging,
+storage contracts, and documentation.
 
 ## License
 
