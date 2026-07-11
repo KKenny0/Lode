@@ -69,6 +69,7 @@ Daily、Weekly、Monthly 必须先分区，再选择主线：
 | `/tracework:weekly` | 高频收口 | 周级管理判断；默认 Markdown brief，明确请求时生成 PPT 大纲 |
 | `/tracework:monthly` | 高频回顾 | Raw-first 的阶段成果、反复风险和下月收口目标 |
 | `/tracework:capture` | 证据基础 | 动态选择 lite/standard/deep 的 session raw record |
+| `/tracework:capture day [date] [scope]` | 当日补录 | 按分组扫描已索引 session，增量补回当天证据 |
 | `/tracework:query` | 低频可信度 | 用引用回答当时为什么这么选 |
 | `/tracework:recall` | 低频恢复 | 继续旧工作时恢复有边界的上下文 |
 | `/tracework:roadmap` | 高级复盘 | 长周期决策线程叙事 |
@@ -107,6 +108,10 @@ claude plugin install tracework@tracework
 
 Raw entries 是语义真相；decision index 是可重建的查询视图；Artifact dossier 保存导航
 和已记录边界，不复制完整源文档。
+
+可选的 Capture Day 默认关闭。设置 `session_scan.enabled: true` 后，插件 Hook 只在
+`~/.tracework/session-index/` 保存 session 指针和分组所需元数据；只有显式运行
+`/tracework:capture day` 才会在分区后读取当天会话，且不会把 transcript 复制进 vault。
 
 ## 开发
 

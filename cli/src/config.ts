@@ -8,6 +8,8 @@ export interface TraceworkConfig {
   project_slug?: string;
   profile?: {
     project_name?: string;
+    reporting_group?: string;
+    default_reporting_group?: string;
     report_language?: 'zh' | 'en' | 'mixed';
     weekly_mode?: 'tech' | 'report';
     team_context?: 'solo' | 'team' | 'mixed';
@@ -18,6 +20,10 @@ export interface TraceworkConfig {
   };
   artifact_index?: {
     enabled?: boolean;
+  };
+  session_scan?: {
+    enabled?: boolean;
+    retention_days?: number;
   };
 }
 

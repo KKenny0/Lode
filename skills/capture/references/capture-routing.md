@@ -21,7 +21,7 @@ Choose the lightest depth that preserves the reusable signal.
 
 | Depth | Use when | Normal entry count |
 |---|---|---|
-| `lite` | Routine progress, small fix, docs/tests/config cleanup, completed low-risk implementation, or auto-capture without durable decision evidence | 1 |
+| `lite` | Routine progress, small fix, docs/tests/config cleanup, completed low-risk implementation, or recovered session material without durable decision evidence | 1 |
 | `standard` | Normal build, repair, investigation, or decision with a clear goal, impact, risk, evidence boundary, or report-ready signal | 1-3 |
 | `deep` | Architecture/product/schema/prompt contract decision, rejected alternatives, durable artifact dossier, major root-cause repair, recurring risk, or explicit "why/tradeoff" memory request | 1-5 |
 

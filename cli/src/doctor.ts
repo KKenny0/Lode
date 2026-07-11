@@ -123,6 +123,22 @@ function checkArtifactGovernanceConfig(cfg: TraceworkConfig | null, cwd: string)
   ];
 }
 
+function checkSessionScanConfig(cfg: TraceworkConfig | null): CheckResult {
+  const scan = cfg?.session_scan;
+  if (!scan?.enabled) {
+    return pass('session scan', 'disabled by default');
+  }
+  const retention = scan.retention_days ?? 30;
+  if (!Number.isInteger(retention) || retention < 1) {
+    return fail(
+      'session scan',
+      `invalid retention_days: ${retention}`,
+      'Set session_scan.retention_days to a positive integer.',
+    );
+  }
+  return pass('session scan', `enabled; metadata retention ${retention} days`);
+}
+
 function checkTemporaryWrite(vault: string, cwd: string, noWrite: boolean | undefined): CheckResult[] {
   if (noWrite) {
     return [pass('temporary raw write', 'Skipped by --no-write')];
@@ -196,6 +212,7 @@ export async function runDoctor(options: DoctorOptions = {}): Promise<void> {
   }
 
   results.push(...checkArtifactGovernanceConfig(cfg, cwd));
+  results.push(checkSessionScanConfig(cfg));
 
   results.push(checkSkillInstallation(options.skipInstallCheck));
 

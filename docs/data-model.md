@@ -16,6 +16,10 @@ lower-frequency evidence and recovery views.
 | Vault wiki layer | Human-readable synthesis | `Daily Note.md`, `Work Diary/Weekly/`, `Work Diary/Monthly/` |
 | Conversation fallback | Zero-config immediate value | Structured capture recap when no vault is configured |
 
+An opt-in local session index may exist at `~/.tracework/session-index/`. It is
+operational metadata, not a vault layer: no transcript content is copied there,
+and reports never consume it directly.
+
 ## Vault Layout
 
 ```text
@@ -42,7 +46,8 @@ lower-frequency evidence and recovery views.
 ## Core Flow
 
 ```text
-/tracework:capture -> raw/weeks/{week}/{slug}.json
+/tracework:capture     -> raw/weeks/{week}/{slug}.json
+/tracework:capture day -> scoped local session material -> raw/weeks/{week}/{slug}.json
 /tracework:query   <- raw/decisions/{slug}.json + raw/weeks/
 /tracework:recall  <- raw/weeks/ + raw/artifacts/ + raw/decisions/
 /tracework:daily   <- raw/weeks/ + fallback git coverage
@@ -85,6 +90,11 @@ Historical rich reporting objects remain readable. Final `O#`, `W#`, `D#`, and
 
 `capture_depth` is also optional and additive. It describes how much detail the
 capture skill preserved, not how strong the evidence is.
+
+Capture Day entries use typed conversation `source_refs` with a stable
+`session:<runtime>:<session-id>` ref and a `timestamp` watermark. Re-running a
+day processes only later material. The transcript pointer and body remain local
+and are not written into raw entries.
 
 ## Artifact Dossiers
 

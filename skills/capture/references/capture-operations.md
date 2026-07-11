@@ -2,47 +2,31 @@
 
 Use this reference for capture mechanics that are secondary to signal extraction.
 
-## Auto-Capture
+## Session Index Hook
 
-When configured, `/tracework:capture` can run automatically at session end via a
-Claude Code `Stop` hook.
+The installed Tracework plugin bundles a cross-runtime `Stop` hook. It does not
+invoke a skill, call a model, read transcript content, or write raw entries.
+When `session_scan.enabled: true`, it records only session id, runtime, cwd
+history, transcript pointer, and observation timestamps under
+`~/.tracework/session-index/`.
 
-Enable it by setting `auto_capture.enabled: true` in
-`~/.tracework/config.yaml`. `/tracework:cold-start-interview` sets this by
-default for new configurations.
+The hook is opt-in and best-effort:
 
-Add this to `~/.claude/settings.json` under `hooks.Stop`:
+- Default configuration is disabled.
+- Codex requires the user to review and trust the bundled command hook.
+- Claude and Codex may disable hooks through host or organization policy.
+- Missing config, missing transcript pointers, or helper failures leave the
+  session unchanged and never block Stop.
+- Setting `session_scan.enabled: false` makes the hook a no-op.
 
-```json
-{
-  "hooks": {
-    "Stop": [
-      {
-        "matcher": "",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "/tracework:capture"
-          }
-        ]
-      }
-    ]
-  }
-}
-```
-
-Disable it by setting `auto_capture.enabled: false` in
-`~/.tracework/config.yaml`. Remove the hook entry from
-`~/.claude/settings.json` to fully deactivate it.
-
-The hook runs best-effort. If the vault is not configured or the helper is
-unavailable, fall back to Markdown output in the conversation.
+Transcript content is read only after the user invokes Capture Day. Manual
+session-end capture and checkpoint capture remain independent of this index.
 
 ## Output Policy
 
 Use quiet output by default whenever a vault write succeeds. This applies to
-manual `/tracework:capture`, checkpoint capture, and auto-capture. Return only a
-short confirmation plus the receipt:
+manual `/tracework:capture` and checkpoint capture. Capture Day uses its own
+aggregate receipt. Return only a short confirmation plus the receipt:
 
 ```text
 已记录 {N} 条进展 -> {slug} ({week})

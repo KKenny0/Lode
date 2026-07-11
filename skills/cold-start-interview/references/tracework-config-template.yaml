@@ -11,8 +11,9 @@ profile:
 #   team_context: solo
 # artifact_index:
 #   enabled: true
-# auto_capture:
+# session_scan:
 #   enabled: false
+#   retention_days: 30
 
 # Project: {project-root}/.tracework/config.yaml
 # project_slug: my-project

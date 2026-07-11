@@ -16,6 +16,11 @@ profile:
 artifact_index:
   enabled: true                      # 默认 true；当 vault 存在时写入 raw/artifacts/{slug}.json
 
+# 当日 Session 补录（可选，默认关闭）
+# session_scan:
+#   enabled: false                   # 仅索引 session 元数据；显式 Capture Day 才读取正文
+#   retention_days: 30               # ~/.tracework/session-index/ 的保留天数
+
 # 周报大纲设置（可选）
 # weekly_outline:
 #   output_dir: /path/to/Work Diary/Weekly      # 默认 {vault}/Work Diary/Weekly

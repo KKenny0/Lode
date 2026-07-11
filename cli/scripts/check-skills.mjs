@@ -10,11 +10,13 @@ const repoRoot = path.resolve(cliRoot, '..');
 const sourceSkillsDir = path.join(repoRoot, 'skills');
 const bundledSkillsDir = path.join(cliRoot, 'skills');
 const sourceAssetsDir = path.join(repoRoot, 'assets');
+const sourceHooksDir = path.join(repoRoot, 'hooks');
 const bundledAssetsDir = path.join(cliRoot, 'assets');
 const sitePublicDir = path.join(repoRoot, 'site', 'public');
 const codexPluginBundleDir = path.join(repoRoot, 'plugins', 'tracework');
 const codexPluginSkillsDir = path.join(codexPluginBundleDir, 'skills');
 const codexPluginAssetsDir = path.join(codexPluginBundleDir, 'assets');
+const codexPluginHooksDir = path.join(codexPluginBundleDir, 'hooks');
 const codexPluginManifest = path.join(codexPluginBundleDir, '.codex-plugin', 'plugin.json');
 const claudePluginManifest = path.join(codexPluginBundleDir, '.claude-plugin', 'plugin.json');
 const sourceCodexPluginManifest = path.join(repoRoot, '.codex-plugin', 'plugin.json');
@@ -272,7 +274,7 @@ assert(exists(claudePluginManifest), 'plugins/tracework/.claude-plugin/plugin.js
 assert(exists(sourceCodexPluginManifest), '.codex-plugin/plugin.json is missing');
 assert(exists(sourceClaudePluginManifest), '.claude-plugin/plugin.json is missing');
 
-const allowedPluginBundleEntries = new Set(['.codex-plugin', '.claude-plugin', 'skills', 'assets']);
+const allowedPluginBundleEntries = new Set(['.codex-plugin', '.claude-plugin', 'skills', 'assets', 'hooks']);
 if (exists(codexPluginBundleDir)) {
   for (const entry of fs.readdirSync(codexPluginBundleDir)) {
     assert(allowedPluginBundleEntries.has(entry), `Unexpected plugin bundle entry: plugins/tracework/${entry}`);
@@ -317,6 +319,39 @@ for (const dir of forbiddenCodexPlugin) {
 
 assertSkillTreeCopyMatches(sourceSkillsDir, bundledSkillsDir, 'cli/skills');
 assertSkillTreeCopyMatches(sourceSkillsDir, codexPluginSkillsDir, 'plugins/tracework/skills');
+assert(exists(sourceHooksDir), 'hooks is missing');
+assert(exists(path.join(sourceHooksDir, 'hooks.json')), 'hooks/hooks.json is missing');
+assert(exists(codexPluginHooksDir), 'plugins/tracework/hooks is missing. Run npm run copy-skills first.');
+if (exists(path.join(sourceHooksDir, 'hooks.json'))) {
+  const hookConfig = readJson(path.join(sourceHooksDir, 'hooks.json'));
+  const stopHandlers = hookConfig?.hooks?.Stop;
+  assert(Array.isArray(stopHandlers) && stopHandlers.length === 1, 'hooks/hooks.json must define one Stop matcher group');
+  const command = stopHandlers?.[0]?.hooks?.[0]?.command;
+  assert(
+    typeof command === 'string'
+      && command.includes('${CLAUDE_PLUGIN_ROOT}/skills/capture/scripts/tracework_sessions.py')
+      && command.endsWith(' observe'),
+    'Tracework Stop hook must call the bundled metadata-only session observer',
+  );
+}
+if (exists(sourceHooksDir) && exists(codexPluginHooksDir)) {
+  const sourceHookFiles = collectRelativeFiles(sourceHooksDir);
+  const bundledHookFiles = collectRelativeFiles(codexPluginHooksDir);
+  assert(
+    JSON.stringify(sourceHookFiles) === JSON.stringify(bundledHookFiles),
+    'plugins/tracework/hooks file list is stale or incomplete',
+  );
+  for (const relativeFile of sourceHookFiles) {
+    const sourceFile = path.join(sourceHooksDir, relativeFile);
+    const bundledFile = path.join(codexPluginHooksDir, relativeFile);
+    if (exists(bundledFile)) {
+      assert(
+        fs.readFileSync(sourceFile).equals(fs.readFileSync(bundledFile)),
+        `plugins/tracework/hooks/${relativeFile} is stale`,
+      );
+    }
+  }
+}
 assertAssetCopyMatches(sourceAssetsDir, bundledAssetsDir, 'cli/assets');
 assertAssetCopyMatches(sourceAssetsDir, codexPluginAssetsDir, 'plugins/tracework/assets');
 assertSelectedAssetCopies(sourceAssetsDir, sitePublicDir, siteBrandAssets, 'site/public');

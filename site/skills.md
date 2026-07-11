@@ -27,6 +27,10 @@ and next-month closure targets.
 `/tracework:capture`, checkpoint wording, or `收工` stores adaptive-depth raw
 facts. It does not pre-write separate Daily, Weekly, and Monthly prose.
 
+`/tracework:capture day [YYYY-MM-DD] [scope]` incrementally recovers durable
+facts from opt-in local session manifests. Scope partition happens before
+transcript reading, and transcript bodies are never copied into the vault.
+
 ## Lower-Frequency Trust and Recovery
 
 ### Query
@@ -46,4 +50,4 @@ not a required reporting step.
 ### Cold Start
 
 Configures the vault, project identity, and reporting group with the minimum
-required questions. Auto-capture remains an optional host-specific enhancement.
+required questions. Metadata-only session scanning remains an explicit opt-in.

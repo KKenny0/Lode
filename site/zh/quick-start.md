@@ -34,6 +34,17 @@ Markdown brief，明确说 `weekly PPT` 时才生成 slide outline。
 关键工作结束时说“收工”或运行 `/tracework:capture`。Capture 会从 session 信号选择
 lite、standard 或 deep，只保存值得跨 session 复用的事实。
 
+如果更适合每天结束时集中补录，可以显式启用：
+
+```yaml
+session_scan:
+  enabled: true
+  retention_days: 30
+```
+
+然后运行 `/tracework:capture day [YYYY-MM-DD] [work|personal|all]`。插件 Hook 只索引
+元数据；Capture Day 会先完成 reporting group 分区，再读取会话内容。
+
 ## 5. 需要时再追问和恢复
 
 - `/tracework:query why did we choose ...?`

@@ -18,8 +18,9 @@
     "copy-skills": "node scripts/copy-skills.mjs",
     "check-skills": "node scripts/check-skills.mjs",
     "test:doctor": "node scripts/test-doctor.mjs",
+    "test:session-scan": "python3 -B ../benchmarks/test_tracework_sessions.py",
     "test:regression": "node ../benchmarks/run-regression.mjs",
-    "test": "npm run build && npm run test:doctor && npm run test:regression"
+    "test": "npm run build && npm run test:doctor && npm run test:session-scan && npm run test:regression"
   },
   "engines": {
     "node": ">=18.0.0"

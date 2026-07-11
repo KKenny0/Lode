@@ -1,4 +1,4 @@
-# Tracework Storage Convention (v3.1)
+# Tracework Storage Convention (v3.2)
 
 This file defines the shared data schema and storage convention used by all skills in this monorepo. When generating change entries, follow this spec exactly so downstream consumers can reliably read them.
 
@@ -48,6 +48,40 @@ then store enough structured metadata for future skills to find and reuse it:
   weekly outlines, monthly reviews, and decision roadmaps.
 - **Conversation fallback**: zero-config immediate value when no durable storage
   exists, such as Markdown session recap output.
+
+Tracework may also keep a local operational session index at
+`~/.tracework/session-index/` when `session_scan.enabled` is explicitly true.
+This index is not a fifth storage surface and is not semantic memory. It stores
+only runtime, session id, transcript pointer, cwd history, observation times,
+and scan watermarks. Transcript content is never copied into it. Capture Day
+must partition reporting scope from this metadata before opening a transcript.
+
+Each manifest uses `tracework.session_index.v1` and one file per runtime/session:
+
+```json
+{
+  "schema_version": "tracework.session_index.v1",
+  "runtime": "codex",
+  "session_id": "stable-host-session-id",
+  "transcript_path": "/local/host/transcript.jsonl",
+  "first_seen_at": "2026-07-11T09:00:00+08:00",
+  "last_seen_at": "2026-07-11T18:00:00+08:00",
+  "cwd_history": [
+    {
+      "cwd": "/path/to/project",
+      "first_seen_at": "2026-07-11T09:00:00+08:00",
+      "last_seen_at": "2026-07-11T18:00:00+08:00"
+    }
+  ],
+  "scanned_through": {
+    "2026-07-11": "2026-07-11T17:58:00+08:00"
+  }
+}
+```
+
+The index is disposable. Deleting it disables incremental negative-result
+watermarks, but positive capture watermarks can still be recovered from raw
+entry conversation `source_refs`. Raw entries remain the semantic source.
 
 The knowledge vault itself is organized in two layers following the raw/wiki
 pattern:
@@ -518,7 +552,7 @@ the session. It is additive; old entries without it remain valid.
 
 | Depth | Meaning |
 |---|---|
-| `lite` | Report-ready atoms for routine progress, small fixes, cleanup, or low-risk auto-capture |
+| `lite` | Report-ready atoms for routine progress, small fixes, cleanup, or low-risk recovered session material |
 | `standard` | Normal session memory with motivation, impact, risks, evidence boundary, and report metadata when clear |
 | `deep` | High-value decision, contract, artifact dossier, root-cause, rejected-alternative, or recurring-risk memory |
 

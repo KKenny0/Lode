@@ -1,4 +1,4 @@
 interface:
   display_name: "Tracework Capture"
-  short_description: "Capture session memory with dynamic depth"
-  default_prompt: "Use $capture to route this session to lite, standard, or deep capture and record the report-ready evidence boundary."
+  short_description: "Capture one session or recover a scoped day"
+  default_prompt: "Use $capture to record this session with dynamic depth, or use Capture Day to recover scoped report-ready evidence from today's indexed sessions."

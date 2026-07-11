@@ -57,6 +57,7 @@ references/
 .claude-plugin/marketplace.json         # Claude-style marketplace metadata
 .agents/plugins/marketplace.json        # Codex marketplace metadata
 plugins/tracework/                      # Generated Codex installable plugin bundle
+hooks/                                  # Cross-runtime metadata-only Stop hook
 scripts/sync-convention.sh              # Sync convention to skill-local references
 scripts/sync-reporting-contract.sh      # Sync report contract to report skills
 scripts/sync-decision-replay.sh         # Sync decision replay helper to skill-local copies
@@ -90,7 +91,7 @@ site/.vitepress/dist/
 | Skill | Purpose | Triggers |
 |---|---|---|
 | cold-start-interview | First-run vault, identity, and reporting-group setup | `/tracework:cold-start-interview`, "configure Tracework" |
-| capture | Dynamically routed lite/standard/deep session recap plus artifact context and sync suggestions | `/tracework:capture`, "收工", "done", "今天到这" |
+| capture | Adaptive session recap plus opt-in scoped Capture Day recovery | `/tracework:capture`, `/tracework:capture day`, "收工", "补录今天" |
 | recall | Session-start recall from raw entries and artifact index | `/tracework:recall`, "开工", "session start", "继续上次" |
 | query | Targeted decision replay evidence pack | `/tracework:query`, "why did we choose this?", "为什么当时这么选" |
 | daily | Scoped daily management closure from raw entries, with git fallback | `/tracework:daily`, "更新日报", "日报", "daily note" |
@@ -111,6 +112,7 @@ Tracework is not a strict pipeline. Skills are independently triggered, but they
   query  <- {vault}/raw/decisions/ + {vault}/raw/weeks/
   capture -> {vault}/raw/weeks/{week}/{slug}.json
           -> {vault}/raw/artifacts/{slug}.json when durable artifacts change
+  capture day <- ~/.tracework/session-index/ metadata + scoped local transcripts
   roadmap <- raw entries + decision index + artifact index
 
 每天:
@@ -144,6 +146,7 @@ Tracework is not a strict pipeline. Skills are independently triggered, but they
 - **Reporting-first usage**: daily, weekly, and monthly are the high-frequency product surfaces and can be invoked directly; capture improves confidence; query, recall, and roadmap remain lower-frequency trust/recovery views.
 - **Scope before selection**: reports partition `reporting_group` before ranking headlines. Work output must contain no personal material; `all` keeps groups in separate narrative lanes.
 - **Dynamic capture depth**: capture chooses `lite`, `standard`, or `deep` from the session signal by default; explicit depth wording only overrides the route.
+- **Scope-before-read session recovery**: the opt-in Stop hook stores metadata only. Capture Day resolves one project and reporting group before opening a transcript, skips ambiguous/unassigned sessions, and never copies transcript bodies into the vault.
 - **Progressive-closure reporting**: reports may derive local `O# -> W# -> D# -> E#` chains from raw truth, but activity metrics and provenance alone are not outcomes.
 - **Local evals, public benchmarks**: private evals and workspaces stay ignored; public benchmark guidance lives under `benchmarks/`.
 - **No legacy CLI install surface**: the CLI is for maintenance diagnostics and packaging checks, not user-facing installation. Public install docs should use native plugin marketplace commands.

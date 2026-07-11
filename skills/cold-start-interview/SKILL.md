@@ -35,7 +35,7 @@ Then register the project in `{vault}/raw/projects.json`, including
 4. Stop early when the required fields above are complete.
 
 Do not re-ask existing values. Do not require report language, weekly mode,
-team context, artifact index, or auto-capture during first setup.
+team context, artifact index, or session scanning during first setup.
 
 ## Interview
 
@@ -81,7 +81,7 @@ Rules:
 - Do not store credentials or remote tokens.
 - Missing optional preferences are valid. Consumers infer language, use
   management-brief Weekly by default, enable artifact indexing by default, and
-  treat absent auto-capture as disabled.
+  treat absent session scanning as disabled.
 
 ## Register Project
 
@@ -98,20 +98,32 @@ python <this-skill>/scripts/tracework_raw.py register-project \
 Registration is path-deduplicated. Update an existing matching path rather than
 adding a duplicate.
 
-## Optional Auto-Capture
+## Optional Session Scan
 
-After setup, mention auto-capture as an opt-in enhancement. Do not ask about it
+After setup, mention Capture Day as an opt-in enhancement. Do not ask about it
 during the required interview and do not modify host hooks without explicit
 permission.
 
 Explain:
 
-- `auto_capture.enabled: true` is only a Tracework preference.
-- Each host still needs its own supported hook configuration.
+- `session_scan.enabled: true` lets the bundled Stop hook index session metadata
+  for later `/tracework:capture day` recovery.
+- The index contains pointers and scope metadata, not transcript content.
+- Codex still requires the user to review and trust the plugin hook; host or
+  organization policy may disable it.
 - Manual `收工` or `/tracework:capture` always works.
 
-If the user explicitly opts in, inspect the current host configuration and
-show the minimal non-destructive addition. Never replace unrelated hooks.
+If the user explicitly opts in, preserve unrelated global config fields in
+`~/.tracework/config.yaml` and set:
+
+```yaml
+session_scan:
+  enabled: true
+  retention_days: 30
+```
+
+Do not edit host hook settings. The plugin bundles the hook, and disabling the
+preference makes it a no-op.
 
 ## Completion Report
 
@@ -122,7 +134,7 @@ Return:
 - project name, slug, and reporting group;
 - default report scope;
 - registry result;
-- auto-capture status only when configured.
+- session-scan status only when configured.
 
 Then suggest the primary loop:
 

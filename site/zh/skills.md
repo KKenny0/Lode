@@ -24,6 +24,9 @@
 `/tracework:capture`、checkpoint 或“收工”保存动态深度的 raw facts，不提前写三份
 Daily、Weekly、Monthly 文案。
 
+`/tracework:capture day [YYYY-MM-DD] [scope]` 从显式启用的本地 session manifest
+增量补回持久事实。分区发生在 transcript 读取之前，正文不会被复制进 vault。
+
 ## 低频可信度与恢复
 
 ### Query
@@ -41,5 +44,5 @@ Daily、Weekly、Monthly 文案。
 
 ### Cold Start
 
-用最少问题配置 vault、项目身份和 reporting group。Auto-capture 保持可选且依赖
-具体 host。
+用最少问题配置 vault、项目身份和 reporting group。元数据级 session scan 保持显式
+opt-in。

@@ -8,8 +8,10 @@ description: >
   explicit checkpoint or logging requests like "记录变更", "log changes",
   "记一下今天做了什么", "记一下当前进展", or "checkpoint". The skill dynamically
   routes the session to lite, standard, or deep capture depth; explicit
-  "/tracework:capture lite|standard|deep" wording overrides that route. Do NOT
-  trigger when the user is simply saying goodbye or switching topics.
+  "/tracework:capture lite|standard|deep" wording overrides that route. Use day
+  mode for "/tracework:capture day", "扫描今天的会话", "补录今天", or "capture
+  today". Do NOT trigger when the user is simply saying goodbye or switching
+  topics.
 ---
 
 # Adaptive-Depth Session Recap
@@ -34,6 +36,8 @@ needed:
   reporting metadata, Markdown fallback, and quality checks.
 - `references/capture-operations.md`: resolve config, call `tracework_raw.py`,
   write artifact dossiers, and format quiet receipts.
+- `references/capture-day.md`: scan indexed Codex and Claude sessions for one
+  date without mixing reporting groups. Read for day mode only.
 - `references/tracework-storage-convention.md`: shared schema and storage rules.
 
 ## Zero-Config Mode
@@ -57,6 +61,9 @@ optional fields.
    - Default mode is session-end capture.
    - Use checkpoint mode for "checkpoint", "记一下当前进展", or
      `/tracework:capture checkpoint`.
+   - Use day mode for `/tracework:capture day [YYYY-MM-DD] [scope]` or its
+     natural-language triggers. Read `references/capture-day.md` and follow it
+     instead of extracting only the current conversation.
    - Read `references/capture-routing.md`, then choose one session-level
      `capture_depth`: `lite`, `standard`, or `deep`.
    - Respect explicit depth overrides such as `/tracework:capture deep` or
@@ -95,6 +102,9 @@ Vault mode returns a concise confirmation plus a capture receipt. Include the
 chosen depth and one short routing reason so future tuning can see why the
 skill spent that amount of context.
 
+Day mode returns one aggregate scan receipt. Never echo transcript bodies or
+paths. List only counts, project names, and explicit skip reasons.
+
 Verbose output is opt-in. Treat "verbose", "show recap", "展开总结", or an
 explicit request to inspect the recap as permission to include the Markdown
 recap after writing.
@@ -127,6 +137,10 @@ Before finalizing each entry, check:
 - Do not preserve process noise that would never appear in a daily or weekly
   review.
 - Do not use checkpoint mode to record command-by-command progress.
+- Do not scan host-wide transcript directories directly; day mode reads only
+  manifests created by the opt-in Tracework hook.
+- Do not read a transcript until its project and reporting group pass scope
+  classification.
 - Do not split one coherent feature across many entries.
 - Do not write new entries with `source: "arch-doc"`; that source is
   legacy-only.

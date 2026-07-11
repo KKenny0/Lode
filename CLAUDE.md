@@ -62,6 +62,7 @@ references/
 .claude-plugin/marketplace.json
 .agents/plugins/marketplace.json
 plugins/tracework/
+hooks/
 benchmarks/
 cli/
 site/
@@ -81,7 +82,7 @@ skills/
 | Skill | Purpose | Triggers |
 |---|---|---|
 | cold-start-interview | First-run setup for `~/.tracework/config.yaml` | `/tracework:cold-start-interview`, "configure Tracework" |
-| capture | Dynamically routed lite/standard/deep session recap plus artifact context and sync suggestions | `/tracework:capture`, "收工", "done", "今天到这" |
+| capture | Adaptive session recap plus opt-in scoped Capture Day recovery | `/tracework:capture`, `/tracework:capture day`, "收工", "补录今天" |
 | recall | Session-start recall from raw entries and artifact index | `/tracework:recall`, "开工", "session start", "继续上次" |
 | query | Targeted decision replay evidence pack | `/tracework:query`, "why did we choose this?", "为什么当时这么选" |
 | daily | Scoped daily management closure from raw entries, with git fallback | `/tracework:daily`, "更新日报", "日报", "daily note" |
@@ -103,6 +104,7 @@ skills/
 - **Reporting-first usage**: daily, weekly, and monthly are the high-frequency product surfaces; capture improves confidence; query, recall, and roadmap remain lower-frequency trust/recovery views.
 - **Scope before selection**: reports partition `reporting_group` before ranking headlines. Work output must contain no personal material; `all` keeps groups separate.
 - **Dynamic capture depth**: capture chooses `lite`, `standard`, or `deep` from the session signal by default; explicit depth wording only overrides the route.
+- **Scope-before-read session recovery**: the opt-in Stop hook stores metadata only. Capture Day resolves one project and reporting group before opening a transcript, skips ambiguous/unassigned sessions, and never copies transcript bodies into the vault.
 - **No legacy CLI install surface**: the CLI is for maintenance diagnostics and packaging checks, not user-facing installation.
 
 ## Conventions

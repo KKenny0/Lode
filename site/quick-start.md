@@ -35,6 +35,18 @@ coverage. They do not invent intent, decisions, or verified impact.
 End key work with `收工` or `/tracework:capture`. Capture chooses lite,
 standard, or deep from the session signal and stores only durable facts.
 
+If you prefer one end-of-day recovery pass, opt in with:
+
+```yaml
+session_scan:
+  enabled: true
+  retention_days: 30
+```
+
+Then run `/tracework:capture day [YYYY-MM-DD] [work|personal|all]`. The bundled
+hook indexes metadata only; Capture Day partitions reporting scope before it
+reads transcript content.
+
 ## 5. Use Trust and Recovery When Needed
 
 - `/tracework:query why did we choose ...?`

@@ -9,6 +9,7 @@ const repoRoot = path.resolve(cliRoot, '..');
 const sourceSkillsDir = path.join(repoRoot, 'skills');
 const bundledSkillsDir = path.join(cliRoot, 'skills');
 const sourceAssetsDir = path.join(repoRoot, 'assets');
+const sourceHooksDir = path.join(repoRoot, 'hooks');
 const bundledAssetsDir = path.join(cliRoot, 'assets');
 const sitePublicDir = path.join(repoRoot, 'site', 'public');
 const sourceCodexPluginDir = path.join(repoRoot, '.codex-plugin');
@@ -18,6 +19,7 @@ const bundledCodexPluginDir = path.join(codexPluginBundleDir, '.codex-plugin');
 const bundledClaudePluginDir = path.join(codexPluginBundleDir, '.claude-plugin');
 const bundledCodexSkillsDir = path.join(codexPluginBundleDir, 'skills');
 const bundledCodexAssetsDir = path.join(codexPluginBundleDir, 'assets');
+const bundledCodexHooksDir = path.join(codexPluginBundleDir, 'hooks');
 
 const officialSkills = [
   'capture',
@@ -94,6 +96,10 @@ for (const skill of officialSkills) {
   const skillPath = path.join(sourceSkillsDir, skill);
   if (!fs.existsSync(path.join(skillPath, 'SKILL.md'))) continue;
   copyDir(skillPath, path.join(bundledCodexSkillsDir, skill));
+}
+
+if (fs.existsSync(sourceHooksDir)) {
+  copyDir(sourceHooksDir, bundledCodexHooksDir);
 }
 
 if (fs.existsSync(sourceAssetsDir)) {

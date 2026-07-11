@@ -5,6 +5,7 @@
 ```text
 install -> configure vault and project group -> Daily -> Weekly -> Monthly
                                               \-> capture key sessions
+                                              \-> capture day (opt-in recovery)
 ```
 
 1. Install `tracework@tracework`.
@@ -14,7 +15,9 @@ install -> configure vault and project group -> Daily -> Weekly -> Monthly
    high-frequency management closure.
 4. End key sessions with `收工` or `/tracework:capture` so reports can explain
    intent, risks, trade-offs, and evidence boundaries.
-5. Use Query, Recall, or Roadmap only when work is questioned, resumed, or
+5. Optionally enable metadata-only session scanning and run
+   `/tracework:capture day` once at day end to recover missed sessions.
+6. Use Query, Recall, or Roadmap only when work is questioned, resumed, or
    reviewed over a long horizon.
 
 ## Scope Partition
@@ -32,6 +35,7 @@ headline arcs and a portfolio containing every other meaningful stream.
 
 ```text
 Capture -> raw/weeks/{week}/{slug}.json
+Capture Day -> scoped session index + local transcripts -> raw entries
 Daily   <- raw entries + limited git fallback
 Weekly  <- raw entries + limited git fallback
 Monthly <- raw entries + Daily/Weekly editorial context

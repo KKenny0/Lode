@@ -1,0 +1,16 @@
+{
+  "description": "Index Tracework session metadata when session_scan.enabled is true.",
+  "hooks": {
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 \"${CLAUDE_PLUGIN_ROOT}/skills/capture/scripts/tracework_sessions.py\" observe",
+            "timeout": 5
+          }
+        ]
+      }
+    ]
+  }
+}

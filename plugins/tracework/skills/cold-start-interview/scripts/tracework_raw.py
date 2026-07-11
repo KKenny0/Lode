@@ -98,30 +98,77 @@ def load_yaml_config(path: Path) -> dict[str, Any]:
 
 
 def parse_simple_yaml(raw: str) -> dict[str, Any]:
-    """Parse the simple top-level config shape used by Tracework.
+    """Parse the small nested mapping shape used by Tracework configs.
 
-    This fallback intentionally handles only scalar top-level keys and ignores
-    nested sections such as daily_note.
+    The fallback is intentionally not a general YAML parser. It supports
+    indentation-based mappings and scalar values, which covers Tracework's
+    profile, output, artifact-index, and session-scan settings without adding a
+    mandatory PyYAML dependency.
     """
     result: dict[str, Any] = {}
-    for line in raw.splitlines():
-        stripped = line.strip()
-        if not stripped or stripped.startswith("#"):
-            continue
-        if line[:1].isspace() or ":" not in line:
-            continue
-        key, value = line.split(":", 1)
-        key = key.strip()
-        value = value.strip()
-        if not value or value in {"|", ">"}:
-            continue
+    stack: list[tuple[int, Any]] = [(-1, result)]
+    list_keys = {"repos", "categories", "patterns"}
+
+    def scalar(value: str) -> Any:
         if " #" in value:
             value = value.split(" #", 1)[0].rstrip()
         if (value.startswith('"') and value.endswith('"')) or (
             value.startswith("'") and value.endswith("'")
         ):
-            value = value[1:-1]
-        result[key] = value
+            return value[1:-1]
+        lowered = value.lower()
+        if lowered in {"true", "false"}:
+            return lowered == "true"
+        if lowered in {"null", "~"}:
+            return None
+        if re.fullmatch(r"-?\d+", value):
+            return int(value)
+        if value.startswith("[") and value.endswith("]"):
+            try:
+                parsed = json.loads(value)
+                if isinstance(parsed, list):
+                    return parsed
+            except json.JSONDecodeError:
+                pass
+        return value
+
+    for line in raw.splitlines():
+        stripped = line.strip()
+        if not stripped or stripped.startswith("#"):
+            continue
+        indent = len(line) - len(line.lstrip(" "))
+        while stack[-1][0] >= indent:
+            stack.pop()
+        owner = stack[-1][1]
+
+        if stripped.startswith("-"):
+            if not isinstance(owner, list):
+                continue
+            item = stripped[1:].strip()
+            if not item:
+                continue
+            if ":" in item:
+                key, value = item.split(":", 1)
+                nested_item = {key.strip(): scalar(value.strip()) if value.strip() else {}}
+                owner.append(nested_item)
+                stack.append((indent, nested_item))
+            else:
+                owner.append(scalar(item))
+            continue
+
+        if ":" not in stripped or not isinstance(owner, dict):
+            continue
+        key, value = stripped.split(":", 1)
+        key = key.strip()
+        value = value.strip()
+        if not value:
+            nested: Any = [] if key in list_keys else {}
+            owner[key] = nested
+            stack.append((indent, nested))
+            continue
+        if value in {"|", ">"}:
+            continue
+        owner[key] = scalar(value)
     return result
 
 

@@ -27,6 +27,10 @@ For each local benchmark run, record:
   report contracts, monthly raw loading, decision replay, roadmap thread
   evidence, recall rebuild, unsafe-slug, and capture-helper gates end to end.
   Agent-authored prose quality remains a documented real-output protocol.
+- `test_tracework_sessions.py` generates temporary synthetic Codex and Claude
+  transcripts to verify metadata-only indexing, scope-before-read filtering,
+  incremental watermarks, and fail-closed host parsing. It never reads or
+  commits a user's real session data.
 
 New roadmap and query skills should keep local eval fixtures under ignored
 `skills/*/evals/` directories. Public benchmark writeups should describe the

@@ -71,8 +71,9 @@ profile:
 artifact_index:
   enabled: true              # default true
 
-auto_capture:
-  enabled: false             # default false; host hook still required
+session_scan:
+  enabled: false             # default false; metadata-only Stop hook
+  retention_days: 30         # local session manifests, not transcript copies
 ```
 
 Output paths remain optional under `daily_note`, `weekly_outline`, and
@@ -83,9 +84,15 @@ Output paths remain optional under `daily_note`, `weekly_outline`, and
 Run `/tracework:cold-start-interview`. It asks only for missing vault, project
 identity, reporting group, and—when multiple groups exist—the default scope.
 
-Auto-capture is an optional host-specific enhancement, not a required setup
-step. `auto_capture.enabled: true` does not install or activate a hook by itself.
-Manual `收工` and `/tracework:capture` always remain valid.
+Capture Day is an optional enhancement, not a required setup step. When
+global `session_scan.enabled: true`, the plugin's Stop hook indexes session metadata
+under `~/.tracework/session-index/`; it does not read or copy transcript
+content. Run `/tracework:capture day [YYYY-MM-DD] [scope]` explicitly to recover
+report-ready facts. Manual `收工` and `/tracework:capture` always remain valid.
+
+Codex requires users to review and trust plugin command hooks. Host or
+organization policy may disable hooks; when that happens, Capture Day reports
+the missing index and normal manual capture continues to work.
 
 ## Doctor
 

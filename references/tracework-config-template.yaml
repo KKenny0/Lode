@@ -11,8 +11,9 @@ profile:
 #   team_context: solo               # solo | team | mixed
 # artifact_index:
 #   enabled: true                    # defaults true
-# auto_capture:
-#   enabled: false                   # host-specific hook still required
+# session_scan:
+#   enabled: false                   # opt in to metadata-only Stop-hook indexing
+#   retention_days: 30               # local manifests only; no transcript copies
 
 # Optional output paths:
 # daily_note:
