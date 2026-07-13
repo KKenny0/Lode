@@ -11,7 +11,7 @@
 </p>
 
 <p align="center">
-  <a href="https://kkenny0.github.io/Tracework/zh/"><strong>文档</strong></a> · <a href="README.en.md">English</a>
+  <a href="https://kkenny0.github.io/projects/tracework/"><strong>项目页</strong></a> · <a href="https://kkenny0.github.io/Tracework/"><strong>文档</strong></a> · <a href="README.en.md">English</a>
 </p>
 
 Tracework 把 Agent 工作收口成人能直接使用的报告，同时保留足够的本地证据，供以后
