@@ -11,7 +11,7 @@
     {
       "name": "tracework",
       "description": "Evidence-backed daily, weekly, and monthly reports for agent work.",
-      "version": "0.4.0",
+      "version": "0.4.1",
       "author": {
         "name": "Kennywu",
         "email": "jdlow@live.cn"

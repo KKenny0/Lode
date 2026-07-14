@@ -10,13 +10,14 @@ from __future__ import annotations
 import argparse
 from contextlib import contextmanager
 import datetime as dt
-import fcntl
+import errno
 import json
 import os
 from pathlib import Path
 import re
 import sys
 import tempfile
+import time
 from typing import Any
 
 import tracework_raw
@@ -24,6 +25,9 @@ import tracework_raw
 
 SCHEMA_VERSION = "tracework.session_index.v1"
 MAX_CHUNK_BYTES = 64 * 1024
+LOCK_REGION_BYTES = 1
+WINDOWS_LOCK_TIMEOUT_SECONDS = 4.0
+WINDOWS_LOCK_RETRY_INTERVAL_SECONDS = 0.05
 NOISE_PREFIXES = (
     "<recommended_plugins>",
     "# AGENTS.md instructions for ",
@@ -114,6 +118,52 @@ def write_json_atomic(path: Path, value: Any) -> None:
             pass
 
 
+def prepare_lock_file(handle: Any) -> None:
+    """Ensure the Windows byte-range lock has a region to acquire."""
+    handle.seek(0, os.SEEK_END)
+    size = handle.tell()
+    if size < LOCK_REGION_BYTES:
+        handle.write(b"\0" * (LOCK_REGION_BYTES - size))
+        handle.flush()
+    handle.seek(0)
+
+
+def lock_manifest_handle(handle: Any) -> None:
+    """Acquire a short-lived cross-platform manifest lock."""
+    if os.name == "nt":
+        import msvcrt
+
+        deadline = time.monotonic() + WINDOWS_LOCK_TIMEOUT_SECONDS
+        while True:
+            handle.seek(0)
+            try:
+                msvcrt.locking(handle.fileno(), msvcrt.LK_NBLCK, LOCK_REGION_BYTES)
+                return
+            except OSError as error:
+                if error.errno not in {errno.EACCES, errno.EAGAIN}:
+                    raise
+                if time.monotonic() >= deadline:
+                    raise
+                time.sleep(WINDOWS_LOCK_RETRY_INTERVAL_SECONDS)
+    else:
+        import fcntl
+
+        fcntl.flock(handle.fileno(), fcntl.LOCK_EX)
+
+
+def unlock_manifest_handle(handle: Any) -> None:
+    """Release a lock acquired by lock_manifest_handle."""
+    if os.name == "nt":
+        import msvcrt
+
+        handle.seek(0)
+        msvcrt.locking(handle.fileno(), msvcrt.LK_UNLCK, LOCK_REGION_BYTES)
+    else:
+        import fcntl
+
+        fcntl.flock(handle.fileno(), fcntl.LOCK_UN)
+
+
 @contextmanager
 def manifest_lock(runtime: str, session_id: str):
     path = manifest_path(runtime, session_id)
@@ -122,12 +172,13 @@ def manifest_lock(runtime: str, session_id: str):
     lock_path = path.with_suffix(path.suffix + ".lock")
     descriptor = os.open(lock_path, os.O_CREAT | os.O_RDWR, 0o600)
     os.chmod(lock_path, 0o600)
-    with os.fdopen(descriptor, "r+") as handle:
-        fcntl.flock(handle.fileno(), fcntl.LOCK_EX)
+    with os.fdopen(descriptor, "r+b") as handle:
+        prepare_lock_file(handle)
+        lock_manifest_handle(handle)
         try:
             yield path
         finally:
-            fcntl.flock(handle.fileno(), fcntl.LOCK_UN)
+            unlock_manifest_handle(handle)
 
 
 def session_scan_settings(cwd: Path) -> tuple[bool, int]:

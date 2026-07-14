@@ -17,7 +17,15 @@ from concurrent.futures import ThreadPoolExecutor
 REPO_ROOT = Path(__file__).resolve().parents[1]
 SESSION_HELPER = REPO_ROOT / "skills" / "capture" / "scripts" / "tracework_sessions.py"
 RAW_HELPER = REPO_ROOT / "skills" / "capture" / "scripts" / "tracework_raw.py"
-TARGET_DATE = "2026-07-11"
+TARGET_DATE = dt.datetime.now().astimezone().date().isoformat()
+TARGET_WEEK = dt.date.fromisoformat(TARGET_DATE).strftime("%G-W%V")
+
+
+def target_timestamp(hour: int, minute: int = 0, second: int = 0) -> str:
+    target = dt.date.fromisoformat(TARGET_DATE)
+    return dt.datetime(target.year, target.month, target.day, hour, minute, second).astimezone().isoformat(
+        timespec="seconds"
+    )
 
 
 def write_jsonl(path: Path, records: list[dict]) -> None:
@@ -98,6 +106,7 @@ class SessionScanTest(unittest.TestCase):
         env.update(
             {
                 "HOME": str(self.home),
+                "USERPROFILE": str(self.home),
                 "TRACEWORK_SESSION_INDEX": str(self.index),
                 "TRACEWORK_SESSION_RUNTIME": runtime,
                 "PYTHONDONTWRITEBYTECODE": "1",
@@ -177,11 +186,13 @@ class SessionScanTest(unittest.TestCase):
             encoding="utf-8",
         )
         transcript = self.root / "disabled.jsonl"
-        write_jsonl(transcript, [codex_message("2026-07-11T09:00:00+08:00", "user", "hello")])
-        self.run_helper(
+        write_jsonl(transcript, [codex_message(target_timestamp(9), "user", "hello")])
+        result = self.run_helper(
             "observe",
             payload={"session_id": "disabled", "transcript_path": str(transcript), "cwd": str(self.work)},
         )
+        self.assertEqual(result.stdout, "")
+        self.assertEqual(result.stderr, "")
         self.assertFalse(self.index.exists())
         collected = self.list_day("work")
         self.assertEqual(collected["error"], "session_scan_disabled")
@@ -192,11 +203,11 @@ class SessionScanTest(unittest.TestCase):
         write_jsonl(
             work_transcript,
             [
-                codex_message("2026-07-11T09:00:00+08:00", "developer", "hidden instructions"),
-                codex_message("2026-07-11T09:01:00+08:00", "user", "<environment_context>noise</environment_context>"),
-                codex_message("2026-07-11T09:02:00+08:00", "user", "Fix the retry boundary"),
-                codex_message("2026-07-11T09:03:00+08:00", "assistant", "Working on it"),
-                codex_message("2026-07-11T09:04:00+08:00", "assistant", "Moved validation before export and tests pass"),
+                codex_message(target_timestamp(9), "developer", "hidden instructions"),
+                codex_message(target_timestamp(9, 1), "user", "<environment_context>noise</environment_context>"),
+                codex_message(target_timestamp(9, 2), "user", "Fix the retry boundary"),
+                codex_message(target_timestamp(9, 3), "assistant", "Working on it"),
+                codex_message(target_timestamp(9, 4), "assistant", "Moved validation before export and tests pass"),
             ],
         )
         personal_missing = self.root / "personal-does-not-exist.jsonl"
@@ -219,9 +230,9 @@ class SessionScanTest(unittest.TestCase):
         write_jsonl(
             transcript,
             [
-                claude_message("2026-07-11T10:00:00+08:00", "user", "Choose the storage boundary"),
-                claude_message("2026-07-11T10:01:00+08:00", "assistant", "Drafting"),
-                claude_message("2026-07-11T10:02:00+08:00", "assistant", "Kept raw entries as semantic truth"),
+                claude_message(target_timestamp(10), "user", "Choose the storage boundary"),
+                claude_message(target_timestamp(10, 1), "assistant", "Drafting"),
+                claude_message(target_timestamp(10, 2), "assistant", "Kept raw entries as semantic truth"),
             ],
         )
         self.observe("claude-session", self.work, transcript, runtime="claude")
@@ -249,8 +260,8 @@ class SessionScanTest(unittest.TestCase):
         self.assertEqual(second["skip"], "no_new_messages")
 
         with transcript.open("a", encoding="utf-8") as handle:
-            handle.write(json.dumps(claude_message("2026-07-11T10:05:00+08:00", "user", "Add the final evidence gap")) + "\n")
-            handle.write(json.dumps(claude_message("2026-07-11T10:06:00+08:00", "assistant", "Recorded missing install smoke")) + "\n")
+            handle.write(json.dumps(claude_message(target_timestamp(10, 5), "user", "Add the final evidence gap")) + "\n")
+            handle.write(json.dumps(claude_message(target_timestamp(10, 6), "assistant", "Recorded missing install smoke")) + "\n")
         third = self.collect_session("claude", "claude-session")
         delta = third["session"]
         delta_text = json.dumps(delta, ensure_ascii=False)
@@ -262,14 +273,14 @@ class SessionScanTest(unittest.TestCase):
         write_jsonl(
             transcript,
             [
-                codex_message("2026-07-11T11:00:00+08:00", "user", "Old prompt"),
-                codex_message("2026-07-11T11:01:00+08:00", "assistant", "Old result"),
-                codex_message("2026-07-11T11:05:00+08:00", "user", "New prompt"),
-                codex_message("2026-07-11T11:06:00+08:00", "assistant", "New result"),
+                codex_message(target_timestamp(11), "user", "Old prompt"),
+                codex_message(target_timestamp(11, 1), "assistant", "Old result"),
+                codex_message(target_timestamp(11, 5), "user", "New prompt"),
+                codex_message(target_timestamp(11, 6), "assistant", "New result"),
             ],
         )
         self.observe("raw-session", self.work, transcript)
-        raw_dir = self.vault / "raw" / "weeks" / "2026-W28"
+        raw_dir = self.vault / "raw" / "weeks" / TARGET_WEEK
         raw_dir.mkdir(parents=True)
         (raw_dir / "work-project.json").write_text(
             json.dumps(
@@ -279,7 +290,7 @@ class SessionScanTest(unittest.TestCase):
                             {
                                 "type": "conversation",
                                 "ref": "session:codex:raw-session",
-                                "timestamp": "2026-07-11T11:01:00+08:00",
+                                "timestamp": target_timestamp(11, 1),
                             }
                         ]
                     }
@@ -295,7 +306,7 @@ class SessionScanTest(unittest.TestCase):
 
     def test_mixed_project_session_fails_closed(self) -> None:
         transcript = self.root / "mixed.jsonl"
-        write_jsonl(transcript, [codex_message("2026-07-11T12:00:00+08:00", "user", "mixed")])
+        write_jsonl(transcript, [codex_message(target_timestamp(12), "user", "mixed")])
         self.observe("mixed-session", self.work, transcript)
         self.observe("mixed-session", self.personal, transcript)
         collected = self.list_day("all")
@@ -305,7 +316,7 @@ class SessionScanTest(unittest.TestCase):
 
     def test_concurrent_observations_preserve_scope_history_and_private_modes(self) -> None:
         transcript = self.root / "concurrent.jsonl"
-        write_jsonl(transcript, [codex_message("2026-07-11T12:30:00+08:00", "user", "mixed")])
+        write_jsonl(transcript, [codex_message(target_timestamp(12, 30), "user", "mixed")])
         payloads = [
             {"session_id": "concurrent-session", "transcript_path": str(transcript), "cwd": str(cwd)}
             for cwd in (self.work, self.personal)
@@ -320,8 +331,9 @@ class SessionScanTest(unittest.TestCase):
             {item["cwd"] for item in manifest["cwd_history"]},
             {str(self.work.resolve()), str(self.personal.resolve())},
         )
-        self.assertEqual(manifest_path.stat().st_mode & 0o777, 0o600)
-        self.assertEqual(manifest_path.parent.stat().st_mode & 0o777, 0o700)
+        if os.name != "nt":
+            self.assertEqual(manifest_path.stat().st_mode & 0o777, 0o600)
+            self.assertEqual(manifest_path.parent.stat().st_mode & 0o777, 0o700)
         listed = self.list_day("all")
         skipped = next(item for item in listed["skipped"] if item.get("session_id") == "concurrent-session")
         self.assertEqual(skipped["reason"], "ambiguous_project_or_group")
@@ -330,7 +342,7 @@ class SessionScanTest(unittest.TestCase):
         transcript = self.root / "unknown.jsonl"
         write_jsonl(
             transcript,
-            [{"timestamp": "2026-07-11T13:00:00+08:00", "type": "future_host_record", "body": "do not infer"}],
+            [{"timestamp": target_timestamp(13), "type": "future_host_record", "body": "do not infer"}],
         )
         self.observe("unknown-session", self.work, transcript)
         listed = self.list_day("work")
@@ -342,7 +354,7 @@ class SessionScanTest(unittest.TestCase):
         transcript = self.root / "large.jsonl"
         write_jsonl(
             transcript,
-            [codex_message("2026-07-11T14:00:00+08:00", "user", "x" * 70000)],
+            [codex_message(target_timestamp(14), "user", "x" * 70000)],
         )
         self.observe("large-session", self.work, transcript)
         first = self.collect_session("codex", "large-session", chunk=1)["session"]
@@ -357,7 +369,7 @@ class SessionScanTest(unittest.TestCase):
         transcript = self.root / "many-small.jsonl"
         records = [
             codex_message(
-                f"2026-07-11T15:{index // 60:02d}:{index % 60:02d}+08:00",
+                target_timestamp(15, index // 60, index % 60),
                 "user" if index % 2 == 0 else "assistant",
                 f"message-{index}",
             )
