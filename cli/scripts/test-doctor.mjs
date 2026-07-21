@@ -62,6 +62,15 @@ function readCodexPluginVersion() {
 }
 
 function homeEnv(home) {
+  // Windows temp directories live under the real user profile. Create an
+  // empty nearest config so ancestor discovery cannot leak the real global
+  // ~/.tracework/config.yaml into an otherwise isolated test home.
+  const configDir = path.join(home, '.tracework');
+  const configPath = path.join(configDir, 'config.yaml');
+  if (!fs.existsSync(configPath)) {
+    fs.mkdirSync(configDir, { recursive: true });
+    fs.writeFileSync(configPath, '{}\n', 'utf-8');
+  }
   return { HOME: home, USERPROFILE: home };
 }
 

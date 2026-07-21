@@ -14,7 +14,7 @@ const decisionGraph = path.join(repoRoot, 'skills', 'query', 'scripts', 'decisio
 const roadmapGraph = path.join(repoRoot, 'skills', 'roadmap', 'scripts', 'decision_graph.py');
 const recallContext = path.join(repoRoot, 'skills', 'recall', 'scripts', 'recall_context.py');
 const monthlyPrepare = path.join(repoRoot, 'skills', 'monthly', 'scripts', 'prepare_monthly_data.py');
-const pythonEnv = { ...process.env, PYTHONDONTWRITEBYTECODE: '1' };
+const pythonEnv = { ...process.env, PYTHONDONTWRITEBYTECODE: '1', PYTHONUTF8: '1' };
 
 const STORYBOARD_PIPELINE_RAW_WEEKS = {
   '2026-W18': [
@@ -531,7 +531,8 @@ function runRecallRebuildFixture(fixture) {
       `${fixture.id}: missing decision_context_source`,
     );
     assert(
-      String(rebuiltContext.decision_context_source.path || '').endsWith(`/raw/decisions/${slug}.json`),
+      fs.realpathSync.native(String(rebuiltContext.decision_context_source.path || ''))
+        === fs.realpathSync.native(decisionPath),
       `${fixture.id}: decision_context_source.path should point at the derived decision index`,
     );
     assert(rebuiltContext.decision_context_source.rebuilt === true, `${fixture.id}: expected rebuilt=true`);
@@ -876,8 +877,17 @@ function runArtifactUpsertDossierFixture(fixture) {
 
   try {
     fs.mkdirSync(tempVault, { recursive: true });
-    fs.writeFileSync(dossierPath, JSON.stringify(config.dossier_artifact, null, 2), 'utf-8');
-    fs.writeFileSync(thinPath, JSON.stringify(config.thin_artifact, null, 2), 'utf-8');
+    const dossierArtifact = structuredClone(config.dossier_artifact);
+    const thinArtifact = structuredClone(config.thin_artifact);
+    dossierArtifact.path = path.join(tempRoot, 'project', dossierArtifact.repo_relative_path || 'reporting-model.md');
+    thinArtifact.path = path.join(tempRoot, 'project', 'docs', 'thin.md');
+    for (const sourceRef of dossierArtifact.source_entry_refs || []) {
+      if (sourceRef && typeof sourceRef === 'object' && typeof sourceRef.path === 'string') {
+        sourceRef.path = path.join(tempVault, 'raw', 'weeks', sourceRef.week || 'unknown-week', `${slug}.json`);
+      }
+    }
+    fs.writeFileSync(dossierPath, JSON.stringify(dossierArtifact, null, 2), 'utf-8');
+    fs.writeFileSync(thinPath, JSON.stringify(thinArtifact, null, 2), 'utf-8');
     const dossierResult = runJson('python3', [
       captureRaw,
       'upsert-artifact',

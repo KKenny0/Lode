@@ -110,6 +110,7 @@ class SessionScanTest(unittest.TestCase):
                 "TRACEWORK_SESSION_INDEX": str(self.index),
                 "TRACEWORK_SESSION_RUNTIME": runtime,
                 "PYTHONDONTWRITEBYTECODE": "1",
+                "PYTHONUTF8": "1",
             }
         )
         return env
