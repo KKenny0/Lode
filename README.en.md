@@ -76,7 +76,7 @@ manually.
 | Command | Role | Output |
 | :--- | :--- | :--- |
 | `/tracework:daily` | High-frequency closure | What changed today, why it matters, and the next gate |
-| `/tracework:weekly` | High-frequency closure | Weekly management judgment; Markdown brief by default, PPT outline only when requested |
+| `/tracework:weekly` | High-frequency closure | Weekly management judgment; Markdown brief by default, department-ready PPT outline when requested |
 | `/tracework:monthly` | High-frequency review | Raw-first phase outcomes, recurring risks, and next-month closure targets |
 | `/tracework:capture` | Evidence foundation | An adaptive lite/standard/deep session raw record |
 | `/tracework:capture day [date] [scope]` | Same-day recovery | Incrementally recovered evidence from indexed sessions after scope partitioning |
@@ -84,6 +84,16 @@ manually.
 | `/tracework:recall` | Lower-frequency recovery | Bounded context for resuming older work |
 | `/tracework:roadmap` | Advanced review | A long-range decision-thread narrative |
 | `/tracework:cold-start-interview` | One-time setup | Vault, project identity, and reporting group |
+
+When explicitly asked for a `weekly PPT`, Tracework produces a 6-10 slide
+outline for an individual contributor reporting within a department. Core
+technical results follow three questions: why it changed, how the new mechanism
+works, and whether it is effective. Before/After establishes the state change;
+solution logic and implementation narrative explain the main path, branches,
+fallbacks, and invariants; data, tests, or a visible measurement gap establish
+the evidence boundary. The main deck keeps at most two or three logic diagrams,
+does not manufacture architecture diagrams for routine maintenance, and leaves
+raw evidence mappings in the appendix.
 
 Decision replay is a trust mechanism, not a daily operation. A reader can drill
 from a report claim to raw entries, rejected alternatives, risks, and direct

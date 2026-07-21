@@ -25,7 +25,12 @@ projects are excluded from scoped reports rather than guessed into work output.
 
 Use `personal` for personal projects or `all` for a private combined view with
 separate group sections. Weekly returns a Markdown brief by default; say
-`weekly PPT` when you need a slide outline.
+`weekly PPT` when you need a 6-10 slide outline for a department update. The
+outline is written from an individual contributor's perspective. Core
+mechanism changes combine Before/After, a solution-logic diagram, an
+implementation narrative, and separate validation evidence. The main deck uses
+at most two or three logic diagrams and keeps raw evidence mappings in the
+appendix. The command produces an outline, not a rendered `.pptx` file.
 
 Without raw entries, reports can use meaningful git activity as `limited`
 coverage. They do not invent intent, decisions, or verified impact.

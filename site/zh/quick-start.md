@@ -24,7 +24,10 @@ codex plugin add tracework@tracework
 ```
 
 个人项目使用 `personal`；私人全景使用 `all`，各组会分别叙事。Weekly 默认生成
-Markdown brief，明确说 `weekly PPT` 时才生成 slide outline。
+Markdown brief；明确说 `weekly PPT` 时，才生成面向部门内部汇报、以 IC 为讲述者的
+6–10 页 slide outline。核心机制变化会组合 Before/After、方案逻辑图、实施叙事和
+独立验证证据，主 deck 最多保留 2–3 张逻辑图，原始证据映射留在附录。该命令生成的
+是大纲，不是已经渲染的 `.pptx` 文件。
 
 没有 raw entries 时，报告可以用有意义的 git 活动生成 `limited` coverage，但不会
 补造动机、决策或已验证影响。

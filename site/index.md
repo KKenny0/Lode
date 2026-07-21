@@ -17,7 +17,7 @@ features:
   - title: Close the day
     details: Explain what changed, why it matters, what remains gated, and what happens next.
   - title: Form the weekly judgment
-    details: Select a few result arcs without dropping the rest of the work from portfolio coverage.
+    details: Turn selected result arcs into a reportable story of what changed, how the mechanism works, and what the evidence proves.
   - title: Review the phase
     details: Build raw-first monthly outcomes, recurring risks, and next-month closure targets.
   - title: Drill into the evidence

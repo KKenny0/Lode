@@ -66,7 +66,7 @@ Daily、Weekly、Monthly 必须先分区，再选择主线：
 | Command | 角色 | 输出 |
 | :--- | :--- | :--- |
 | `/tracework:daily` | 高频收口 | 今天改变了什么、为什么重要、下一道门是什么 |
-| `/tracework:weekly` | 高频收口 | 周级管理判断；默认 Markdown brief，明确请求时生成 PPT 大纲 |
+| `/tracework:weekly` | 高频收口 | 周级管理判断；默认 Markdown brief，明确请求时生成面向部门汇报的 PPT 大纲 |
 | `/tracework:monthly` | 高频回顾 | Raw-first 的阶段成果、反复风险和下月收口目标 |
 | `/tracework:capture` | 证据基础 | 动态选择 lite/standard/deep 的 session raw record |
 | `/tracework:capture day [date] [scope]` | 当日补录 | 按分组扫描已索引 session，增量补回当天证据 |
@@ -74,6 +74,12 @@ Daily、Weekly、Monthly 必须先分区，再选择主线：
 | `/tracework:recall` | 低频恢复 | 继续旧工作时恢复有边界的上下文 |
 | `/tracework:roadmap` | 高级复盘 | 长周期决策线程叙事 |
 | `/tracework:cold-start-interview` | 一次性设置 | Vault、项目身份和报告分组 |
+
+明确请求 `weekly PPT` 时，Tracework 会为部门内 IC 生成 6–10 页汇报大纲。核心技术
+成果按“为什么改、如何工作、是否有效”组织：Before/After 说明状态变化，方案逻辑图和
+实施叙事解释主路径、关键分支、回退与不变量，数据、测试或明确的 measurement gap
+单独说明效果边界。主 deck 最多保留 2–3 张逻辑图；普通维护工作不会为了视觉形式
+强行生成架构图，原始证据映射留在附录。
 
 Decision replay 是可信机制，而不是需要每天使用的操作。读者可以从报告主张向下追到
 raw entry、被拒方案、风险和直接证据。记录不足时，Tracework 应该明确暴露缺口，而
