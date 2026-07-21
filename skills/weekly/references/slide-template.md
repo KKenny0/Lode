@@ -13,12 +13,13 @@ stream. Allocate slides by the conclusions the audience must understand.
 Core technical results use this sequence:
 
 ```text
-为什么改          如何工作          是否有效
-Before/After  ->  方案逻辑图  ->  数据或验证结果
+为什么改          如何工作                    是否有效
+Before/After  ->  方案逻辑图 + 实施叙事  ->  数据或验证结果
 ```
 
 - A normal result covers at least two of the three parts.
-- A result with `solution_logic.significance=core` covers all three.
+- A result with `solution_logic.significance=core` covers all three and adds a
+  complete implementation narrative.
 - A simple result may combine Before/After and Solution Logic on one slide.
 - A complex result separates the state/result slide from its logic slide.
 - Keep at most two to three solution-logic diagrams in the main deck. Put the
@@ -27,6 +28,11 @@ Before/After  ->  方案逻辑图  ->  数据或验证结果
   names connected by decorative arrows do not pass.
 - A logic diagram proves only how a solution works. Data, tests, or observed
   evidence must separately support whether it worked.
+- Evaluate this coverage across the result's associated slides. Do not force
+  Before/After, the diagram, the narrative, and result evidence onto one page.
+- Keep each implementation-narrative block to one or two sentences. Put fuller
+  mechanism detail in the technical appendix; each block must stay within 600
+  Unicode characters.
 - Each slide has one conclusion title and at most one primary visual.
 
 ## Main Deck
@@ -63,6 +69,7 @@ Before/After  ->  方案逻辑图  ->  数据或验证结果
 **改造前：** {supported starting state}
 **关键改变：** {intervention}
 **改造后：** {supported end state}
+**实施说明：** {only for a result with `solution_logic.significance=core | supporting`; compress its existing `implementation_narrative` into two sentences without creating a separate narrative field}
 **部门价值：** {delivery, quality, risk, cost, collaboration, or iteration meaning}
 **成熟度：** 机制 {state} / 效果 {state} / 生产验收 {state}
 **剩余门槛：** {gate}
@@ -73,14 +80,17 @@ Before/After  ->  方案逻辑图  ->  数据或验证结果
 ## Slide N｜{Solution Logic supported conclusion}
 
 **推荐视觉：** {sequence | swimlane | data flow | decision tree | failure path | state machine | architecture}
-**入口条件：** {trigger}
-**参与者：** {actors}
-**核心流程：** {ordered main flow}
-**关键分支：** {material branches}
-**异常或降级：** {fallbacks}
-**输出状态：** {output}
-**关键不变量：** {compatibility or safety invariants}
-**剩余边界：** {uncovered or unverified boundary}
+
+{solution-logic diagram containing the trigger, actors, ordered flow, material
+branches, fallbacks, output, invariants, and remaining boundary}
+
+### 实施说明
+
+1. **正常路径：** {implementation_narrative.normal_path}
+2. **分支与回退：** {implementation_narrative.branch_and_fallback}
+3. **输出与约束：** {implementation_narrative.outcome_and_invariant}
+
+**验证结论：** {supported data or test result, followed by the measurement gap when effect evidence is incomplete}
 **页面结论：** {why this mechanism addresses the original problem}
 
 Keep source locations, raw evidence ids, commit hashes, and internal links in
@@ -155,7 +165,7 @@ understand coverage or allocation. Otherwise keep it in the appendix.
 
 Parameter tuning, small refactors, cleanup, and configuration edits that do not
 change runtime behavior remain portfolio items. Do not force an architecture
-diagram for visual variety.
+diagram or implementation narrative for visual variety.
 
 For `all`, create separate group mini-decks with their own judgment, result
 selection, logic-diagram budget, portfolio, closure targets, and evidence map.

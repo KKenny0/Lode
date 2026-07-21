@@ -188,7 +188,44 @@ Diagram routing:
 A logic diagram is incomplete when it lists only actors and arrows. Preserve
 the material trigger, branches, fallbacks, output, invariants, remaining
 boundary, and evidence references. It explains why the design can address the
-original problem; it is not effectiveness evidence.
+original problem; it is not effectiveness evidence. Keep presentation lists
+bounded: at most 12 actors or main-flow steps, 8 branches, fallbacks, or
+invariants, and 24 evidence references. Summarize overflow in the technical
+appendix instead of expanding the main-deck logic object.
+
+## Implementation Narrative
+
+`implementation_narrative` exists only inside a slide-projection result. It is
+not a second technical-fact object. Rewrite the same result's `solution_logic`
+into three short, reader-facing blocks:
+
+```json
+{
+  "implementation_narrative": {
+    "normal_path": "",
+    "branch_and_fallback": "",
+    "outcome_and_invariant": ""
+  }
+}
+```
+
+- `normal_path`: start from the trigger, describe at least two ordered actions,
+  and state what waiting, coupling, or error-propagation problem they address.
+- `branch_and_fallback`: state the condition that dispatches, degrades, or
+  falls back, the resulting path, and the concrete risk that path avoids.
+- `outcome_and_invariant`: state the produced result or state and at least one
+  input, interface, call-count, compatibility, or safety constraint that stays
+  unchanged.
+
+When `solution_logic.significance=core`, all three blocks are required. Derive
+them only from that result's solution logic and evidence; do not add mechanisms
+or effects that those sources do not support. A `supporting` result may use the
+narrative in the technical appendix. A `none` result does not generate it.
+Keep each main-deck block to one or two sentences. Diagram node names, serialized
+field lists, and repeated slide titles are not implementation narrative. For a
+default `department_ic` deck, never copy source paths, URLs, commit hashes, raw
+evidence ids, internal links, or active Markdown/HTML from the evidence into
+these blocks. Each block must stay within 600 Unicode characters.
 
 ## Slide Projection
 
@@ -216,7 +253,8 @@ fields shown below. Do not create a second result identity namespace.
       "effect_evidence_kind": "test | smoke_test | benchmark | observed | recorded",
       "validation_result": "",
       "measurement_plan": "",
-      "closure_criterion": ""
+      "closure_criterion": "",
+      "implementation_narrative": null
     }
   ],
   "portfolio": [],
@@ -234,7 +272,10 @@ the main deck. A normal result covers at least two of: State Transition,
 Solution Logic, and Metric Evidence or other direct validation. A result with
 `solution_logic.significance=core` must cover all three; when effect metrics are
 not yet available, the third part is an explicit validation result plus the
-measurement gap and closure criterion, never invented data.
+measurement gap and closure criterion, never invented data. A core result also
+requires all three `implementation_narrative` fields. This is result-level
+coverage across associated slides, not a requirement to place Before/After,
+logic, narrative, and validation on one page.
 
 ## Portfolio
 

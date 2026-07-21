@@ -22,6 +22,15 @@ const RESULT_CHART_TYPES = new Set([
 const MATURITY_STATES = new Set(['yes', 'partial', 'no', 'not_applicable']);
 const DIRECT_VALIDATION_KINDS = new Set(['test', 'smoke_test', 'benchmark', 'observed', 'recorded']);
 const SERIES_CHART_TYPES = new Set(['distribution_chart', 'trend_chart', 'timeline_chart', 'waterfall_chart']);
+const MAX_NARRATIVE_CHARACTERS = 600;
+const LOGIC_LIST_LIMITS = {
+  actors: 12,
+  main_flow: 12,
+  branches: 8,
+  fallbacks: 8,
+  invariants: 8,
+  evidence_refs: 24,
+};
 
 function present(value) {
   return typeof value === 'string' ? Boolean(value.trim()) : value !== null && value !== undefined;
@@ -33,6 +42,107 @@ function nonEmptyString(value) {
 
 function nonEmptyStringArray(value) {
   return Array.isArray(value) && value.length > 0 && value.every(nonEmptyString);
+}
+
+function normalizeNarrativeText(value) {
+  return String(value || '')
+    .toLowerCase()
+    .replace(/[^\p{L}\p{N}]+/gu, ' ')
+    .trim()
+    .replace(/\s+/g, ' ');
+}
+
+const NARRATIVE_PRESENTATION_LABELS = [
+  'normal path',
+  'branch and fallback',
+  'outcome and invariant',
+  'implementation narrative',
+  'step',
+  '正常路径',
+  '分支与回退',
+  '输出与约束',
+  '实施说明',
+];
+
+function narrativeIsOnlyLogicLabels(value, result) {
+  const logic = result.solution_logic || {};
+  const arrays = [logic.actors, logic.main_flow, logic.branches, logic.fallbacks, logic.invariants]
+    .filter(Array.isArray);
+  const fragments = [result.title, logic.trigger, logic.output, logic.remaining_boundary];
+  for (const values of arrays) {
+    fragments.push(...values);
+  }
+  let remaining = normalizeNarrativeText(value);
+  for (const label of NARRATIVE_PRESENTATION_LABELS) {
+    remaining = remaining.split(normalizeNarrativeText(label)).join(' ');
+  }
+  const normalizedFragments = [...new Set(fragments.map(normalizeNarrativeText).filter(Boolean))]
+    .sort((left, right) => right.length - left.length);
+  for (const fragment of normalizedFragments) {
+    remaining = remaining.split(fragment).join(' ');
+  }
+  return !normalizeNarrativeText(remaining);
+}
+
+function containsForbiddenMainDeckReference(value) {
+  const text = String(value || '');
+  return /[\u0000-\u001f\u007f-\u009f]/.test(text)
+    || /!?\[[^\]]*\]\([^)]*\)/.test(text)
+    || /<\/?[A-Za-z][^>]*>/.test(text)
+    || /https?:\/\//i.test(text)
+    || /(^|[\s(])\/\/[A-Za-z0-9.-]+(?:\/|$)/.test(text)
+    || /\bfile:/i.test(text)
+    || /%(?:2f|5c)/i.test(text)
+    || /\b[A-Za-z]:[\\/][^\s]+/.test(text)
+    || /(^|\s)\/(?:[^/\s]+\/)+[^/\s]+/.test(text)
+    || /(?:[\w.-]+[\\/]){2,}[\w.-]+(?::\d+)?/.test(text)
+    || /\b(?=[0-9a-f]{7,40}\b)(?=[0-9a-f]*[a-f])(?=[0-9a-f]*\d)[0-9a-f]{7,40}\b/i.test(text)
+    || /\b[OWDE]\d+\b/.test(text);
+}
+
+function validateImplementationNarrative(result, fixtureId, audience) {
+  const significance = result.solution_logic?.significance;
+  const narrative = result.implementation_narrative;
+
+  if (!significance || significance === 'none') {
+    assert(
+      narrative === null || narrative === undefined,
+      `${fixtureId}: ${result.id} non-mechanism result gained implementation narrative`,
+    );
+    return false;
+  }
+
+  if (significance === 'supporting' && (narrative === null || narrative === undefined)) {
+    return false;
+  }
+
+  assert(
+    narrative && typeof narrative === 'object' && !Array.isArray(narrative),
+    `${fixtureId}: ${result.id} implementation narrative is missing`,
+  );
+  const normalizedBlocks = [];
+  for (const field of ['normal_path', 'branch_and_fallback', 'outcome_and_invariant']) {
+    assert(nonEmptyString(narrative[field]), `${fixtureId}: ${result.id} implementation narrative ${field} is missing`);
+    const normalized = normalizeNarrativeText(narrative[field]);
+    assert(normalized, `${fixtureId}: ${result.id} implementation narrative ${field} has no substantive text`);
+    assert(
+      [...narrative[field]].length <= MAX_NARRATIVE_CHARACTERS,
+      `${fixtureId}: ${result.id} implementation narrative ${field} exceeds the main-deck size limit`,
+    );
+    assert(
+      !narrativeIsOnlyLogicLabels(narrative[field], result),
+      `${fixtureId}: ${result.id} implementation narrative ${field} only repeats logic labels`,
+    );
+    if (audience === 'department_ic') {
+      assert(
+        !containsForbiddenMainDeckReference(narrative[field]),
+        `${fixtureId}: ${result.id} implementation narrative ${field} leaks an internal reference`,
+      );
+    }
+    normalizedBlocks.push(normalized);
+  }
+  assert(new Set(normalizedBlocks).size === normalizedBlocks.length, `${fixtureId}: ${result.id} implementation narrative blocks must be distinct`);
+  return true;
 }
 
 function validateStateTransition(result, fixtureId) {
@@ -132,6 +242,9 @@ function validateSolutionLogic(result, fixtureId, expectedRoutes) {
   assert(nonEmptyString(logic.remaining_boundary), `${fixtureId}: ${result.id} remaining boundary is missing`);
   assert(DIAGRAM_TYPES.has(logic.recommended_diagram), `${fixtureId}: ${result.id} invalid diagram type`);
   assert(nonEmptyStringArray(logic.evidence_refs), `${fixtureId}: ${result.id} logic evidence is missing`);
+  for (const [field, limit] of Object.entries(LOGIC_LIST_LIMITS)) {
+    assert(logic[field].length <= limit, `${fixtureId}: ${result.id} solution logic ${field} exceeds ${limit} items`);
+  }
 
   if (logic.significance === 'core') {
     assert(logic.branches.length > 0, `${fixtureId}: ${result.id} core solution branches are missing`);
@@ -175,6 +288,15 @@ function validateSlideContract(fixture, output, group) {
       && projection.main_deck_slide_titles.length === projection.main_deck_slide_count,
     `${fixtureId}: declared slide count does not match the composed slide titles`,
   );
+  assert(
+    new Set(projection.main_deck_slide_titles.map(normalizeNarrativeText)).size === projection.main_deck_slide_titles.length,
+    `${fixtureId}: main-deck slide titles must be distinct`,
+  );
+  if (projection.audience === 'department_ic') {
+    for (const title of projection.main_deck_slide_titles) {
+      assert(!containsForbiddenMainDeckReference(title), `${fixtureId}: main-deck slide title contains an unsafe or internal reference`);
+    }
+  }
 
   const results = Array.isArray(projection.results) ? projection.results : [];
   assert(results.length > 0, `${fixtureId}: slide projection has no results`);
@@ -199,16 +321,21 @@ function validateSlideContract(fixture, output, group) {
   for (const result of results) {
     assert(present(result.title), `${fixtureId}: ${result.id} result title is missing`);
     assert(result.title_style === 'conclusion', `${fixtureId}: ${result.id} title is not conclusion-led`);
+    if (projection.audience === 'department_ic') {
+      assert(!containsForbiddenMainDeckReference(result.title), `${fixtureId}: ${result.id} result title contains an unsafe or internal reference`);
+    }
     const hasMetricEvidence = validateMetricEvidence(result, fixtureId);
     validateMaturity(result, fixtureId);
     const hasTransition = validateStateTransition(result, fixtureId);
     const hasLogic = validateSolutionLogic(result, fixtureId, expectedRoutes);
+    const hasImplementationNarrative = validateImplementationNarrative(result, fixtureId, projection.audience);
     const hasDirectValidation = nonEmptyString(result.validation_result)
       && DIRECT_VALIDATION_KINDS.has(result.effect_evidence_kind);
     const triadCoverage = [hasTransition, hasLogic, hasMetricEvidence || hasDirectValidation].filter(Boolean).length;
     assert(triadCoverage >= 2, `${fixtureId}: ${result.id} covers fewer than two presentation-contract parts`);
     if (result.solution_logic?.significance === 'core') {
       assert(triadCoverage === 3, `${fixtureId}: ${result.id} core solution must cover all three presentation-contract parts`);
+      assert(hasImplementationNarrative, `${fixtureId}: ${result.id} core solution lacks implementation narrative`);
       assert(coreResultIds.includes(result.id), `${fixtureId}: ${result.id} core solution is missing from core_result_ids`);
       assert(logicIds.includes(result.id), `${fixtureId}: ${result.id} core solution is missing from the main deck`);
     }
@@ -230,6 +357,7 @@ function validateSlideContract(fixture, output, group) {
 
   for (const id of logicIds) {
     assert(resultById.has(id), `${fixtureId}: unknown main-deck logic diagram ${id}`);
+    assert(coreResultIds.includes(id), `${fixtureId}: supporting solution ${id} must remain in the technical appendix`);
   }
 
   for (const id of fixture.fixture?.expected_no_logic_ids || []) {
@@ -337,6 +465,61 @@ export function validateReportContractRejectionProbes(fixture) {
       delete group.slide_projection;
     } else if (probe === 'missing-maturity') {
       delete firstResult.result_maturity;
+    } else if (probe === 'missing-implementation-narrative') {
+      delete firstResult.implementation_narrative;
+    } else if (probe === 'hollow-implementation-narrative') {
+      firstResult.implementation_narrative.branch_and_fallback = '';
+    } else if (probe === 'node-list-implementation-narrative') {
+      firstResult.implementation_narrative = {
+        normal_path: firstResult.solution_logic.main_flow.join(' -> '),
+        branch_and_fallback: firstResult.solution_logic.branches.join(' -> '),
+        outcome_and_invariant: firstResult.solution_logic.invariants.join(' -> '),
+      };
+    } else if (probe === 'prefixed-node-list-implementation-narrative') {
+      firstResult.implementation_narrative = {
+        normal_path: `Normal path: ${firstResult.solution_logic.main_flow.join(' -> ')}`,
+        branch_and_fallback: `Branch and fallback: ${firstResult.solution_logic.branches.join(' -> ')} -> ${firstResult.solution_logic.fallbacks.join(' -> ')}`,
+        outcome_and_invariant: `Outcome and invariant: ${firstResult.solution_logic.output} -> ${firstResult.solution_logic.invariants.join(' -> ')}`,
+      };
+    } else if (probe === 'composite-node-list-implementation-narrative') {
+      firstResult.implementation_narrative = {
+        normal_path: [firstResult.solution_logic.trigger, ...firstResult.solution_logic.main_flow].join(' -> '),
+        branch_and_fallback: [...firstResult.solution_logic.branches, ...firstResult.solution_logic.fallbacks].reverse().join(' -> '),
+        outcome_and_invariant: [firstResult.solution_logic.output, ...firstResult.solution_logic.invariants].join(' -> '),
+      };
+    } else if (probe === 'invisible-implementation-narrative') {
+      firstResult.implementation_narrative = {
+        normal_path: '\u200B',
+        branch_and_fallback: '\u200B\u200B',
+        outcome_and_invariant: '\u200B\u200B\u200B',
+      };
+    } else if (probe === 'duplicate-implementation-narrative') {
+      const duplicate = 'The mechanism follows one supported path and preserves one supported constraint.';
+      firstResult.implementation_narrative = {
+        normal_path: duplicate,
+        branch_and_fallback: duplicate,
+        outcome_and_invariant: duplicate,
+      };
+    } else if (probe === 'confidential-implementation-narrative') {
+      firstResult.implementation_narrative.normal_path = 'Read C:\\Users\\alice\\SecretProject\\design.md and then call https://internal.example/incident/123.';
+    } else if (probe === 'supporting-logic-in-main-deck') {
+      firstResult.solution_logic.significance = 'supporting';
+      delete firstResult.implementation_narrative;
+      projection.core_result_ids = projection.core_result_ids.filter((id) => id !== firstResult.id);
+    } else if (probe === 'duplicate-slide-titles') {
+      projection.main_deck_slide_titles = projection.main_deck_slide_titles.map(() => 'Weekly update');
+    } else if (probe === 'unsafe-main-deck-markup') {
+      projection.main_deck_slide_titles[0] = '![track](//attacker.invalid/pixel)';
+    } else if (probe === 'oversized-implementation-narrative') {
+      firstResult.implementation_narrative.normal_path = `When the supported path starts, ${'safe context '.repeat(60)}the supported actions complete.`;
+    } else if (probe === 'oversized-solution-logic') {
+      firstResult.solution_logic.actors = Array.from({ length: LOGIC_LIST_LIMITS.actors + 1 }, (_, index) => `actor ${index}`);
+    } else if (probe === 'decorative-maintenance-narrative') {
+      firstResult.implementation_narrative = {
+        normal_path: 'Shared helpers replace duplicated maintenance code before the existing tests run.',
+        branch_and_fallback: 'If packaging fails, the maintenance change remains pending.',
+        outcome_and_invariant: 'The code surface is smaller while runtime behavior remains unchanged.',
+      };
     } else {
       throw new Error(`${fixture.id}: unknown rejection probe ${probe}`);
     }

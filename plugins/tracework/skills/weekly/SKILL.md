@@ -108,12 +108,16 @@ department-facing deck before applying the slide template.
    ```
 
    A normal result covers at least two parts. A core solution-logic result must
-   cover all three.
+   cover all three and add an implementation narrative that makes the logic
+   speakable without turning it into a second source of technical truth.
 5. When a core technical result changes data flow, control flow, execution
    timing, state generation, component responsibility, provider or strategy
    dispatch, or failure handling and fallback, the main deck must contain a
    solution-logic diagram brief. This is a quality gate, not an optional visual
-   suggestion.
+   suggestion. The result must also contain three short implementation
+   narrative blocks: normal path, branch and fallback, and outcome and
+   invariant. Derive them only from the result's existing `solution_logic` and
+   evidence.
 6. Keep at most two to three solution-logic diagrams in the main deck. Move
    supporting mechanisms and implementation detail to the technical appendix.
 7. Route parameter tuning, small refactors, code cleanup, and configuration
@@ -180,10 +184,19 @@ Coverage measures source completeness, not value.
 - A core runtime-mechanism change has a solution-logic diagram brief containing
   its trigger, actors, main flow, material branches, fallbacks, output,
   invariants, remaining boundary, and evidence references.
+- A core runtime-mechanism result has a non-empty implementation narrative
+  covering the normal path, branch and fallback, and outcome and invariant.
+  Each block stays to one or two sentences in the main deck; fuller mechanism
+  detail belongs in the technical appendix.
+- The implementation narrative is stored only in the slide projection. It
+  restates supported solution logic in reader-friendly execution order and
+  must not introduce a new mechanism, effect, or evidence claim.
 - A solution-logic diagram explains how the solution works; it never counts as
   evidence that the solution worked.
 - Normal results cover at least two of Before/After, Solution Logic, and Data or
-  Validation. Results with `solution_logic.significance=core` cover all three.
+  Validation. Results with `solution_logic.significance=core` cover all three
+  and include the implementation narrative. Coverage is evaluated across the
+  result's associated slides; the four artifacts do not have to share one page.
 - The main deck contains at most two to three solution-logic diagrams.
 - Mechanism completion, effect validation, and production acceptance are stated
   separately.
@@ -205,4 +218,6 @@ Coverage measures source completeness, not value.
 - Treating expected impact as an observed result.
 - Treating code completion as production acceptance.
 - Decorative architecture diagrams with only component names and arrows.
+- Node lists, field labels, or repeated titles presented as implementation
+  narrative.
 - Using a solution-logic diagram as proof of effectiveness.

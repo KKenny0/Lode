@@ -1,6 +1,6 @@
 {
   "name": "tracework",
-  "version": "0.5.0",
+  "version": "0.5.1",
   "description": "Evidence-backed daily, weekly, and monthly reports for agent work, with local decision replay when the work is questioned later.",
   "author": {
     "name": "Kennywu",

@@ -1051,7 +1051,7 @@
       },
       "skill": "weekly",
       "fixture": {
-        "rejection_probes": ["omit-results", "hollow-core"],
+        "rejection_probes": ["omit-results", "hollow-core", "missing-implementation-narrative"],
         "expected_diagram_routes": {
           "streaming-evaluation": "swimlane"
         },
@@ -1104,6 +1104,11 @@
                       "remaining_boundary": "Production latency savings are not observed yet.",
                       "recommended_diagram": "swimlane",
                       "evidence_refs": ["test:streaming-consumer", "doc:streaming-design"]
+                    },
+                    "implementation_narrative": {
+                      "normal_path": "When both stages are uncached, the DAG creates a shared queue, Generate pushes completed groups, and Evaluate consumes them until done, removing the wait for the full Generate batch.",
+                      "branch_and_fallback": "If either stage is cached or overridden, execution uses the existing non-streaming path so partial cached state cannot enter an incompatible streaming pair.",
+                      "outcome_and_invariant": "Evaluate receives the same complete input with overlapped timing, while input content and the LLM call count remain unchanged."
                     },
                     "result_maturity": {
                       "mechanism_complete": "yes",
@@ -1186,6 +1191,7 @@
       },
       "skill": "weekly",
       "fixture": {
+        "rejection_probes": ["missing-implementation-narrative", "hollow-implementation-narrative", "node-list-implementation-narrative", "prefixed-node-list-implementation-narrative", "composite-node-list-implementation-narrative", "invisible-implementation-narrative", "duplicate-implementation-narrative", "confidential-implementation-narrative", "supporting-logic-in-main-deck", "duplicate-slide-titles", "unsafe-main-deck-markup", "oversized-implementation-narrative", "oversized-solution-logic"],
         "expected_diagram_routes": {
           "streaming-pipeline": "swimlane",
           "registry-rebuild": "data_flow",
@@ -1233,6 +1239,11 @@
                       "recommended_diagram": "swimlane",
                       "evidence_refs": ["test:streaming"]
                     },
+                    "implementation_narrative": {
+                      "normal_path": "When both stages are uncached, the scheduler creates the queue, the producer pushes each completed group, and the consumer processes groups until the done signal, replacing full-stage waiting with progressive consumption.",
+                      "branch_and_fallback": "If a stage is cached, the pair bypasses streaming and uses the batch path, preventing mixed execution state from changing cache or override behavior.",
+                      "outcome_and_invariant": "The consumer receives equivalent evaluation input with overlapping timing, while the input and LLM call count stay unchanged."
+                    },
                     "result_maturity": {
                       "mechanism_complete": "yes",
                       "effect_validated": "partial",
@@ -1262,6 +1273,11 @@
                       "remaining_boundary": "A real multi-job rerun is not yet accepted.",
                       "recommended_diagram": "data_flow",
                       "evidence_refs": ["test:registry-rerun"]
+                    },
+                    "implementation_narrative": {
+                      "normal_path": "After an episode artifact is written or replaced, the rebuild reads every canonical episode, folds them in order from an empty snapshot with the existing merge behavior, and writes the derived current view so superseded contributions are not accumulated.",
+                      "branch_and_fallback": "A legacy series first backfills canonical artifacts and then enters the same rebuild path, avoiding a second persistence path with different replay semantics.",
+                      "outcome_and_invariant": "The current view reflects the latest canonical episodes, while the registry schema and downstream interface remain stable."
                     },
                     "result_maturity": {
                       "mechanism_complete": "yes",
@@ -1293,6 +1309,11 @@
                       "recommended_diagram": "decision_tree",
                       "evidence_refs": ["test:provider-smoke"]
                     },
+                    "implementation_narrative": {
+                      "normal_path": "When the model pool prepares a call, it classifies the provider, removes incompatible keys, applies the recognized dialect parameters, and sends the translated request so provider differences stay out of stage code.",
+                      "branch_and_fallback": "Known dialects receive explicit translation, while an unknown provider receives a bare request, avoiding failures caused by forcing unsupported reasoning parameters.",
+                      "outcome_and_invariant": "The endpoint receives a provider-compatible request, while stages remain provider-agnostic and pool configuration remains authoritative."
+                    },
                     "result_maturity": {
                       "mechanism_complete": "yes",
                       "effect_validated": "yes",
@@ -1314,7 +1335,7 @@
       },
       "skill": "weekly",
       "fixture": {
-        "rejection_probes": ["decorative-maintenance-logic"],
+        "rejection_probes": ["decorative-maintenance-logic", "decorative-maintenance-narrative"],
         "expected_no_logic_ids": ["maintenance-summary"],
         "expected_portfolio_ids": ["cleanup"],
         "candidate_output": {

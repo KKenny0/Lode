@@ -37,12 +37,18 @@ review.
 12. **Core runtime mechanism**: generate complete `solution_logic` with a diagram
     type matched to concurrency, data flow, dispatch, failure handling, state,
     or responsibility change.
-13. **Maintenance-only work**: retain parameter tuning, cleanup, and
+13. **Core implementation narrative**: derive normal-path, branch-and-fallback,
+    and outcome-and-invariant prose from the same core `solution_logic`, without
+    introducing new mechanisms or presenting the prose as effect evidence.
+14. **Maintenance-only work**: retain parameter tuning, cleanup, and
     non-mechanism configuration work in the portfolio without decorative
-    architecture diagrams.
-14. **Contract rejection probes**: reject omitted results, hollow core logic,
-    unsupported result charts, missing maturity, decorative maintenance logic,
-    and invalid slide formats.
+    architecture diagrams or implementation narratives.
+15. **Contract rejection probes**: reject omitted results, hollow core logic,
+    missing, empty, invisible, duplicate, prefixed, composite, or node-list
+    implementation narratives, default-deck internal references, unsupported
+    result charts, duplicate or unsafe slide titles, oversized narrative or
+    logic fields, missing maturity, decorative maintenance logic, and invalid
+    slide formats.
 
 ## Pass Criteria
 
@@ -68,7 +74,8 @@ review.
 - The declared 6-10 slide count matches the composed conclusion-title list.
 - A normal result covers at least two of Before/After, Solution Logic, and Data
   or Validation.
-- A result with `solution_logic.significance=core` covers all three.
+- A result with `solution_logic.significance=core` covers all three and has a
+  complete `implementation_narrative` in its slide-projection result.
 - Core solution logic records its trigger, actors, ordered main flow, material
   branches, fallbacks, output, invariants, remaining boundary, diagram route,
   and evidence references.
@@ -76,6 +83,16 @@ review.
   mechanisms move to the technical appendix.
 - Logic diagrams explain how a solution works and remain separate from the
   data, test, eval, or observed evidence used to establish whether it worked.
+- Core implementation narratives cover the ordered normal path, the condition
+  and reason for a branch or fallback, and the output plus an invariant. They
+  are derived from solution logic, use one or two sentences per block in the
+  main deck, stay within 600 Unicode characters per block, and do not become
+  another source of technical facts.
+- Presentation logic lists are bounded to 12 actors or main-flow steps, 8
+  branches, fallbacks, or invariants, and 24 evidence references. Larger detail
+  is summarized in the technical appendix.
+- Presentation coverage is result-level across associated slides. Before/After,
+  logic, narrative, and result evidence do not have to occupy one page.
 - Mechanism completion, effect validation, and production acceptance are
   reported separately.
 - Every open risk and next-week acceptance target has a pass/fail closure
@@ -119,6 +136,18 @@ and verify that it contains:
    schema, and unchanged downstream interface;
 8. risks, collaboration, and closure criteria;
 9. next-week acceptance targets.
+
+The Provider, Producer-Consumer, and Registry core results must each pass both
+solution-logic completeness and implementation-narrative completeness. Review
+the real candidate manually because the executable validator can prove field
+presence and reject known label-only shapes, but cannot prove that free prose
+faithfully explains a diagram. For each core result, confirm that the narrative
+covers the diagram's main path, material branch, fallback, output, and invariant.
+
+Also verify that the streaming quality difference supports only the stated
+quality boundary under the current sample. It may justify proceeding to latency
+measurement as a safety gate, but it must not be described as observed latency
+improvement.
 
 Keep the Nacos or provider logic not selected for the main deck in the technical
 appendix. Do not copy project names, model names, or these implementation details
