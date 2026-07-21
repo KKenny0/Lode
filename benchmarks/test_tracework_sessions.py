@@ -126,6 +126,7 @@ class SessionScanTest(unittest.TestCase):
             input=json.dumps(payload) if payload is not None else None,
             text=True,
             capture_output=True,
+            cwd=self.home,
             env=self.env(runtime),
             check=True,
         )
