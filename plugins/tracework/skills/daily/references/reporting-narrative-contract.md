@@ -21,8 +21,15 @@ report the missing classification; keep them visibly separate only in `all`.
 Never guess that an unassigned project is safe for a scoped report.
 
 `profile.default_reporting_group` selects the default scope when configured.
-Without it, workplace-facing Daily and Weekly default to `work`; an explicit
-`all` request is the private combined view.
+When a scope is **explicit** (user named `work`, `personal`, or another group)
+or **configured** via that default, unassigned projects stay excluded and must
+never be guessed into the scoped report.
+
+When no explicit group and no configured default are present, Daily and Weekly
+use skill-level First-Run rules instead of silently defaulting unassigned work
+into `work`: report the current unassigned repository as a `local` lane, label
+it clearly, and keep workplace audience safety intact. An explicit `all`
+request remains the private combined view with separate group sections.
 
 The headline budget applies per reporting group, not across the whole vault.
 Personal projects must never displace work projects from a `work` report, and

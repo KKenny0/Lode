@@ -67,22 +67,98 @@ Resolve `{vault}` from project then global `.tracework/config.yaml`.
 Defaults:
 
 - Date range: current Monday through today.
-- Scope: explicit `all` or an exact registered group such as `work` or
-  `personal`; otherwise `profile.default_reporting_group`; otherwise `work`.
+- Scope: resolve with First-Run and Local Fallback below. Do not silently force
+  unassigned projects into `work`.
 - Mode: as above; default `brief`.
 - Brief/slides file output: `{vault}/Work Diary/Weekly/{YYYY-WNN}.md`, unless
-  the user or config provides another path. Quick mode never writes this file.
+  the user or config provides another path. Write that file only for normal
+  scoped group output. Quick mode, no-vault runs, and local first-run stay in
+  conversation so unassigned content is not written into workplace weekly files.
 
 If the target brief/slides file exists, ask before overwriting unless the user
 requested update, rewrite, or overwrite. If no vault exists, return brief or
 slides content in conversation. Quick mode always stays in conversation.
+Cold-start is optional upgrade copy, never a hard gate.
+
+## First-Run and Local Fallback
+
+Weekly must produce value without prior setup.
+
+### Scope resolution
+
+1. If the user explicitly names `all` or an exact reporting group such as
+   `work` or `personal`, that scope is **explicit**.
+2. Else if `profile.default_reporting_group` is configured, that scope is
+   **configured**.
+3. Else the scope is **implicit**.
+
+### Partition rules
+
+- **Explicit or configured** `work` / `personal` / named group:
+  - Include only matching projects.
+  - Exclude `unassigned`. Never promote unassigned into `work`.
+  - If empty because the current project is unassigned, return a clear
+    excluded/empty result with repair hint:
+    `/tracework:cold-start-interview` or set `profile.reporting_group`.
+  - Do not fail the skill.
+
+- **Implicit** scope (no explicit group, no configured default):
+  - If the current project has a `reporting_group`, use that group.
+  - If the current project is `unassigned` or has no project config, enter
+    **local first-run**:
+    - Report only the current repository.
+    - Label scope `local` (unassigned), never `work`.
+    - Use git plus any raw entries for that repo.
+    - Mark git-only material `limited`.
+    - Hint that workplace-scoped reports need `reporting_group`.
+  - Do not mix unrelated assigned vault projects into a local first-run.
+
+### No vault
+
+- Always allowed for quick, brief, and slides.
+- Write nothing to disk.
+- Keep the narrative short; use conversation output.
+- End brief/slides with at most one upgrade line:
+
+  > 可选：配置 knowledge vault 后可跨天累计并写入文件。`/tracework:cold-start-interview`
+
+- Do not imply the run failed because setup is missing.
+
+### Empty signal
+
+If local first-run has no raw entries and no meaningful git activity, return a
+short empty-state and suggest capture or waiting for more work signal.
+
+### Conversation brief shape (no vault or local first-run)
+
+When not writing the weekly file, a compact brief is enough:
+
+```markdown
+## {YYYY-WNN} · {work | personal | all | local}
+
+**判断：** …
+
+### 主线
+1. …
+2. …
+3. …
+
+### 其他
+- …
+
+### 证据边界
+- raw / git / limited 各一句
+
+---
+可选：配置 knowledge vault 后可跨天累计并写入文件。`/tracework:cold-start-interview`
+```
 
 ## Workflow
 
 ### 0. Resolve Mode, Range, and Scope
 
 1. Choose `quick`, `brief`, or `slides` from the mode table.
-2. Resolve week range and reporting scope.
+2. Resolve week range and scope class (explicit / configured / implicit).
 3. If mode is `quick`, follow **Quick Mode** and stop after its quality gate.
 4. Otherwise continue with partition → evidence → analysis → write.
 
@@ -90,19 +166,23 @@ slides content in conversation. Quick mode always stays in conversation.
 
 1. Load projects from the prompt, `raw/projects.json`, or current repo.
 2. Resolve each project's `reporting_group` from project config, then registry.
-3. Filter for the exact requested group. For `all`, keep groups separate
-   throughout analysis and writing.
-4. Exclude unassigned projects from scoped output and report the missing
-   classification. Show them separately only in `all`.
+3. Apply First-Run and Local Fallback with the audience-safety rules.
+4. For normal scoped output, filter to the exact requested group. For `all`,
+   keep groups separate throughout analysis and writing.
+5. Exclude unassigned projects from scoped `work` / `personal` output and
+   report the missing classification. Show them separately only in `all`.
+6. For local first-run, keep a single `local` lane for the current repo.
 
 ### 2. Gather Evidence
 
-For every in-scope project:
+For every in-scope project or the local lane:
 
-1. Read matching `{vault}/raw/weeks/{week}/{slug}.json` entries.
+1. Read matching `{vault}/raw/weeks/{week}/{slug}.json` entries when a vault
+   exists.
 2. Read optional artifact dossiers for navigation and recorded scope.
 3. Run a lightweight git log only to detect uncovered work.
 4. Merge duplicate raw/git signals before analysis.
+5. Without a vault, use git coverage and conversation context only.
 
 Raw entries are the semantic source. Git-only work remains `limited` and cannot
 substantiate a completed outcome or invented trade-off.
@@ -201,14 +281,16 @@ equivalents.
 
 Behavior:
 
-1. Resolve week range and scope (same defaults as brief).
-2. Partition projects; exclude unassigned from scoped `work` / `personal`.
-3. Read raw entries for in-scope projects. Optionally glance at git only to
-   detect whether uncovered commits exist.
+1. Resolve week range and scope class with First-Run and Local Fallback.
+2. Partition accordingly. Explicit/configured `work` / `personal` still exclude
+   unassigned. Implicit unassigned current repo uses `local`.
+3. Read raw entries for in-scope projects when a vault exists. Optionally glance
+   at git to detect uncovered commits.
 4. Do not read `slide-template.md`, do not build slide_projection, and do not
    require solution-logic diagrams or implementation narratives.
 5. Output 5–7 bullets in the conversation only. Prefer
-   `[archetype] summary`-style lines grounded in raw fields.
+   `[archetype] summary`-style lines grounded in raw fields; git-only bullets
+   stay bounded and `limited`.
 6. Append at most three carried-forward lines for open risks or unresolved
    decisions.
 7. If no raw entries but meaningful git exists: say evidence is `limited`, list
@@ -216,6 +298,8 @@ Behavior:
    full brief.
 8. If no raw and no usable git: empty-state with a short hint to capture or run
    a full brief after more work signal exists.
+9. If explicit scope excluded the current unassigned project, say so and point
+   to reporting_group setup instead of returning a silent empty list.
 
 Suggested shape:
 
@@ -229,7 +313,8 @@ Suggested shape:
 **结转**：… · …
 ```
 
-Do not write vault files in quick mode.
+Do not write vault files in quick mode. A single optional upgrade line is
+allowed; do not block on cold-start.
 
 ## Coverage
 
@@ -248,8 +333,13 @@ coverage in one line; it does not need badges.
 
 ### Shared (all modes that emit scoped narrative)
 
-- Scope partition happened before ranking or bullet selection.
+- Scope class (explicit / configured / implicit-local) was resolved before
+  ranking or bullet selection.
 - `work` contains no personal or unassigned titles, paths, commits, artifacts, or refs.
+- Local first-run is labeled `local` / unassigned, never presented as safe `work`.
+- Explicit scoped emptiness explains exclusion and repair without leaking
+  unassigned content into `work`.
+- No-vault runs return conversation output without blocking on cold-start.
 - Evidence grades and uncertainty are preserved; git-only material stays `limited`.
 - Activity volume is never promoted into outcomes.
 

@@ -11,6 +11,11 @@ When coverage is thin or git-only, keep the main sections short, mark affected
 arcs `limited`, and avoid padding with architecture detail that the evidence
 does not support.
 
+For no-vault or local first-run conversation output, prefer the compact shape
+in `SKILL.md` (判断 / 主线 / 其他 / 证据边界). Label scope `local` when the
+current repo is unassigned under implicit scope; never present that lane as
+`work`.
+
 ```markdown
 # YYYY-WNN 工作汇报
 

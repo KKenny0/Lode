@@ -136,7 +136,13 @@ Return:
 - registry result;
 - session-scan status only when configured.
 
+State clearly that Tracework can already produce daily/weekly reports before
+this setup; configuration unlocks durable multi-day storage, file writes, and
+strict work/personal partition. Do not imply the user could not try reports
+without cold-start.
+
 Then suggest the primary loop:
 
-> 直接运行 `/tracework:daily`、`/tracework:weekly` 或
-> `/tracework:monthly` 完成工作收口。关键 session 结束时说“收工”，可以提升后续报告和证据下钻质量。
+> 现在可以跑 `/tracework:daily`、`/tracework:weekly` 或 `/tracework:monthly`
+> 做工作收口；未配置前也能先在对话里试用。关键 session 结束时说“收工”，可以提升
+> 后续报告和证据下钻质量。

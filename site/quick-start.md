@@ -30,9 +30,12 @@ or:
 
 You can also close today first: `write the daily report` / `/tracework:daily`.
 
-You can see a result in the conversation without configuring a vault. Without
-raw entries, reports may use meaningful git activity as `limited` coverage.
-They do not invent intent, decisions, or verified impact.
+You can see a result in the conversation without configuring a vault. If the
+current project is still unassigned, an implicit trial reports it as `local`
+instead of pretending it is safe `work`. Only an explicit `work` scope excludes
+unassigned projects and explains how to fix the classification. Without raw
+entries, reports may use meaningful git activity as `limited` coverage. They do
+not invent intent, decisions, or verified impact.
 
 ## 3. Turn On Durable Storage When You Need It
 

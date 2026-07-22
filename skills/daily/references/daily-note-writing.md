@@ -55,6 +55,8 @@ The next step is not an agent handoff or a task dump.
 
 ## Output Format
 
+### Vault file shape
+
 Single reporting group:
 
 ```markdown
@@ -86,6 +88,45 @@ Single reporting group:
 ```
 
 Omit optional sections when empty.
+
+### Conversation / first-run shape
+
+Use this when there is no vault, or when local first-run should stay in the
+conversation instead of writing `Daily Note.md`. Keep it short. Do not invent
+file paths.
+
+```markdown
+## YYYY.MM.DD · {work | personal | all | local}
+
+**判断：** {1-2 sentences. Note git-only / limited when material.}
+
+### 主线
+1. {starting situation -> movement -> end state; next gate}
+2. ...
+3. ...
+
+### 其他
+- {bounded non-headline coverage, or omit}
+
+### 证据边界
+- raw：{none | summary}
+- git：{none | summary}
+- 总评：{verified | recorded | limited}
+
+---
+可选：配置 knowledge vault 后可跨天累计并写入文件。`/tracework:cold-start-interview`
+```
+
+Rules for conversation / local output:
+
+- Label `local` when the current repo is unassigned under implicit scope. Never
+  call that lane `work`.
+- Prefer one to three mainline items on thin evidence; do not pad to three empty
+  headlines.
+- Keep the upgrade line optional and single. Never block because setup is
+  missing.
+- If explicit `work` excluded an unassigned current repo, say that in the
+  judgment or evidence section and point to cold-start / `reporting_group`.
 
 For `all`, repeat the report body under separate group headings:
 
