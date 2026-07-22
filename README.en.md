@@ -104,7 +104,7 @@ manually.
 | Command | Frequency | Output |
 | :--- | :--- | :--- |
 | `/tracework:daily` | High | What changed today, why it matters, and the next gate |
-| `/tracework:weekly` | High | Weekly management judgment; Markdown brief by default, department-ready PPT outline when requested |
+| `/tracework:weekly` | High | Weekly management judgment; brief by default, quick review on “what did we do this week”, PPT outline only when requested |
 | `/tracework:monthly` | High | Raw-first phase outcomes, recurring risks, and next-month closure targets |
 | `/tracework:capture` | High multiplier | An adaptive lite/standard/deep session raw record |
 | `/tracework:capture day [date] [scope]` | Optional recovery | Incrementally recovered evidence from indexed sessions after scope partitioning |

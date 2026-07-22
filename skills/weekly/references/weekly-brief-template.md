@@ -1,7 +1,15 @@
 # Weekly Management Brief Template
 
-Use this template for the default `/tracework:weekly` output. Read
-`reporting-narrative-contract.md` first.
+Use this template for **brief** mode (`/tracework:weekly`, `写周报`, default
+weekly). Do not use it for **quick** mode. For **slides**, analyze with the
+brief spine first, then project through `slide-template.md`.
+
+Read `reporting-narrative-contract.md` first. Brief mode does not require
+solution-logic diagrams, implementation narratives, or chart briefs.
+
+When coverage is thin or git-only, keep the main sections short, mark affected
+arcs `limited`, and avoid padding with architecture detail that the evidence
+does not support.
 
 ```markdown
 # YYYY-WNN 工作汇报

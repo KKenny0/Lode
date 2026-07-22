@@ -94,7 +94,7 @@ Daily、Weekly、Monthly 必须先分区，再选择主线：
 | Command | 频次 | 输出 |
 | :--- | :--- | :--- |
 | `/tracework:daily` | 高频 | 今天改变了什么、为什么重要、下一道门是什么 |
-| `/tracework:weekly` | 高频 | 周级管理判断；默认 Markdown brief，明确请求时生成面向部门汇报的 PPT 大纲 |
+| `/tracework:weekly` | 高频 | 周级管理判断；默认 brief，「这周做了啥」为 quick，明确 PPT 时才出大纲 |
 | `/tracework:monthly` | 高频 | Raw-first 的阶段成果、反复风险和下月收口目标 |
 | `/tracework:capture` | 高频增强 | 动态选择 lite/standard/deep 的 session raw record |
 | `/tracework:capture day [date] [scope]` | 可选补录 | 按分组扫描已索引 session，增量补回当天证据 |

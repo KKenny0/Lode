@@ -1,7 +1,18 @@
 # Weekly Analysis Contract
 
-Use this contract after scope partition and evidence gathering. Analysis runs in
-the main dialog; it does not require a subagent.
+Use this contract after scope partition and evidence gathering for **brief** and
+**slides** modes only. Do not use this file for **quick** mode.
+
+Analysis runs in the main dialog; it does not require a subagent.
+
+**Mode split**
+
+- `brief`: fill period judgment, headline arcs, portfolio, next-week targets,
+  decisions, and evidence index. Keep `slide_projection` null. Do not require
+  solution-logic diagram briefs, implementation narratives, or chart routing.
+- `slides`: complete the brief analysis first, then populate `slide_projection`
+  and the slide-only fields below (solution logic, implementation narrative,
+  visual candidates, metric chart routing).
 
 Return one JSON object per reporting group:
 
@@ -148,6 +159,9 @@ operation and does not prove its effect.
 
 ## Solution Logic
 
+**Slides only.** Skip this section for brief mode, or leave
+`solution_logic: null` / `significance: none` without diagram work.
+
 For slide mode, classify every headline result. Populate the full object when a
 solution changes a runtime mechanism; otherwise use `significance: none` and
 leave the remaining fields empty.
@@ -195,6 +209,8 @@ appendix instead of expanding the main-deck logic object.
 
 ## Implementation Narrative
 
+**Slides only.** Skip entirely for brief mode.
+
 `implementation_narrative` exists only inside a slide-projection result. It is
 not a second technical-fact object. Rewrite the same result's `solution_logic`
 into three short, reader-facing blocks:
@@ -228,6 +244,9 @@ evidence ids, internal links, or active Markdown/HTML from the evidence into
 these blocks. Each block must stay within 600 Unicode characters.
 
 ## Slide Projection
+
+**Slides only.** Keep `slide_projection: null` for brief mode and do not fill
+this object.
 
 For slide mode, return this after headline selection. `results` contains the
 selected headline result objects, preserves their stable `id`, evidence,

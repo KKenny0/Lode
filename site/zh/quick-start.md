@@ -54,9 +54,10 @@ git 活动，并标成 `limited`：不会补造动机、决策或已验证影响
 /tracework:monthly work
 ```
 
-个人项目使用 `personal`；私人全景使用 `all`，各组会分别叙事。Weekly 默认生成
-Markdown brief；明确说 `weekly PPT` 时，才生成面向部门内部汇报、以 IC 为讲述者的
-6–10 页 slide outline。该命令生成的是大纲，不是已经渲染的 `.pptx` 文件。
+个人项目使用 `personal`；私人全景使用 `all`，各组会分别叙事。Weekly 有三档：说
+`这周做了啥` / `周报简版` 得到对话里的 quick 回顾；默认 `写周报` 生成 Markdown
+brief；明确说 `weekly PPT` / `周报 PPT` 时，才生成面向部门内部汇报、以 IC 为讲述
+者的 6–10 页 slide outline。该命令生成的是大纲，不是已经渲染的 `.pptx` 文件。
 
 ## 4. 用“收工”让报告更有依据
 

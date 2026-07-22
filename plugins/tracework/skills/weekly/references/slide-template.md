@@ -1,8 +1,11 @@
 # Weekly Department Slide Outline Template
 
-Use only when the user explicitly asks for PPT, slides, or an演示大纲. Read
-`reporting-narrative-contract.md` first. The default presenter is an individual
-contributor reporting inside a department to managers and peers.
+Use only for **slides** mode when the user explicitly asks for PPT, slides, or
+an演示大纲. Never load this file for **quick** or default **brief** weekly
+output.
+
+Read `reporting-narrative-contract.md` first. The default presenter is an
+individual contributor reporting inside a department to managers and peers.
 
 The main deck contains 6-10 slides per reporting group. The evidence and
 technical appendices are outside the budget. Do not allocate one slide per work

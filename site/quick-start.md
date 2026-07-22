@@ -58,9 +58,11 @@ Common closure commands:
 ```
 
 Use `personal` for personal projects or `all` for a private combined view with
-separate group sections. Weekly returns a Markdown brief by default; say
-`weekly PPT` when you need a 6-10 slide outline for a department update. The
-command produces an outline, not a rendered `.pptx` file.
+separate group sections. Weekly has three modes: say `这周做了啥` / `quick weekly`
+for a conversation-only quick review; default `write the weekly report` for a
+Markdown brief; say `weekly PPT` when you need a 6-10 slide outline for a
+department update. The PPT command produces an outline, not a rendered
+`.pptx` file.
 
 ## 4. Improve the Evidence with Capture
 

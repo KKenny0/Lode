@@ -12,10 +12,17 @@ the next gate.
 
 ### Weekly
 
-`/tracework:weekly [work|personal|all]` writes a management brief by default.
-Explicit PPT wording switches to a 6-10 slide outline for an individual
-contributor reporting within a department. A core technical result separates
-four complementary layers:
+Three modes:
+
+- **quick**: `这周做了啥` / `quick weekly` — 5–7 conversation bullets plus
+  carried-forward items; no file write.
+- **brief** (default): `/tracework:weekly` / write the weekly report —
+  management brief.
+- **slides**: explicit `weekly PPT` / slides wording — 6-10 slide outline for an
+  individual contributor reporting within a department.
+
+Only slides mode requires core technical results to separate four complementary
+layers:
 
 - Before/After shows why the change was needed and what state changed.
 - A solution-logic diagram shows how data, control, branches, fallbacks, and
@@ -24,11 +31,12 @@ four complementary layers:
 - Data, tests, or a visible measurement gap show whether the result is
   effective and how mature the evidence is.
 
-Core runtime-mechanism changes must cover all four layers. The main deck keeps
-at most two or three logic diagrams; routine maintenance does not receive a
-decorative architecture diagram. Logic explains how a solution works, while
-independent evidence establishes whether it works. Raw evidence maps remain in
-the appendix.
+In slides mode, core runtime-mechanism changes must cover all four layers. The
+main deck keeps at most two or three logic diagrams; routine maintenance does
+not receive a decorative architecture diagram. Logic explains how a solution
+works, while independent evidence establishes whether it works. Raw evidence
+maps remain in the appendix. Brief and quick modes do not require diagrams or
+implementation narratives.
 
 ### Monthly
 
