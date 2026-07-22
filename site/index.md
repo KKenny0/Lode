@@ -3,8 +3,8 @@ layout: home
 
 hero:
   name: Tracework
-  text: Close agent work into evidence-backed reports.
-  tagline: Daily, weekly, and monthly management narratives first; decision replay when the work is questioned later.
+  text: Turn agent work into evidence-backed progress reports.
+  tagline: Say “wrap up” to keep the durable facts. Generate daily, weekly, and monthly reports when you need them. When the work is questioned later, replay why a choice was made.
   actions:
     - theme: brand
       text: Install
@@ -14,14 +14,14 @@ hero:
       link: /workflow
 
 features:
-  - title: Close the day
-    details: Explain what changed, why it matters, what remains gated, and what happens next.
-  - title: Form the weekly judgment
-    details: Turn selected result arcs into a reportable story of what changed, how the mechanism works, and what the evidence proves.
-  - title: Review the phase
-    details: Build raw-first monthly outcomes, recurring risks, and next-month closure targets.
-  - title: Drill into the evidence
-    details: Capture local facts and replay the why only when a report or future session needs it.
+  - title: Report first
+    details: Try a daily or weekly report right after install, even in conversation only. Without accumulated records, use git for limited coverage and mark the evidence boundary.
+  - title: Close the day and week
+    details: Explain what changed, why it matters, and the next gate. Markdown brief by default; a presentation outline only when you ask.
+  - title: Wrap up to keep the why
+    details: End key sessions by saving trade-offs, risks, and next steps so later reports stay grounded.
+  - title: Drill down when asked
+    details: Replay why a choice was made, or resume older work, only when you need it — not as a daily habit.
 ---
 
 <section class="tw-command-panel">
@@ -31,26 +31,27 @@ codex plugin marketplace add KKenny0/Tracework
 codex plugin add tracework@tracework
 ```
 
-<p>Public namespace: <code>tracework</code>. Records stay in your own local vault.</p>
+<p>Public namespace: <code>tracework</code>. Records stay in your own local vault. You can try reports first, then set up durable storage.</p>
 
 </section>
 
-## Reporting-First Loop
+## How to use it
 
 ```text
-agent work -> capture durable facts -> Daily -> Weekly -> Monthly
-                                   \-> Query / Recall when needed
+install -> try: write weekly / write daily
+        -> configure vault and project groups when you want multi-day memory
+        -> wrap up after key sessions
+        -> query / recall only when questioned or resuming
 ```
 
-Projects declare a reporting group such as `work` or `personal`. Reports filter
-scope before selecting headlines, so personal projects never displace or leak
-into workplace output. A private `all` view keeps each group in a separate lane.
-
-Tracework is decision-replay-backed, but Query and Recall do not need to be
-daily habits. They are the trust and recovery surfaces behind reports.
+Projects can declare a reporting group such as `work` or `personal`. Reports
+filter scope before selecting headlines, so personal projects never displace or
+leak into workplace output. A private `all` view keeps each group in a separate
+lane.
 
 ## Boundary
 
 Tracework is not a meeting-notes tool, approval workflow, performance packaging
 layer, generic office suite, or employee-monitoring surface. Activity volume is
-coverage metadata, not proof of outcomes.
+coverage, not proof of outcomes. When the record is thin, Tracework exposes the
+gap instead of inventing history.

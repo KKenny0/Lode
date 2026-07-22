@@ -4,9 +4,9 @@ This file provides guidance to Codex (Codex.ai/code) when working with code in t
 
 ## What This Is
 
-**Tracework** is a cross-runtime plugin and skill monorepo for evidence-backed work reports and memory from agent sessions. It ships a Codex plugin, a Claude Code plugin, and eight Markdown-first skills for capture, recall, query, workplace daily reports, weekly briefs, monthly reviews, decision roadmaps, and cold-start setup.
+**Tracework** is a cross-runtime plugin and skill monorepo that turns agent work into evidence-backed progress reports, while keeping enough local memory to replay decisions later. It ships a Codex plugin, a Claude Code plugin, and eight Markdown-first skills for capture, recall, query, workplace daily reports, weekly briefs, monthly reviews, decision roadmaps, and cold-start setup.
 
-Tracework is reporting-first and decision-replay-backed. Daily, weekly, and monthly are the high-frequency product surfaces; capture is the evidence multiplier; query, recall, and roadmap are lower-frequency trust and recovery surfaces.
+Product line: close agent work into evidence-backed daily, weekly, and monthly reports; capture is the evidence multiplier; query, recall, and roadmap are lower-frequency trust and recovery surfaces.
 
 The strongest use case is coding work: architecture choices, repairs, schemas, prompts, tests, and delivery risk. The product boundary is wider than coding only: any agent session with goals, choices, evidence, outcomes, risks, or next-step value can be recorded. Tracework is not a meeting workflow, approval system, generic office suite, performance packaging tool, or employee-monitoring surface.
 

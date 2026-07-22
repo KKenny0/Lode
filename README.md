@@ -4,39 +4,67 @@
 
 <h1 align="center">Tracework</h1>
 
-<p align="center"><strong>把 Agent 工作持续收口成有证据的日报、周报和月报。</strong></p>
+<p align="center"><strong>把 Agent 工作，收口成有证据的进展报告。</strong></p>
 
 <p align="center">
-  <img src="assets/tracework-reporting-hero.webp" alt="Tracework 把零散的 Agent 工作收口成清晰、有证据、能赢得管理者认可的汇报" width="1086" />
+  <img src="assets/tracework-reporting-hero.webp" alt="Tracework 把 Agent 工作收口成有证据的进展报告" width="1086" />
 </p>
 
 <p align="center">
   <a href="https://kkenny0.github.io/projects/tracework/"><strong>项目页</strong></a> · <a href="https://kkenny0.github.io/Tracework/"><strong>文档</strong></a> · <a href="README.en.md">English</a>
 </p>
 
-Tracework 把 Agent 工作收口成人能直接使用的报告，同时保留足够的本地证据，供以后
-追问其中的决策。
+日常说“收工”留下关键事实；需要时生成日报、周报、月报。  
+被追问时，再回看当时为什么这么选。
 
-Daily、Weekly、Monthly 是高频主产品；Capture 是安静的数据基础；Query、Recall、
-Roadmap 是低频的可信度与恢复能力，只在工作被追问、继续或阶段复盘时使用。
+记录留在你自己的本地 vault。没有累计记录时，报告仍可用 git 生成 `limited`
+版本，并明确标出证据边界，而不是编造动机或成果。
+
+## 最短试用
+
+安装后，在任意有工作记录的项目里直接试：
+
+```text
+写周报
+# 或
+/tracework:weekly
+```
+
+也可以先写今天的收口：`写日报` / `/tracework:daily`。
+
+不配置 vault 也能先在对话里看到结果。若要跨天累计、写入文件，以及严格区分公司 /
+个人项目，再运行 `/tracework:cold-start-interview`。
+
+## 安装
+
+### Codex
+
+```bash
+codex plugin marketplace add KKenny0/Tracework
+codex plugin add tracework@tracework
+```
+
+### Claude Code
+
+```bash
+claude plugin marketplace add KKenny0/Tracework
+claude plugin install tracework@tracework
+```
 
 ## 核心循环
 
 ```text
 Agent 工作
-  -> capture 持久事实
-  -> 完成当天收口
-  -> 形成本周判断
-  -> 回顾月度阶段
-
-需要时
-  -> query 当时为什么这么选
-  -> recall 从哪里继续
+  -> 收工，留下关键事实
+  -> 写日报 / 写周报 / 写月报
+  -> 需要时：为什么当时这么选 / 接着上次
 ```
 
-Tracework 是 reporting-first、decision-replay-backed。没有 raw entries 时，报告仍可
-用 git 生成 `limited` 版本；capture 保存 git 无法解释的动机、状态、风险、取舍和
-证据边界。
+| 频次 | 你怎么说 | 作用 |
+| :--- | :--- | :--- |
+| 高频 | 写日报 / 写周报 / 写月报 | 给人看的进展收口 |
+| 高频增强 | 收工 | 让后续报告更有依据 |
+| 低频 | 为什么当时这么选 / 接着上次 | 被追问或续作时下钻 |
 
 ## 公司与个人项目分区
 
@@ -63,23 +91,24 @@ Daily、Weekly、Monthly 必须先分区，再选择主线：
 
 ## Skills
 
-| Command | 角色 | 输出 |
+| Command | 频次 | 输出 |
 | :--- | :--- | :--- |
-| `/tracework:daily` | 高频收口 | 今天改变了什么、为什么重要、下一道门是什么 |
-| `/tracework:weekly` | 高频收口 | 周级管理判断；默认 Markdown brief，明确请求时生成面向部门汇报的 PPT 大纲 |
-| `/tracework:monthly` | 高频回顾 | Raw-first 的阶段成果、反复风险和下月收口目标 |
-| `/tracework:capture` | 证据基础 | 动态选择 lite/standard/deep 的 session raw record |
-| `/tracework:capture day [date] [scope]` | 当日补录 | 按分组扫描已索引 session，增量补回当天证据 |
-| `/tracework:query` | 低频可信度 | 用引用回答当时为什么这么选 |
-| `/tracework:recall` | 低频恢复 | 继续旧工作时恢复有边界的上下文 |
-| `/tracework:roadmap` | 高级复盘 | 长周期决策线程叙事 |
-| `/tracework:cold-start-interview` | 一次性设置 | Vault、项目身份和报告分组 |
+| `/tracework:daily` | 高频 | 今天改变了什么、为什么重要、下一道门是什么 |
+| `/tracework:weekly` | 高频 | 周级管理判断；默认 Markdown brief，明确请求时生成面向部门汇报的 PPT 大纲 |
+| `/tracework:monthly` | 高频 | Raw-first 的阶段成果、反复风险和下月收口目标 |
+| `/tracework:capture` | 高频增强 | 动态选择 lite/standard/deep 的 session raw record |
+| `/tracework:capture day [date] [scope]` | 可选补录 | 按分组扫描已索引 session，增量补回当天证据 |
+| `/tracework:query` | 低频 | 用引用回答当时为什么这么选 |
+| `/tracework:recall` | 低频 | 继续旧工作时恢复有边界的上下文 |
+| `/tracework:roadmap` | 低频进阶 | 长周期决策线程叙事 |
+| `/tracework:cold-start-interview` | 一次性增强 | Vault、项目身份和报告分组 |
 
 明确请求 `weekly PPT` 时，Tracework 会为部门内 IC 生成 6–10 页汇报大纲。核心技术
 成果按“为什么改、如何工作、是否有效”组织：Before/After 说明状态变化，方案逻辑图和
 实施叙事解释主路径、关键分支、回退与不变量，数据、测试或明确的 measurement gap
 单独说明效果边界。主 deck 最多保留 2–3 张逻辑图；普通维护工作不会为了视觉形式
-强行生成架构图，原始证据映射留在附录。
+强行生成架构图，原始证据映射留在附录。该命令生成的是大纲，不是已经渲染的
+`.pptx` 文件。
 
 Decision replay 是可信机制，而不是需要每天使用的操作。读者可以从报告主张向下追到
 raw entry、被拒方案、风险和直接证据。记录不足时，Tracework 应该明确暴露缺口，而
@@ -87,22 +116,6 @@ raw entry、被拒方案、风险和直接证据。记录不足时，Tracework �
 
 Tracework 不是会议纪要、审批流、绩效包装、员工监控或泛办公室套件。活动数、提交数
 和代码行数只能描述覆盖度，不能证明成果。
-
-## 安装
-
-### Codex
-
-```bash
-codex plugin marketplace add KKenny0/Tracework
-codex plugin add tracework@tracework
-```
-
-### Claude Code
-
-```bash
-claude plugin marketplace add KKenny0/Tracework
-claude plugin install tracework@tracework
-```
 
 ## Storage
 
@@ -134,7 +147,7 @@ npm --prefix site run build
 
 ## 支持
 
-如果 Tracework 帮你把 Agent 工作收口成了更清晰的报告，同时保留了重要决策背后的
+如果 Tracework 帮你把 Agent 工作收口成了更清晰的进展报告，同时保留了重要决策背后的
 证据，你可以在这里支持项目继续维护：
 
 <https://kkenny0.github.io/support/>

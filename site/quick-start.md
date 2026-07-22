@@ -7,15 +7,49 @@ codex plugin marketplace add KKenny0/Tracework
 codex plugin add tracework@tracework
 ```
 
-## 2. Configure Once Per Project
+Claude Code:
 
-Run `/tracework:cold-start-interview`. Choose the local vault, project identity,
-and reporting group such as `work` or `personal`.
+```bash
+claude plugin marketplace add KKenny0/Tracework
+claude plugin install tracework@tracework
+```
+
+## 2. Try a Report First
+
+In any project with recent work, say:
+
+```text
+write the weekly report
+```
+
+or:
+
+```text
+/tracework:weekly
+```
+
+You can also close today first: `write the daily report` / `/tracework:daily`.
+
+You can see a result in the conversation without configuring a vault. Without
+raw entries, reports may use meaningful git activity as `limited` coverage.
+They do not invent intent, decisions, or verified impact.
+
+## 3. Turn On Durable Storage When You Need It
+
+When you want multi-day memory, file writes, and strict work/personal
+partitioning, run:
+
+```text
+/tracework:cold-start-interview
+```
+
+Choose the local vault, project identity, and reporting group such as `work`
+or `personal`.
 
 After upgrading from 0.2, run it once in each existing project. Unassigned
 projects are excluded from scoped reports rather than guessed into work output.
 
-## 3. Close the Work
+Common closure commands:
 
 ```text
 /tracework:daily work
@@ -26,19 +60,12 @@ projects are excluded from scoped reports rather than guessed into work output.
 Use `personal` for personal projects or `all` for a private combined view with
 separate group sections. Weekly returns a Markdown brief by default; say
 `weekly PPT` when you need a 6-10 slide outline for a department update. The
-outline is written from an individual contributor's perspective. Core
-mechanism changes combine Before/After, a solution-logic diagram, an
-implementation narrative, and separate validation evidence. The main deck uses
-at most two or three logic diagrams and keeps raw evidence mappings in the
-appendix. The command produces an outline, not a rendered `.pptx` file.
+command produces an outline, not a rendered `.pptx` file.
 
-Without raw entries, reports can use meaningful git activity as `limited`
-coverage. They do not invent intent, decisions, or verified impact.
+## 4. Improve the Evidence with Capture
 
-## 4. Improve the Evidence
-
-End key work with `收工` or `/tracework:capture`. Capture chooses lite,
-standard, or deep from the session signal and stores only durable facts.
+End key work with `收工` / “wrap up” or `/tracework:capture`. Capture chooses
+lite, standard, or deep from the session signal and stores only durable facts.
 
 If you prefer one end-of-day recovery pass, opt in with:
 

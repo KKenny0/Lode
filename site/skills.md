@@ -1,5 +1,7 @@
 # Skills
 
+Full command reference. For first use, prefer [Quick Start](./quick-start): try a weekly or daily report before configuring a vault.
+
 ## High-Frequency Reporting
 
 ### Daily

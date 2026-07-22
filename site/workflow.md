@@ -3,22 +3,37 @@
 ## Primary Loop
 
 ```text
-install -> configure vault and project group -> Daily -> Weekly -> Monthly
-                                              \-> capture key sessions
-                                              \-> capture day (opt-in recovery)
+install
+  -> try: write weekly / write daily
+  -> when you need multi-day memory: configure vault and project groups
+  -> wrap up after key sessions
+  -> write daily / weekly / monthly
+  -> drill down only when questioned or resuming
 ```
 
 1. Install `tracework@tracework`.
-2. Run `/tracework:cold-start-interview` once per project to set its reporting
-   group.
-3. Use `/tracework:daily`, `/tracework:weekly`, and `/tracework:monthly` for
+2. Try `/tracework:weekly` or `/tracework:daily` first; without a vault, the
+   report returns in the conversation.
+3. Run `/tracework:cold-start-interview` when you want durable storage and
+   strict reporting groups.
+4. End key sessions with `收工` / “wrap up” or `/tracework:capture` so reports
+   can explain intent, risks, trade-offs, and evidence boundaries.
+5. Use `/tracework:daily`, `/tracework:weekly`, and `/tracework:monthly` for
    high-frequency management closure.
-4. End key sessions with `收工` or `/tracework:capture` so reports can explain
-   intent, risks, trade-offs, and evidence boundaries.
-5. Optionally enable metadata-only session scanning and run
+6. Optionally enable metadata-only session scanning and run
    `/tracework:capture day` once at day end to recover missed sessions.
-6. Use Query, Recall, or Roadmap only when work is questioned, resumed, or
+7. Use Query, Recall, or Roadmap only when work is questioned, resumed, or
    reviewed over a long horizon.
+
+## User Actions, Not a Command Table
+
+| What you say | What runs |
+| :--- | :--- |
+| wrap up / 收工 | capture |
+| write daily / weekly / monthly | daily / weekly / monthly |
+| why did we choose this / continue last time | query / recall |
+
+See [Skills](./skills) for the full command surface.
 
 ## Scope Partition
 

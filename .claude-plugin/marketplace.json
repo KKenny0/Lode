@@ -5,12 +5,12 @@
     "email": "jdlow@live.cn"
   },
   "metadata": {
-    "description": "Tracework plugin marketplace for evidence-backed agent work reports."
+    "description": "Tracework plugin marketplace for evidence-backed progress reports from agent work."
   },
   "plugins": [
     {
       "name": "tracework",
-      "description": "Evidence-backed daily, weekly, and monthly reports for agent work.",
+      "description": "Turn agent work into evidence-backed progress reports — daily, weekly, and monthly.",
       "version": "0.5.1",
       "author": {
         "name": "Kennywu",
@@ -20,11 +20,12 @@
       "repository": "https://github.com/KKenny0/Tracework",
       "license": "MIT",
       "keywords": [
+        "progress reports",
+        "daily report",
+        "weekly report",
         "agent sessions",
-        "work memory",
-        "decision replay",
         "work briefs",
-        "decision roadmap",
+        "decision replay",
         "local-first"
       ]
     }

@@ -1,7 +1,7 @@
 {
   "name": "tracework",
   "version": "0.5.1",
-  "description": "Evidence-backed daily, weekly, and monthly reports for agent work, with local decision replay when the work is questioned later.",
+  "description": "Turn agent work into evidence-backed progress reports — daily, weekly, and monthly, with local decision replay when work is questioned later.",
   "author": {
     "name": "Kennywu",
     "email": "jdlow@live.cn"
@@ -10,18 +10,19 @@
   "repository": "https://github.com/KKenny0/Tracework",
   "homepage": "https://github.com/KKenny0/Tracework",
   "keywords": [
+    "progress reports",
+    "daily report",
+    "weekly report",
     "agent sessions",
-    "work memory",
     "work briefs",
     "decision replay",
-    "decision roadmap",
     "local-first"
   ],
   "skills": "./skills/",
   "interface": {
     "displayName": "Tracework",
-    "shortDescription": "Evidence-backed daily, weekly, and monthly reports for agent work",
-    "longDescription": "Close agent work into scoped daily, weekly, and monthly management narratives, capture key evidence with dynamic depth, recover missed sessions through opt-in Capture Day, and replay decisions when work is questioned or resumed.",
+    "shortDescription": "Turn agent work into evidence-backed progress reports",
+    "longDescription": "Close agent work into evidence-backed daily, weekly, and monthly progress reports. Capture key facts when you wrap up a session, keep work and personal projects partitioned, and replay decisions only when the work is questioned or resumed.",
     "developerName": "Kennywu",
     "category": "Productivity",
     "capabilities": [
@@ -33,10 +34,10 @@
     "logo": "./assets/logo.png",
     "brandColor": "#B87508",
     "defaultPrompt": [
-      "Use Tracework to write a work-scoped daily report with /tracework:daily work.",
-      "Use Tracework to form this week's management judgment with /tracework:weekly work.",
-      "Use Tracework to create a raw-first monthly review with /tracework:monthly work.",
+      "Use Tracework to write this week's work-scoped weekly brief with /tracework:weekly work.",
+      "Use Tracework to write today's work-scoped daily report with /tracework:daily work.",
       "Use Tracework to capture this key session with /tracework:capture.",
+      "Use Tracework to create a raw-first monthly review with /tracework:monthly work.",
       "Use Tracework to recover today's scoped session evidence with /tracework:capture day."
     ],
     "screenshots": [

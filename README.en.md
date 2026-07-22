@@ -4,10 +4,10 @@
 
 <h1 align="center">Tracework</h1>
 
-<p align="center"><strong>Turn agent work into evidence-backed daily, weekly, and monthly reports.</strong></p>
+<p align="center"><strong>Turn agent work into evidence-backed progress reports.</strong></p>
 
 <p align="center">
-  <img src="assets/tracework-reporting-hero.webp" alt="Tracework turns scattered agent work into a clear, evidence-backed report that earns management confidence" width="1086" />
+  <img src="assets/tracework-reporting-hero.webp" alt="Tracework turns agent work into evidence-backed progress reports" width="1086" />
 </p>
 
 <p align="center">
@@ -17,32 +17,60 @@
 The Chinese README is the canonical product reference; this page mirrors its
 current product scope and command surface in English.
 
-Tracework closes agent work into reports people can use while preserving enough
-local evidence to explain the decisions behind that work later.
+Say “wrap up” to keep the durable facts. Generate daily, weekly, and monthly
+reports when you need them. When the work is questioned later, replay why a
+choice was made.
 
-Daily, Weekly, and Monthly are the high-frequency product surfaces. Capture is
-the quiet evidence foundation. Query, Recall, and Roadmap are lower-frequency
-trust and recovery views for the moments when work is questioned, resumed, or
-reviewed as a longer phase.
+Records stay in your own local vault. Without accumulated entries, reports can
+still use git for `limited` coverage and mark the evidence boundary instead of
+inventing intent or outcomes.
+
+## Try It First
+
+After install, try it in any project with recent work:
+
+```text
+write the weekly report
+# or
+/tracework:weekly
+```
+
+Or close today first: `write the daily report` / `/tracework:daily`.
+
+You can see a result in the conversation without configuring a vault. Run
+`/tracework:cold-start-interview` when you want durable storage, file writes,
+and strict work/personal partitioning.
+
+## Install
+
+### Codex
+
+```bash
+codex plugin marketplace add KKenny0/Tracework
+codex plugin add tracework@tracework
+```
+
+### Claude Code
+
+```bash
+claude plugin marketplace add KKenny0/Tracework
+claude plugin install tracework@tracework
+```
 
 ## Core Loop
 
 ```text
 agent work
-  -> capture the durable facts
-  -> close the day
-  -> form a weekly judgment
-  -> review the monthly phase
-
-when needed
-  -> query why a choice was made
-  -> recall where to continue
+  -> wrap up and keep the durable facts
+  -> write daily / weekly / monthly reports
+  -> when needed: why that choice / resume where you left off
 ```
 
-Tracework is reporting-first and decision-replay-backed. When raw entries are
-missing, reports can still use git to produce `limited` coverage. Capture
-preserves the motivation, status, risks, trade-offs, and evidence boundaries
-that git cannot explain.
+| Frequency | What you say | What it does |
+| :--- | :--- | :--- |
+| High | write daily / weekly / monthly | Management-facing progress closure |
+| High multiplier | wrap up / capture | Makes later reports better grounded |
+| Low | why did we choose this / continue last time | Drill-down when questioned or resuming |
 
 ## Reporting Scopes
 
@@ -73,17 +101,17 @@ manually.
 
 ## Skills
 
-| Command | Role | Output |
+| Command | Frequency | Output |
 | :--- | :--- | :--- |
-| `/tracework:daily` | High-frequency closure | What changed today, why it matters, and the next gate |
-| `/tracework:weekly` | High-frequency closure | Weekly management judgment; Markdown brief by default, department-ready PPT outline when requested |
-| `/tracework:monthly` | High-frequency review | Raw-first phase outcomes, recurring risks, and next-month closure targets |
-| `/tracework:capture` | Evidence foundation | An adaptive lite/standard/deep session raw record |
-| `/tracework:capture day [date] [scope]` | Same-day recovery | Incrementally recovered evidence from indexed sessions after scope partitioning |
-| `/tracework:query` | Lower-frequency trust | A cited answer to why a path was chosen |
-| `/tracework:recall` | Lower-frequency recovery | Bounded context for resuming older work |
-| `/tracework:roadmap` | Advanced review | A long-range decision-thread narrative |
-| `/tracework:cold-start-interview` | One-time setup | Vault, project identity, and reporting group |
+| `/tracework:daily` | High | What changed today, why it matters, and the next gate |
+| `/tracework:weekly` | High | Weekly management judgment; Markdown brief by default, department-ready PPT outline when requested |
+| `/tracework:monthly` | High | Raw-first phase outcomes, recurring risks, and next-month closure targets |
+| `/tracework:capture` | High multiplier | An adaptive lite/standard/deep session raw record |
+| `/tracework:capture day [date] [scope]` | Optional recovery | Incrementally recovered evidence from indexed sessions after scope partitioning |
+| `/tracework:query` | Low | A cited answer to why a path was chosen |
+| `/tracework:recall` | Low | Bounded context for resuming older work |
+| `/tracework:roadmap` | Low / advanced | A long-range decision-thread narrative |
+| `/tracework:cold-start-interview` | One-time upgrade | Vault, project identity, and reporting group |
 
 When explicitly asked for a `weekly PPT`, Tracework produces a 6-10 slide
 outline for an individual contributor reporting within a department. Core
@@ -93,7 +121,8 @@ solution logic and implementation narrative explain the main path, branches,
 fallbacks, and invariants; data, tests, or a visible measurement gap establish
 the evidence boundary. The main deck keeps at most two or three logic diagrams,
 does not manufacture architecture diagrams for routine maintenance, and leaves
-raw evidence mappings in the appendix.
+raw evidence mappings in the appendix. The command produces an outline, not a
+rendered `.pptx` file.
 
 Decision replay is a trust mechanism, not a daily operation. A reader can drill
 from a report claim to raw entries, rejected alternatives, risks, and direct
@@ -103,22 +132,6 @@ instead of inventing history.
 Tracework is not a meeting-notes tool, approval workflow, performance-packaging
 layer, employee-monitoring surface, or generic office suite. Activity counts,
 commit counts, and lines of code describe coverage; they do not prove outcomes.
-
-## Install
-
-### Codex
-
-```bash
-codex plugin marketplace add KKenny0/Tracework
-codex plugin add tracework@tracework
-```
-
-### Claude Code
-
-```bash
-claude plugin marketplace add KKenny0/Tracework
-claude plugin install tracework@tracework
-```
 
 ## Storage
 
@@ -154,9 +167,9 @@ Core documentation: [Configuration](docs/configuration.md),
 
 ## Support
 
-If Tracework helps you turn agent work into clearer reports while preserving the
-evidence behind important decisions, you can support continued maintenance
-here:
+If Tracework helps you turn agent work into clearer progress reports while
+preserving the evidence behind important decisions, you can support continued
+maintenance here:
 
 <https://kkenny0.github.io/support/>
 

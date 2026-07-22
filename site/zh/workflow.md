@@ -3,18 +3,32 @@
 ## 主循环
 
 ```text
-安装 -> 配置 vault 与项目分组 -> Daily -> Weekly -> Monthly
-                                  \-> capture 关键 session
-                                  \-> capture day（可选补录）
+安装
+  -> 先试：写周报 / 写日报
+  -> 需要跨天累计时：配置 vault 与项目分组
+  -> 关键 session 说“收工”
+  -> 写日报 / 写周报 / 写月报
+  -> 被追问或续作时再下钻
 ```
 
 1. 安装 `tracework@tracework`。
-2. 每个项目运行一次 `/tracework:cold-start-interview`，设置 reporting group。
-3. 用 `/tracework:daily`、`/tracework:weekly`、`/tracework:monthly` 完成高频收口。
+2. 先直接运行 `/tracework:weekly` 或 `/tracework:daily` 试用；无 vault 时在对话中输出。
+3. 需要持久保存与严格分区时，再运行 `/tracework:cold-start-interview`。
 4. 关键工作结束时说“收工”，保存动机、风险、取舍和证据边界。
-5. 可选启用元数据级 session scan，在每天结束时运行一次
+5. 用 `/tracework:daily`、`/tracework:weekly`、`/tracework:monthly` 完成高频收口。
+6. 可选启用元数据级 session scan，在每天结束时运行一次
    `/tracework:capture day`，补回遗漏 session。
-6. 只有在工作被追问、继续或长周期复盘时，才使用 Query、Recall、Roadmap。
+7. 只有在工作被追问、继续或长周期复盘时，才使用 Query、Recall、Roadmap。
+
+## 用户动作，而不是命令表
+
+| 你怎么说 | 背后能力 |
+| :--- | :--- |
+| 收工 | capture |
+| 写日报 / 写周报 / 写月报 | daily / weekly / monthly |
+| 为什么当时这么选 / 接着上次 | query / recall |
+
+完整命令表见 [Skills](./skills)。
 
 ## 先分区，再选择主线
 
