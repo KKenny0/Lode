@@ -35,3 +35,7 @@ site/node_modules/
 site/.vitepress/cache/
 site/.vitepress/dist/
 .gstack/
+
+# Local planning notes — never ship
+plans/
+
