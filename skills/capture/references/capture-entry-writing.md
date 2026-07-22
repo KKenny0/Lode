@@ -213,9 +213,11 @@ Use this template in zero-config mode or helper-failure fallback:
 }
 ```
 
-After the final entry, append:
+After the final entry, append one soft upgrade line (zero-config only):
 
 ```text
-配置 knowledge_vault 可以持久保存这些记录，并在日报、周报、月报和 query 中复用。
-运行 `/tracework:cold-start-interview` 可在约 2 分钟内完成设置。
+可选：配置 knowledge vault 后可跨天累计，并在日报、周报、月报和 query 中复用。`/tracework:cold-start-interview`
 ```
+
+Do not imply capture failed without a vault. The Markdown recap is the
+deliverable.

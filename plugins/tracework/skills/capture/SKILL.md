@@ -98,19 +98,28 @@ optional fields.
 
 ## Output Policy
 
-Vault mode returns a concise confirmation plus a capture receipt. Include the
-chosen depth and one short routing reason so future tuning can see why the
-skill spent that amount of context.
+Vault mode returns a concise confirmation plus a capture receipt from
+`references/capture-operations.md`. Include:
+
+- chosen depth and one short routing reason;
+- the top durable summary;
+- non-zero risk / open-question / abandoned-alternative counts only;
+- one forward-looking line that connects this capture to later Daily/Weekly
+  reports (for example that it can enter this week's report candidates).
+
+Keep the default vault reply about six lines or fewer. Do not dump transcript
+bodies or long recaps unless verbose mode is requested.
 
 Day mode returns one aggregate scan receipt. Never echo transcript bodies or
 paths. List only counts, project names, and explicit skip reasons.
 
 Verbose output is opt-in. Treat "verbose", "show recap", "展开总结", or an
 explicit request to inspect the recap as permission to include the Markdown
-recap after writing.
+recap after the receipt.
 
 Zero-config mode is always verbose because the conversation output is the only
-deliverable.
+deliverable. It does not need the short vault receipt; keep the existing
+one-line setup hint after the Markdown recap.
 
 ## Quality Gate
 
@@ -129,6 +138,14 @@ Before finalizing each entry, check:
   metadata only when they are material?
 - For checkpoint mode, is this a durable stage signal rather than a progress
   log?
+
+Before finalizing vault-mode user output, also check:
+
+- Does the receipt include a top summary grounded in the written entries?
+- Are zero counts omitted rather than shown as "0 个"?
+- Is there exactly one forward-looking report line (candidate for weekly/daily,
+  or checkpoint "已记入本周证据")?
+- Is the default reply short and quiet unless verbose was requested?
 
 ## Anti-Patterns
 

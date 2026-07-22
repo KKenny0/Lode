@@ -26,15 +26,21 @@ session-end capture and checkpoint capture remain independent of this index.
 
 Use quiet output by default whenever a vault write succeeds. This applies to
 manual `/tracework:capture` and checkpoint capture. Capture Day uses its own
-aggregate receipt. Return only a short confirmation plus the receipt:
+aggregate receipt. Return only a short confirmation plus the capture receipt
+(see Capture Receipt below). Keep the whole vault-mode reply about six lines or
+fewer unless verbose recap is requested.
 
 ```text
 已记录 {N} 条进展 -> {slug} ({week})
 depth={lite|standard|deep}: {one short routing reason}
+
+{最关键 summary}
+⚠️ {N} 个风险 · ❓ {N} 个开放问题 · 🔄 {N} 个放弃方案
+→ 可进入本周 {scope} 报告主线候选；需要时运行 /tracework:weekly 或「写周报」
 ```
 
 If the user requested verbose output, also include the Markdown recap after the
-write confirmation.
+receipt. Do not echo transcript bodies by default.
 
 Zero-config mode is always verbose because the conversation output is the only
 deliverable. Helper failures must not be silent: report the specific failure
@@ -155,16 +161,28 @@ deliverable.
 
 ## Capture Receipt
 
-After the vault-mode confirmation, append a 2-3 line receipt that gives the user
-immediate signal from what was just captured. Zero-config mode does not need a
-receipt because the full Markdown output already serves this purpose.
+After the vault-mode confirmation line, append a short receipt that shows what
+mattered and why capture helps later reports. Zero-config mode does not need
+this receipt because the full Markdown output is the deliverable; keep its
+setup hint at the end of the Markdown recap instead.
 
-Receipt template:
+Full vault-mode template (confirmation + receipt):
 
 ```text
-📋 {最关键的 summary}
-   depth={lite|standard|deep}: {one short routing reason}
-   ⚠️ {N} 个风险 · ❓ {N} 个开放问题 · 🔄 {N} 个放弃方案
+已记录 {N} 条进展 -> {slug} ({week})
+depth={lite|standard|deep}: {one short routing reason}
+
+{最关键的 summary}
+⚠️ {N} 个风险 · ❓ {N} 个开放问题 · 🔄 {N} 个放弃方案
+→ 可进入本周 {scope} 报告主线候选；需要时运行 /tracework:weekly 或「写周报」
+```
+
+`scope` is the project's `reporting_group` when known (`work`, `personal`, or
+another stable group). If the project is unassigned, use `local` and keep the
+forward line honest, for example:
+
+```text
+→ 已记入本周 local 证据；配置 reporting_group 后可进入 work/personal 分区报告
 ```
 
 Selection rules for the top summary:
@@ -189,8 +207,26 @@ Signal counts:
 Omission rules:
 
 - When a count is 0, omit that segment rather than showing "0 个".
-- When all entries are `archetype: "maintenance"`, omit the prefix and use plain
-  wording.
+- When all three counts are 0, omit the whole signal-count line.
+- When all entries are `archetype: "maintenance"`, omit decorative prefixes and
+  use plain wording for the summary line.
+- Keep vault-mode output quiet: no transcript paths, no long recap, no emoji
+  required. A leading symbol is optional; plain text is fine.
 
-Checkpoint receipt is shorter. Show only the top summary and open questions, if
-any. Skip the full signal-count line.
+Forward-looking line (required in vault mode):
+
+- Session-end capture: always end with one line that connects this write to
+  later reports, normally:
+
+  `→ 可进入本周 {scope} 报告主线候选；需要时运行 /tracework:weekly 或「写周报」`
+
+- If the session is mainly daily-closure material, `写日报` / `/tracework:daily`
+  may replace or join the weekly suggestion.
+- Checkpoint capture is shorter: top summary, open questions if any, then:
+
+  `→ 已记入本周证据`
+
+  Skip the full signal-count line for checkpoint unless risks or abandoned
+  alternatives are material.
+- Do not claim the item is already a weekly headline. Say it is a candidate or
+  that the evidence was recorded.

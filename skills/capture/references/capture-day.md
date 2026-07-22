@@ -116,13 +116,17 @@ the affected watermark; a later run must be able to retry.
 
 ## Receipt
 
-Return only aggregate operational facts:
+Return only aggregate operational facts, plus one short forward line when any
+entries were written:
 
 ```text
 扫描 7 个 session -> 写入 4 个项目、6 条记录
 跳过：1 个已覆盖 · 1 个未分组 · 1 个格式不支持
 scope=work · date=2026-07-10
+→ 已补入本周证据；需要时运行 /tracework:weekly 或「写周报」
 ```
+
+If nothing was written, omit the forward line and keep the skip reasons clear.
 
 Do not echo prompts, assistant replies, transcript paths, or personal project
 names excluded by scope.
