@@ -258,8 +258,14 @@ function assertSelectedAssetCopies(sourceRoot, copyRoot, assets, label) {
 }
 
 function assertNoForbiddenSkillArtifacts(root, label) {
+  // Local private evals/workspaces/__pycache__ are gitignored and skipped by
+  // copy-skills. Packaging safety is enforced on cli/skills and
+  // plugins/tracework, which must not contain those directories.
+  // Source-tree check only fails on stray ship-risk files that are not the
+  // intentional local-only skip set.
   const forbidden = walk(root, (fullPath, entry) => {
-    if (entry.isDirectory()) return shouldSkipSkillCopyEntry(entry.name);
+    if (entry.isDirectory()) return false;
+    if (shouldSkipSkillCopyEntry(entry.name)) return false;
     return entry.name.endsWith('.pyc') || entry.name === '.DS_Store';
   });
   for (const item of forbidden) {

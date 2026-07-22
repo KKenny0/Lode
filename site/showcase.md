@@ -81,7 +81,7 @@ public sample gate remain open.
 |--------|--------|--------------|----------|-------|
 | Capture receipt forward line | done | Wrap-up now points at weekly/daily candidates | supporting | none |
 | Quick-start / workflow docs | done | Match try-first narrative | supporting | none |
-| Version bump | ongoing | Still 0.5.1 until a release batch | portfolio | ship gate |
+| Version bump | done | Plugin manifests at 0.6.0 | supporting | publish to marketplaces separately |
 
 ## Next-week closure targets
 

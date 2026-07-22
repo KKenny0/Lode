@@ -76,7 +76,7 @@ description: Tracework 的输出形态、前后对比与证据边界。
 |----------|------|----------------|------------|----------|
 | Capture 回执前瞻句 | done | 收工后提示可进入本周报告候选 | supporting | 无 |
 | 站点 quick-start / workflow | done | 与 try-first 叙事一致 | supporting | 无 |
-| 版本号 bump | ongoing | 仍停在 0.5.1，待发布批次 | portfolio | 与发版门禁一起处理 |
+| 版本号 bump | done | 插件清单已升到 0.6.0 | supporting | 发布时再推市场安装 |
 
 ## 下周收口目标
 
