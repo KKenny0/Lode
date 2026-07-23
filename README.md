@@ -14,7 +14,7 @@
   <a href="https://kkenny0.github.io/projects/tracework/"><strong>项目页</strong></a> · <a href="https://kkenny0.github.io/Tracework/"><strong>文档</strong></a> · <a href="README.en.md">English</a>
 </p>
 
-日常说“收工”留下关键事实；需要时生成日报、周报、月报。  
+日常说“收工”留下关键事实；需要时生成日报、周报、月报。
 被追问时，再回看当时为什么这么选。
 
 记录留在你自己的本地 vault。没有累计记录时，报告仍可用 git 生成 `limited`
