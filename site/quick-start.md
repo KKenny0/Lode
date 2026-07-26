@@ -63,9 +63,11 @@ Common closure commands:
 Use `personal` for personal projects or `all` for a private combined view with
 separate group sections. Weekly has three modes: say `这周做了啥` / `quick weekly`
 for a conversation-only quick review; default `write the weekly report` for a
-Markdown brief; say `weekly PPT` when you need a 6-10 slide outline for a
-department update. The PPT command produces an outline, not a rendered
-`.pptx` file.
+Markdown brief; say `weekly PPT` when you need a standalone PPT-ready Markdown
+Deck for a department update. Slides mode has no minimum and emits at most
+eight necessary pages. Each Story opens with Why and Goal, then directly
+presents facts, relationships, comparisons, mechanisms, values, and risks.
+The Markdown is independently readable; PPT is its visual translation.
 
 ## 4. Improve the Evidence with Capture
 

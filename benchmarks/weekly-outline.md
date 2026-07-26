@@ -5,8 +5,10 @@
 Verify that Weekly produces a scoped, objective-anchored management judgment
 from raw evidence: intended direction, actual change, material variance,
 current decision, and next commitment. It must keep every meaningful stream
-visible without inventing a retrospective Why. When slides are explicit, also
-retain the current slide-contract checks until the separate Storyboard phase.
+visible without inventing a retrospective Why. When slides are explicit, it
+must reopen the supporting sources and turn that analysis into a standalone,
+PPT-ready Markdown Deck rather than paginate the Brief or emit production
+instructions.
 
 ## Goal-Loop Scenarios
 
@@ -40,8 +42,9 @@ retain the current slide-contract checks until the separate Storyboard phase.
    portfolio coverage. Do not force a headline count.
 14. **Conflict**: later or conflicting raw states remain visible and lower
    confidence.
-15. **Explicit PPT request**: produce 6-10 main slides per group. Default Weekly
-   remains a Markdown management brief.
+15. **Explicit PPT request**: produce one PPT-ready Markdown Deck with no
+    minimum and at most eight necessary main slides per group. Default Weekly
+    remains a Brief.
 16. **Quantified algorithm result**: recommend a result chart only when metric,
    unit, baseline, current value, delta, sample scope, method, and comparability
    support it.
@@ -49,21 +52,100 @@ retain the current slide-contract checks until the separate Storyboard phase.
     plan and closure criterion; never invent a result chart.
 18. **Conflicting metrics**: expose invalid ordering, incompatible samples, or
     unit conflicts, lower confidence, and withhold the chart.
-19. **Core runtime mechanism**: generate complete `solution_logic` with a diagram
-    type matched to concurrency, data flow, dispatch, failure handling, state,
-    or responsibility change.
-20. **Core implementation narrative**: derive normal-path, branch-and-fallback,
-    and outcome-and-invariant prose from the same core `solution_logic`, without
-    introducing new mechanisms or presenting the prose as effect evidence.
+19. **Core runtime mechanism**: use mechanism evidence only when it materially
+    advances the audience's understanding; a diagram explains causality rather
+    than enumerate actors or steps.
+20. **Cognitive decomposition**: identify necessary problem reframe, design
+    rationale, mechanism, validation, and decision tasks internally; tasks are
+    candidates, not pages.
 21. **Maintenance-only work**: retain parameter tuning, cleanup, and
     non-mechanism configuration work in the portfolio without decorative
     architecture diagrams or implementation narratives.
-22. **Contract rejection probes**: reject omitted results, hollow core logic,
-    missing, empty, invisible, duplicate, prefixed, composite, or node-list
-    implementation narratives, default-deck internal references, unsupported
-    result charts, duplicate or unsafe slide titles, oversized narrative or
-    logic fields, missing maturity, decorative maintenance logic, and invalid
-    slide formats.
+22. **Story formation**: publish one Why and Goal at the start of each Story;
+    do not repeat them per slide.
+23. **Content materialization**: reopen raw sources, keep source packets
+    internal, and turn facts, relations, comparisons, mechanisms, numbers,
+    boundaries, and gates into presentation content itself.
+24. **Contract rejection probes**: reject missing Story Why/Goal, production
+    guidelines in public content, intended-takeaway leakage, unsafe main-deck
+    references, false complex-result merges, mechanical simple-result splits,
+    and appendix-only meaning.
+
+## PPT-ready Markdown Deck Scenarios
+
+1. **P1 — One goal, several actions**: merge activities that prove one audience
+   conclusion instead of allocating one page per activity.
+2. **P2 — Complex mechanism**: allow more than one page only when the pages
+   perform independent cognitive work.
+3. **P3 — Quiet maintenance week**: produce a short deck without filler cover,
+   agenda, status, or summary pages.
+4. **P4 — No comparable metric**: use a relationship, process, state, or
+   evidence-boundary visual instead of a chart.
+5. **P5 — Comparable metric**: let the chart prove the conclusion without
+   repeating the same values in adjacent text or a table.
+6. **P6 — Management decision**: combine risk, variance, and support into one
+   decision page when they serve one judgment.
+7. **P7 — Non-code work**: support proposal, content, and customer progress
+   without requiring technical diagrams.
+8. **P8 — All scope**: create separate work and personal mini-decks with their
+   own thesis and audience decision.
+9. **P9 — Evidence conflict**: lower claim strength and keep the conflict
+   visible.
+10. **P10 — Deletion**: reject any page whose removal changes neither deck
+    thesis nor audience decision.
+
+### P2-A — Complex Story forms a natural progression
+
+Input contains an old approach's failure, candidate trade-offs, a governing
+design constraint, the new operating path, and an unchanged boundary.
+
+Pass only when:
+
+- the Story publishes Why and Goal first;
+- page one directly presents the design problem, constraints, and trade-offs;
+- page two directly presents the mechanism and depends on page one's premise;
+- pages use different grounded source material and cognitive tasks;
+- no production guideline or intended takeaway appears in public content;
+- a fresh reader can infer the expected understanding;
+- deleting either page prevents the Story Goal from being completed.
+
+### P2-B — Simple result must merge
+
+When one Before/After, relationship, or flow can fully express root cause,
+choice, and operation, emit one content page under one Story Why/Goal.
+
+Fail when:
+
+- design and mechanism are split by convention;
+- page two only expands page-one detail;
+- deleting either page leaves the Story Goal intact.
+
+### P2-C — Blind Content Handoff
+
+Give only the final Markdown Deck to an independent maker who did not perform
+Weekly Analysis.
+
+The maker may choose layout, type, color, and visual translation. They may not
+browse the vault, add Story Why/Goal, research trade-offs, invent nodes,
+relations, numbers, or risks, or re-decide the split. Pass only when PPT and
+Markdown carry the same argument and the maker performs visual translation
+only.
+
+### P2-D — Takeaway Inference
+
+Keep hidden `intended_takeaway` values separate from the public Markdown. Give
+only the public deck to a fresh reader.
+
+Pass only when the public deck does not directly repeat the takeaway, the title
+does not leak it, and the reader can express a materially similar understanding
+in their own words.
+
+### P2-E — Standalone Markdown Reading
+
+Read the Markdown without making a PPT. Pass only when a reader can reconstruct
+the Story order, every Why and Goal, the material facts, relationships, numbers,
+risks, and decisions without production guidance or the Evidence Appendix as a
+prerequisite.
 
 ## Brief Compression Scenarios
 
@@ -119,34 +201,24 @@ variance, decision or support, next commitment, and confidence boundary.
 - The appendix maps body claims to evidence without retelling body prose.
 - Plain slide wording defaults to an IC department update; a technical-review
   deck requires explicit wording.
-- Slide 2 states the stage judgment, key results, largest gate, and support need
-  in about 30 seconds.
-- Each main-deck title states one supported conclusion and each slide has at
-  most one primary visual.
-- Stable result ids link headline selection, core classification, logic-diagram
-  routing, and slide projection; omitted or duplicate results fail validation.
-- The declared 6-10 slide count matches the composed conclusion-title list.
-- A normal result covers at least two of Before/After, Solution Logic, and Data
-  or Validation.
-- A result with `solution_logic.significance=core` covers all three and has a
-  complete `implementation_narrative` in its slide-projection result.
-- Core solution logic records its trigger, actors, ordered main flow, material
-  branches, fallbacks, output, invariants, remaining boundary, diagram route,
-  and evidence references.
-- Main-deck logic diagrams are limited to two or three per group. Supporting
-  mechanisms move to the technical appendix.
-- Logic diagrams explain how a solution works and remain separate from the
-  data, test, eval, or observed evidence used to establish whether it worked.
-- Core implementation narratives cover the ordered normal path, the condition
-  and reason for a branch or fallback, and the output plus an invariant. They
-  are derived from solution logic, use one or two sentences per block in the
-  main deck, stay within 600 Unicode characters per block, and do not become
-  another source of technical facts.
-- Presentation logic lists are bounded to 12 actors or main-flow steps, 8
-  branches, fallbacks, or invariants, and 24 evidence references. Larger detail
-  is summarized in the technical appendix.
-- Presentation coverage is result-level across associated slides. Before/After,
-  logic, narrative, and result evidence do not have to occupy one page.
+- The Markdown Deck states its context and management question.
+- The main deck has no minimum and no more than eight necessary slides.
+- Every Story states Why and Goal once before its slides.
+- Each title names a question, object, mechanism, comparison, or decision gate
+  without directly leaking the hidden intended takeaway.
+- Each page directly presents supported facts, relationships, comparison,
+  mechanism, numbers, boundaries, or risks; it contains no production fields.
+- Full Source Grounding Packets and unsupported-claim ledgers remain internal;
+  the public appendix contains only compact claim-to-source boundaries.
+- Complex results split only when pages use different grounded material and
+  cognitive tasks, serve one Story Goal, and form a prerequisite sequence.
+- Simple results remain merged when one content block explains root cause,
+  choice, and operation.
+- Validation receives a separate page only when it changes confidence, risk, or
+  the audience decision.
+- Removing any slide breaks its Story Goal or the deck's management question.
+- The deck passes standalone reading, takeaway inference, and blind content
+  handoff.
 - Mechanism completion, effect validation, and production acceptance are
   reported separately.
 - Every open risk and next-week acceptance target has a pass/fail closure
@@ -185,37 +257,19 @@ Missing any answer fails Phase 1 even when the executable contract is green.
 
 ## Real-Output Check
 
-Use a dense real week and generate `work`, `personal`, and `all` candidates
-without overwriting the source report. The work brief should be presentable in
-about five minutes. For the W29 storyboard candidate, use a nine-slide main deck
-and verify that it contains:
+Use current real vault data to regenerate `2026-W28` in slides mode without
+overwriting the source report or raw entries. Save the candidate under the
+ignored weekly eval directory.
 
-1. the weekly throughline;
-2. key results and maturity;
-3. configuration/model failure Before/After;
-4. configuration or provider compatibility logic;
-5. streaming execution result evidence;
-6. Producer-Consumer logic with queue, completion signal, bypass branch, batch
-   fallback, unchanged input, and unchanged call-count invariants;
-7. Registry Before/After and materialized-view rebuild logic with canonical
-   episodes, ordered fold, existing merge, current view, auto-backfill, stable
-   schema, and unchanged downstream interface;
-8. risks, collaboration, and closure criteria;
-9. next-week acceptance targets.
+The W28 candidate must be regenerated from raw sources rather than expand the
+existing Weekly summary, Storyboard, or Production Brief. It must contain a DAG
+Story with public Why/Goal and a two-page `design judgment -> mechanism`
+progression, plus a scene-reuse Story that stays on one content page. Source
+Grounding stays internal and the public Evidence Appendix remains compact.
 
-The Provider, Producer-Consumer, and Registry core results must each pass both
-solution-logic completeness and implementation-narrative completeness. Review
-the real candidate manually because the executable validator can prove field
-presence and reject known label-only shapes, but cannot prove that free prose
-faithfully explains a diagram. For each core result, confirm that the narrative
-covers the diagram's main path, material branch, fallback, output, and invariant.
-
-Also verify that the streaming quality difference supports only the stated
-quality boundary under the current sample. It may justify proceeding to latency
-measurement as a safety gate, but it must not be described as observed latency
-improvement.
-
-Keep the Nacos or provider logic not selected for the main deck in the technical
-appendix. Do not copy project names, model names, or these implementation details
-into the reusable skill contract. Keep private fixtures and outputs in ignored
-eval folders or temporary storage.
+The candidate fails when the pair appears only after hand editing, when either
+page is background or inventory, when the intended takeaway is exposed, or when
+the Markdown requires production guidance to be understood. Complete P2-D and
+P2-E before P2-C; then give only the Markdown to an independent maker, render
+and review the PPT. Green checks and fresh-context validation do not replace
+explicit user acceptance.

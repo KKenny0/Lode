@@ -6,7 +6,7 @@ description: >
   all-project scopes. Three modes: quick conversation review ("这周做了啥",
   "周报简版", "quick weekly", "本周概要"), default Markdown brief ("写周报",
   "周报", "/tracework:weekly", "weekly brief", "本周总结", "weekly report"),
-  and slide outline only when weekly PPT is explicit ("weekly PPT", "周报 PPT",
+  and PPT-ready Markdown Deck only when weekly PPT is explicit ("weekly PPT", "周报 PPT",
   "weekly slides", "演示大纲"). Do not use for daily notes, generic slide
   decks, or single-commit analysis.
 ---
@@ -28,7 +28,7 @@ Priority when cues conflict: `slides` > `quick` > `brief`.
 | :--- | :--- | :--- | :--- | :--- |
 | `quick` | 这周做了啥, 周报简版, quick weekly, 本周概要 | Conversation 5–7 bullets + carried-forward | No | No |
 | `brief` | 写周报, 周报, /tracework:weekly, weekly brief, 本周总结, weekly report | Management brief | Yes when vault exists; else conversation | No |
-| `slides` | weekly PPT, 周报 PPT, weekly slides, 演示大纲; or PPT/slides only after this skill is already selected for a weekly report | 6–10 page department outline | Same as brief | Yes |
+| `slides` | weekly PPT, 周报 PPT, weekly slides, 演示大纲; or PPT/slides only after this skill is already selected for a weekly report | Standalone PPT-ready Markdown Deck, max 8 main slides | Same as brief | Yes |
 
 Default is `brief` when the request is a normal weekly report without PPT or
 quick wording. Do not treat bare “PPT” or “slides” alone as a reason to start
@@ -226,10 +226,9 @@ recorded.
 
 ### 4. Analyze Change and Variance (brief and slides)
 
-Apply `references/weekly-analysis-contract.md` in the main dialog. For `brief`, keep
-`slide_projection` null and do not build solution-logic diagram briefs,
-implementation narratives, or chart briefs unless the user later upgrades to
-slides.
+Apply `references/weekly-analysis-contract.md` in the main dialog. For `brief`,
+do not build slide candidates, diagrams, or chart briefs unless the user later
+upgrades to slides.
 
 For every prior commitment, record whether it was met, advanced, blocked,
 replanned, or not started. No prior commitment may disappear.
@@ -258,44 +257,33 @@ change judgment, action, or confidence in the body; route accountability,
 coverage, and provenance to the appendix. Use one expanded home per fact and no
 fixed length or item count.
 
-### 6. Project Slides When Requested
+### 6. Build the PPT-ready Markdown Deck
 
 Skip this entire step for `quick` and `brief`. Run it only for `slides`.
 
-Transform the weekly analysis into a department-facing deck before applying
-`references/slide-template.md`.
+Transform the stable Weekly Analysis and its raw sources into presentation
+content that is independently readable before applying `references/slide-template.md`.
 
-1. Treat plain `weekly PPT` or slide wording as a department update from an
-   individual contributor. Use a technical-review deck only when the user
-   explicitly asks for a technical review, architecture review, or equivalent.
-2. Select two to three core results. A result earns main-deck space because it
-   changes a material state or decision, not because its implementation is
-   complicated.
-3. Build the result evidence and visual candidates defined in the slide sections
-   of `references/weekly-analysis-contract.md`. Validate metric comparability before
-   recommending a chart.
-4. Route each result through the presentation triad:
-
-   ```text
-   why it changed -> how the new solution works -> whether it worked
-   Before/After      Solution Logic               Data or validation
-   ```
-
-   A normal result covers at least two parts. A core solution-logic result must
-   cover all three and add an implementation narrative that makes the logic
-   speakable without turning it into a second source of technical truth.
-5. When a core technical result changes data flow, control flow, execution
-   timing, state generation, component responsibility, provider or strategy
-   dispatch, or failure handling and fallback, the main deck must contain a
-   solution-logic diagram brief. This is a slides-only quality gate. The result
-   must also contain three short implementation narrative blocks: normal path,
-   branch and fallback, and outcome and invariant. Derive them only from the
-   result's existing `solution_logic` and evidence.
-6. Keep at most two to three solution-logic diagrams in the main deck. Move
-   supporting mechanisms and implementation detail to the technical appendix.
-7. Route parameter tuning, small refactors, code cleanup, and configuration
-   edits that do not change runtime behavior to the portfolio. Do not
-   manufacture diagrams for them.
+1. State the deck context, overall goal, and management question. Select results
+   for their contribution to that job, not implementation volume.
+2. Group selected results into necessary Stories. State one public `Why` and
+   `Goal` at the start of each Story; these belong to the presentation content,
+   not to production notes.
+3. Apply **Cognitive Task Decomposition** from
+   `references/weekly-analysis-contract.md`. Internally identify only necessary
+   `problem_reframe`, `design_rationale`, `mechanism`, `validation`, and
+   `decision` tasks. Keep their `intended_takeaway` internal.
+4. Apply **Content Materialization** from the same contract. Reopen raw sources
+   and build internal Source Grounding Packets, then turn them into actual
+   presentation content: facts, conflicts, comparisons, Mermaid relationships,
+   tables, numbers, paths, branches, fallbacks, invariants, risks, and gates.
+5. Split only when two content blocks are independent cognitive steps serving
+   the same Story Goal and the second depends on the first. Otherwise merge.
+6. Put only compact claim-to-source mapping in the Evidence Appendix. Do not
+   expose source packets, cognitive roles, intended takeaways, layout
+   instructions, visual-style prescriptions, or production constraints.
+7. Delete any page whose removal does not break a Story Goal. Keep at most
+   eight necessary main slides.
 
 Use these visual routes only in `slides` mode:
 
@@ -319,8 +307,8 @@ the measurement gap, and name its closure criterion.
 
 - `quick`: conversation only; see Quick Mode.
 - `brief`: use `weekly-brief-template.md`.
-- `slides`: use `slide-template.md` and keep the main deck to 6-10 slides,
-  excluding the evidence appendix.
+- `slides`: use `slide-template.md`; the main deck has no minimum and at most
+  eight slides, excluding appendices.
 - Keep claim-level evidence in the appendix. Main prose must be readable
   without report-local ids.
 - Preserve risks, unresolved decisions, and evidence gaps.
@@ -345,8 +333,8 @@ Behavior:
    unassigned. Implicit unassigned current repo uses `local`.
 3. Read raw entries for in-scope projects when a vault exists. Optionally glance
    at git to detect uncovered commits.
-4. Do not read `slide-template.md`, do not build slide_projection, and do not
-   require solution-logic diagrams or implementation narratives.
+4. Do not read `slide-template.md` or build slide candidates, diagrams, or
+   implementation narratives.
 5. Output 5–7 bullets in the conversation only. Prefer
    `[archetype] summary`-style lines grounded in raw fields; git-only bullets
    stay bounded and `limited`.
@@ -430,31 +418,27 @@ coverage in one line; it does not need badges.
 
 ### Slides only
 
-- Slide mode has 6-10 main slides per group and no stream-by-stream page quota.
-- Slide 2 communicates the stage judgment, key results, largest gate, and
-  collaboration need in about 30 seconds.
-- Every main-deck slide title states the conclusion supported by that slide.
-- Every slide has at most one primary visual and one main conclusion.
-- An algorithm or effectiveness claim uses comparable data with metric, unit,
-  baseline, current value, sample scope, method, and evidence boundary when
-  those fields apply. Missing fields remain visible rather than guessed.
-- A core runtime-mechanism change has a solution-logic diagram brief containing
-  its trigger, actors, main flow, material branches, fallbacks, output,
-  invariants, remaining boundary, and evidence references.
-- A core runtime-mechanism result has a non-empty implementation narrative
-  covering the normal path, branch and fallback, and outcome and invariant.
-  Each block stays to one or two sentences in the main deck; fuller mechanism
-  detail belongs in the technical appendix.
-- The implementation narrative is stored only in the slide projection. It
-  restates supported solution logic in reader-friendly execution order and
-  must not introduce a new mechanism, effect, or evidence claim.
-- A solution-logic diagram explains how the solution works; it never counts as
-  evidence that the solution worked.
-- Normal results cover at least two of Before/After, Solution Logic, and Data or
-  Validation. Results with `solution_logic.significance=core` cover all three
-  and include the implementation narrative. Coverage is evaluated across the
-  result's associated slides; the four artifacts do not have to share one page.
-- The main deck contains at most two to three solution-logic diagrams.
+- The main deck has no minimum and never exceeds eight slides.
+- The deck states one thesis and audience decision; slides form a cumulative
+  argument rather than mirror Weekly Analysis fields.
+- Every Story starts once with public Why and Goal, then advances through only
+  the content required to complete that Goal.
+- Titles name the current question, object, mechanism, comparison, or decision
+  gate; they do not leak the internal intended takeaway.
+- Slides directly contain supported facts, relations, comparisons, mechanisms,
+  numbers, boundaries, and risks using Markdown, Mermaid, tables, quotes, or
+  concise lists.
+- Complex design/mechanism results form two content pages under one Story only
+  when the second depends on the facts and trade-offs established by the first.
+- Simple results remain one content page when one Before/After, relation, or
+  flow explains root cause, choice, and operation.
+- A fresh reader can understand the Story sequence, Why, Goal, facts, relations,
+  numbers, and risks without a PPT or production instructions.
+- A maker using only the Markdown Deck can perform visual translation without
+  vault research, semantic invention, or a new split decision.
+- Removing any slide breaks its Story Goal or the deck's management question.
+- Charts require comparable evidence; missing or conflicting data stays visible
+  without a fabricated chart.
 - Mechanism completion, effect validation, and production acceptance are stated
   separately.
 - Main slides omit commit hashes, source locations, SDK line numbers, and raw
@@ -490,9 +474,21 @@ coverage in one line; it does not need badges.
 ### Slides only
 
 - One slide per stream by default.
+- Fixed “design slide + implementation slide” pairs.
+- A public Storyboard or Production Brief beside the public Markdown Deck.
+- `Audience takeaway`, `Recommended visual form`, `Page composition`,
+  `On-slide copy`, `Production constraints`, or page-level Source Grounding
+  Packet sections in the public deck.
+- A title or body sentence that directly exposes the internal intended takeaway.
+- Repeating Why or Goal on every slide instead of once per Story.
+- A design slide that only supplies background, history, or option inventory.
+- A mechanism slide that is only a module, field, code, or step list.
+- Two slides that do not perform independent cognitive work.
+- Content that makes the reader or PPT maker reopen the vault to discover the
+  actual claim, node, relationship, number, or risk.
+- Layout, typography, color, card, or diagram-production instructions.
+- A detail slide whose removal changes neither thesis nor audience decision.
 - Topic-only slide titles such as `结果弧线一` or `工作组合状态`.
 - Charts without comparable evidence, units, or sample context.
 - Decorative architecture diagrams with only component names and arrows.
-- Node lists, field labels, or repeated titles presented as implementation
-  narrative.
 - Using a solution-logic diagram as proof of effectiveness.

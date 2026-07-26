@@ -6,9 +6,10 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import {
   validateReportContract,
-  validateReportContractRejectionProbes,
   validateWeeklyBriefCompressionContract,
   validateWeeklyGoalLoopContract,
+  validateWeeklyPptReadyMarkdownContract,
+  validateWeeklyPptReadyMarkdownRejectionProbes,
 } from './report-contract.mjs';
 
 const scriptDir = path.dirname(fileURLToPath(import.meta.url));
@@ -1029,11 +1030,13 @@ function runExecutableFixture(fixture) {
     runMonthlyPrepareDailyReportFixture(fixture);
   } else if (kind === 'report-contract') {
     validateReportContract(fixture);
-    validateReportContractRejectionProbes(fixture);
   } else if (kind === 'weekly-goal-loop-contract') {
     validateWeeklyGoalLoopContract(fixture);
   } else if (kind === 'weekly-brief-compression-contract') {
     validateWeeklyBriefCompressionContract(fixture);
+  } else if (kind === 'weekly-ppt-ready-markdown-contract') {
+    validateWeeklyPptReadyMarkdownContract(fixture);
+    validateWeeklyPptReadyMarkdownRejectionProbes(fixture);
   } else if (kind === 'query-positive') {
     runQueryPositiveFixture(fixture);
   } else if (kind === 'query-negative') {

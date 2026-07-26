@@ -20,25 +20,18 @@ Three modes:
   objective-anchored management brief covering actual change, variance, and
   next commitments. Its body is decision-complete; its appendix preserves
   accountability, work coverage, and provenance.
-- **slides**: explicit `weekly PPT` / slides wording — 6-10 slide outline for an
-  individual contributor reporting within a department.
+- **slides**: explicit `weekly PPT` / slides wording — a standalone PPT-ready
+  Markdown Deck with no minimum and at most eight main-deck pages.
 
-Only slides mode requires core technical results to separate four complementary
-layers:
+Slides reopens raw sources and uses internal cognitive tasks, intended
+takeaways, and grounding packets to materialize presentation content. Public
+output contains Story Why/Goal, slide content, and a compact Evidence Appendix;
+it contains no production guidelines or page-level source packets.
 
-- Before/After shows why the change was needed and what state changed.
-- A solution-logic diagram shows how data, control, branches, fallbacks, and
-  invariants work together.
-- An implementation narrative explains that mechanism in execution order.
-- Data, tests, or a visible measurement gap show whether the result is
-  effective and how mature the evidence is.
-
-In slides mode, core runtime-mechanism changes must cover all four layers. The
-main deck keeps at most two or three logic diagrams; routine maintenance does
-not receive a decorative architecture diagram. Logic explains how a solution
-works, while independent evidence establishes whether it works. Raw evidence
-maps remain in the appendix. Brief and quick modes do not require diagrams or
-implementation narratives.
+Design rationale and mechanism split only when they use different grounded
+content, serve the same Story Goal, and the mechanism depends on the design
+premise. Hidden intended takeaways must be inferable rather than repeated in
+titles or prose.
 
 ### Monthly
 

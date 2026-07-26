@@ -59,7 +59,8 @@ claude plugin install tracework@tracework
 个人项目使用 `personal`；私人全景使用 `all`，各组会分别叙事。Weekly 有三档：说
 `这周做了啥` / `周报简版` 得到对话里的 quick 回顾；默认 `写周报` 生成 Markdown
 brief；明确说 `weekly PPT` / `周报 PPT` 时，才生成面向部门内部汇报、以 IC 为讲述
-者的 6–10 页 slide outline。该命令生成的是大纲，不是已经渲染的 `.pptx` 文件。
+者的 PPT-ready Markdown Deck。每个 Story 先给出 Why 与 Goal，再直接呈现事实、
+关系、比较、机制、数字和风险。Markdown 本身可独立阅读，PPT 只是视觉转译。
 
 ## 4. 用“收工”让报告更有依据
 

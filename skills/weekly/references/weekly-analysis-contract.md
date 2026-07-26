@@ -1,21 +1,14 @@
 # Weekly Analysis Contract
 
-Use this contract after scope partition and evidence gathering for **brief** and
-**slides** modes only. Do not use this file for **quick** mode.
+Use after scope partition and evidence gathering for **brief** and **slides**.
+Do not use for **quick**. Analysis runs in the main dialog.
 
-Analysis runs in the main dialog; it does not require a subagent.
+- `brief`: complete the goal loop, then apply **Brief Projection**.
+- `slides`: complete the same goal loop, then form Stories, apply **Cognitive
+  Task Decomposition**, source grounding, and **Content Materialization**. Emit
+  one PPT-ready Markdown Deck.
 
-**Mode split**
-
-- `brief`: fill goal lanes, prior-commitment accounting, material changes,
-  variance, portfolio, next commitments, decisions, and evidence index. Keep
-  `slide_projection` null. Do not require
-  solution-logic diagram briefs, implementation narratives, or chart routing.
-- `slides`: complete the same goal-loop analysis first, then populate `slide_projection`
-  and the slide-only fields below (solution logic, implementation narrative,
-  visual candidates, metric chart routing).
-
-Return one JSON object per reporting group:
+Return one analysis object per reporting group:
 
 ```json
 {
@@ -34,18 +27,13 @@ Return one JSON object per reporting group:
   "portfolio": [],
   "next_commitments": [],
   "decisions_or_support_needed": [],
-  "slide_projection": null,
   "evidence_index": []
 }
 ```
 
-`slide_projection` is `null` in brief-only analysis. Populate it only for an
-explicit PPT, slide, or presentation request after the goal lanes and material
-changes are stable.
-
 ## Goal Resolution
 
-Resolve goals before selecting report-worthy changes. Use this source order:
+Resolve goals before selecting changes:
 
 1. explicit current-request goal;
 2. confirmed prior-Weekly commitment;
@@ -68,13 +56,10 @@ Resolve goals before selecting report-worthy changes. Use this source order:
 }
 ```
 
-An empty source is `unknown`, not permission to invent a Why. A goal inferred
-after the work happened must remain `inferred`. When a previous Weekly item was
-an agent recommendation rather than user-confirmed direction, use
-`commitment_state: proposed` and describe it as the prior report's proposal.
-
-One reporting group may contain several unrelated goal lanes. Do not synthesize
-a shared objective merely because projects share an audience.
+An empty source is `unknown`, not permission to invent a Why. Goals inferred
+after work remain `inferred`. An agent recommendation from the prior report
+remains `proposed`. Keep unrelated goal lanes separate even when they share a
+reporting group.
 
 ## Prior Commitment Accounting
 
@@ -91,19 +76,20 @@ Account for every prior-period item:
 }
 ```
 
-No prior commitment may disappear. For replanned work, retain the former
-direction, evidence trigger, reason, and replacement direction.
+No prior item may disappear. For replanned work, retain the former direction,
+evidence trigger, reason, and replacement direction.
 
-## Work Stream Shape
+## Work Streams and Material Changes
 
-First group related entries into independent work streams:
+First merge entries that describe one state transition. Do not split by commit,
+module, day, or archetype when the management meaning is shared.
 
 ```json
 {
   "id": "temporary-analysis-id",
   "goal_ids": [],
   "project": "Project Name",
-  "title": "short work-stream title",
+  "title": "",
   "status": "done | ongoing | risk | decision",
   "closure_type": "delivery | decision | risk | learning",
   "starting_constraint": "",
@@ -121,26 +107,10 @@ First group related entries into independent work streams:
 }
 ```
 
-Merge signals when they describe one state transition. A feature followed by a
-repair and a release can be one arc. Do not split by commit, module, day, or
-archetype when the management meaning is shared.
+Rank by observable end-state significance, audience relevance, evidence
+strength, and effect on the next decision. Do not force a headline count.
 
-## Material Change Selection
-
-Rank streams by:
-
-1. significance of the observable end state;
-2. relevance to the intended reporting group and reader;
-3. evidence strength;
-4. effect on next week's decisions or resource allocation.
-
-Do not force a headline count. Select every change needed to explain goal
-progress, material variance, a management decision, or an unplanned change that
-displaced intended work. Multiple activities may support one change. Keep
-lower-value but meaningful work in the portfolio. Do not let personal work
-compete with work projects.
-
-For each selected change, include:
+Each selected material change keeps a stable id and includes:
 
 ```json
 {
@@ -176,17 +146,14 @@ For each selected change, include:
 }
 ```
 
-An outcome must pass the Fruit Check: a deliverable, observable state, recorded
-effect, or demonstrably removed risk exists. Expected impact stays prospective.
-Every material change has at least one `goal_id` or
-`variance.kind: unplanned`. Otherwise it belongs in the portfolio.
+An outcome requires a deliverable, observable state, recorded effect, or
+demonstrably removed risk. Expected impact stays prospective. Every material
+change has a goal or `variance.kind: unplanned`; otherwise keep it in portfolio.
 
 ## Brief Projection
 
-**Brief only.** Do not create another analysis object. Render a layered brief
-from the complete analysis above.
-
-The body must be the minimum information needed to reconstruct:
+**Brief only.** Do not create another analysis object. Keep in the body only
+what is necessary to reconstruct:
 
 ```text
 goal state
@@ -197,63 +164,29 @@ next commitment
 confidence boundary
 ```
 
-For every candidate body block, ask whether removing it would materially change
-the reader's judgment, action, or confidence. Keep it only when the answer is
-yes. Otherwise route it to the appendix when it is needed for accountability,
-coverage, or verification; omit it when it serves none of those functions.
+For every candidate block, ask whether removing it changes judgment, action, or
+confidence. Keep it only when yes.
 
 Body admission:
 
-- changes a goal's status;
-- explains a material block, replan, or unplanned displacement;
+- changes a goal status;
+- explains a material block, replan, or displacement;
 - changes a decision, support request, or resource implication;
-- defines a next commitment and its closure criterion;
-- qualifies a body claim as `limited`, conflicting, or expected-only.
+- defines a next commitment and closure criterion;
+- qualifies a claim as limited, conflicting, or expected-only.
 
-Appendix routing:
+Route complete prior-item accounting, remaining meaningful streams, compact
+claim evidence, provenance, coverage, and scope boundaries to the appendix. Use
+one fact in one expanded location. Do not use a fixed length or item count.
 
-- complete prior-item accounting;
-- meaningful streams that do not change the management model;
-- compact claim evidence and provenance;
-- coverage and scope boundaries.
+## Evidence Candidates
 
-Use one fact in one expanded location. The body may state a supported conclusion
-while the appendix maps that conclusion to compact evidence, but the appendix
-must not retell the narrative. Do not use a fixed length or item count. A dense
-week earns more body only through additional independent management changes,
-not through more entries, commits, or evidence refs.
+Use numeric evidence only when metric, unit, sample, method, and comparison
+conditions are stable. Recompute ordering and deltas. If values conflict or
+samples are incomparable, expose the conflict and do not recommend a chart.
+Never infer a missing baseline or target.
 
-## Metric Evidence
-
-Use metric evidence only when the sources provide a stable measurement:
-
-```json
-{
-  "metric_name": "",
-  "baseline": null,
-  "current": null,
-  "delta": null,
-  "unit": "",
-  "sample_scope": "",
-  "evaluation_method": "",
-  "data_points": [{"label": "", "value": 0}],
-  "impact_boundary": "observed | recorded | expected",
-  "evidence_grade": "verified | recorded | limited",
-  "source_refs": []
-}
-```
-
-Before recommending a comparison chart, confirm that baseline and current use
-the same metric, unit, sample scope, and compatible evaluation conditions.
-Recompute stated ordering and deltas. If values conflict, units differ, or the
-sample is not comparable, preserve the conflict, lower confidence, and do not
-recommend a result chart. One reliable value may support a number card, not a
-trend. Never infer a missing baseline or numeric target.
-
-## State Transition
-
-Use for a material change in architecture, process, responsibility, state, or
-failure handling:
+A material state transition may use:
 
 ```json
 {
@@ -265,151 +198,130 @@ failure handling:
 }
 ```
 
-This supports Before/After. It does not explain the new solution's internal
-operation and does not prove its effect.
+When a mechanism visual is actually selected, `solution_logic` may preserve the
+supported trigger, actors, main flow, material branches, fallbacks, output,
+invariants, remaining boundary, diagram route, and evidence refs. It is an
+optional visual payload, not a requirement for every result and never proof
+that the solution worked.
 
-## Solution Logic
+## Story Formation
 
-**Slides only.** Skip this section for brief mode, or leave
-`solution_logic: null` / `significance: none` without diagram work.
+**Slides only.** Group selected results into the fewest Stories that give the
+deck a coherent management argument. A Story is a shared objective across one
+or more slides, not a slide type.
 
-For slide mode, classify every headline result. Populate the full object when a
-solution changes a runtime mechanism; otherwise use `significance: none` and
-leave the remaining fields empty.
+For every Story, publish once:
 
-```json
-{
-  "significance": "none | supporting | core",
-  "trigger": "",
-  "actors": [],
-  "main_flow": [],
-  "branches": [],
-  "fallbacks": [],
-  "output": "",
-  "invariants": [],
-  "remaining_boundary": "",
-  "recommended_diagram": "sequence | swimlane | data_flow | decision_tree | failure_path | state_machine | architecture",
-  "evidence_refs": []
-}
-```
+- `Why`: the problem, constraint, opportunity, or uncertainty that makes the
+  Story necessary;
+- `Goal`: the understanding or question this group of slides must resolve.
 
-Use `core` only when the mechanism is essential to understanding a main result
-and changes at least one of: data flow, control flow, concurrency or execution
-timing, state generation, component responsibility, provider or policy
-dispatch, or failure handling and fallback. Use `supporting` for a material
-mechanism that can remain in the technical appendix. Parameter changes, small
-refactors, cleanup, and configuration edits with no runtime-mechanism change use
-`none`.
+Do not repeat Why and Goal on every slide. Do not use a reporting group as proof
+that unrelated results share one Story.
 
-Diagram routing:
+## Cognitive Task Decomposition
 
-- concurrency, asynchronous stages, stage collaboration -> `sequence` or `swimlane`;
-- data processing, aggregation, materialized rebuild -> `data_flow`;
-- provider, model, policy, or strategy dispatch -> `decision_tree`;
-- failure handling and fallback -> `failure_path`;
-- lifecycle or state transition -> `state_machine`;
-- component responsibility -> `architecture`.
+**Slides only.** This is a temporary reasoning step inside each Story. Do not
+expose its role labels or create another public schema. A cognitive task is a
+candidate, not a page.
 
-A logic diagram is incomplete when it lists only actors and arrows. Preserve
-the material trigger, branches, fallbacks, output, invariants, remaining
-boundary, and evidence references. It explains why the design can address the
-original problem; it is not effectiveness evidence. Keep presentation lists
-bounded: at most 12 actors or main-flow steps, 8 branches, fallbacks, or
-invariants, and 24 evidence references. Summarize overflow in the technical
-appendix instead of expanding the main-deck logic object.
+First state the management conclusion each selected result must support. Then
+identify only the necessary cognitive tasks:
 
-## Implementation Narrative
+- `problem_reframe`: replace the apparent problem with the real constraint;
+- `design_rationale`: explain the trade-off and why the chosen direction wins;
+- `mechanism`: explain how the chosen solution causally operates, including
+  material branches, fallback, and unchanged boundary;
+- `validation`: change confidence using comparable results, tests, or an
+  explicit evidence gap;
+- `decision`: make the required judgment, support, or next gate unavoidable.
 
-**Slides only.** Skip entirely for brief mode.
+For each temporary task, record an internal `intended_takeaway`, likely source
+locators, the facts or relationship from which a reader should infer it, and
+what prior understanding it needs. Discard tasks that do not advance the Story
+Goal. Never copy `intended_takeaway` into public titles or prose.
 
-`implementation_narrative` exists only inside a slide-projection result. It is
-not a second technical-fact object. Rewrite the same result's `solution_logic`
-into three short, reader-facing blocks:
+## Source Grounding
 
-```json
-{
-  "implementation_narrative": {
-    "normal_path": "",
-    "branch_and_fallback": "",
-    "outcome_and_invariant": ""
-  }
-}
-```
+Reopen the raw entries and direct artifacts behind every candidate task.
+Existing Weekly prose may locate evidence but cannot substitute for it. Build
+an internal Source Grounding Packet containing:
 
-- `normal_path`: start from the trigger, describe at least two ordered actions,
-  and state what waiting, coupling, or error-propagation problem they address.
-- `branch_and_fallback`: state the condition that dispatches, degrades, or
-  falls back, the resulting path, and the concrete risk that path avoids.
-- `outcome_and_invariant`: state the produced result or state and at least one
-  input, interface, call-count, compatibility, or safety constraint that stays
-  unchanged.
+- source path or raw entry identifier;
+- the exact claim it supports;
+- extracted facts, values, labels, and relationships usable on the page;
+- available text, relationship, screenshot, code structure, or table;
+- the evidence boundary;
+- unverified statements that must not be presented as fact.
 
-When `solution_logic.significance=core`, all three blocks are required. Derive
-them only from that result's solution logic and evidence; do not add mechanisms
-or effects that those sources do not support. A `supporting` result may use the
-narrative in the technical appendix. A `none` result does not generate it.
-Keep each main-deck block to one or two sentences. Diagram node names, serialized
-field lists, and repeated slide titles are not implementation narrative. For a
-default `department_ic` deck, never copy source paths, URLs, commit hashes, raw
-evidence ids, internal links, or active Markdown/HTML from the evidence into
-these blocks. Each block must stay within 600 Unicode characters.
+Do not expose full packets per page. Preserve only compact claim-to-source
+mapping in the final Evidence Appendix.
 
-## Slide Projection
+## Content Materialization
 
-**Slides only.** Keep `slide_projection: null` for brief mode and do not fill
-this object.
+Convert the grounded packet into presentation content itself:
 
-For slide mode, return this after material-change selection. `results` contains
-the selected result objects, preserves their stable `id`, evidence,
-transition, logic, maturity, and closure fields, and adds the presentation
-fields shown below. Do not create a second result identity namespace.
+- facts and contradictions the audience must see;
+- candidates, constraints, and rejection reasons;
+- actual objects and relationships;
+- observed numbers with sample and boundary;
+- main path, material branch, fallback, input, output, and invariant;
+- Before/After, Mermaid, Markdown tables, quote blocks, or concise prose;
+- remaining risks, decisions, and pass/fail gates.
 
-```json
-{
-  "audience": "department_ic | technical_review",
-  "main_deck_slide_count": 0,
-  "main_deck_slide_titles": [],
-  "stage_judgment": "",
-  "key_result_cards": [],
-  "core_result_ids": [],
-  "main_deck_logic_diagram_ids": [],
-  "results": [
-    {
-      "id": "stable-result-id",
-      "title": "conclusion-led slide title",
-      "title_style": "conclusion",
-      "visual_kind": "number_card | comparison_chart | distribution_chart | trend_chart | timeline_chart | waterfall_chart | validation_summary | before_after | sequence | swimlane | data_flow | decision_tree | failure_path | state_machine | architecture | status_cards",
-      "effect_data_available": true,
-      "effect_evidence_kind": "test | smoke_test | benchmark | observed | recorded",
-      "validation_result": "",
-      "measurement_plan": "",
-      "closure_criterion": "",
-      "implementation_narrative": null
-    }
-  ],
-  "portfolio": [],
-  "risks_and_closure": [],
-  "next_acceptance_targets": [],
-  "support_needed": []
-}
-```
+Do not specify layout, font, color, cards, regions, or drawing instructions.
+Markdown is the presentation; PPT is its visual translation. If grounded
+content cannot state the needed objects, relations, values, or risks directly,
+supplement evidence, merge, or omit the candidate.
+
+### Page independence and merge or split
+
+A candidate becomes a page only when it is an independent cognitive step,
+contains grounded presentation content, advances its Story Goal, and cannot be
+deleted without breaking that Goal.
+
+Prefer one page. Split `design_rationale` from `mechanism` only when both
+pages serve the same Story Goal, use different source material and cognitive
+tasks, and the mechanism depends on the facts, constraints, and trade-offs
+presented first. The first page directly presents the design problem and
+choice; the second directly presents operation, branch or fallback, and
+unchanged boundary.
+
+Otherwise merge them. One grounded Before/After, relationship, or flow view is
+enough when it carries the root cause, choice, and operation. Add validation as
+a third page only when it independently changes confidence or the decision and
+has its own packet and visual.
+
+Reject background pages, option inventories without a decision, module or step
+lists, interchangeable pages, and detail pages whose deletion changes nothing.
+
+## PPT-ready Markdown Deck
+
+**Slides only.** Return one public Markdown document using `slide-template.md`.
+It must remain complete and readable without a `.pptx`.
 
 Use `department_ic` unless the user explicitly requests a technical or
-architecture review. `results` must match the selected headline ids exactly;
-`core_result_ids` and `main_deck_logic_diagram_ids` must reference those same
-ids. Select at most two to three `solution_logic` objects for
-the main deck. A normal result covers at least two of: State Transition,
-Solution Logic, and Metric Evidence or other direct validation. A result with
-`solution_logic.significance=core` must cover all three; when effect metrics are
-not yet available, the third part is an explicit validation result plus the
-measurement gap and closure criterion, never invented data. A core result also
-requires all three `implementation_narrative` fields. This is result-level
-coverage across associated slides, not a requirement to place Before/After,
-logic, narrative, and validation on one page.
+architecture review. Keep only necessary main-deck slides, never more than
+eight. A result may use zero, one, two, or—only when independent validation
+changes the decision—three slides.
 
-## Portfolio
+Public content consists of deck context, Story Why/Goal, slide content, optional
+speaker notes, and a compact Evidence Appendix. Internal intended takeaways,
+cognitive roles, source packets, visual feasibility, merge/split analysis,
+unsupported-claim ledgers, and production guidance remain hidden.
 
-Every meaningful stream not selected as a headline remains visible:
+Run three preflights:
+
+1. standalone reading: a fresh reader can explain the Story order, Why, Goal,
+   facts, relations, values, and risks without a PPT;
+2. takeaway inference: the reader can infer the hidden intended takeaway in
+   their own words, while no title or prose directly repeats it;
+3. blind content handoff: a maker can visually translate the Markdown without
+   vault research, semantic invention, or a new split decision.
+
+## Portfolio, Judgment, and Commitments
+
+Keep every meaningful non-headline stream visible:
 
 ```json
 {
@@ -423,34 +335,19 @@ Every meaningful stream not selected as a headline remains visible:
 }
 ```
 
-Filter chore-only and generated-bundle noise unless it represents a release
-gate, risk, or otherwise material maintenance state.
+Write the weekly judgment after selection. Synthesize the original goal or
+missing-source boundary, actual change, material variance, current decision, and
+largest remaining gate. Never combine work and personal judgments.
 
-## Weekly Judgment
-
-Write the judgment only after selection. It must synthesize the group rather
-than list projects. State the original goal or its missing-source boundary, the
-actual change, the material variance, the current decision, and the largest
-remaining gate in one paragraph.
-
-Never create a combined judgment across `work` and `personal`.
-
-## Next Commitments
-
-Return only the commitments justified by the analysis; do not force a count.
-Each commitment names an uncertainty, acceptance gate, decision, or risk to
-close—not a task list.
-
-Every commitment includes a pass/fail closure criterion and a
-`commitment_state` of `confirmed` or `proposed`. Include an owner or target date
-only when the evidence explicitly identifies it.
+Return only justified next commitments; do not force a count. Each names an
+uncertainty, acceptance gate, decision, or risk, with a pass/fail closure
+criterion and `confirmed` or `proposed` commitment state.
 
 ## Evidence
 
 - Raw entries establish recorded intent and status.
-- `source_entry_refs` establish provenance.
+- Source refs establish provenance.
 - Commits, tests, evals, issue states, and explicit source-of-truth files may
-  independently verify a bounded claim.
-- General artifact dossiers are navigation or recorded context unless the
-  evidence boundary is direct.
-- Conflicts must remain visible and lower confidence.
+  verify bounded claims.
+- General artifact dossiers are navigation or recorded context unless direct.
+- Conflicts remain visible and lower confidence.

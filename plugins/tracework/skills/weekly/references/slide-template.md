@@ -1,184 +1,100 @@
-# Weekly Department Slide Outline Template
+# Weekly PPT-ready Markdown Deck Template
 
-Use only for **slides** mode when the user explicitly asks for PPT, slides, or
-an演示大纲. Never load this file for **quick** or default **brief** weekly
-output.
+Use only for explicit **slides** mode. Complete Weekly Analysis, Story
+Formation, Cognitive Task Decomposition, source grounding, and Content
+Materialization first.
 
-Read `reporting-narrative-contract.md` first. The default presenter is an
-individual contributor reporting inside a department to managers and peers.
+The Markdown is the presentation content itself. It must be independently
+readable and complete enough that a PPT maker only chooses visual style and
+layout. Do not emit a Storyboard or Production Brief beside it.
 
-The main deck contains 6-10 slides per reporting group. The evidence and
-technical appendices are outside the budget. Do not allocate one slide per work
-stream. Allocate slides by the conclusions the audience must understand.
-
-## Presentation Contract
-
-Core technical results use this sequence:
-
-```text
-为什么改          如何工作                    是否有效
-Before/After  ->  方案逻辑图 + 实施叙事  ->  数据或验证结果
-```
-
-- A normal result covers at least two of the three parts.
-- A result with `solution_logic.significance=core` covers all three and adds a
-  complete implementation narrative.
-- A simple result may combine Before/After and Solution Logic on one slide.
-- A complex result separates the state/result slide from its logic slide.
-- Keep at most two to three solution-logic diagrams in the main deck. Put the
-  rest in the technical appendix.
-- A logic diagram contains material branches, fallbacks, or invariants. Actor
-  names connected by decorative arrows do not pass.
-- A logic diagram proves only how a solution works. Data, tests, or observed
-  evidence must separately support whether it worked.
-- Evaluate this coverage across the result's associated slides. Do not force
-  Before/After, the diagram, the narrative, and result evidence onto one page.
-- Keep each implementation-narrative block to one or two sentences. Put fuller
-  mechanism detail in the technical appendix; each block must stay within 600
-  Unicode characters.
-- Each slide has one conclusion title and at most one primary visual.
-
-## Main Deck
+## Deck
 
 ```markdown
-## Slide 1｜{本周主线结论}
+# {YYYY-WNN} Weekly Review
 
-**日期：** YYYY-MM-DD ~ YYYY-MM-DD
-**范围：** {reporting group and projects}
-**汇报视角：** 部门内团队成员
-
-{One sentence stating the week's central state change.}
+{Why this weekly review is worth presenting and the management question it
+must support.}
 
 ---
 
-## Slide 2｜{阶段判断结论}
+# Story 1｜{story subject}
 
-**阶段判断：** {mechanism, effect, and production-acceptance boundary}
+## Why
 
-### 关键结果
+{The supported problem, constraint, opportunity, or uncertainty.}
 
-| 结果 | 当前状态或数字 | 成熟度 | 最大门槛 |
-|---|---|---|---|
-| {result} | {supported number or bounded state} | 机制 / 效果 / 生产 | {gate} |
+## Goal
 
-**需要协作：** {bounded support request or 当前无需要升级的协作事项。}
+{What this group of slides must resolve or make understandable.}
 
 ---
 
-## Slide N｜{Before/After supported conclusion}
+## Slide 1｜{question, object, mechanism, comparison, or decision gate}
 
-**推荐视觉：** Before/After {process | failure path | state | architecture}
-
-**改造前：** {supported starting state}
-**关键改变：** {intervention}
-**改造后：** {supported end state}
-**实施说明：** {only for a result with `solution_logic.significance=core | supporting`; compress its existing `implementation_narrative` into two sentences without creating a separate narrative field}
-**部门价值：** {delivery, quality, risk, cost, collaboration, or iteration meaning}
-**成熟度：** 机制 {state} / 效果 {state} / 生产验收 {state}
-**剩余门槛：** {gate}
-**证据边界：** {verified | recorded | limited}
+{Presentation content: grounded prose, Mermaid, table, quote block, numbers,
+relationships, risks, or concise lists.}
 
 ---
 
-## Slide N｜{Solution Logic supported conclusion}
+## Slide 2｜{next cognitive step}
 
-**推荐视觉：** {sequence | swimlane | data flow | decision tree | failure path | state machine | architecture}
-
-{solution-logic diagram containing the trigger, actors, ordered flow, material
-branches, fallbacks, output, invariants, and remaining boundary}
-
-### 实施说明
-
-1. **正常路径：** {implementation_narrative.normal_path}
-2. **分支与回退：** {implementation_narrative.branch_and_fallback}
-3. **输出与约束：** {implementation_narrative.outcome_and_invariant}
-
-**验证结论：** {supported data or test result, followed by the measurement gap when effect evidence is incomplete}
-**页面结论：** {why this mechanism addresses the original problem}
-
-Keep source locations, raw evidence ids, commit hashes, and internal links in
-the evidence appendix for the default department deck. An explicitly requested
-technical-review deck may show sanitized compact references.
+{Presentation content that depends on the prior page when split.}
 
 ---
 
-## Slide N｜{Metric or validation supported conclusion}
+# Story 2｜{story subject}
 
-**推荐视觉：** {number_card | comparison_chart | distribution_chart | trend_chart | timeline_chart | waterfall_chart}
+## Why
+...
 
-### 图表数据
-
-| 指标 | 基线 | 当前 | 变化 | 单位 |
-|---|---:|---:|---:|---|
-| {metric} | {baseline} | {current} | {delta} | {unit} |
-
-**图表结论：** {only the conclusion supported by the data}
-**样本范围：** {sample scope}
-**评估方法：** {method}
-**口径说明：** {comparability conditions or limitations}
-**证据边界：** {observed/recorded/expected + grade}
-**待验证效果：** {gap and closure criterion, or none}
-
-If comparable numeric evidence is absent, replace the table with a validation
-result and measurement plan. Never emit guessed numbers.
+## Goal
+...
 
 ---
 
-## Slide N｜{Portfolio conclusion}
+## Evidence Appendix
 
-| 工作项 | 本周形成的变化 | 部门价值 | 成熟度 | 需要关注 |
-|---|---|---|---|---|
-| {stream} | {bounded change} | {value or none supported} | {maturity} | {gate or none} |
-
-Only use this slide when the portfolio materially helps the department
-understand coverage or allocation. Otherwise keep it in the appendix.
-
----
-
-## Slide N｜{Risk and collaboration conclusion}
-
-| 风险或门槛 | 可能影响 | 当前控制 | 关闭标准 | 责任边界 |
-|---|---|---|---|---|
-| {risk} | {impact} | {control} | {pass/fail criterion} | 本人 / 团队协作 / 管理决策 |
-
-**当前不需要升级：** {items or none}
-
----
-
-## Slide N｜{Next-week acceptance conclusion}
-
-| 验收目标 | 验收方法 | 完成定义 | 未通过时的下一步 |
-|---|---|---|---|
-| {target} | {method} | {closure criterion} | {branch} |
-
-**下周期望阶段变化：** {from current maturity to intended maturity}
+| Claim | Source | Boundary |
+|---|---|---|
+| {compact claim} | {raw entry or direct artifact locator} | {what it does not prove} |
 ```
 
-## Visual Routing Rules
+## Content Rules
 
-- concurrency, asynchronous work, or stage collaboration -> sequence/swimlane;
-- data processing, aggregation, or materialized rebuild -> data flow;
-- provider, model, policy, or strategy dispatch -> decision tree;
-- failure handling and fallback -> failure path;
-- lifecycle or state transition -> state machine;
-- component responsibility change -> architecture relationship;
-- comparable outcome data -> an appropriate result chart;
-- no reliable result data -> mechanism diagram plus measurement plan, not a
-  fabricated chart.
+- State Why and Goal once per Story, not once per slide.
+- Let slide titles name the current question, object, mechanism, comparison, or
+  decision gate. Do not copy the hidden intended takeaway into the title.
+- Put the actual facts, conflicts, alternatives, relationships, numbers,
+  branches, fallbacks, invariants, risks, and gates in the slide body.
+- Use Mermaid, Markdown tables, quote blocks, number comparisons, concise prose,
+  and short lists when they are the content—not as production instructions.
+- Keep a complex design-to-mechanism result in one Story and use two pages only
+  when the mechanism depends on the facts and trade-offs established first.
+- Keep a simple result on one page when one Before/After, relation, or flow
+  explains root cause, choice, and operation.
+- Keep full source packets and unsupported-claim analysis internal. The
+  Evidence Appendix is compact and does not repeat the deck.
 
-Parameter tuning, small refactors, cleanup, and configuration edits that do not
-change runtime behavior remain portfolio items. Do not force an architecture
-diagram or implementation narrative for visual variety.
+## Forbidden Public Sections
 
-For `all`, create separate group mini-decks with their own judgment, result
-selection, logic-diagram budget, portfolio, closure targets, and evidence map.
-Never place work and personal projects in one headline ranking or evidence map.
+Do not emit:
 
-After the deck, append:
+- `Audience takeaway`
+- `Recommended visual form`
+- `Page composition`
+- `On-slide copy`
+- `Production constraints`
+- page-level `Source Grounding Packet`
+- cognitive role labels
+- `intended_takeaway`
+- layout, typography, color, card, or drawing instructions
 
-1. technical solution details not selected for the main deck;
-2. metric definitions, samples, full data, and validation caveats;
-3. the same claim-level evidence map defined in `weekly-brief-template.md`.
+## Preflight
 
-Keep `O#`, `W#`, `D#`, and `E#` in appendices or small footer references rather
-than the spoken headline.
+1. Read the Markdown without imagining a PPT; every Story must be understandable.
+2. Hide internal intended takeaways and ask a fresh reader to infer them.
+3. Remove each page in turn; if its Story Goal remains complete, merge or delete
+   the page.
+4. Give only the Markdown to a fresh maker; they may choose visual translation
+   but may not research, invent semantics, or re-decide the split.

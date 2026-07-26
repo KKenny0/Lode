@@ -16,18 +16,11 @@
 - **quick**：`这周做了啥` / `周报简版` — 对话内 5–7 条 + 结转，不写文件。
 - **brief**（默认）：`/tracework:weekly` / `写周报` — management brief。
 - **slides**：明确 `weekly PPT` / `周报 PPT` 时 — 面向部门内部汇报、以 IC 为讲述者的
-  6–10 页 slide outline。
+  PPT-ready Markdown Deck；没有最低页数，主 deck 最多 8 页。
 
-PPT 档才要求核心技术成果覆盖四层表达：
-
-- Before/After 说明为什么要改，以及状态发生了什么变化；
-- 方案逻辑图说明数据流、控制流、关键分支、回退和不变量如何协作；
-- 实施叙事按执行顺序解释方案如何落地；
-- 数据、测试或明确的 measurement gap 说明结果是否有效，以及证据成熟到哪一步。
-
-核心运行机制变化在 slides 中必须覆盖四层。主 deck 最多保留 2–3 张逻辑图；普通维护
-工作不生成装饰性架构图。逻辑图只解释方案如何工作，独立证据才说明方案是否有效；
-原始证据映射留在附录。brief 与 quick 不要求逻辑图或实施叙事。
+Slides 会先形成 Story Why/Goal，再通过内部认知任务、source grounding 与 Content
+Materialization 把事实、关系、数字、机制和风险直接写入演示正文。intended takeaway
+与完整 source packet 不公开；读者应从内容中自然得到认识，PPT 制作者只做视觉转译。
 
 ### Monthly
 

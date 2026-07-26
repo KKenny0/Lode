@@ -972,425 +972,6 @@
       "expected_behavior": "All-scope Weekly gives work and personal separate judgments and headline budgets without dropping portfolio work."
     },
     {
-      "id": "weekly-slides-quantified-algorithm-result",
-      "execution": {
-        "kind": "report-contract"
-      },
-      "skill": "weekly",
-      "fixture": {
-        "rejection_probes": ["trend-without-metrics", "invalid-format", "missing-maturity"],
-        "candidate_output": {
-          "format": "slides",
-          "scope": "work",
-          "groups": [
-            {
-              "name": "work",
-              "judgment": "Evaluation latency improved under a comparable workload while the quality gate remained stable.",
-              "all_streams": ["evaluation-latency", "docs"],
-              "headlines": ["evaluation-latency"],
-              "portfolio": ["docs"],
-              "next_closure_targets": [{"target": "production latency acceptance", "closure_criterion": "Re-run the comparable workload in the production-like environment and meet the agreed latency threshold."}, {"target": "quality regression acceptance", "closure_criterion": "Confirm the same evaluation workload remains within the agreed quality tolerance."}],
-              "slide_projection": {
-                "audience": "department_ic",
-                "main_deck_slide_count": 7,
-                "main_deck_slide_titles": ["Evaluation latency improved under the same workload", "The result is effect-validated but awaits production acceptance", "The execution path changed without changing the workload", "Latency fell from 90 to 65 seconds", "Quality remains within the acceptance boundary", "Production acceptance is the remaining risk", "Next week closes production latency and quality gates"],
-                "core_result_ids": [],
-                "main_deck_logic_diagram_ids": [],
-                "results": [
-                  {
-                    "id": "evaluation-latency",
-                    "title": "Evaluation latency fell by 25 seconds under the same workload",
-                    "title_style": "conclusion",
-                    "visual_kind": "comparison_chart",
-                    "effect_data_available": true,
-                    "evidence_grade": "verified",
-                    "closure_criterion": "Re-run the same workload in the production-like environment and record the acceptance result.",
-                    "metric_evidence": [
-                      {
-                        "metric_name": "end-to-end latency",
-                        "baseline": 90,
-                        "current": 65,
-                        "delta": -25,
-                        "unit": "seconds",
-                        "sample_scope": "same 10-episode evaluation set",
-                        "evaluation_method": "median of three isolated runs",
-                        "impact_boundary": "observed",
-                        "evidence_grade": "verified",
-                        "comparable": true,
-                        "source_refs": ["eval:latency-comparison"]
-                      }
-                    ],
-                    "state_transition": {
-                      "before": "The same evaluation workload completed in 90 seconds.",
-                      "intervention": "The evaluation execution path was optimized without changing the workload.",
-                      "after": "The same evaluation workload completes in 65 seconds.",
-                      "remaining_gate": "Production-like latency acceptance is still open.",
-                      "evidence_refs": ["eval:latency-comparison"]
-                    },
-                    "solution_logic": {
-                      "significance": "none"
-                    },
-                    "result_maturity": {
-                      "mechanism_complete": "yes",
-                      "effect_validated": "yes",
-                      "production_accepted": "no"
-                    }
-                  }
-                ]
-              }
-            }
-          ]
-        }
-      },
-      "expected_behavior": "A quantified algorithm result produces a conclusion-led comparison brief only when baseline, current value, delta, unit, sample, method, and comparability are present."
-    },
-    {
-      "id": "weekly-slides-missing-metric-safe-degrade",
-      "execution": {
-        "kind": "report-contract"
-      },
-      "skill": "weekly",
-      "fixture": {
-        "rejection_probes": ["omit-results", "hollow-core", "missing-implementation-narrative"],
-        "expected_diagram_routes": {
-          "streaming-evaluation": "swimlane"
-        },
-        "candidate_output": {
-          "format": "slides",
-          "scope": "work",
-          "groups": [
-            {
-              "name": "work",
-              "judgment": "Streaming evaluation is implemented and safety-tested, but production latency remains unmeasured.",
-              "all_streams": ["streaming-evaluation", "docs"],
-              "headlines": ["streaming-evaluation"],
-              "portfolio": ["docs"],
-              "next_closure_targets": [{"target": "production latency measurement", "closure_criterion": "Record comparable Generate, Evaluate, and total wall times for streaming and batch modes."}, {"target": "streaming invariants acceptance", "closure_criterion": "Confirm unchanged evaluation input and LLM call count on the production-like workload."}],
-              "slide_projection": {
-                "audience": "department_ic",
-                "main_deck_slide_count": 7,
-                "main_deck_slide_titles": ["Streaming evaluation overlaps stages but effect measurement remains open", "The mechanism is complete while effect and production gates remain open", "Evaluate no longer waits for all Generate work", "A shared queue coordinates producer and consumer", "Safety tests pass without proving latency savings", "Production measurement is the remaining risk", "Next week closes latency and invariant acceptance"],
-                "core_result_ids": ["streaming-evaluation"],
-                "main_deck_logic_diagram_ids": ["streaming-evaluation"],
-                "results": [
-                  {
-                    "id": "streaming-evaluation",
-                    "title": "Generate and Evaluate now overlap, while production savings remain to be measured",
-                    "title_style": "conclusion",
-                    "visual_kind": "swimlane",
-                    "effect_data_available": false,
-                    "measurement_plan": "Run the same multi-episode workload in streaming and batch modes and compare total wall time.",
-                    "closure_criterion": "Record comparable generate, evaluate, and total wall times for both modes.",
-                    "validation_result": "Streaming consumption and empty-queue tests pass.",
-                    "effect_evidence_kind": "test",
-                    "evidence_grade": "recorded",
-                    "metric_evidence": [],
-                    "state_transition": {
-                      "before": "Evaluate waits for Generate to finish.",
-                      "intervention": "A shared queue and done signal connect the producer and consumer stages.",
-                      "after": "Evaluate consumes completed groups while Generate continues.",
-                      "remaining_gate": "Production latency savings are not observed yet.",
-                      "evidence_refs": ["test:streaming-consumer", "doc:streaming-design"]
-                    },
-                    "solution_logic": {
-                      "significance": "core",
-                      "trigger": "Generate and Evaluate are both uncached and have no override.",
-                      "actors": ["DAG scheduler", "Generate", "shared queue", "Evaluate"],
-                      "main_flow": ["DAG creates a shared queue", "Generate pushes completed groups", "Evaluate consumes groups and closes on done"],
-                      "branches": ["A cached or overridden stage bypasses streaming."],
-                      "fallbacks": ["Use the existing non-streaming path."],
-                      "output": "The same evaluation input is produced with overlapped execution.",
-                      "invariants": ["LLM call count does not increase", "evaluation input content is unchanged"],
-                      "remaining_boundary": "Production latency savings are not observed yet.",
-                      "recommended_diagram": "swimlane",
-                      "evidence_refs": ["test:streaming-consumer", "doc:streaming-design"]
-                    },
-                    "implementation_narrative": {
-                      "normal_path": "When both stages are uncached, the DAG creates a shared queue, Generate pushes completed groups, and Evaluate consumes them until done, removing the wait for the full Generate batch.",
-                      "branch_and_fallback": "If either stage is cached or overridden, execution uses the existing non-streaming path so partial cached state cannot enter an incompatible streaming pair.",
-                      "outcome_and_invariant": "Evaluate receives the same complete input with overlapped timing, while input content and the LLM call count remain unchanged."
-                    },
-                    "result_maturity": {
-                      "mechanism_complete": "yes",
-                      "effect_validated": "partial",
-                      "production_accepted": "no"
-                    }
-                  }
-                ]
-              }
-            }
-          ]
-        }
-      },
-      "expected_behavior": "When a runtime mechanism is implemented without observed outcome metrics, Weekly uses a logic diagram plus an explicit measurement plan and never invents a result chart."
-    },
-    {
-      "id": "weekly-slides-conflicting-metrics-rejected",
-      "execution": {
-        "kind": "report-contract"
-      },
-      "skill": "weekly",
-      "fixture": {
-        "candidate_output": {
-          "format": "slides",
-          "scope": "work",
-          "groups": [
-            {
-              "name": "work",
-              "judgment": "The available quality measurements cannot yet support a comparison claim.",
-              "all_streams": ["quality-evaluation", "docs"],
-              "headlines": ["quality-evaluation"],
-              "portfolio": ["docs"],
-              "next_closure_targets": [{"target": "quality metric normalization", "closure_criterion": "Re-run both variants on the same sample and rubric and recompute ordering and deltas."}, {"target": "comparison claim review", "closure_criterion": "Approve a comparison claim only if the normalized rerun preserves metric, sample, unit, and rubric comparability."}],
-              "slide_projection": {
-                "audience": "department_ic",
-                "main_deck_slide_count": 6,
-                "main_deck_slide_titles": ["The quality comparison is withheld because scoring conditions differ", "Effect validation remains open", "The evidence audit removed an unsupported comparison", "No result chart is emitted from conflicting metrics", "A normalized rerun is the remaining risk", "Next week closes the metric and claim gates"],
-                "core_result_ids": [],
-                "main_deck_logic_diagram_ids": [],
-                "results": [
-                  {
-                    "id": "quality-evaluation",
-                    "title": "Quality comparison remains open because the samples use incompatible scoring conditions",
-                    "title_style": "conclusion",
-                    "visual_kind": "validation_summary",
-                    "metric_conflict": true,
-                    "closure_criterion": "Re-run both variants on the same sample and rubric, then recompute ordering and deltas.",
-                    "validation_result": "The current samples were confirmed to use incompatible scoring conditions, so no comparison claim is emitted.",
-                    "effect_evidence_kind": "recorded",
-                    "evidence_grade": "limited",
-                    "metric_evidence": [],
-                    "state_transition": {
-                      "before": "Measurements from incompatible scoring conditions appeared comparable.",
-                      "intervention": "The scoring conditions and sample scopes were audited.",
-                      "after": "The comparison claim is withheld until a normalized rerun is available.",
-                      "remaining_gate": "A same-sample same-rubric rerun is required.",
-                      "evidence_refs": ["eval:quality-audit"]
-                    },
-                    "solution_logic": {
-                      "significance": "none"
-                    },
-                    "result_maturity": {
-                      "mechanism_complete": "not_applicable",
-                      "effect_validated": "no",
-                      "production_accepted": "not_applicable"
-                    }
-                  }
-                ]
-              }
-            }
-          ]
-        }
-      },
-      "expected_behavior": "Conflicting or incomparable metrics do not produce a result chart; the claim is limited and carries a concrete re-measurement criterion."
-    },
-    {
-      "id": "weekly-slides-core-solution-logic-routing",
-      "execution": {
-        "kind": "report-contract"
-      },
-      "skill": "weekly",
-      "fixture": {
-        "rejection_probes": ["missing-implementation-narrative", "hollow-implementation-narrative", "node-list-implementation-narrative", "prefixed-node-list-implementation-narrative", "composite-node-list-implementation-narrative", "invisible-implementation-narrative", "duplicate-implementation-narrative", "confidential-implementation-narrative", "supporting-logic-in-main-deck", "duplicate-slide-titles", "unsafe-main-deck-markup", "oversized-implementation-narrative", "oversized-solution-logic"],
-        "expected_diagram_routes": {
-          "streaming-pipeline": "swimlane",
-          "registry-rebuild": "data_flow",
-          "provider-dispatch": "decision_tree"
-        },
-        "candidate_output": {
-          "format": "slides",
-          "scope": "work",
-          "groups": [
-            {
-              "name": "work",
-              "judgment": "Three core runtime mechanisms now have explicit execution, rebuild, and dispatch boundaries.",
-              "all_streams": ["streaming-pipeline", "registry-rebuild", "provider-dispatch", "cleanup"],
-              "headlines": ["streaming-pipeline", "registry-rebuild", "provider-dispatch"],
-              "portfolio": ["cleanup"],
-              "next_closure_targets": [{"target": "production acceptance", "closure_criterion": "Complete the production-like latency, rerun, and provider-family acceptance matrix."}, {"target": "remaining boundary review", "closure_criterion": "Confirm each mechanism's stated fallback and invariant on the production-like path."}],
-              "slide_projection": {
-                "audience": "department_ic",
-                "main_deck_slide_count": 9,
-                "main_deck_slide_titles": ["Three runtime mechanisms now have explicit boundaries", "Mechanisms are complete while production acceptance remains open", "Streaming changes execution timing without changing input", "Producer and consumer coordinate through a bounded queue path", "Registry rebuild removes stale accumulated contributions", "Canonical episodes now materialize the current view", "Provider dispatch prevents incompatible parameters", "Production acceptance is the shared remaining risk", "Next week closes the acceptance matrix"],
-                "core_result_ids": ["streaming-pipeline", "registry-rebuild", "provider-dispatch"],
-                "main_deck_logic_diagram_ids": ["streaming-pipeline", "registry-rebuild", "provider-dispatch"],
-                "results": [
-                  {
-                    "id": "streaming-pipeline",
-                    "title": "Producer and consumer stages overlap without changing evaluation input",
-                    "title_style": "conclusion",
-                    "visual_kind": "swimlane",
-                    "validation_result": "Streaming safety tests pass.",
-                    "effect_evidence_kind": "test",
-                    "evidence_grade": "verified",
-                    "closure_criterion": "Record production-like latency for the same workload and confirm no regression in call count or input content.",
-                    "metric_evidence": [],
-                    "state_transition": {"before": "Serial stages", "intervention": "Connect producer and consumer with a shared queue and done signal.", "after": "Overlapped stages", "remaining_gate": "Production latency is unmeasured.", "evidence_refs": ["test:streaming"]},
-                    "solution_logic": {
-                      "significance": "core",
-                      "trigger": "Both stages are uncached.",
-                      "actors": ["scheduler", "producer", "queue", "consumer"],
-                      "main_flow": ["create queue", "push groups", "consume groups", "send done"],
-                      "branches": ["cached stage bypasses streaming"],
-                      "fallbacks": ["run the batch path"],
-                      "output": "Equivalent evaluation input with overlapped timing.",
-                      "invariants": ["same input", "same LLM call count"],
-                      "remaining_boundary": "Production latency is unmeasured.",
-                      "recommended_diagram": "swimlane",
-                      "evidence_refs": ["test:streaming"]
-                    },
-                    "implementation_narrative": {
-                      "normal_path": "When both stages are uncached, the scheduler creates the queue, the producer pushes each completed group, and the consumer processes groups until the done signal, replacing full-stage waiting with progressive consumption.",
-                      "branch_and_fallback": "If a stage is cached, the pair bypasses streaming and uses the batch path, preventing mixed execution state from changing cache or override behavior.",
-                      "outcome_and_invariant": "The consumer receives equivalent evaluation input with overlapping timing, while the input and LLM call count stay unchanged."
-                    },
-                    "result_maturity": {
-                      "mechanism_complete": "yes",
-                      "effect_validated": "partial",
-                      "production_accepted": "no"
-                    }
-                  },
-                  {
-                    "id": "registry-rebuild",
-                    "title": "Registry rebuilds from canonical episodes instead of accumulating stale contributions",
-                    "title_style": "conclusion",
-                    "visual_kind": "data_flow",
-                    "validation_result": "Repeat-run regression passes.",
-                    "effect_evidence_kind": "test",
-                    "evidence_grade": "verified",
-                    "closure_criterion": "Pass a real multi-job rerun without stale contributions or schema drift.",
-                    "metric_evidence": [],
-                    "state_transition": {"before": "Incremental accumulation", "intervention": "Rebuild the current view from canonical episode artifacts.", "after": "Canonical rebuild", "remaining_gate": "A real multi-job rerun is not yet accepted.", "evidence_refs": ["test:registry-rerun"]},
-                    "solution_logic": {
-                      "significance": "core",
-                      "trigger": "An episode artifact is written or replaced.",
-                      "actors": ["canonical episodes", "empty snapshot", "existing merge", "current view"],
-                      "main_flow": ["read canonical episodes", "fold in order", "write current view"],
-                      "branches": ["legacy series enters auto-backfill"],
-                      "fallbacks": ["backfill canonical artifacts before rebuild"],
-                      "output": "A current view derived from the latest canonical episodes.",
-                      "invariants": ["schema remains stable", "downstream interface does not change"],
-                      "remaining_boundary": "A real multi-job rerun is not yet accepted.",
-                      "recommended_diagram": "data_flow",
-                      "evidence_refs": ["test:registry-rerun"]
-                    },
-                    "implementation_narrative": {
-                      "normal_path": "After an episode artifact is written or replaced, the rebuild reads every canonical episode, folds them in order from an empty snapshot with the existing merge behavior, and writes the derived current view so superseded contributions are not accumulated.",
-                      "branch_and_fallback": "A legacy series first backfills canonical artifacts and then enters the same rebuild path, avoiding a second persistence path with different replay semantics.",
-                      "outcome_and_invariant": "The current view reflects the latest canonical episodes, while the registry schema and downstream interface remain stable."
-                    },
-                    "result_maturity": {
-                      "mechanism_complete": "yes",
-                      "effect_validated": "yes",
-                      "production_accepted": "no"
-                    }
-                  },
-                  {
-                    "id": "provider-dispatch",
-                    "title": "Provider-aware dispatch prevents incompatible reasoning parameters from reaching model endpoints",
-                    "title_style": "conclusion",
-                    "visual_kind": "decision_tree",
-                    "validation_result": "Provider smoke tests pass.",
-                    "effect_evidence_kind": "smoke_test",
-                    "evidence_grade": "verified",
-                    "closure_criterion": "Add the next provider family to the acceptance matrix and confirm bare-request fallback behavior.",
-                    "metric_evidence": [],
-                    "state_transition": {"before": "Uniform parameters", "intervention": "Classify providers and translate or remove dialect-specific parameters.", "after": "Dialect-aware parameters", "remaining_gate": "A future provider family may require a classifier rule.", "evidence_refs": ["test:provider-smoke"]},
-                    "solution_logic": {
-                      "significance": "core",
-                      "trigger": "A model call is prepared.",
-                      "actors": ["model pool", "provider classifier", "parameter translator", "endpoint"],
-                      "main_flow": ["classify provider", "strip incompatible keys", "apply dialect parameters", "send request"],
-                      "branches": ["known dialect translates parameters", "unknown dialect uses a bare request"],
-                      "fallbacks": ["unknown providers receive no forced reasoning parameters"],
-                      "output": "A provider-compatible request.",
-                      "invariants": ["stage code stays provider-agnostic", "pool configuration remains authoritative"],
-                      "remaining_boundary": "A future provider family may require a new classifier rule.",
-                      "recommended_diagram": "decision_tree",
-                      "evidence_refs": ["test:provider-smoke"]
-                    },
-                    "implementation_narrative": {
-                      "normal_path": "When the model pool prepares a call, it classifies the provider, removes incompatible keys, applies the recognized dialect parameters, and sends the translated request so provider differences stay out of stage code.",
-                      "branch_and_fallback": "Known dialects receive explicit translation, while an unknown provider receives a bare request, avoiding failures caused by forcing unsupported reasoning parameters.",
-                      "outcome_and_invariant": "The endpoint receives a provider-compatible request, while stages remain provider-agnostic and pool configuration remains authoritative."
-                    },
-                    "result_maturity": {
-                      "mechanism_complete": "yes",
-                      "effect_validated": "yes",
-                      "production_accepted": "partial"
-                    }
-                  }
-                ]
-              }
-            }
-          ]
-        }
-      },
-      "expected_behavior": "Core mechanism changes generate complete and correctly routed solution logic while keeping mechanism explanation separate from result validation."
-    },
-    {
-      "id": "weekly-slides-maintenance-does-not-force-diagram",
-      "execution": {
-        "kind": "report-contract"
-      },
-      "skill": "weekly",
-      "fixture": {
-        "rejection_probes": ["decorative-maintenance-logic", "decorative-maintenance-narrative"],
-        "expected_no_logic_ids": ["maintenance-summary"],
-        "expected_portfolio_ids": ["cleanup"],
-        "candidate_output": {
-          "format": "slides",
-          "scope": "work",
-          "groups": [
-            {
-              "name": "work",
-              "judgment": "The week contained bounded maintenance without a material runtime-mechanism change.",
-              "all_streams": ["cleanup"],
-              "headlines": ["maintenance-summary"],
-              "portfolio": ["cleanup"],
-              "next_closure_targets": [{"target": "confirm clean packaging", "closure_criterion": "Run the packaging check from a clean isolated install and confirm no generated cache is shipped."}, {"target": "confirm runtime equivalence", "closure_criterion": "Run the existing behavior tests and confirm no runtime-mechanism change."}],
-              "slide_projection": {
-                "audience": "department_ic",
-                "main_deck_slide_count": 6,
-                "main_deck_slide_titles": ["Maintenance reduced code surface without changing runtime behavior", "The change is effect-validated but awaits clean packaging", "Duplicated maintenance code was consolidated", "Existing behavior tests still pass", "No architecture diagram is needed for unchanged runtime behavior", "Next week closes packaging and equivalence checks"],
-                "core_result_ids": [],
-                "main_deck_logic_diagram_ids": [],
-                "results": [
-                  {
-                    "id": "maintenance-summary",
-                    "title": "Maintenance reduced code surface without changing runtime behavior",
-                    "title_style": "conclusion",
-                    "visual_kind": "status_cards",
-                    "evidence_grade": "recorded",
-                    "validation_result": "The maintenance test suite passes without a runtime behavior change.",
-                    "effect_evidence_kind": "test",
-                    "closure_criterion": "Run the packaging check from a clean isolated install and confirm no generated cache is shipped.",
-                    "metric_evidence": [],
-                    "state_transition": {
-                      "before": "Duplicated maintenance code increased the change surface.",
-                      "intervention": "Shared helpers replaced duplicated code without changing runtime behavior.",
-                      "after": "The maintenance surface is smaller and the same tests pass.",
-                      "remaining_gate": "Clean isolated packaging remains to be confirmed.",
-                      "evidence_refs": ["test:maintenance"]
-                    },
-                    "solution_logic": {
-                      "significance": "none"
-                    },
-                    "result_maturity": {
-                      "mechanism_complete": "not_applicable",
-                      "effect_validated": "yes",
-                      "production_accepted": "partial"
-                    }
-                  }
-                ]
-              }
-            }
-          ]
-        }
-      },
-      "expected_behavior": "Parameter tuning, cleanup, and non-mechanism maintenance stay visible in the portfolio without a decorative architecture diagram."
-    },
-    {
       "id": "weekly-goal-loop-same-actions-different-goals",
       "execution": {
         "kind": "weekly-goal-loop-contract"
@@ -2131,6 +1712,184 @@
         ]
       },
       "expected_behavior": "Brief compression follows management information gain: maintenance and extra evidence expand only the appendix, material risk changes the body, and every body block carries a unique decision delta."
+    },
+    {
+      "id": "weekly-ppt-a-complex-story-content-split",
+      "execution": {"kind": "weekly-ppt-ready-markdown-contract"},
+      "skill": "weekly",
+      "fixture": {
+        "expected_story_slide_counts": [2],
+        "required_content_terms": [[
+          ["ambiguous repair owner", "upstream repair", "local repair", "retry boundary"],
+          ["repair locally", "budget exhausted", "fallback", "ownership remains in validation"]
+        ]],
+        "unique_content_terms": ["upstream repair", "budget exhausted"],
+        "hidden_intended_takeaways": [
+          {"story_index": 0, "slide_index": 0, "text": "Local repair wins because upstream ownership leaks validation internals."},
+          {"story_index": 0, "slide_index": 1, "text": "Repair stays local while fallback preserves the orchestration boundary."}
+        ],
+        "rejection_probes": [
+          "missing-why",
+          "missing-goal",
+          "missing-content",
+          "production-guideline",
+          "takeaway-leak",
+          "role-title",
+          "unsafe-main-deck-reference",
+          "complex-result-merged"
+        ],
+        "candidate_output": {
+          "deck_context": "Validation failures exposed an ownership question that affects retry reliability.",
+          "management_question": "Where should repair live without coupling orchestration to validation internals?",
+          "stories": [{
+            "title": "Repair ownership and retry boundaries",
+            "why": "The previous path had an ambiguous repair owner, so validation failures could leak into orchestration decisions.",
+            "goal": "Compare the ownership choices and explain the selected runtime path.",
+            "slides": [
+              {
+                "title": "Where repair ownership creates coupling",
+                "content": "The ambiguous repair owner made the retry boundary the governing constraint.\\n\\n| Option | Effect |\\n|---|---|\\n| upstream repair | exposes validation internals to orchestration |\\n| local repair | keeps failure handling inside validation |"
+              },
+              {
+                "title": "The local repair and fallback path",
+                "content": "```mermaid\\nflowchart LR\\n  Validate[validate] --> Repair[repair locally]\\n  Repair --> Validate\\n  Repair -->|budget exhausted| Fallback[orchestration fallback]\\n```\\n\\nThe retry budget controls the branch; ownership remains in validation."
+              }
+            ]
+          }],
+          "evidence_appendix": [
+            {"claim": "Upstream repair exposes validation internals.", "source": "design:tradeoffs", "boundary": "Design comparison, not measured latency."},
+            {"claim": "Exhausted local retries enter fallback.", "source": "mechanism:fallback", "boundary": "Path semantics, not fallback frequency."}
+          ]
+        }
+      },
+      "expected_behavior": "P2-A: one Story publishes Why and Goal, then directly presents trade-offs and the dependent runtime path without exposing intended takeaways or production guidance."
+    },
+    {
+      "id": "weekly-ppt-b-simple-story-content-merge",
+      "execution": {"kind": "weekly-ppt-ready-markdown-contract"},
+      "skill": "weekly",
+      "fixture": {
+        "expected_story_slide_counts": [1],
+        "required_content_terms": [[[
+          "two owners", "one explicit owner", "downstream interface stays unchanged"
+        ]]],
+        "unique_content_terms": ["downstream interface stays unchanged"],
+        "hidden_intended_takeaways": [
+          {"story_index": 0, "slide_index": 0, "text": "One ownership edge removes the ambiguous handoff without changing downstream work."}
+        ],
+        "rejection_probes": ["missing-why", "missing-goal", "production-guideline", "simple-result-split"],
+        "candidate_output": {
+          "deck_context": "A bounded ownership change needs one complete explanation.",
+          "management_question": "Can the handoff be clarified without changing downstream work?",
+          "stories": [{
+            "title": "Ownership handoff",
+            "why": "Two owners shared one handoff and neither was the explicit source of truth.",
+            "goal": "Show the root cause, selected ownership, and unchanged interface together.",
+            "slides": [{
+              "title": "Before and after the ownership change",
+              "content": "```mermaid\\nflowchart LR\\n  A[owner A] -. ambiguous .-> Downstream[downstream]\\n  B[owner B] -. ambiguous .-> Downstream\\n  C[one explicit owner] --> DownstreamAfter[downstream interface stays unchanged]\\n```\\n\\nBefore: two owners. After: one explicit owner."
+            }]
+          }],
+          "evidence_appendix": [
+            {"claim": "The explicit owner preserves the downstream interface.", "source": "simple:mechanism-path", "boundary": "Contract preservation, not measured speed."}
+          ]
+        }
+      },
+      "expected_behavior": "P2-B: one Story and one content page carry root cause, choice, operation, and invariant without mechanical splitting."
+    },
+    {
+      "id": "weekly-ppt-c-blind-content-handoff-preflight",
+      "execution": {"kind": "weekly-ppt-ready-markdown-contract"},
+      "skill": "weekly",
+      "fixture": {
+        "expected_story_slide_counts": [1],
+        "required_content_terms": [[["normal", "force", "partial recovery", "selected stages", "per-episode DAG"]]],
+        "unique_content_terms": ["per-episode DAG"],
+        "candidate_output": {
+          "deck_context": "Three entry paths need one execution model.",
+          "management_question": "Can a maker translate the operating path without source research?",
+          "stories": [{
+            "title": "Unified execution path",
+            "why": "Normal, force, and partial recovery previously diverged before execution.",
+            "goal": "Present every semantic node and relationship needed for visual translation.",
+            "slides": [{
+              "title": "Execution path shared by every entry",
+              "content": "```mermaid\\nflowchart LR\\n  normal --> Selection[selected stages]\\n  force --> Selection\\n  recovery[partial recovery] --> Selection\\n  Selection --> DAG[per-episode DAG]\\n  DAG --> Result[episode artifacts and final result]\\n```\\n\\nUnchanged: force API, result contract, rolling metadata."
+            }]
+          }],
+          "evidence_appendix": [
+            {"claim": "All entries converge before the per-episode DAG.", "source": "mechanism:unified-path", "boundary": "Execution semantics, not production acceptance."}
+          ]
+        }
+      },
+      "expected_behavior": "P2-C preflight: all semantic content is in Markdown, leaving only visual translation to the blind maker."
+    },
+    {
+      "id": "weekly-ppt-d-takeaway-inference-separation",
+      "execution": {"kind": "weekly-ppt-ready-markdown-contract"},
+      "skill": "weekly",
+      "fixture": {
+        "expected_story_slide_counts": [1],
+        "required_content_terms": [[["same 88 shots", "Sonnet 28", "visual dimensions 7", "manual review"]]],
+        "unique_content_terms": ["visual dimensions 7"],
+        "hidden_intended_takeaways": [
+          {"story_index": 0, "slide_index": 0, "text": "Sonnet reveals a real visual-quality advantage but is not yet an automatic production choice."}
+        ],
+        "rejection_probes": ["takeaway-leak"],
+        "candidate_output": {
+          "deck_context": "Provider choice requires comparable evidence and explicit limits.",
+          "management_question": "What does the same-sample comparison establish, and what remains undecided?",
+          "stories": [{
+            "title": "Provider comparison",
+            "why": "Visual issue dimensions remained silent under the current provider.",
+            "goal": "Compare observed signals without turning hit counts into accuracy.",
+            "slides": [{
+              "title": "Four models on the same sample",
+              "content": "Same 88 shots and prompt:\\n\\n| Model group | Total hits | Visual dimensions |\\n|---|---:|---:|\\n| Other providers | 5–11 | 0–1 |\\n| Sonnet | Sonnet 28 | visual dimensions 7 |\\n\\nHit count is not accuracy; cost and over-judgment still require manual review."
+            }]
+          }],
+          "evidence_appendix": [
+            {"claim": "Sonnet produced 28 total and 7 visual-dimension hits.", "source": "eval:model-comparison", "boundary": "Observed hits, not precision or approval."}
+          ]
+        }
+      },
+      "expected_behavior": "P2-D: hidden intended takeaway is inferable from evidence and limits but is not directly copied into the public deck."
+    },
+    {
+      "id": "weekly-ppt-e-standalone-markdown-reading",
+      "execution": {"kind": "weekly-ppt-ready-markdown-contract"},
+      "skill": "weekly",
+      "fixture": {
+        "expected_story_slide_counts": [1, 1],
+        "required_content_terms": [
+          [["batch and episode", "single DAG", "cache miss"]],
+          [["locked baseline", "variant", "end-to-end rerun"]]
+        ],
+        "unique_content_terms": ["cache miss", "end-to-end rerun"],
+        "candidate_output": {
+          "deck_context": "The week moved two hidden semantic risks into explicit mechanisms and gates.",
+          "management_question": "Which mechanisms are established, and which evidence gates remain?",
+          "stories": [
+            {
+              "title": "Pipeline execution semantics",
+              "why": "Batch and episode semantics diverged during partial recovery.",
+              "goal": "Explain the single DAG path and its remaining cache boundary.",
+              "slides": [{"title": "The shared execution path", "content": "Every entry converges on a single DAG at episode granularity, removing the batch and episode divergence. Historical batch cache may produce a first-run cache miss; force can bypass it."}]
+            },
+            {
+              "title": "Cross-episode scene reuse",
+              "why": "The model did not see the locked baseline and recreated stable fields.",
+              "goal": "Explain baseline reuse, allowed variation, and the validation gate.",
+              "slides": [{"title": "The location-cluster generation path", "content": "Each location cluster receives the locked baseline. Stable fields are reused; change enters variant and anchors. An end-to-end rerun must confirm ep7/ep8 consistency."}]
+            }
+          ],
+          "evidence_appendix": [
+            {"claim": "Single DAG preserves episode semantics.", "source": "runtime:dag", "boundary": "Mechanism complete, cache gate open."},
+            {"claim": "Location clusters receive locked baselines.", "source": "scene:cluster", "boundary": "Implementation recorded, end-to-end acceptance open."}
+          ]
+        }
+      },
+      "expected_behavior": "P2-E: a reader can reconstruct Story order, Why, Goal, mechanisms, and open gates without PPT or production guidance."
     },
     {
       "id": "decision-replay-unsafe-slug-rejected",

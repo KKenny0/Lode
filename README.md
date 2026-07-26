@@ -95,7 +95,7 @@ headline 数量。Brief 正文只保留会改变管理判断的信息，完整�
 | Command | 频次 | 输出 |
 | :--- | :--- | :--- |
 | `/tracework:daily` | 高频 | 今天改变了什么、为什么重要、下一道门是什么 |
-| `/tracework:weekly` | 高频 | 周级管理判断；默认 brief，「这周做了啥」为 quick，明确 PPT 时才出大纲 |
+| `/tracework:weekly` | 高频 | 周级管理判断；默认 brief，「这周做了啥」为 quick，明确 PPT 时才出 PPT-ready Markdown Deck |
 | `/tracework:monthly` | 高频 | Raw-first 的阶段成果、反复风险和下月收口目标 |
 | `/tracework:capture` | 高频增强 | 动态选择 lite/standard/deep 的 session raw record |
 | `/tracework:capture day [date] [scope]` | 可选补录 | 按分组扫描已索引 session，增量补回当天证据 |
@@ -104,12 +104,10 @@ headline 数量。Brief 正文只保留会改变管理判断的信息，完整�
 | `/tracework:roadmap` | 低频进阶 | 长周期决策线程叙事 |
 | `/tracework:cold-start-interview` | 一次性增强 | Vault、项目身份和报告分组 |
 
-明确请求 `weekly PPT` 时，Tracework 会为部门内 IC 生成 6–10 页汇报大纲。核心技术
-成果按“为什么改、如何工作、是否有效”组织：Before/After 说明状态变化，方案逻辑图和
-实施叙事解释主路径、关键分支、回退与不变量，数据、测试或明确的 measurement gap
-单独说明效果边界。主 deck 最多保留 2–3 张逻辑图；普通维护工作不会为了视觉形式
-强行生成架构图，原始证据映射留在附录。该命令生成的是大纲，不是已经渲染的
-`.pptx` 文件。
+明确请求 `weekly PPT` 时，Tracework 会生成最多 8 页、没有最低页数的 PPT-ready
+Markdown Deck。每个 Story 先公开 Why 与 Goal，随后直接呈现事实、关系、比较、
+机制、数字和风险；source packet 与 intended takeaway 留在内部，公开附录只保留
+紧凑证据映射。Markdown 本身可以独立阅读，PPT 只是它的视觉转译。
 
 Decision replay 是可信机制，而不是需要每天使用的操作。读者可以从报告主张向下追到
 raw entry、被拒方案、风险和直接证据。记录不足时，Tracework 应该明确暴露缺口，而
