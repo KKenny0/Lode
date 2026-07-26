@@ -7,10 +7,11 @@ Analysis runs in the main dialog; it does not require a subagent.
 
 **Mode split**
 
-- `brief`: fill period judgment, headline arcs, portfolio, next-week targets,
-  decisions, and evidence index. Keep `slide_projection` null. Do not require
+- `brief`: fill goal lanes, prior-commitment accounting, material changes,
+  variance, portfolio, next commitments, decisions, and evidence index. Keep
+  `slide_projection` null. Do not require
   solution-logic diagram briefs, implementation narratives, or chart routing.
-- `slides`: complete the brief analysis first, then populate `slide_projection`
+- `slides`: complete the same goal-loop analysis first, then populate `slide_projection`
   and the slide-only fields below (solution logic, implementation narrative,
   visual candidates, metric chart routing).
 
@@ -19,16 +20,19 @@ Return one JSON object per reporting group:
 ```json
 {
   "reporting_group": "work",
+  "goal_lanes": [],
   "period_judgment": {
-    "starting_situation": "",
-    "main_movement": "",
-    "end_state": "",
-    "remaining_gate": "",
+    "original_direction": "",
+    "actual_change": "",
+    "variance": "",
+    "current_decision": "",
     "statement": ""
   },
-  "headline_arcs": [],
+  "prior_commitment_accounting": [],
+  "material_changes": [],
+  "unplanned_material": [],
   "portfolio": [],
-  "next_closure_targets": [],
+  "next_commitments": [],
   "decisions_or_support_needed": [],
   "slide_projection": null,
   "evidence_index": []
@@ -36,8 +40,59 @@ Return one JSON object per reporting group:
 ```
 
 `slide_projection` is `null` in brief-only analysis. Populate it only for an
-explicit PPT, slide, or presentation request after the weekly streams and
-headline arcs are stable.
+explicit PPT, slide, or presentation request after the goal lanes and material
+changes are stable.
+
+## Goal Resolution
+
+Resolve goals before selecting report-worthy changes. Use this source order:
+
+1. explicit current-request goal;
+2. confirmed prior-Weekly commitment;
+3. explicit milestone, plan, or project-goal artifact;
+4. inference from raw motivation, decision, or carry-forward;
+5. unknown.
+
+```json
+{
+  "id": "goal-1",
+  "statement": "",
+  "source": {
+    "kind": "current_request | previous_weekly | goal_artifact | raw_inference | unknown",
+    "reference": ""
+  },
+  "confidence": "confirmed | inferred | unknown",
+  "closure_criterion": "",
+  "status": "met | advanced | blocked | replanned | not_started",
+  "commitment_state": "confirmed | proposed"
+}
+```
+
+An empty source is `unknown`, not permission to invent a Why. A goal inferred
+after the work happened must remain `inferred`. When a previous Weekly item was
+an agent recommendation rather than user-confirmed direction, use
+`commitment_state: proposed` and describe it as the prior report's proposal.
+
+One reporting group may contain several unrelated goal lanes. Do not synthesize
+a shared objective merely because projects share an audience.
+
+## Prior Commitment Accounting
+
+Account for every prior-period item:
+
+```json
+{
+  "statement": "",
+  "commitment_state": "confirmed | proposed",
+  "status": "met | advanced | blocked | replanned | not_started",
+  "goal_id": "goal-1",
+  "reason": "",
+  "evidence_refs": []
+}
+```
+
+No prior commitment may disappear. For replanned work, retain the former
+direction, evidence trigger, reason, and replacement direction.
 
 ## Work Stream Shape
 
@@ -46,6 +101,7 @@ First group related entries into independent work streams:
 ```json
 {
   "id": "temporary-analysis-id",
+  "goal_ids": [],
   "project": "Project Name",
   "title": "short work-stream title",
   "status": "done | ongoing | risk | decision",
@@ -69,7 +125,7 @@ Merge signals when they describe one state transition. A feature followed by a
 repair and a release can be one arc. Do not split by commit, module, day, or
 archetype when the management meaning is shared.
 
-## Headline Selection
+## Material Change Selection
 
 Rank streams by:
 
@@ -78,14 +134,18 @@ Rank streams by:
 3. evidence strength;
 4. effect on next week's decisions or resource allocation.
 
-Select normally three headline arcs and no more than four. The budget is per
-reporting group. Do not let personal work compete with work projects.
+Do not force a headline count. Select every change needed to explain goal
+progress, material variance, a management decision, or an unplanned change that
+displaced intended work. Multiple activities may support one change. Keep
+lower-value but meaningful work in the portfolio. Do not let personal work
+compete with work projects.
 
-For each selected arc, include:
+For each selected change, include:
 
 ```json
 {
   "id": "stable-result-id",
+  "goal_ids": [],
   "headline": "observable state-change claim",
   "supporting_stream_ids": [],
   "closure_type": "delivery | decision | risk | learning",
@@ -105,12 +165,63 @@ For each selected arc, include:
     "effect_validated": "yes | partial | no | not_applicable",
     "production_accepted": "yes | partial | no | not_applicable"
   },
-  "department_value": "delivery_speed | quality | production_risk | cost | collaboration | iteration_capacity | null"
+  "department_value": "delivery_speed | quality | production_risk | cost | collaboration | iteration_capacity | null",
+  "variance": {
+    "kind": "none | blocked | replanned | unplanned",
+    "prior_direction": "",
+    "trigger": "",
+    "reason": "",
+    "new_direction": ""
+  }
 }
 ```
 
 An outcome must pass the Fruit Check: a deliverable, observable state, recorded
 effect, or demonstrably removed risk exists. Expected impact stays prospective.
+Every material change has at least one `goal_id` or
+`variance.kind: unplanned`. Otherwise it belongs in the portfolio.
+
+## Brief Projection
+
+**Brief only.** Do not create another analysis object. Render a layered brief
+from the complete analysis above.
+
+The body must be the minimum information needed to reconstruct:
+
+```text
+goal state
+actual change
+material variance
+decision or support needed
+next commitment
+confidence boundary
+```
+
+For every candidate body block, ask whether removing it would materially change
+the reader's judgment, action, or confidence. Keep it only when the answer is
+yes. Otherwise route it to the appendix when it is needed for accountability,
+coverage, or verification; omit it when it serves none of those functions.
+
+Body admission:
+
+- changes a goal's status;
+- explains a material block, replan, or unplanned displacement;
+- changes a decision, support request, or resource implication;
+- defines a next commitment and its closure criterion;
+- qualifies a body claim as `limited`, conflicting, or expected-only.
+
+Appendix routing:
+
+- complete prior-item accounting;
+- meaningful streams that do not change the management model;
+- compact claim evidence and provenance;
+- coverage and scope boundaries.
+
+Use one fact in one expanded location. The body may state a supported conclusion
+while the appendix maps that conclusion to compact evidence, but the appendix
+must not retell the narrative. Do not use a fixed length or item count. A dense
+week earns more body only through additional independent management changes,
+not through more entries, commits, or evidence refs.
 
 ## Metric Evidence
 
@@ -248,8 +359,8 @@ these blocks. Each block must stay within 600 Unicode characters.
 **Slides only.** Keep `slide_projection: null` for brief mode and do not fill
 this object.
 
-For slide mode, return this after headline selection. `results` contains the
-selected headline result objects, preserves their stable `id`, evidence,
+For slide mode, return this after material-change selection. `results` contains
+the selected result objects, preserves their stable `id`, evidence,
 transition, logic, maturity, and closure fields, and adds the presentation
 fields shown below. Do not create a second result identity namespace.
 
@@ -318,18 +429,21 @@ gate, risk, or otherwise material maintenance state.
 ## Weekly Judgment
 
 Write the judgment only after selection. It must synthesize the group rather
-than list projects. State the starting situation, the main shift, the current
-state, and the largest remaining gate in one paragraph.
+than list projects. State the original goal or its missing-source boundary, the
+actual change, the material variance, the current decision, and the largest
+remaining gate in one paragraph.
 
 Never create a combined judgment across `work` and `personal`.
 
-## Next Closure Targets
+## Next Commitments
 
-Return two to four targets, normally three. Each target names an uncertainty,
-acceptance gate, decision, or risk to close—not a task list.
+Return only the commitments justified by the analysis; do not force a count.
+Each commitment names an uncertainty, acceptance gate, decision, or risk to
+close—not a task list.
 
-Every target includes a pass/fail closure criterion. Include an owner or target
-date only when the evidence explicitly identifies it.
+Every commitment includes a pass/fail closure criterion and a
+`commitment_state` of `confirmed` or `proposed`. Include an owner or target date
+only when the evidence explicitly identifies it.
 
 ## Evidence
 

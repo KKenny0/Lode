@@ -13,10 +13,10 @@ description: >
 
 # Tracework Weekly
 
-Turn a week of agent work into a management judgment: what situation changed,
-which uncertainties closed, what remains gated, and where next week should
-focus. Preserve all meaningful work without giving every stream equal headline
-prominence.
+Turn a week of agent work into an objective-anchored feedback loop: what the
+period was meant to advance, what actually changed, why reality diverged, what
+management judgment follows, and what commitment comes next. Preserve all
+meaningful work without inventing a retrospective goal.
 
 ## Modes
 
@@ -46,16 +46,20 @@ Always:
 - `references/reporting-narrative-contract.md` for scope partition, selection,
   closure, evidence, and audience safety.
 
+For Weekly, the goal-loop rules below replace the shared contract's default
+headline and next-target counts. Scope, evidence, closure, and audience-safety
+rules remain unchanged.
+
 For `brief` and `slides` only:
 
-- `references/subagent-prompt.md` for structured analysis. Use the brief
+- `references/weekly-analysis-contract.md` for structured analysis. Use the brief
   analysis path unless mode is `slides`.
 - `references/weekly-brief-template.md` for brief output (and as analysis
   backbone before slides).
 
 For `slides` only:
 
-- Full slide sections in `references/subagent-prompt.md`
+- Full slide sections in `references/weekly-analysis-contract.md`
 - `references/slide-template.md`
 
 Do not read `slide-template.md` for `quick` or `brief`.
@@ -136,15 +140,16 @@ When not writing the weekly file, a compact brief is enough:
 ```markdown
 ## {YYYY-WNN} · {work | personal | all | local}
 
-**判断：** …
+**目标与判断：** {confirmed goal, inferred goal with boundary, or 目标未记录}；…
 
-### 主线
-1. …
-2. …
-3. …
+### 目标推进
+- {goal}: {actual change and status}
 
-### 其他
-- …
+### 偏差与决策
+- {variance, replanning, decision, support, or unplanned material change}
+
+### 下周承诺
+- {commitment}: {pass/fail closure criterion}
 
 ### 证据边界
 - raw / git / limited 各一句
@@ -160,7 +165,7 @@ When not writing the weekly file, a compact brief is enough:
 1. Choose `quick`, `brief`, or `slides` from the mode table.
 2. Resolve week range and scope class (explicit / configured / implicit).
 3. If mode is `quick`, follow **Quick Mode** and stop after its quality gate.
-4. Otherwise continue with partition → evidence → analysis → write.
+4. Otherwise continue with partition → evidence → goals → analysis → write.
 
 ### 1. Resolve and Partition
 
@@ -179,33 +184,81 @@ For every in-scope project or the local lane:
 
 1. Read matching `{vault}/raw/weeks/{week}/{slug}.json` entries when a vault
    exists.
-2. Read optional artifact dossiers for navigation and recorded scope.
-3. Run a lightweight git log only to detect uncovered work.
-4. Merge duplicate raw/git signals before analysis.
-5. Without a vault, use git coverage and conversation context only.
+2. Read the previous Weekly's next-period items as editorial context when it
+   exists. Preserve whether each item was a confirmed commitment or only a
+   report proposal; never silently promote a proposal.
+3. Read explicit goal sources available in the request or project, such as a
+   milestone or current `PLAN` artifact. Read only sources needed to establish
+   the reporting goal.
+4. Read optional artifact dossiers for navigation and recorded scope.
+5. Run a lightweight git log only to detect uncovered work.
+6. Merge duplicate raw/git signals before analysis.
+7. Without a vault, use git coverage and conversation context only.
 
 Raw entries are the semantic source. Git-only work remains `limited` and cannot
 substantiate a completed outcome or invented trade-off.
 
-### 3. Analyze and Rank (brief and slides)
+### 3. Resolve Goals and Prior Commitments
 
-Apply `references/subagent-prompt.md` in the main dialog. For `brief`, keep
+Resolve each goal lane from the strongest available source:
+
+1. an explicit goal in the current request;
+2. a confirmed commitment from the previous Weekly;
+3. an explicit milestone, plan, or project-goal artifact;
+4. a goal inferred from raw motivation, decision, or carry-forward;
+5. `unknown`.
+
+Record the goal statement, source, confidence, closure criterion, status, and
+commitment state. Confidence is `confirmed`, `inferred`, or `unknown`; status is
+`met`, `advanced`, `blocked`, `replanned`, or `not_started`; commitment state is
+`confirmed` or `proposed`.
+
+For `brief` and `slides`, if no reliable goal exists, ask at most one question:
+
+> 这周原本最重要的是推进什么？
+
+If the user skips it, continue with `目标未记录`. Never backfill a confirmed Why
+from completed activities. Quick mode does not ask this question.
+
+`reporting_group` is an audience and privacy boundary, not proof that its
+projects share one objective. Keep separate goal lanes when no common goal is
+recorded.
+
+### 4. Analyze Change and Variance (brief and slides)
+
+Apply `references/weekly-analysis-contract.md` in the main dialog. For `brief`, keep
 `slide_projection` null and do not build solution-logic diagram briefs,
 implementation narratives, or chart briefs unless the user later upgrades to
 slides.
 
-Produce coherent work streams, then rank them inside each reporting group by:
+For every prior commitment, record whether it was met, advanced, blocked,
+replanned, or not started. No prior commitment may disappear.
+
+Connect every material weekly change to a goal lane. When no honest link exists,
+label it `unplanned but material` or keep it in the portfolio. Preserve the old
+goal, evidence trigger, reason, and new direction for replanned work.
+
+Rank goal-linked and unplanned material changes inside each reporting group by:
 
 - observable end-state significance;
 - management relevance;
 - evidence strength;
 - effect on the next planning decision.
 
-Write one weekly judgment per group. Use normally three result arcs; two to four
-is acceptable. Put every remaining meaningful stream in the portfolio table.
-Do not allocate prose by entry count.
+Write one weekly judgment per group. Do not force a headline count. Multiple
+activities may support one change, and one goal may need multiple changes when
+they carry distinct management meaning. Put every remaining meaningful stream
+in the portfolio table. Do not allocate prose by entry count.
 
-### 4. Project Slides When Requested
+### 5. Project the Brief When Requested
+
+Skip for `quick` and `slides`. For `brief`, apply **Brief Projection** in
+`references/weekly-analysis-contract.md`: keep only blocks whose removal would
+change judgment, action, or confidence in the body; route accountability,
+coverage, and provenance to the appendix. Use one expanded home per fact and no
+fixed length or item count.
+
+### 6. Project Slides When Requested
 
 Skip this entire step for `quick` and `brief`. Run it only for `slides`.
 
@@ -219,7 +272,7 @@ Transform the weekly analysis into a department-facing deck before applying
    changes a material state or decision, not because its implementation is
    complicated.
 3. Build the result evidence and visual candidates defined in the slide sections
-   of `references/subagent-prompt.md`. Validate metric comparability before
+   of `references/weekly-analysis-contract.md`. Validate metric comparability before
    recommending a chart.
 4. Route each result through the presentation triad:
 
@@ -262,15 +315,21 @@ If data is missing, incomparable, or contradictory, do not invent a chart.
 Use a mechanism or state-change diagram, lower the evidence boundary, expose
 the measurement gap, and name its closure criterion.
 
-### 5. Write
+### 7. Write
 
 - `quick`: conversation only; see Quick Mode.
 - `brief`: use `weekly-brief-template.md`.
 - `slides`: use `slide-template.md` and keep the main deck to 6-10 slides,
   excluding the evidence appendix.
-- Put report-local `O#`, `W#`, `D#`, and `E#` primarily in the evidence
-  appendix. Main prose must be readable without ids.
+- Keep claim-level evidence in the appendix. Main prose must be readable
+  without report-local ids.
 - Preserve risks, unresolved decisions, and evidence gaps.
+- Preserve confirmed versus proposed commitments and inferred versus confirmed
+  goals.
+- Keep tables, full commitment accounting, portfolio coverage, and provenance
+  in the brief appendix. The brief body uses prose and bullets only.
+- Keep `limited`, conflicting, and expected-only boundaries beside the body
+  claim they qualify. Verified provenance can remain in the appendix.
 - When evidence is thin or git-only, keep the main narrative short and mark
   `limited` explicitly rather than padding with architecture theater.
 
@@ -352,14 +411,22 @@ coverage in one line; it does not need badges.
 ### Brief only
 
 - Every group has exactly one weekly judgment.
-- Headline arcs explain constraint, movement, end state, meaning, and gate.
-- Normally three and never more than four headline arcs per group.
-- Every meaningful non-headline stream appears in the portfolio.
-- Next-week closure targets number two to four, normally three.
-- Every unresolved risk or next-week target has a concrete closure criterion.
-- Brief mode can be presented in about five minutes per group.
-- No requirement for Before/After diagrams, solution-logic diagrams,
-  implementation narratives, or chart briefs.
+- Every goal states its source, confidence, status, and closure criterion.
+- Inferred or unknown goals never use confirmed-goal language.
+- Every prior commitment is accounted for; proposals remain proposals.
+- Every material change is goal-linked, explicitly unplanned, or in the
+  portfolio.
+- Replanned work preserves the prior direction, evidence trigger, reason, and
+  new direction.
+- Every meaningful remaining stream appears in the portfolio.
+- Every unresolved risk or next commitment has a concrete closure criterion.
+- The body alone reconstructs goal state, actual change, material variance,
+  decision or support, next commitment, and confidence boundary.
+- Every body block survives counterfactual deletion; full prior-item,
+  portfolio, and evidence coverage stays in the appendix.
+- The body contains no tables, source paths, commit lists, or evidence index.
+- Appendix ledgers and mappings do not repeat body narrative.
+- Brief mode does not require diagrams, implementation narratives, or charts.
 
 ### Slides only
 
@@ -400,6 +467,15 @@ coverage in one line; it does not need badges.
 - Flat project or commit list as the overview.
 - Cross-group themes in `all` mode.
 - Activity volume promoted into outcomes.
+- Retrofitting a confirmed Why from completed actions.
+- Treating a report proposal as a prior commitment.
+- Hiding a prior goal when evidence caused a replan.
+- Forcing unrelated projects in one reporting group under a shared goal.
+- Keeping a body block whose removal changes neither judgment, action, nor
+  confidence.
+- Repeating the same narrative in the body and appendix.
+- Hiding a blocked/replanned material item, decision request, or evidence
+  conflict only in the appendix.
 - Hiding work because it did not qualify as a headline (brief/slides) or
   omitting material risks from carried-forward (quick).
 - Treating expected impact as an observed result.

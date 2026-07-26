@@ -4,7 +4,12 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { validateReportContract, validateReportContractRejectionProbes } from './report-contract.mjs';
+import {
+  validateReportContract,
+  validateReportContractRejectionProbes,
+  validateWeeklyBriefCompressionContract,
+  validateWeeklyGoalLoopContract,
+} from './report-contract.mjs';
 
 const scriptDir = path.dirname(fileURLToPath(import.meta.url));
 const repoRoot = path.resolve(scriptDir, '..');
@@ -1025,6 +1030,10 @@ function runExecutableFixture(fixture) {
   } else if (kind === 'report-contract') {
     validateReportContract(fixture);
     validateReportContractRejectionProbes(fixture);
+  } else if (kind === 'weekly-goal-loop-contract') {
+    validateWeeklyGoalLoopContract(fixture);
+  } else if (kind === 'weekly-brief-compression-contract') {
+    validateWeeklyBriefCompressionContract(fixture);
   } else if (kind === 'query-positive') {
     runQueryPositiveFixture(fixture);
   } else if (kind === 'query-negative') {

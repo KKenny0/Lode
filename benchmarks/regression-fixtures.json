@@ -1391,6 +1391,748 @@
       "expected_behavior": "Parameter tuning, cleanup, and non-mechanism maintenance stay visible in the portfolio without a decorative architecture diagram."
     },
     {
+      "id": "weekly-goal-loop-same-actions-different-goals",
+      "execution": {
+        "kind": "weekly-goal-loop-contract"
+      },
+      "skill": "weekly",
+      "fixture": {
+        "expected_distinct_rankings": true,
+        "expected_distinct_narratives": true,
+        "candidate_outputs": [
+          {
+            "scope": "work",
+            "groups": [
+              {
+                "name": "work",
+                "narrative": "为下周客户提案形成了更完整的说服链路。",
+                "goals": [
+                  {
+                    "id": "win-proposal",
+                    "statement": "为下周提案赢得客户",
+                    "source": {"kind": "current_request", "reference": "user request"},
+                    "confidence": "confirmed",
+                    "closure_criterion": "客户确认进入提案后的下一步商务流程。",
+                    "status": "advanced",
+                    "commitment_state": "confirmed"
+                  }
+                ],
+                "prior_commitments": [],
+                "material_changes": [
+                  {"id": "customer-followup", "goal_ids": ["win-proposal"], "variance": {"kind": "none"}},
+                  {"id": "competitor-analysis", "goal_ids": ["win-proposal"], "variance": {"kind": "none"}},
+                  {"id": "content-production", "goal_ids": ["win-proposal"], "variance": {"kind": "none"}}
+                ],
+                "portfolio": [],
+                "all_changes": ["competitor-analysis", "content-production", "customer-followup"],
+                "next_commitments": [
+                  {
+                    "statement": "完成客户提案",
+                    "commitment_state": "confirmed",
+                    "closure_criterion": "提案发送并获得客户是否进入下一步的明确答复。"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "scope": "work",
+            "groups": [
+              {
+                "name": "work",
+                "narrative": "围绕交付风险识别形成了优先处理顺序。",
+                "goals": [
+                  {
+                    "id": "reduce-risk",
+                    "statement": "降低下阶段交付风险",
+                    "source": {"kind": "current_request", "reference": "user request"},
+                    "confidence": "confirmed",
+                    "closure_criterion": "高风险假设均有验证结论或明确规避方案。",
+                    "status": "advanced",
+                    "commitment_state": "confirmed"
+                  }
+                ],
+                "prior_commitments": [],
+                "material_changes": [
+                  {"id": "competitor-analysis", "goal_ids": ["reduce-risk"], "variance": {"kind": "none"}},
+                  {"id": "customer-followup", "goal_ids": ["reduce-risk"], "variance": {"kind": "none"}},
+                  {"id": "content-production", "goal_ids": ["reduce-risk"], "variance": {"kind": "none"}}
+                ],
+                "portfolio": [],
+                "all_changes": ["competitor-analysis", "content-production", "customer-followup"],
+                "next_commitments": [
+                  {
+                    "statement": "关闭最高风险假设",
+                    "commitment_state": "confirmed",
+                    "closure_criterion": "最高风险假设获得测试或客户证据并形成继续或规避决定。"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "expected_behavior": "The same activities produce different ranking and management meaning when the confirmed goal changes."
+    },
+    {
+      "id": "weekly-goal-loop-unknown-goal-stays-unknown",
+      "execution": {
+        "kind": "weekly-goal-loop-contract"
+      },
+      "skill": "weekly",
+      "fixture": {
+        "candidate_output": {
+          "scope": "work",
+          "groups": [
+            {
+              "name": "work",
+              "narrative": "目标未记录；本周只能确认三个有证据的变化。",
+              "goals": [
+                {
+                  "id": "unknown-goal",
+                  "statement": "目标未记录",
+                  "source": {"kind": "unknown", "reference": ""},
+                  "confidence": "unknown",
+                  "closure_criterion": "用户确认本周期原本最重要的推进方向。",
+                  "status": "advanced",
+                  "commitment_state": "proposed"
+                }
+              ],
+              "prior_commitments": [],
+              "material_changes": [
+                {"id": "recorded-change", "goal_ids": [], "variance": {"kind": "unplanned"}}
+              ],
+              "portfolio": [],
+              "all_changes": ["recorded-change"],
+              "next_commitments": []
+            }
+          ]
+        }
+      },
+      "expected_behavior": "Missing goal evidence remains unknown and never becomes a retrospectively confirmed Why."
+    },
+    {
+      "id": "weekly-goal-loop-prior-commitments-accounted",
+      "execution": {
+        "kind": "weekly-goal-loop-contract"
+      },
+      "skill": "weekly",
+      "fixture": {
+        "expected_prior_statements": ["完成兼容性验证", "获得试点反馈"],
+        "candidate_output": {
+          "scope": "work",
+          "groups": [
+            {
+              "name": "work",
+              "narrative": "上周两个承诺分别完成和受阻，没有无声消失。",
+              "goals": [
+                {
+                  "id": "release-readiness",
+                  "statement": "关闭发布前验证",
+                  "source": {"kind": "previous_weekly", "reference": "previous weekly"},
+                  "confidence": "confirmed",
+                  "closure_criterion": "兼容性和试点反馈均形成结论。",
+                  "status": "blocked",
+                  "commitment_state": "confirmed"
+                }
+              ],
+              "prior_commitments": [
+                {
+                  "statement": "完成兼容性验证",
+                  "commitment_state": "confirmed",
+                  "status": "met",
+                  "goal_id": "release-readiness",
+                  "reason": "兼容性矩阵已全部通过。"
+                },
+                {
+                  "statement": "获得试点反馈",
+                  "commitment_state": "proposed",
+                  "status": "blocked",
+                  "goal_id": "release-readiness",
+                  "reason": "上周报告仅建议获得试点反馈，且试点环境尚未开放。"
+                }
+              ],
+              "material_changes": [
+                {"id": "compatibility-closed", "goal_ids": ["release-readiness"], "variance": {"kind": "none"}}
+              ],
+              "portfolio": [],
+              "all_changes": ["compatibility-closed"],
+              "next_commitments": [
+                {
+                  "statement": "补齐试点反馈",
+                  "commitment_state": "proposed",
+                  "closure_criterion": "试点方给出继续、修改或停止的明确结论。"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "expected_behavior": "Every prior confirmed commitment or report proposal is accounted for with its original state, current status, and reason."
+    },
+    {
+      "id": "weekly-goal-loop-evidence-led-replan",
+      "execution": {
+        "kind": "weekly-goal-loop-contract"
+      },
+      "skill": "weekly",
+      "fixture": {
+        "candidate_output": {
+          "scope": "work",
+          "groups": [
+            {
+              "name": "work",
+              "narrative": "新证据支持从扩展功能转向先修复可靠性边界。",
+              "goals": [
+                {
+                  "id": "reliable-release",
+                  "statement": "形成可可靠发布的版本",
+                  "source": {"kind": "goal_artifact", "reference": "release milestone"},
+                  "confidence": "confirmed",
+                  "closure_criterion": "关键可靠性回归通过并形成发布判断。",
+                  "status": "replanned",
+                  "commitment_state": "confirmed"
+                }
+              ],
+              "prior_commitments": [],
+              "material_changes": [
+                {
+                  "id": "reliability-replan",
+                  "goal_ids": ["reliable-release"],
+                  "variance": {
+                    "kind": "replanned",
+                    "prior_direction": "继续扩展功能覆盖",
+                    "trigger": "回归测试暴露数据丢失风险",
+                    "reason": "继续扩展会放大未关闭的可靠性风险",
+                    "new_direction": "先修复可靠性边界并重跑回归"
+                  }
+                }
+              ],
+              "portfolio": [],
+              "all_changes": ["reliability-replan"],
+              "next_commitments": [
+                {
+                  "statement": "关闭可靠性回归",
+                  "commitment_state": "confirmed",
+                  "closure_criterion": "数据丢失复现用例和完整回归均通过。"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "expected_behavior": "A reasonable replan preserves the prior direction, evidence trigger, reason, and new direction."
+    },
+    {
+      "id": "weekly-goal-loop-unplanned-critical-repair",
+      "execution": {
+        "kind": "weekly-goal-loop-contract"
+      },
+      "skill": "weekly",
+      "fixture": {
+        "candidate_output": {
+          "scope": "work",
+          "groups": [
+            {
+              "name": "work",
+              "narrative": "关键修复产生计划外价值，同时原计划只推进了一部分。",
+              "goals": [
+                {
+                  "id": "proposal-ready",
+                  "statement": "完成提案准备",
+                  "source": {"kind": "current_request", "reference": "user request"},
+                  "confidence": "confirmed",
+                  "closure_criterion": "提案通过内部评审。",
+                  "status": "blocked",
+                  "commitment_state": "confirmed"
+                }
+              ],
+              "prior_commitments": [],
+              "material_changes": [
+                {"id": "critical-repair", "goal_ids": [], "variance": {"kind": "unplanned"}},
+                {"id": "proposal-partial", "goal_ids": ["proposal-ready"], "variance": {"kind": "blocked"}}
+              ],
+              "portfolio": [],
+              "all_changes": ["critical-repair", "proposal-partial"],
+              "next_commitments": [
+                {
+                  "statement": "恢复提案主线",
+                  "commitment_state": "confirmed",
+                  "closure_criterion": "提案通过内部评审并记录修复造成的日期偏差。"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "expected_behavior": "Unplanned critical work stays visible without hiding displacement of the original goal."
+    },
+    {
+      "id": "weekly-goal-loop-exploration-closes-uncertainty",
+      "execution": {
+        "kind": "weekly-goal-loop-contract"
+      },
+      "skill": "weekly",
+      "fixture": {
+        "expected_change_closure_types": {
+          "option-b-ruled-out": "learning"
+        },
+        "candidate_output": {
+          "scope": "work",
+          "groups": [
+            {
+              "name": "work",
+              "narrative": "探索关闭了选型不确定性，没有虚构交付结果。",
+              "goals": [
+                {
+                  "id": "choose-direction",
+                  "statement": "关闭技术路线选择的不确定性",
+                  "source": {"kind": "current_request", "reference": "user request"},
+                  "confidence": "confirmed",
+                  "closure_criterion": "候选路线依据统一标准形成继续或放弃结论。",
+                  "status": "met",
+                  "commitment_state": "confirmed"
+                }
+              ],
+              "prior_commitments": [],
+              "material_changes": [
+                {
+                  "id": "option-b-ruled-out",
+                  "goal_ids": ["choose-direction"],
+                  "closure_type": "learning",
+                  "variance": {"kind": "none"}
+                }
+              ],
+              "portfolio": [],
+              "all_changes": ["option-b-ruled-out"],
+              "next_commitments": [
+                {
+                  "statement": "验证保留路线",
+                  "commitment_state": "proposed",
+                  "closure_criterion": "保留路线通过一个真实工作负载的验收。"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "expected_behavior": "Exploration may close uncertainty without being rewritten as a delivery."
+    },
+    {
+      "id": "weekly-goal-loop-multiple-project-goals",
+      "execution": {
+        "kind": "weekly-goal-loop-contract"
+      },
+      "skill": "weekly",
+      "fixture": {
+        "expected_min_goal_lanes": 2,
+        "candidate_output": {
+          "scope": "work",
+          "groups": [
+            {
+              "name": "work",
+              "narrative": "两个工作项目保留各自目标，没有被合成虚假的部门主线。",
+              "goals": [
+                {
+                  "id": "project-a-goal",
+                  "statement": "Project A 关闭发布风险",
+                  "source": {"kind": "goal_artifact", "reference": "Project A milestone"},
+                  "confidence": "confirmed",
+                  "closure_criterion": "Project A 发布门通过。",
+                  "status": "advanced",
+                  "commitment_state": "confirmed"
+                },
+                {
+                  "id": "project-b-goal",
+                  "statement": "Project B 完成客户验证",
+                  "source": {"kind": "goal_artifact", "reference": "Project B milestone"},
+                  "confidence": "confirmed",
+                  "closure_criterion": "Project B 获得客户结论。",
+                  "status": "advanced",
+                  "commitment_state": "confirmed"
+                }
+              ],
+              "prior_commitments": [],
+              "material_changes": [
+                {"id": "project-a-change", "goal_ids": ["project-a-goal"], "variance": {"kind": "none"}},
+                {"id": "project-b-change", "goal_ids": ["project-b-goal"], "variance": {"kind": "none"}}
+              ],
+              "portfolio": [],
+              "all_changes": ["project-a-change", "project-b-change"],
+              "next_commitments": []
+            }
+          ]
+        }
+      },
+      "expected_behavior": "Reporting group remains an audience boundary and does not force unrelated projects into one goal."
+    },
+    {
+      "id": "weekly-goal-loop-work-scope-safety",
+      "execution": {
+        "kind": "weekly-goal-loop-contract"
+      },
+      "skill": "weekly",
+      "fixture": {
+        "forbidden_terms": ["private-journal", "/vault/personal", "personal-secret"],
+        "candidate_output": {
+          "scope": "work",
+          "groups": [
+            {
+              "name": "work",
+              "narrative": "工作目标和证据在分区后完成选择。",
+              "goals": [
+                {
+                  "id": "work-goal",
+                  "statement": "完成工作项目验收",
+                  "source": {"kind": "current_request", "reference": "work request"},
+                  "confidence": "confirmed",
+                  "closure_criterion": "工作项目验收用例全部通过。",
+                  "status": "advanced",
+                  "commitment_state": "confirmed"
+                }
+              ],
+              "prior_commitments": [],
+              "material_changes": [
+                {"id": "work-change", "goal_ids": ["work-goal"], "variance": {"kind": "none"}}
+              ],
+              "portfolio": [],
+              "all_changes": ["work-change"],
+              "next_commitments": []
+            }
+          ]
+        }
+      },
+      "expected_behavior": "Work scope remains free of personal titles, paths, and evidence after goal-based selection."
+    },
+    {
+      "id": "weekly-brief-semantic-compression-boundary",
+      "execution": {
+        "kind": "weekly-brief-compression-contract"
+      },
+      "skill": "weekly",
+      "fixture": {
+        "expected_same_body_pairs": [
+          ["baseline", "maintenance-noise"],
+          ["baseline", "evidence-expansion"]
+        ],
+        "expected_different_body_pairs": [
+          ["baseline", "material-risk"]
+        ],
+        "expected_appendix_growth_pairs": [
+          ["baseline", "maintenance-noise"],
+          ["baseline", "evidence-expansion"]
+        ],
+        "candidate_outputs": [
+          {
+            "name": "baseline",
+            "management_model": {
+              "goal_state": "Evaluation signal advanced but remains provider-dependent.",
+              "actual_change": "A controlled comparison exposed false-clean fallback behavior.",
+              "material_variance": "Provider selection was reframed as degradation policy.",
+              "decision_or_support": "Choose fail-loud or visibly degraded fallback.",
+              "next_commitment": "Close the degradation policy with a pass/fail run.",
+              "confidence_boundary": "Signal gap is verified; editor usefulness remains unverified.",
+              "required_delta_ids": ["eval-signal", "provider-decision", "next-gate"]
+            },
+            "body_required_item_ids": ["provider-risk"],
+            "body_blocks": [
+              {
+                "id": "judgment",
+                "text": "Evaluation now exposes real signal, but the result is still load-bearing on one provider and editor usefulness remains unverified.",
+                "covers": ["goal_state", "actual_change", "confidence_boundary"],
+                "delta_ids": ["eval-signal"],
+                "item_refs": ["evaluation-goal"]
+              },
+              {
+                "id": "variance-decision",
+                "text": "The provider question changed from model ranking to failure semantics: decide whether unavailable quality should fail loudly or return a visibly degraded result.",
+                "covers": ["material_variance", "decision_or_support"],
+                "delta_ids": ["provider-decision"],
+                "item_refs": ["provider-risk"]
+              },
+              {
+                "id": "next-commitment",
+                "text": "Run normal, unavailable, and fallback paths on one sample; pass only when valid-clean and provider-failure states are distinguishable.",
+                "covers": ["next_commitment"],
+                "delta_ids": ["next-gate"],
+                "item_refs": ["degradation-policy"]
+              }
+            ],
+            "all_prior_item_ids": ["prior-provider-choice", "prior-editor-ui"],
+            "all_work_stream_ids": ["evaluation-runner", "provider-comparison"],
+            "appendix": {
+              "prior_item_ids": ["prior-provider-choice", "prior-editor-ui"],
+              "work_stream_ids": ["evaluation-runner", "provider-comparison"],
+              "claim_evidence": [
+                {"claim_id": "judgment", "label": "evaluation signal boundary", "evidence_refs": ["raw:comparison"]},
+                {"claim_id": "variance-decision", "label": "provider degradation decision", "evidence_refs": ["raw:provider-risk"]},
+                {"claim_id": "next-commitment", "label": "degradation acceptance gate", "evidence_refs": ["weekly:proposal"]}
+              ]
+            }
+          },
+          {
+            "name": "maintenance-noise",
+            "management_model": {
+              "goal_state": "Evaluation signal advanced but remains provider-dependent.",
+              "actual_change": "A controlled comparison exposed false-clean fallback behavior.",
+              "material_variance": "Provider selection was reframed as degradation policy.",
+              "decision_or_support": "Choose fail-loud or visibly degraded fallback.",
+              "next_commitment": "Close the degradation policy with a pass/fail run.",
+              "confidence_boundary": "Signal gap is verified; editor usefulness remains unverified.",
+              "required_delta_ids": ["eval-signal", "provider-decision", "next-gate"]
+            },
+            "body_required_item_ids": ["provider-risk"],
+            "body_blocks": [
+              {
+                "id": "judgment",
+                "text": "Evaluation now exposes real signal, but the result is still load-bearing on one provider and editor usefulness remains unverified.",
+                "covers": ["goal_state", "actual_change", "confidence_boundary"],
+                "delta_ids": ["eval-signal"],
+                "item_refs": ["evaluation-goal"]
+              },
+              {
+                "id": "variance-decision",
+                "text": "The provider question changed from model ranking to failure semantics: decide whether unavailable quality should fail loudly or return a visibly degraded result.",
+                "covers": ["material_variance", "decision_or_support"],
+                "delta_ids": ["provider-decision"],
+                "item_refs": ["provider-risk"]
+              },
+              {
+                "id": "next-commitment",
+                "text": "Run normal, unavailable, and fallback paths on one sample; pass only when valid-clean and provider-failure states are distinguishable.",
+                "covers": ["next_commitment"],
+                "delta_ids": ["next-gate"],
+                "item_refs": ["degradation-policy"]
+              }
+            ],
+            "all_prior_item_ids": ["prior-provider-choice", "prior-editor-ui"],
+            "all_work_stream_ids": [
+              "evaluation-runner",
+              "provider-comparison",
+              "maintenance-01",
+              "maintenance-02",
+              "maintenance-03",
+              "maintenance-04",
+              "maintenance-05",
+              "maintenance-06",
+              "maintenance-07",
+              "maintenance-08",
+              "maintenance-09",
+              "maintenance-10",
+              "maintenance-11",
+              "maintenance-12",
+              "maintenance-13",
+              "maintenance-14",
+              "maintenance-15",
+              "maintenance-16",
+              "maintenance-17",
+              "maintenance-18",
+              "maintenance-19",
+              "maintenance-20"
+            ],
+            "appendix": {
+              "prior_item_ids": ["prior-provider-choice", "prior-editor-ui"],
+              "work_stream_ids": [
+                "evaluation-runner",
+                "provider-comparison",
+                "maintenance-01",
+                "maintenance-02",
+                "maintenance-03",
+                "maintenance-04",
+                "maintenance-05",
+                "maintenance-06",
+                "maintenance-07",
+                "maintenance-08",
+                "maintenance-09",
+                "maintenance-10",
+                "maintenance-11",
+                "maintenance-12",
+                "maintenance-13",
+                "maintenance-14",
+                "maintenance-15",
+                "maintenance-16",
+                "maintenance-17",
+                "maintenance-18",
+                "maintenance-19",
+                "maintenance-20"
+              ],
+              "claim_evidence": [
+                {"claim_id": "judgment", "label": "evaluation signal boundary", "evidence_refs": ["raw:comparison"]},
+                {"claim_id": "variance-decision", "label": "provider degradation decision", "evidence_refs": ["raw:provider-risk"]},
+                {"claim_id": "next-commitment", "label": "degradation acceptance gate", "evidence_refs": ["weekly:proposal"]}
+              ]
+            }
+          },
+          {
+            "name": "evidence-expansion",
+            "management_model": {
+              "goal_state": "Evaluation signal advanced but remains provider-dependent.",
+              "actual_change": "A controlled comparison exposed false-clean fallback behavior.",
+              "material_variance": "Provider selection was reframed as degradation policy.",
+              "decision_or_support": "Choose fail-loud or visibly degraded fallback.",
+              "next_commitment": "Close the degradation policy with a pass/fail run.",
+              "confidence_boundary": "Signal gap is verified; editor usefulness remains unverified.",
+              "required_delta_ids": ["eval-signal", "provider-decision", "next-gate"]
+            },
+            "body_required_item_ids": ["provider-risk"],
+            "body_blocks": [
+              {
+                "id": "judgment",
+                "text": "Evaluation now exposes real signal, but the result is still load-bearing on one provider and editor usefulness remains unverified.",
+                "covers": ["goal_state", "actual_change", "confidence_boundary"],
+                "delta_ids": ["eval-signal"],
+                "item_refs": ["evaluation-goal"]
+              },
+              {
+                "id": "variance-decision",
+                "text": "The provider question changed from model ranking to failure semantics: decide whether unavailable quality should fail loudly or return a visibly degraded result.",
+                "covers": ["material_variance", "decision_or_support"],
+                "delta_ids": ["provider-decision"],
+                "item_refs": ["provider-risk"]
+              },
+              {
+                "id": "next-commitment",
+                "text": "Run normal, unavailable, and fallback paths on one sample; pass only when valid-clean and provider-failure states are distinguishable.",
+                "covers": ["next_commitment"],
+                "delta_ids": ["next-gate"],
+                "item_refs": ["degradation-policy"]
+              }
+            ],
+            "all_prior_item_ids": ["prior-provider-choice", "prior-editor-ui"],
+            "all_work_stream_ids": ["evaluation-runner", "provider-comparison"],
+            "appendix": {
+              "prior_item_ids": ["prior-provider-choice", "prior-editor-ui"],
+              "work_stream_ids": ["evaluation-runner", "provider-comparison"],
+              "claim_evidence": [
+                {"claim_id": "judgment", "label": "evaluation signal boundary", "evidence_refs": ["raw:comparison", "artifact:gpt-output", "artifact:fallback-output"]},
+                {"claim_id": "variance-decision", "label": "provider degradation decision", "evidence_refs": ["raw:provider-risk"]},
+                {"claim_id": "next-commitment", "label": "degradation acceptance gate", "evidence_refs": ["weekly:proposal"]}
+              ]
+            }
+          },
+          {
+            "name": "material-risk",
+            "management_model": {
+              "goal_state": "Evaluation signal advanced but deployment can still invalidate it.",
+              "actual_change": "A controlled comparison exposed false-clean fallback behavior.",
+              "material_variance": "Provider selection was reframed and deployment configuration is unverified.",
+              "decision_or_support": "Choose degradation semantics and verify the deployed endpoint.",
+              "next_commitment": "Close provider and deployment gates with pass/fail runs.",
+              "confidence_boundary": "Local signal is verified; deployed behavior remains unverified.",
+              "required_delta_ids": ["eval-signal", "provider-decision", "deployment-risk", "next-gate"]
+            },
+            "body_required_item_ids": ["provider-risk", "deployment-risk"],
+            "body_blocks": [
+              {
+                "id": "judgment",
+                "text": "Evaluation exposes real local signal, but provider fallback and an unverified deployed endpoint can still invalidate the production result.",
+                "covers": ["goal_state", "actual_change", "confidence_boundary"],
+                "delta_ids": ["eval-signal"],
+                "item_refs": ["evaluation-goal"]
+              },
+              {
+                "id": "variance-decision",
+                "text": "Decide the degradation policy and verify the deployed endpoint before treating the quality gate as production-safe.",
+                "covers": ["material_variance", "decision_or_support"],
+                "delta_ids": ["provider-decision", "deployment-risk"],
+                "item_refs": ["provider-risk", "deployment-risk"]
+              },
+              {
+                "id": "next-commitment",
+                "text": "Pass only when provider-failure states are distinguishable and the deployed endpoint completes the same acceptance run.",
+                "covers": ["next_commitment"],
+                "delta_ids": ["next-gate"],
+                "item_refs": ["degradation-policy", "deployment-check"]
+              }
+            ],
+            "all_prior_item_ids": ["prior-provider-choice", "prior-editor-ui"],
+            "all_work_stream_ids": ["evaluation-runner", "provider-comparison", "deployment-check"],
+            "appendix": {
+              "prior_item_ids": ["prior-provider-choice", "prior-editor-ui"],
+              "work_stream_ids": ["evaluation-runner", "provider-comparison", "deployment-check"],
+              "claim_evidence": [
+                {"claim_id": "judgment", "label": "evaluation and deployment boundary", "evidence_refs": ["raw:comparison", "raw:deployment-gap"]},
+                {"claim_id": "variance-decision", "label": "provider and deployment decision", "evidence_refs": ["raw:provider-risk", "raw:deployment-gap"]},
+                {"claim_id": "next-commitment", "label": "combined acceptance gate", "evidence_refs": ["weekly:proposal"]}
+              ]
+            }
+          },
+          {
+            "name": "dense-week",
+            "management_model": {
+              "goal_state": "Three independent goal lanes advanced with separate remaining gates.",
+              "actual_change": "Evaluation, runtime reliability, and registry integrity each changed.",
+              "material_variance": "Provider choice was replanned and two critical repairs displaced planned work.",
+              "decision_or_support": "Choose degradation policy and schedule production acceptance.",
+              "next_commitment": "Close each independent gate with explicit acceptance.",
+              "confidence_boundary": "Mechanisms are verified while production effects remain partly open.",
+              "required_delta_ids": ["goal-state", "evaluation-change", "runtime-change", "registry-change", "variance", "decision", "next-gates"]
+            },
+            "body_required_item_ids": ["provider-risk", "runtime-risk", "registry-risk"],
+            "body_blocks": [
+              {
+                "id": "dense-judgment",
+                "text": "Three independent goal lanes advanced; mechanism evidence is strong while production acceptance remains incomplete.",
+                "covers": ["goal_state", "confidence_boundary"],
+                "delta_ids": ["goal-state"],
+                "item_refs": ["evaluation-goal", "runtime-goal", "registry-goal"]
+              },
+              {
+                "id": "evaluation-change",
+                "text": "Evaluation exposed a provider-dependent signal boundary that changes the quality-gate decision.",
+                "covers": ["actual_change"],
+                "delta_ids": ["evaluation-change"],
+                "item_refs": ["provider-risk"]
+              },
+              {
+                "id": "runtime-change",
+                "text": "Previously silent configuration and binding failures now surface or degrade without stopping the full run.",
+                "covers": ["actual_change"],
+                "delta_ids": ["runtime-change"],
+                "item_refs": ["runtime-risk"]
+              },
+              {
+                "id": "registry-change",
+                "text": "Registry rebuild now reflects canonical episode state instead of accumulating stale contributions.",
+                "covers": ["actual_change"],
+                "delta_ids": ["registry-change"],
+                "item_refs": ["registry-risk"]
+              },
+              {
+                "id": "dense-variance-decision",
+                "text": "Provider selection was replanned around failure semantics; choose the degradation policy and schedule the three production acceptance runs.",
+                "covers": ["material_variance", "decision_or_support"],
+                "delta_ids": ["variance", "decision"],
+                "item_refs": ["provider-risk", "runtime-risk", "registry-risk"]
+              },
+              {
+                "id": "dense-next",
+                "text": "Close provider degradation, runtime negative-path, and registry rerun gates independently; each needs an observed pass.",
+                "covers": ["next_commitment"],
+                "delta_ids": ["next-gates"],
+                "item_refs": ["provider-gate", "runtime-gate", "registry-gate"]
+              }
+            ],
+            "all_prior_item_ids": ["prior-provider-choice", "prior-editor-ui", "prior-registry-doc"],
+            "all_work_stream_ids": ["evaluation", "runtime", "registry", "cost", "observability", "maintenance"],
+            "appendix": {
+              "prior_item_ids": ["prior-provider-choice", "prior-editor-ui", "prior-registry-doc"],
+              "work_stream_ids": ["evaluation", "runtime", "registry", "cost", "observability", "maintenance"],
+              "claim_evidence": [
+                {"claim_id": "dense-judgment", "label": "three-lane state", "evidence_refs": ["raw:weekly"]},
+                {"claim_id": "evaluation-change", "label": "evaluation boundary", "evidence_refs": ["raw:evaluation"]},
+                {"claim_id": "runtime-change", "label": "runtime reliability", "evidence_refs": ["raw:runtime"]},
+                {"claim_id": "registry-change", "label": "registry integrity", "evidence_refs": ["raw:registry"]},
+                {"claim_id": "dense-variance-decision", "label": "replan and decision", "evidence_refs": ["raw:decision"]},
+                {"claim_id": "dense-next", "label": "acceptance gates", "evidence_refs": ["weekly:proposal"]}
+              ]
+            }
+          }
+        ]
+      },
+      "expected_behavior": "Brief compression follows management information gain: maintenance and extra evidence expand only the appendix, material risk changes the body, and every body block carries a unique decision delta."
+    },
+    {
       "id": "decision-replay-unsafe-slug-rejected",
       "execution": {
         "kind": "unsafe-slug"

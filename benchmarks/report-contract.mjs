@@ -20,6 +20,24 @@ const RESULT_CHART_TYPES = new Set([
 ]);
 
 const MATURITY_STATES = new Set(['yes', 'partial', 'no', 'not_applicable']);
+const GOAL_CONFIDENCE = new Set(['confirmed', 'inferred', 'unknown']);
+const GOAL_STATUSES = new Set(['met', 'advanced', 'blocked', 'replanned', 'not_started']);
+const COMMITMENT_STATES = new Set(['confirmed', 'proposed']);
+const GOAL_SOURCE_CONFIDENCE = new Map([
+  ['current_request', 'confirmed'],
+  ['previous_weekly', 'confirmed'],
+  ['goal_artifact', 'confirmed'],
+  ['raw_inference', 'inferred'],
+  ['unknown', 'unknown'],
+]);
+const MANAGEMENT_FIELDS = new Set([
+  'goal_state',
+  'actual_change',
+  'material_variance',
+  'decision_or_support',
+  'next_commitment',
+  'confidence_boundary',
+]);
 const DIRECT_VALIDATION_KINDS = new Set(['test', 'smoke_test', 'benchmark', 'observed', 'recorded']);
 const SERIES_CHART_TYPES = new Set(['distribution_chart', 'trend_chart', 'timeline_chart', 'waterfall_chart']);
 const MAX_NARRATIVE_CHARACTERS = 600;
@@ -387,7 +405,7 @@ export function validateReportContract(fixture) {
     assert(typeof group.judgment === 'string' && group.judgment.trim(), `${fixture.id}: missing group judgment`);
 
     const headlines = Array.isArray(group.headlines) ? group.headlines : [];
-    assert(headlines.length >= 1 && headlines.length <= 4, `${fixture.id}: headline count must be 1-4 per group`);
+    assert(headlines.length >= 1, `${fixture.id}: report has no material changes`);
     const portfolio = Array.isArray(group.portfolio) ? group.portfolio : [];
     const covered = new Set([...headlines, ...portfolio]);
     for (const stream of group.all_streams || []) {
@@ -395,8 +413,6 @@ export function validateReportContract(fixture) {
     }
 
     const targets = Array.isArray(group.next_closure_targets) ? group.next_closure_targets : [];
-    assert(targets.length >= 2 && targets.length <= 4, `${fixture.id}: closure target count must be 2-4 per group`);
-
     if (output.format === 'slides') {
       for (const target of targets) {
         assert(target && typeof target === 'object' && !Array.isArray(target), `${fixture.id}: slide closure target must be structured`);
@@ -417,6 +433,255 @@ export function validateReportContract(fixture) {
 
   if (output.scope === 'all') {
     assert(groups.length >= 2, `${fixture.id}: all scope must preserve separate groups`);
+  }
+}
+
+function validateGoalLoopOutput(fixture, output) {
+  const groups = Array.isArray(output.groups) ? output.groups : [];
+  assert(groups.length > 0, `${fixture.id}: no reporting groups`);
+
+  for (const group of groups) {
+    assert(nonEmptyString(group.name), `${fixture.id}: missing group name`);
+    const goals = Array.isArray(group.goals) ? group.goals : [];
+    assert(goals.length > 0, `${fixture.id}: ${group.name} has no goal lane`);
+    const goalIds = new Set();
+    for (const goal of goals) {
+      assert(nonEmptyString(goal.id), `${fixture.id}: goal id is missing`);
+      assert(!goalIds.has(goal.id), `${fixture.id}: duplicate goal ${goal.id}`);
+      goalIds.add(goal.id);
+      assert(nonEmptyString(goal.statement), `${fixture.id}: ${goal.id} statement is missing`);
+      assert(GOAL_CONFIDENCE.has(goal.confidence), `${fixture.id}: ${goal.id} confidence is invalid`);
+      assert(GOAL_STATUSES.has(goal.status), `${fixture.id}: ${goal.id} status is invalid`);
+      assert(COMMITMENT_STATES.has(goal.commitment_state), `${fixture.id}: ${goal.id} commitment state is invalid`);
+      assert(nonEmptyString(goal.closure_criterion), `${fixture.id}: ${goal.id} closure criterion is missing`);
+      const sourceKind = goal.source?.kind;
+      assert(GOAL_SOURCE_CONFIDENCE.has(sourceKind), `${fixture.id}: ${goal.id} source is invalid`);
+      const expectedConfidence = sourceKind === 'previous_weekly' && goal.commitment_state === 'proposed'
+        ? 'inferred'
+        : GOAL_SOURCE_CONFIDENCE.get(sourceKind);
+      assert(
+        goal.confidence === expectedConfidence,
+        `${fixture.id}: ${goal.id} confidence contradicts its source`,
+      );
+    }
+
+    const priorCommitments = Array.isArray(group.prior_commitments) ? group.prior_commitments : [];
+    for (const item of priorCommitments) {
+      assert(nonEmptyString(item.statement), `${fixture.id}: prior commitment statement is missing`);
+      assert(COMMITMENT_STATES.has(item.commitment_state), `${fixture.id}: prior commitment state is invalid`);
+      assert(GOAL_STATUSES.has(item.status), `${fixture.id}: prior commitment status is invalid`);
+      assert(goalIds.has(item.goal_id), `${fixture.id}: prior commitment references unknown goal ${item.goal_id}`);
+      assert(nonEmptyString(item.reason), `${fixture.id}: prior commitment reason is missing`);
+    }
+
+    const changes = Array.isArray(group.material_changes) ? group.material_changes : [];
+    const changeIds = new Set();
+    for (const change of changes) {
+      assert(nonEmptyString(change.id), `${fixture.id}: material change id is missing`);
+      assert(!changeIds.has(change.id), `${fixture.id}: duplicate material change ${change.id}`);
+      changeIds.add(change.id);
+      const linkedGoals = Array.isArray(change.goal_ids) ? change.goal_ids : [];
+      assert(
+        linkedGoals.length > 0 || change.variance?.kind === 'unplanned',
+        `${fixture.id}: ${change.id} is neither goal-linked nor explicitly unplanned`,
+      );
+      for (const goalId of linkedGoals) {
+        assert(goalIds.has(goalId), `${fixture.id}: ${change.id} references unknown goal ${goalId}`);
+      }
+      if (change.variance?.kind === 'replanned') {
+        for (const field of ['prior_direction', 'trigger', 'reason', 'new_direction']) {
+          assert(nonEmptyString(change.variance[field]), `${fixture.id}: ${change.id} replan ${field} is missing`);
+        }
+      }
+    }
+
+    const portfolio = new Set(Array.isArray(group.portfolio) ? group.portfolio : []);
+    for (const changeId of group.all_changes || []) {
+      assert(changeIds.has(changeId) || portfolio.has(changeId), `${fixture.id}: uncovered change ${changeId}`);
+    }
+
+    const nextCommitments = Array.isArray(group.next_commitments) ? group.next_commitments : [];
+    for (const item of nextCommitments) {
+      assert(nonEmptyString(item.statement), `${fixture.id}: next commitment statement is missing`);
+      assert(COMMITMENT_STATES.has(item.commitment_state), `${fixture.id}: next commitment state is invalid`);
+      assert(nonEmptyString(item.closure_criterion), `${fixture.id}: next commitment criterion is missing`);
+    }
+
+    if (fixture.fixture?.expected_min_goal_lanes) {
+      assert(
+        goals.length >= fixture.fixture.expected_min_goal_lanes,
+        `${fixture.id}: unrelated projects were forced into one goal lane`,
+      );
+    }
+
+    const narrative = String(group.narrative || '');
+    if (goals.some((goal) => goal.confidence !== 'confirmed')) {
+      assert(!/(原定目标|本周承诺|confirmed goal)/i.test(narrative), `${fixture.id}: uncertain goal uses confirmed language`);
+    }
+  }
+
+  if (output.scope === 'work') {
+    assert.deepEqual(groups.map((group) => group.name), ['work'], `${fixture.id}: work scope must contain only work`);
+    const serialized = JSON.stringify(output).toLowerCase();
+    for (const forbidden of fixture.fixture?.forbidden_terms || []) {
+      assert(!serialized.includes(String(forbidden).toLowerCase()), `${fixture.id}: work output leaked ${forbidden}`);
+    }
+  }
+}
+
+export function validateWeeklyGoalLoopContract(fixture) {
+  const outputs = fixture.fixture?.candidate_outputs
+    || [fixture.fixture?.candidate_output];
+  assert(outputs.every(Boolean), `${fixture.id}: goal-loop candidate output is missing`);
+  for (const output of outputs) validateGoalLoopOutput(fixture, output);
+
+  if (fixture.fixture?.expected_distinct_rankings) {
+    const rankings = outputs.map((output) => output.groups[0].material_changes.map((change) => change.id).join('|'));
+    assert(new Set(rankings).size === rankings.length, `${fixture.id}: different goals produced the same change ranking`);
+  }
+
+  if (fixture.fixture?.expected_distinct_narratives) {
+    const narratives = outputs.map((output) => normalizeNarrativeText(output.groups[0].narrative));
+    assert(new Set(narratives).size === narratives.length, `${fixture.id}: different goals produced the same management meaning`);
+  }
+
+  for (const [changeId, closureType] of Object.entries(fixture.fixture?.expected_change_closure_types || {})) {
+    const changes = outputs.flatMap((output) => output.groups.flatMap((group) => group.material_changes || []));
+    assert(
+      changes.some((change) => change.id === changeId && change.closure_type === closureType),
+      `${fixture.id}: ${changeId} did not preserve closure type ${closureType}`,
+    );
+  }
+
+  for (const expected of fixture.fixture?.expected_prior_statements || []) {
+    const accounted = outputs[0].groups.flatMap((group) => group.prior_commitments || []);
+    assert(accounted.some((item) => item.statement === expected), `${fixture.id}: prior commitment disappeared: ${expected}`);
+  }
+}
+
+function validateBriefCompressionOutput(fixture, output) {
+  assert(nonEmptyString(output.name), `${fixture.id}: compression output name is missing`);
+  const model = output.management_model || {};
+  for (const field of MANAGEMENT_FIELDS) {
+    assert(nonEmptyString(model[field]), `${fixture.id}:${output.name}: management model ${field} is missing`);
+  }
+
+  const requiredDeltaIds = new Set(model.required_delta_ids || []);
+  assert(requiredDeltaIds.size > 0, `${fixture.id}:${output.name}: required management deltas are missing`);
+  const bodyBlocks = Array.isArray(output.body_blocks) ? output.body_blocks : [];
+  assert(bodyBlocks.length > 0, `${fixture.id}:${output.name}: brief body is empty`);
+  const coveredFields = new Set();
+  const deltaCounts = new Map();
+  const bodyItemRefs = new Set();
+  const blockIds = new Set();
+  for (const block of bodyBlocks) {
+    assert(nonEmptyString(block.id), `${fixture.id}:${output.name}: body block id is missing`);
+    assert(!blockIds.has(block.id), `${fixture.id}:${output.name}: duplicate body block ${block.id}`);
+    blockIds.add(block.id);
+    assert(nonEmptyString(block.text), `${fixture.id}:${output.name}:${block.id}: body text is missing`);
+    assert(!/(^|\n)\s*\|.+\|\s*(\n|$)/.test(block.text), `${fixture.id}:${output.name}:${block.id}: body contains a table`);
+    assert(!containsForbiddenMainDeckReference(block.text), `${fixture.id}:${output.name}:${block.id}: body leaks provenance`);
+    const covers = Array.isArray(block.covers) ? block.covers : [];
+    assert(covers.length > 0, `${fixture.id}:${output.name}:${block.id}: body block changes no management field`);
+    for (const field of covers) {
+      assert(MANAGEMENT_FIELDS.has(field), `${fixture.id}:${output.name}:${block.id}: invalid management field ${field}`);
+      coveredFields.add(field);
+    }
+    const deltaIds = Array.isArray(block.delta_ids) ? block.delta_ids : [];
+    assert(deltaIds.length > 0, `${fixture.id}:${output.name}:${block.id}: body block has no decision delta`);
+    for (const deltaId of deltaIds) {
+      assert(requiredDeltaIds.has(deltaId), `${fixture.id}:${output.name}:${block.id}: non-required delta ${deltaId} entered the body`);
+      deltaCounts.set(deltaId, (deltaCounts.get(deltaId) || 0) + 1);
+    }
+    for (const itemRef of block.item_refs || []) bodyItemRefs.add(itemRef);
+  }
+  assert.deepEqual(coveredFields, MANAGEMENT_FIELDS, `${fixture.id}:${output.name}: body cannot reconstruct the management model`);
+  for (const deltaId of requiredDeltaIds) {
+    assert(deltaCounts.get(deltaId) === 1, `${fixture.id}:${output.name}: decision delta ${deltaId} is missing or repeated`);
+  }
+  for (const block of bodyBlocks) {
+    assert(
+      block.delta_ids.some((deltaId) => deltaCounts.get(deltaId) === 1),
+      `${fixture.id}:${output.name}:${block.id}: block fails the counterfactual deletion test`,
+    );
+  }
+  for (const itemId of output.body_required_item_ids || []) {
+    assert(bodyItemRefs.has(itemId), `${fixture.id}:${output.name}: material item ${itemId} exists only in the appendix`);
+  }
+
+  const appendix = output.appendix || {};
+  const priorItems = new Set(appendix.prior_item_ids || []);
+  for (const itemId of output.all_prior_item_ids || []) {
+    assert(priorItems.has(itemId), `${fixture.id}:${output.name}: prior item ${itemId} is missing from the appendix`);
+  }
+  const workStreams = new Set(appendix.work_stream_ids || []);
+  for (const streamId of output.all_work_stream_ids || []) {
+    assert(workStreams.has(streamId), `${fixture.id}:${output.name}: work stream ${streamId} is missing from the appendix`);
+  }
+
+  const claimEvidence = Array.isArray(appendix.claim_evidence) ? appendix.claim_evidence : [];
+  const evidenceByClaim = new Map(claimEvidence.map((claim) => [claim.claim_id, claim]));
+  for (const block of bodyBlocks) {
+    const claim = evidenceByClaim.get(block.id);
+    assert(claim, `${fixture.id}:${output.name}:${block.id}: body claim has no appendix evidence mapping`);
+    assert(nonEmptyString(claim.label), `${fixture.id}:${output.name}:${block.id}: evidence label is missing`);
+    assert(nonEmptyStringArray(claim.evidence_refs), `${fixture.id}:${output.name}:${block.id}: evidence refs are missing`);
+    assert(
+      normalizeNarrativeText(claim.label) !== normalizeNarrativeText(block.text),
+      `${fixture.id}:${output.name}:${block.id}: appendix repeats the body narrative`,
+    );
+  }
+}
+
+function compressionBodyFingerprint(output) {
+  return output.body_blocks.map((block) => `${block.id}:${normalizeNarrativeText(block.text)}`).join('|');
+}
+
+function appendixSignalCount(output) {
+  const appendix = output.appendix || {};
+  return (appendix.prior_item_ids || []).length
+    + (appendix.work_stream_ids || []).length
+    + (appendix.claim_evidence || []).reduce((total, claim) => total + (claim.evidence_refs || []).length, 0);
+}
+
+export function validateWeeklyBriefCompressionContract(fixture) {
+  const outputs = fixture.fixture?.candidate_outputs || [];
+  assert(outputs.length > 0, `${fixture.id}: compression candidates are missing`);
+  const byName = new Map();
+  for (const output of outputs) {
+    validateBriefCompressionOutput(fixture, output);
+    assert(!byName.has(output.name), `${fixture.id}: duplicate compression output ${output.name}`);
+    byName.set(output.name, output);
+  }
+
+  for (const [baselineName, variantName] of fixture.fixture?.expected_same_body_pairs || []) {
+    const baseline = byName.get(baselineName);
+    const variant = byName.get(variantName);
+    assert(baseline && variant, `${fixture.id}: unknown same-body comparison`);
+    assert.equal(
+      compressionBodyFingerprint(variant),
+      compressionBodyFingerprint(baseline),
+      `${fixture.id}: ${variantName} changed the body without changing management meaning`,
+    );
+  }
+  for (const [baselineName, variantName] of fixture.fixture?.expected_different_body_pairs || []) {
+    const baseline = byName.get(baselineName);
+    const variant = byName.get(variantName);
+    assert(baseline && variant, `${fixture.id}: unknown different-body comparison`);
+    assert.notEqual(
+      compressionBodyFingerprint(variant),
+      compressionBodyFingerprint(baseline),
+      `${fixture.id}: ${variantName} failed to surface a management change`,
+    );
+  }
+  for (const [baselineName, variantName] of fixture.fixture?.expected_appendix_growth_pairs || []) {
+    const baseline = byName.get(baselineName);
+    const variant = byName.get(variantName);
+    assert(baseline && variant, `${fixture.id}: unknown appendix-growth comparison`);
+    assert(
+      appendixSignalCount(variant) > appendixSignalCount(baseline),
+      `${fixture.id}: ${variantName} did not preserve added accountability or evidence in the appendix`,
+    );
   }
 }
 

@@ -43,8 +43,11 @@ personal -> personal projects only
 all      -> separate group narratives in one private view
 ```
 
-Partition happens before headline selection. Each group normally gets three
-headline arcs and a portfolio containing every other meaningful stream.
+Partition happens before selection. Weekly then resolves goal sources and
+accounts for actual change, variance, and next commitments without forcing a
+headline count. Its brief body keeps only information that changes management
+judgment, action, or confidence; accountability, coverage, and provenance stay
+in the appendix.
 
 ## Reuse Map
 

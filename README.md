@@ -82,8 +82,9 @@ Daily、Weekly、Monthly 必须先分区，再选择主线：
 - `personal`：只包含个人项目。
 - `all`：私人全景视图，各组分别拥有自己的判断和 headline。
 
-默认三条 headline 的预算按分组计算，不是整个 vault 共用。其余有意义的工作会保留
-在组合状态中，不会因为没有进入 headline 而消失。
+Weekly 会在每个分组内先恢复目标来源，再解释实际变化、偏差和下周承诺，不固定
+headline 数量。Brief 正文只保留会改变管理判断的信息，完整承诺、工作组合与证据
+进入附录；其余有意义的工作不会因为没有进入正文而消失。
 
 从 0.2 升级时，尚未配置 `reporting_group` 的项目会成为 `unassigned`，并出于安全
 原因被 scoped report 排除。请在每个项目中运行一次

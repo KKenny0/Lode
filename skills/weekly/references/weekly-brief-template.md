@@ -11,10 +11,15 @@ When coverage is thin or git-only, keep the main sections short, mark affected
 arcs `limited`, and avoid padding with architecture detail that the evidence
 does not support.
 
+The body is the minimum information needed to reconstruct the management
+judgment. Before keeping a body block, ask whether removing it would change the
+reader's judgment, action, or confidence. Move accountability, coverage, and
+provenance to the appendix. Do not use a fixed length or item count.
+
 For no-vault or local first-run conversation output, prefer the compact shape
-in `SKILL.md` (判断 / 主线 / 其他 / 证据边界). Label scope `local` when the
-current repo is unassigned under implicit scope; never present that lane as
-`work`.
+in `SKILL.md` (目标与判断 / 目标推进 / 偏差与决策 / 下周承诺 /
+证据边界). Label scope `local` when the current repo is unassigned under
+implicit scope; never present that lane as `work`.
 
 ```markdown
 # YYYY-WNN 工作汇报
@@ -22,63 +27,71 @@ current repo is unassigned under implicit scope; never present that lane as
 **日期：** YYYY-MM-DD ~ YYYY-MM-DD
 **范围：** work | personal | all
 
-## 本周判断
+## 本周目标与判断
 
-{One paragraph that a manager can repeat: starting situation, main movement,
-current state, and the most important remaining gate.}
+{State the confirmed goal, inferred direction with its boundary, or
+`目标未记录`. Then give one repeatable judgment covering actual change,
+material variance, current decision, and largest remaining gate.}
 
-## 结果弧线
+## 关键推进
 
-### {O1 headline}
+### {conclusion-led management change}
 
-- **周初约束：** {starting constraint}
-- **关键转折：** {decisive movement or choice}
-- **周末状态：** {observable end state}
-- **管理意义：** {why it matters}
+- **实际变化：** {observable change}
+- **管理意义：** {why it changes the goal state or management judgment}
 - **剩余门槛：** {what is not closed}
-- **证据边界：** {verified | recorded | limited}
 
-{Repeat for normally three, and no more than four, headline arcs.}
+Show an evidence boundary here only when the claim is `limited`, conflicting,
+or expected-only. Verified provenance stays in the appendix. Repeat only when
+another independent change survives the counterfactual deletion test. Multiple
+activities that prove one conclusion stay together.
 
-## 工作组合状态
+## 偏差与决策
 
-| 工作主线 | 状态 | 本周形成的变化 | 与主线关系 | 需要关注 |
-|----------|------|----------------|------------|----------|
-| {stream} | {status} | {bounded change} | headline / supporting / portfolio | {gate or none} |
+- **{blocked | replanned | unplanned | decision | support}:** {only the
+  information whose removal would change judgment, action, or confidence}
 
-Every meaningful stream must appear either above or in this table.
+When none exists, write `本周没有需要升级的重要偏差、决策或协作事项。`
 
-## 下周收口目标
+## 下周承诺
 
-1. **{closure target}:** {specific uncertainty or acceptance gate to close}
-2. ...
+- **{commitment}:** {specific pass/fail closure criterion} ·
+  {confirmed | proposed}
 
-Use two to four targets, normally three. Do not list every task.
-
-## 需要决策或协作
-
-- {decision, resource, or cross-team dependency}
-
-When none exists, write `当前无需要升级的决策或协作事项。`
+Do not force a count or list every task. A report proposal must remain
+`proposed` until the user or another explicit source confirms it.
 
 ---
 
-## 附录：主张—证据映射
+## 附录
 
-| 主张 | 表述 | 证据 | 核验说明 |
-|------|------|------|----------|
-| O1 | {headline claim} | E1, E2 | {why the evidence grade is justified} |
-| W1 | {stream claim} | E1 | {scope/status support} |
-| D1 | {decision/trade-off} | E3 | explicit / inferred |
+### 目标与上期事项账本
 
-### Evidence index
+| 事项 | 来源与性质 | 本周状态 | 收口条件或原因 |
+|------|------------|----------|----------------|
+| {goal or prior item} | {source} · {confirmed | inferred | unknown} · {confirmed | proposed} | {met | advanced | blocked | replanned | not_started} | {criterion or reason} |
 
-| ID | 来源类型 | 引用 |
-|----|----------|------|
-| E1 | raw entry | {timestamp + summary or stable reference} |
+Include every goal and every prior-period item. Omit prior rows only when no
+previous Weekly item exists.
+
+### 工作组合
+
+| 工作主线 | 状态 | 本周形成的变化 | 与目标关系 | 需要关注 |
+|----------|------|----------------|------------|----------|
+| {stream} | {status} | {bounded change} | {goal / unplanned / portfolio} | {gate or none} |
+
+Every meaningful stream must appear in the body or this ledger.
+
+### 主张—证据与覆盖边界
+
+| 正文主张 | 紧凑证据 | 证据边界与缺口 |
+|----------|----------|----------------|
+| {body claim} | {source type + stable reference} | {verified | recorded | limited; remaining gap} |
+
+- **Scope：** {partition and excluded lanes}
+- **Coverage：** {raw coverage and bounded git fallback}
 ```
 
 For `all`, write two complete group sections, such as `公司工作` and
-`个人项目`. Each group gets its own weekly judgment, result arcs, portfolio,
-and next-week closure targets. Use a separate evidence subsection per group so
-work output can be extracted without personal references.
+`个人项目`. Each group gets its own body and appendix so work output can be
+extracted without personal references.

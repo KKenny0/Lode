@@ -17,7 +17,9 @@ Three modes:
 - **quick**: `这周做了啥` / `quick weekly` — 5–7 conversation bullets plus
   carried-forward items; no file write.
 - **brief** (default): `/tracework:weekly` / write the weekly report —
-  management brief.
+  objective-anchored management brief covering actual change, variance, and
+  next commitments. Its body is decision-complete; its appendix preserves
+  accountability, work coverage, and provenance.
 - **slides**: explicit `weekly PPT` / slides wording — 6-10 slide outline for an
   individual contributor reporting within a department.
 
