@@ -28,16 +28,16 @@ Priority when cues conflict: `slides` > `quick` > `brief`.
 | :--- | :--- | :--- | :--- | :--- |
 | `quick` | 这周做了啥, 周报简版, quick weekly, 本周概要 | Conversation 5–7 bullets + carried-forward | No | No |
 | `brief` | 写周报, 周报, /tracework:weekly, weekly brief, 本周总结, weekly report | Management brief | Yes when vault exists; else conversation | No |
-| `slides` | weekly PPT, 周报 PPT, weekly slides, 演示大纲; or PPT/slides only after this skill is already selected for a weekly report | Standalone PPT-ready Markdown Deck, max 8 main slides | Same as brief | Yes |
+| `slides` | weekly PPT, 周报 PPT, weekly slides, 演示大纲; or PPT/slides only after this skill is already selected for a weekly report | Audience-framed PPT-ready Markdown Deck, max 8 main slides; optional editable template-native PPTX when explicitly requested and supported | Same as brief; PPTX is a versioned copy | Yes |
 
 Default is `brief` when the request is a normal weekly report without PPT or
 quick wording. Do not treat bare “PPT” or “slides” alone as a reason to start
 this skill; those words select slides mode only inside an already weekly
 report request.
 
-Slide mode is a presentation projection over the weekly analysis, not a
-paginated copy of the Markdown brief. The default slide audience is an
-individual contributor reporting inside a department to managers and peers.
+Slide mode projects the weekly analysis for one primary audience, occasion, and
+communication job. Do not combine managers, peers, and technical reviewers. If
+the framing question is skipped, default to a five-minute manager decision brief.
 
 ## Progressive References
 
@@ -74,6 +74,7 @@ Defaults:
 - Scope: resolve with First-Run and Local Fallback below. Do not silently force
   unassigned projects into `work`.
 - Mode: as above; default `brief`.
+- Slides framing: user-supplied audience, occasion/duration, decision, and optional PPTX template path; no persistent template registry or style config.
 - Brief/slides file output: `{vault}/Work Diary/Weekly/{YYYY-WNN}.md`, unless
   the user or config provides another path. Write that file only for normal
   scoped group output. Quick mode, no-vault runs, and local first-run stay in
@@ -83,6 +84,10 @@ If the target brief/slides file exists, ask before overwriting unless the user
 requested update, rewrite, or overwrite. If no vault exists, return brief or
 slides content in conversation. Quick mode always stays in conversation.
 Cold-start is optional upgrade copy, never a hard gate.
+
+For an explicitly requested editable PPTX, preserve the template and write a
+versioned copy. Without presentation-editing capability, deliver Markdown and
+state the boundary; never imitate editability with flattened slide images.
 
 ## First-Run and Local Fallback
 
@@ -261,54 +266,39 @@ fixed length or item count.
 
 Skip this entire step for `quick` and `brief`. Run it only for `slides`.
 
-Transform the stable Weekly Analysis and its raw sources into presentation
-content that is independently readable before applying `references/slide-template.md`.
+Transform the stable Weekly Analysis and its raw sources into audience-facing
+presentation content before applying `references/slide-template.md`.
 
-1. State the deck context, overall goal, and management question. Select results
-   for their contribution to that job, not implementation volume.
-2. Group selected results into necessary Stories. State one public `Why` and
-   `Goal` at the start of each Story; these belong to the presentation content,
-   not to production notes.
-3. Apply **Cognitive Task Decomposition** from
-   `references/weekly-analysis-contract.md`. Internally identify only necessary
-   `problem_reframe`, `design_rationale`, `mechanism`, `validation`, and
-   `decision` tasks. Keep their `intended_takeaway` internal.
-4. Apply **Content Materialization** from the same contract. Reopen raw sources
-   and build internal Source Grounding Packets, then turn them into actual
-   presentation content: facts, conflicts, comparisons, Mermaid relationships,
-   tables, numbers, paths, branches, fallbacks, invariants, risks, and gates.
-5. Split only when two content blocks are independent cognitive steps serving
-   the same Story Goal and the second depends on the first. Otherwise merge.
-6. Put only compact claim-to-source mapping in the Evidence Appendix. Do not
-   expose source packets, cognitive roles, intended takeaways, layout
-   instructions, visual-style prescriptions, or production constraints.
-7. Delete any page whose removal does not break a Story Goal. Keep at most
+1. Apply **Audience and Occasion Framing** and **Main-deck Admission** from
+   `references/weekly-analysis-contract.md`; use its default when framing is skipped.
+2. Form the fewest internal Stories and run **Cognitive Task Decomposition**;
+   keep its labels internal and give each retained task one supported claim.
+3. Apply **Source Grounding** and **Content Materialization**. Use the exact
+   commit plus an eligible immutable snapshot; never infer history from a branch
+   or today's `HEAD`. Without a snapshot, narrow to the commit tree or degrade.
+4. Split only for independent supported claims with distinct grounded content
+   and a prerequisite relationship. Otherwise merge. With a template, finish
+   this decision only after native-layout fit.
+5. Use the supported claim as the public title and make the body visibly prove
+   it. Route implementation inventory and provenance to notes or appendix.
+6. Keep only compact claim-to-source mapping in the Evidence Appendix. Hide all
+   authoring and production analysis.
+7. Delete pages whose removal does not change the audience outcome. Keep at most
    eight necessary main slides.
-
-Use these visual routes only in `slides` mode:
-
-| Evidence or mechanism | Visual route |
-|---|---|
-| Comparable algorithm, model, quality, latency, cost, or throughput data | comparison, distribution, trend, timeline, or waterfall chart brief |
-| One reliable number | number card |
-| Architecture, process, ownership, or failure-path change | Before/After diagram |
-| Concurrency, asynchronous stages, or stage collaboration | sequence or swimlane diagram |
-| Data processing, aggregation, or materialized rebuild | data-flow diagram |
-| Provider, model, or strategy dispatch | decision tree |
-| Failure handling and fallback | failure-path diagram |
-| Lifecycle or state transition | state machine |
-| Component responsibility change | architecture relationship diagram |
 
 If data is missing, incomparable, or contradictory, do not invent a chart.
 Use a mechanism or state-change diagram, lower the evidence boundary, expose
 the measurement gap, and name its closure criterion.
 
+For an explicitly requested template-native PPTX, follow the optional contract
+in both slide references. Reuse runtime capability; do not build a renderer.
+
 ### 7. Write
 
 - `quick`: conversation only; see Quick Mode.
 - `brief`: use `weekly-brief-template.md`.
-- `slides`: use `slide-template.md`; the main deck has no minimum and at most
-  eight slides, excluding appendices.
+- `slides`: use `slide-template.md`; emit 1-8 necessary slides with no preset
+  target, or return an evidence-insufficient empty state without a deck file.
 - Keep claim-level evidence in the appendix. Main prose must be readable
   without report-local ids.
 - Preserve risks, unresolved decisions, and evidence gaps.
@@ -418,13 +408,17 @@ coverage in one line; it does not need badges.
 
 ### Slides only
 
-- The main deck has no minimum and never exceeds eight slides.
-- The deck states one thesis and audience decision; slides form a cumulative
-  argument rather than mirror Weekly Analysis fields.
-- Every Story starts once with public Why and Goal, then advances through only
-  the content required to complete that Goal.
-- Titles name the current question, object, mechanism, comparison, or decision
-  gate; they do not leak the internal intended takeaway.
+- Emit 1-8 necessary slides with no preset target; zero admitted candidates
+  produce an empty state rather than a deck file.
+- One primary audience, their prior knowledge, the occasion or duration, the
+  deck job, and the required audience outcome are resolved before slide
+  selection.
+- The deck states one evidence-bounded thesis and audience decision; slides form
+  a cumulative argument rather than mirror Weekly Analysis fields.
+- Story Why/Goal and cognitive roles remain internal authoring logic, not
+  mandatory public headings.
+- Every title states a supported audience-facing claim; the body visibly proves
+  it and keeps the evidence boundary beside the claim.
 - Slides directly contain supported facts, relations, comparisons, mechanisms,
   numbers, boundaries, and risks using Markdown, Mermaid, tables, quotes, or
   concise lists.
@@ -432,17 +426,22 @@ coverage in one line; it does not need badges.
   when the second depends on the facts and trade-offs established by the first.
 - Simple results remain one content page when one Before/After, relation, or
   flow explains root cause, choice, and operation.
-- A fresh reader can understand the Story sequence, Why, Goal, facts, relations,
-  numbers, and risks without a PPT or production instructions.
+- A fresh member of the target audience can state the thesis, confidence
+  boundary, and requested decision or action after a short read without a PPT
+  or production instructions.
 - A maker using only the Markdown Deck can perform visual translation without
   vault research, semantic invention, or a new split decision.
-- Removing any slide breaks its Story Goal or the deck's management question.
+- Removing any slide changes the audience's decision, understanding, or
+  confidence.
 - Charts require comparable evidence; missing or conflicting data stays visible
   without a fabricated chart.
 - Mechanism completion, effect validation, and production acceptance are stated
   separately.
 - Main slides omit commit hashes, source locations, SDK line numbers, and raw
   evidence ids unless the user explicitly requested a technical-review deck.
+- Template-native PPTX pages map to source slides, remain editable, pass rendered
+  checks, preserve the prior version, and survive a scoped revision. Stable jobs
+  keep ids; changed evidence may add, remove, or reorder pages.
 
 ## Anti-Patterns
 
@@ -479,8 +478,9 @@ coverage in one line; it does not need badges.
 - `Audience takeaway`, `Recommended visual form`, `Page composition`,
   `On-slide copy`, `Production constraints`, or page-level Source Grounding
   Packet sections in the public deck.
-- A title or body sentence that directly exposes the internal intended takeaway.
-- Repeating Why or Goal on every slide instead of once per Story.
+- Public Story Why/Goal or cognitive-role scaffolding that the audience would
+  not expect to see in the actual presentation.
+- Topic, question, process, or object-only titles that hide the supported claim.
 - A design slide that only supplies background, history, or option inventory.
 - A mechanism slide that is only a module, field, code, or step list.
 - Two slides that do not perform independent cognitive work.
@@ -488,7 +488,11 @@ coverage in one line; it does not need badges.
   actual claim, node, relationship, number, or risk.
 - Layout, typography, color, card, or diagram-production instructions.
 - A detail slide whose removal changes neither thesis nor audience decision.
-- Topic-only slide titles such as `结果弧线一` or `工作组合状态`.
+- Topic-only slide titles such as `结果弧线一`, `方案怎么跑通`, or
+  `工作组合状态`.
 - Charts without comparable evidence, units, or sample context.
 - Decorative architecture diagrams with only component names and arrows.
+- Ungrounded, wrong-cutoff, target-as-current, or prose-reformatting diagrams.
 - Using a solution-logic diagram as proof of effectiveness.
+- Bundled style galleries, flattened slides, or a custom version database when
+  a user-owned template and versioned files already solve the need.

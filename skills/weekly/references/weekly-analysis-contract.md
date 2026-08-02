@@ -4,9 +4,11 @@ Use after scope partition and evidence gathering for **brief** and **slides**.
 Do not use for **quick**. Analysis runs in the main dialog.
 
 - `brief`: complete the goal loop, then apply **Brief Projection**.
-- `slides`: complete the same goal loop, then form Stories, apply **Cognitive
-  Task Decomposition**, source grounding, and **Content Materialization**. Emit
-  one PPT-ready Markdown Deck.
+- `slides`: complete the same goal loop, then resolve **Audience and Occasion**,
+  apply **Main-deck Admission**, form internal Stories, run **Cognitive Task
+  Decomposition**, source grounding, and **Content Materialization**. Emit one
+  audience-facing PPT-ready Markdown Deck and, only when explicitly requested
+  and supported, an editable template-native PPTX.
 
 Return one analysis object per reporting group:
 
@@ -204,20 +206,60 @@ invariants, remaining boundary, diagram route, and evidence refs. It is an
 optional visual payload, not a requirement for every result and never proof
 that the solution worked.
 
+## Audience and Occasion Framing
+
+**Slides only.** Resolve the communication job before selecting presentation
+content. Keep this as internal analysis rather than another public page schema:
+
+```json
+{
+  "primary_audience": "one role, not managers plus peers plus reviewers",
+  "prior_knowledge": "what this audience can safely be assumed to know",
+  "occasion": "live_brief | async_read | technical_review",
+  "duration": "for example 5 minutes, or unknown",
+  "deck_job": "inform | recommend | decide | request_support | technical_review",
+  "audience_outcome": "the judgment, action, or understanding required",
+  "central_claim": "one evidence-bounded conclusion",
+  "confidence_boundary": "what the evidence does not establish"
+}
+```
+
+Express the communication job in one sentence:
+
+> By the end, **[primary audience]** should **[audience outcome]** because
+> **[central claim within its confidence boundary]**.
+
+If the primary audience or required outcome is missing, ask at most one combined
+question. When skipped, use a non-technical five-minute decision brief for the
+responsible manager or project owner. Never use `reporting_group` alone as the
+audience definition, and do not mix distinct audience roles in one deck.
+
+## Main-deck Admission
+
+**Slides only.** Admit a result only when removing it would change the primary
+audience's decision, understanding, or confidence. Implementation inventory,
+secondary work streams, provenance, and details useful only for technical
+follow-up go to speaker notes or appendix.
+
+Do not admit a result merely because it is effortful, complete, technically
+interesting, or present in Weekly Analysis. The main deck answers the
+communication job; the appendix preserves accountability.
+
 ## Story Formation
 
 **Slides only.** Group selected results into the fewest Stories that give the
 deck a coherent management argument. A Story is a shared objective across one
-or more slides, not a slide type.
+or more slides, not a slide type or mandatory public heading.
 
-For every Story, publish once:
+For every Story, record internally:
 
 - `Why`: the problem, constraint, opportunity, or uncertainty that makes the
   Story necessary;
 - `Goal`: the understanding or question this group of slides must resolve.
 
-Do not repeat Why and Goal on every slide. Do not use a reporting group as proof
-that unrelated results share one Story.
+Do not force Why and Goal into the public Markdown. Their job is to keep the
+claim sequence honest. Do not use a reporting group as proof that unrelated
+results share one Story.
 
 ## Cognitive Task Decomposition
 
@@ -236,10 +278,12 @@ identify only the necessary cognitive tasks:
   explicit evidence gap;
 - `decision`: make the required judgment, support, or next gate unavoidable.
 
-For each temporary task, record an internal `intended_takeaway`, likely source
-locators, the facts or relationship from which a reader should infer it, and
-what prior understanding it needs. Discard tasks that do not advance the Story
-Goal. Never copy `intended_takeaway` into public titles or prose.
+For each temporary task, record an internal `supported_claim`, its evidence
+boundary, likely source locators, the facts or relationship that prove it, and
+the prior understanding it needs. Discard tasks that do not advance the Story
+Goal. A retained `supported_claim` should become the public slide title or be
+combined into another title; do not make the audience infer the conclusion from
+a topic label.
 
 ## Source Grounding
 
@@ -257,6 +301,45 @@ an internal Source Grounding Packet containing:
 Do not expose full packets per page. Preserve only compact claim-to-source
 mapping in the final Evidence Appendix.
 
+### Follow the source chain only as far as the claim requires
+
+Raw entries remain semantic truth for intent, status, and management meaning.
+For a technical explanation, follow their direct locators rather than treating
+the raw summary as code structure:
+
+- a commit diff establishes the implementation delta;
+- an immutable repository snapshot captured within the report cutoff establishes
+  the resulting committed structure;
+- tests or a harness establish only the behavior they exercise;
+- eval or production data establishes observed effect within its sample;
+- a plan or design document establishes target design, not current state.
+
+Resolve a commit repository from `source_refs.path`, then the matching project
+registry entry, then the current repository when it is the same project. A
+commit diff establishes the delta. For the resulting structure, select the
+latest relevant `repository_snapshot` from scoped raw entries whose entry
+timestamp is not later than `as_of`, whose absolute `path` identifies the same
+repository, and whose full object id exists locally. Never derive a historical
+tree from a branch name or substitute today's `HEAD`; branches move and are not
+reproducible evidence.
+
+When combining a commit delta with a later snapshot, use Git's ancestry check to
+confirm that the referenced commit is an ancestor of the snapshot. If that
+relationship cannot be established, keep the sources separate. A snapshot
+represents committed content only; it does not establish staged, unstaged, or
+untracked work.
+
+If no qualified snapshot exists, the referenced commit tree may still support
+wording such as "the structure after this commit", but not "the final structure
+at the weekly cutoff". If the repository, commit, or snapshot cannot be
+resolved, retain the raw-supported claim, mark the code view unavailable, and
+do not manufacture module names, edges, or a current-architecture diagram.
+
+Keep these truth types distinct in wording even when they share a page:
+recorded intent, implemented structure, tested behavior, observed effect, and
+target design. A commit or code diagram never proves quality improvement, and a
+target-design diagram must be visibly described as not yet implemented.
+
 ## Content Materialization
 
 Convert the grounded packet into presentation content itself:
@@ -269,16 +352,45 @@ Convert the grounded packet into presentation content itself:
 - Before/After, Mermaid, Markdown tables, quote blocks, or concise prose;
 - remaining risks, decisions, and pass/fail gates.
 
-Do not specify layout, font, color, cards, regions, or drawing instructions.
-Markdown is the presentation; PPT is its visual translation. If grounded
-content cannot state the needed objects, relations, values, or risks directly,
-supplement evidence, merge, or omit the candidate.
+Do not specify layout, font, color, cards, regions, or drawing instructions in
+the public Markdown. Markdown is the audience-facing semantic presentation,
+not a Production Brief. If grounded content cannot state the needed objects,
+relations, values, or risks directly, supplement evidence, merge, or omit the
+candidate.
+
+### Choose a representation from the evidence shape
+
+First state the concept in plain audience language and, when it materially
+helps, ground it with one minimal example. Then choose the lightest
+representation that makes a supported relationship easier to see:
+
+| Grounded shape | Prefer |
+|---|---|
+| architecture, data flow, module relation | structure or flow diagram |
+| causal chain, process, state change | causal diagram, timeline, or state view |
+| feedback, retry, iterative update | loop diagram |
+| distribution, scale, marginal change | compact ASCII curve only with comparable evidence |
+| cost/quality or speed/accuracy tension | trade-off curve only with comparable axes; otherwise a table |
+| repeated old/new comparison | small table or matrix |
+| one case changing step by step | aligned example trace |
+| formula as the irreducible relation | one minimal formula plus a plain-language translation |
+| two or three sentences already suffice | text only |
+
+In Markdown, use fenced `text` for ASCII and keep it within 80 characters.
+Diagrams are optional and never appear as the first body block: state the
+audience-facing concept before the fence. Every node, edge, value, and label
+must be traceable to the grounded packet; put its evidence boundary immediately
+after the visual.
+A reader seeing only the visual should recover the relevant relationship and
+boundary without inferring a stronger result. If the visual only reformats the
+summary, remove it.
 
 ### Page independence and merge or split
 
-A candidate becomes a page only when it is an independent cognitive step,
-contains grounded presentation content, advances its Story Goal, and cannot be
-deleted without breaking that Goal.
+A candidate becomes a page only when it carries an independent supported claim,
+contains grounded presentation content, advances the communication job, and
+cannot be deleted without changing the audience's decision, understanding, or
+confidence.
 
 Prefer one page. Split `design_rationale` from `mechanism` only when both
 pages serve the same Story Goal, use different source material and cognitive
@@ -292,6 +404,12 @@ enough when it carries the root cause, choice, and operation. Add validation as
 a third page only when it independently changes confidence or the decision and
 has its own packet and visual.
 
+When a user supplies a PPTX template, the page decision is not final until the
+grounded claim is mapped to a real source slide. Preserve the claim and shorten
+copy, choose another source layout, or split only when the native layout cannot
+carry the proof at its original typography. Never shrink text to protect an
+earlier page count, and never let a template create unsupported semantics.
+
 Reject background pages, option inventories without a decision, module or step
 lists, interchangeable pages, and detail pages whose deletion changes nothing.
 
@@ -300,24 +418,52 @@ lists, interchangeable pages, and detail pages whose deletion changes nothing.
 **Slides only.** Return one public Markdown document using `slide-template.md`.
 It must remain complete and readable without a `.pptx`.
 
-Use `department_ic` unless the user explicitly requests a technical or
-architecture review. Keep only necessary main-deck slides, never more than
-eight. A result may use zero, one, two, or—only when independent validation
-changes the decision—three slides.
+Use the resolved primary audience. When framing is skipped, use
+`manager_decision_brief`, five-minute live delivery, and non-technical wording.
+Keep only necessary main-deck slides, never more than eight. A result may use
+zero, one, two, or—only when independent validation changes the decision—three
+slides.
 
-Public content consists of deck context, Story Why/Goal, slide content, optional
-speaker notes, and a compact Evidence Appendix. Internal intended takeaways,
-cognitive roles, source packets, visual feasibility, merge/split analysis,
-unsupported-claim ledgers, and production guidance remain hidden.
+Public content consists of a compact deck framing line, audience-facing slide
+content, optional speaker notes, and a compact Evidence Appendix. Internal Story
+Why/Goal, cognitive roles, source packets, visual feasibility, merge/split
+analysis, unsupported-claim ledgers, and production guidance remain hidden.
 
-Run three preflights:
+Run these preflights:
 
-1. standalone reading: a fresh reader can explain the Story order, Why, Goal,
-   facts, relations, values, and risks without a PPT;
-2. takeaway inference: the reader can infer the hidden intended takeaway in
-   their own words, while no title or prose directly repeats it;
-3. blind content handoff: a maker can visually translate the Markdown without
+1. audience outcome: a fresh member of the primary audience can state the
+   thesis, confidence boundary, and required decision or action after a short
+   read;
+2. claim-to-proof: each title states a supported claim and its body visibly
+   proves that wording without unsupported certainty;
+3. standalone reading: a reader can explain the cumulative argument, facts,
+   relations, values, risks, and next gate without a PPT;
+4. blind content handoff: a maker can visually translate the Markdown without
    vault research, semantic invention, or a new split decision.
+
+## Optional Template-native PPTX
+
+**Slides only and only when explicitly requested.** Treat the user-supplied
+PPTX as the visual source. Use an existing presentation capability when the
+runtime provides one; otherwise stop at Markdown and state the capability
+boundary.
+
+- Inspect every source slide before mapping content.
+- Map every output slide to a real source slide, duplicate it, and edit inherited
+  elements rather than rebuilding its style.
+- Preserve master, layout, typography, spacing, and native editability.
+- If copy does not fit, shorten, remap, or split. Do not shrink or flatten it.
+- Render and inspect every final page; verify template fidelity and overflow.
+- Write a versioned copy and preserve its predecessor.
+- Apply one evidence or user-comment revision to affected claims and dependent
+  pages without re-deciding unrelated pages. Preserve stable page ids where the
+  cognitive job survives; add, remove, or reorder pages only when changed
+  evidence changes the necessary claim sequence. Formatting-only differences do
+  not count as a revision.
+
+Do not add a renderer, a closed style gallery, a persistent template registry,
+or a custom history database to Tracework. A template path is an explicit run
+input and versioned files provide rollback.
 
 ## Portfolio, Judgment, and Commitments
 

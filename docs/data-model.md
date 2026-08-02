@@ -91,6 +91,14 @@ Historical rich reporting objects remain readable. Final `O#`, `W#`, `D#`, and
 `capture_depth` is also optional and additive. It describes how much detail the
 capture skill preserved, not how strong the evidence is.
 
+Code-backed session-end and checkpoint entries may also carry a typed
+`repository_snapshot` source reference. Its `ref` is the full immutable Git
+`HEAD` object id observed at capture and its `path` is the absolute repository
+root. It represents the committed tree only. Weekly may select snapshots whose
+entry timestamp is within its `as_of` cutoff; it must not reconstruct an older
+tree from today's moving branch. Historical entries without snapshots remain
+valid and degrade to their direct commit or raw claim.
+
 Capture Day entries use typed conversation `source_refs` with a stable
 `session:<runtime>:<session-id>` ref and a `timestamp` watermark. Re-running a
 day processes only later material. The transcript pointer and body remain local

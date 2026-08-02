@@ -39,6 +39,19 @@ function normalizeNarrativeText(value) {
     .replace(/\s+/g, ' ');
 }
 
+function normalizeSemanticValue(value) {
+  if (typeof value === 'string') {
+    return value.replace(/\r\n?/g, '\n').trim().replace(/\s+/g, ' ');
+  }
+  if (Array.isArray(value)) return value.map(normalizeSemanticValue);
+  if (value && typeof value === 'object') {
+    return Object.fromEntries(
+      Object.entries(value).map(([key, item]) => [key, normalizeSemanticValue(item)]),
+    );
+  }
+  return value;
+}
+
 function containsForbiddenMainDeckReference(value) {
   const text = String(value || '');
   return /[\u0000-\u001f\u007f-\u009f]/.test(text)
@@ -359,8 +372,12 @@ const FORBIDDEN_DECK_FIELDS = [
   'production constraints',
   'source grounding packet',
   'intended_takeaway',
+  'supported_claim',
   'design_rationale',
   'problem_reframe',
+  '"stories"',
+  '"why"',
+  '"goal"',
 ];
 
 const FORBIDDEN_ROLE_TITLES = new Set([
@@ -377,50 +394,75 @@ const FORBIDDEN_ROLE_TITLES = new Set([
 ]);
 
 function validatePptReadyMarkdownOutput(fixture, output) {
+  const audience = output.audience_contract || {};
+  for (const field of [
+    'primary_audience',
+    'prior_knowledge',
+    'occasion',
+    'deck_job',
+    'audience_outcome',
+    'central_claim',
+    'confidence_boundary',
+  ]) {
+    assert(nonEmptyString(audience[field]), `${fixture.id}: audience contract ${field} is missing`);
+  }
   assert(nonEmptyString(output.deck_context), `${fixture.id}: deck context is missing`);
   assert(nonEmptyString(output.management_question), `${fixture.id}: management question is missing`);
-  const stories = Array.isArray(output.stories) ? output.stories : [];
-  assert(stories.length > 0, `${fixture.id}: no Story was emitted`);
-  const slides = stories.flatMap((story) => story.slides || []);
+  assert(nonEmptyString(output.thesis), `${fixture.id}: deck thesis is missing`);
+  const slides = Array.isArray(output.slides) ? output.slides : [];
   assert(slides.length > 0 && slides.length <= 8, `${fixture.id}: main deck must contain 1-8 necessary slides`);
+  if (Number.isInteger(fixture.fixture?.expected_slide_count)) {
+    assert.equal(slides.length, fixture.fixture.expected_slide_count, `${fixture.id}: deck has the wrong merge/split result`);
+  }
 
   const publicText = JSON.stringify(output).toLowerCase();
   for (const field of FORBIDDEN_DECK_FIELDS) {
     assert(!publicText.includes(field), `${fixture.id}: public deck leaks ${field}`);
   }
 
-  const expectedCounts = fixture.fixture?.expected_story_slide_counts || [];
-  for (const [storyIndex, story] of stories.entries()) {
-    const label = `${fixture.id}: story ${storyIndex + 1}`;
-    assert(nonEmptyString(story.title), `${label} title is missing`);
-    assert(nonEmptyString(story.why), `${label} Why is missing`);
-    assert(nonEmptyString(story.goal), `${label} Goal is missing`);
-    const storySlides = Array.isArray(story.slides) ? story.slides : [];
-    assert(storySlides.length > 0, `${label} has no slides`);
-    if (Number.isInteger(expectedCounts[storyIndex])) {
-      assert.equal(storySlides.length, expectedCounts[storyIndex], `${label} has the wrong merge/split result`);
+  const slideIds = new Set();
+  for (const [slideIndex, slide] of slides.entries()) {
+    const slideLabel = `${fixture.id}: slide ${slideIndex + 1}`;
+    assert(nonEmptyString(slide.id), `${slideLabel} stable id is missing`);
+    assert(!slideIds.has(slide.id), `${slideLabel} duplicates slide id ${slide.id}`);
+    slideIds.add(slide.id);
+    assert(nonEmptyString(slide.title), `${slideLabel} title is missing`);
+    assert(nonEmptyString(slide.content), `${slideLabel} presentation content is missing`);
+    assert(!/[?？]\s*$/.test(slide.title), `${slideLabel} uses a question instead of a supported claim`);
+    assert(
+      !FORBIDDEN_ROLE_TITLES.has(normalizeNarrativeText(slide.title)),
+      `${slideLabel} title exposes an internal role`,
+    );
+    assert(!containsForbiddenMainDeckReference(slide.title), `${slideLabel} title contains an unsafe reference`);
+    assert(
+      !slide.content.replaceAll('\\n', '\n').split('\n').some((line) => containsForbiddenMainDeckReference(line)),
+      `${slideLabel} content contains an unsafe reference`,
+    );
+    assert(
+      !/(place on the left|use a .*diagram|font|color|layout|card grid|制作|版式|字体|颜色)/i.test(slide.content),
+      `${slideLabel} contains production guidance`,
+    );
+    for (const term of fixture.fixture?.required_title_terms?.[slideIndex] || []) {
+      assert(slide.title.toLowerCase().includes(term.toLowerCase()), `${slideLabel} title is missing claim term ${term}`);
     }
-    for (const [slideIndex, slide] of storySlides.entries()) {
-      const slideLabel = `${label}: slide ${slideIndex + 1}`;
-      assert(nonEmptyString(slide.title), `${slideLabel} title is missing`);
-      assert(nonEmptyString(slide.content), `${slideLabel} presentation content is missing`);
-      assert(
-        !FORBIDDEN_ROLE_TITLES.has(normalizeNarrativeText(slide.title)),
-        `${slideLabel} title exposes an internal role`,
-      );
-      assert(!containsForbiddenMainDeckReference(slide.title), `${slideLabel} title contains an unsafe reference`);
-      assert(
-        !slide.content.replaceAll('\\n', '\n').split('\n').some((line) => containsForbiddenMainDeckReference(line)),
-        `${slideLabel} content contains an unsafe reference`,
-      );
-      assert(
-        !/(place on the left|use a .*diagram|font|color|layout|card grid|制作|版式|字体|颜色)/i.test(slide.content),
-        `${slideLabel} contains production guidance`,
-      );
-      const requiredTerms = fixture.fixture?.required_content_terms?.[storyIndex]?.[slideIndex] || [];
-      for (const term of requiredTerms) {
-        assert(slide.content.toLowerCase().includes(term.toLowerCase()), `${slideLabel} is missing grounded content term ${term}`);
+    for (const term of fixture.fixture?.required_content_terms?.[slideIndex] || []) {
+      assert(slide.content.toLowerCase().includes(term.toLowerCase()), `${slideLabel} is missing grounded content term ${term}`);
+    }
+    const content = slide.content.replaceAll('\\n', '\n');
+    const diagramIndex = content.search(/```(?:mermaid|text)\b/i);
+    if (diagramIndex >= 0) {
+      const introduction = content.slice(0, diagramIndex).trim();
+      assert(nonEmptyString(introduction), `${slideLabel} must explain the concept before its diagram`);
+      for (const term of fixture.fixture?.required_pre_diagram_terms?.[slideIndex] || []) {
+        assert(
+          introduction.toLowerCase().includes(String(term).toLowerCase()),
+          `${slideLabel} diagram introduction is missing concept term ${term}`,
+        );
       }
+    }
+    const mainText = `${slide.title}\n${slide.content}`.toLowerCase();
+    for (const term of fixture.fixture?.forbidden_main_terms || []) {
+      assert(!mainText.includes(String(term).toLowerCase()), `${slideLabel} leaked audience-inappropriate term ${term}`);
     }
   }
 
@@ -431,15 +473,11 @@ function validatePptReadyMarkdownOutput(fixture, output) {
     assert(nonEmptyString(item.source), `${fixture.id}: appendix source is missing`);
     assert(nonEmptyString(item.boundary), `${fixture.id}: appendix boundary is missing`);
   }
-
-  for (const hidden of fixture.fixture?.hidden_intended_takeaways || []) {
-    const slide = stories[hidden.story_index]?.slides?.[hidden.slide_index];
-    assert(slide, `${fixture.id}: hidden takeaway points to a missing slide`);
-    const publicSlide = normalizeNarrativeText(`${slide.title} ${slide.content}`);
-    const hiddenText = normalizeNarrativeText(hidden.text);
+  const appendixText = appendix.map(item => `${item.source}\n${item.boundary}`).join('\n').toLowerCase();
+  for (const term of fixture.fixture?.required_appendix_source_terms || []) {
     assert(
-      !publicSlide.includes(hiddenText),
-      `${fixture.id}: intended takeaway is directly exposed`,
+      appendixText.includes(String(term).toLowerCase()),
+      `${fixture.id}: evidence appendix is missing source-chain term ${term}`,
     );
   }
 
@@ -449,28 +487,140 @@ function validatePptReadyMarkdownOutput(fixture, output) {
   }
 }
 
+function validatePptRevisionRoundTrip(fixture, outputs) {
+  const expectation = fixture.fixture?.revision_expectation;
+  if (!expectation) return;
+  assert.equal(outputs.length, 2, `${fixture.id}: revision benchmark requires baseline and revised outputs`);
+  const [baseline, revised] = outputs;
+  assert(nonEmptyString(baseline.version), `${fixture.id}: baseline version is missing`);
+  assert(nonEmptyString(revised.version), `${fixture.id}: revised version is missing`);
+  assert.notEqual(revised.version, baseline.version, `${fixture.id}: revision overwrote the baseline version`);
+  assert.equal(revised.previous_version, baseline.version, `${fixture.id}: revised output does not point to its predecessor`);
+  assert(Date.parse(revised.as_of) > Date.parse(baseline.as_of), `${fixture.id}: revision cutoff did not advance`);
+
+  const baselineById = new Map(baseline.slides.map((slide) => [slide.id, slide]));
+  const revisedById = new Map(revised.slides.map((slide) => [slide.id, slide]));
+  const actualAdded = [...revisedById.keys()].filter(id => !baselineById.has(id)).sort();
+  const actualRemoved = [...baselineById.keys()].filter(id => !revisedById.has(id)).sort();
+  assert.deepEqual(actualAdded, [...(expectation.added_slide_ids || [])].sort(), `${fixture.id}: revision added unexpected slides`);
+  assert.deepEqual(actualRemoved, [...(expectation.removed_slide_ids || [])].sort(), `${fixture.id}: revision removed unexpected slides`);
+  if (expectation.expected_slide_order) {
+    assert.deepEqual([...revisedById.keys()], expectation.expected_slide_order, `${fixture.id}: revised slide order is wrong`);
+  }
+  const changedSlideIds = expectation.changed_slide_ids || [];
+  const unchangedSlideIds = expectation.unchanged_slide_ids || [];
+  assert.equal(new Set(changedSlideIds).size, changedSlideIds.length, `${fixture.id}: changed slide classification contains duplicates`);
+  assert.equal(new Set(unchangedSlideIds).size, unchangedSlideIds.length, `${fixture.id}: unchanged slide classification contains duplicates`);
+  const classifiedSlideIds = [...changedSlideIds, ...unchangedSlideIds];
+  assert.equal(new Set(classifiedSlideIds).size, classifiedSlideIds.length, `${fixture.id}: a slide is classified as both changed and unchanged`);
+  const commonSlideIds = [...baselineById.keys()].filter(id => revisedById.has(id)).sort();
+  assert.deepEqual([...classifiedSlideIds].sort(), commonSlideIds, `${fixture.id}: every slide shared by both versions must be classified exactly once`);
+
+  for (const slideId of changedSlideIds) {
+    assert(baselineById.has(slideId) && revisedById.has(slideId), `${fixture.id}: changed slide ${slideId} must exist in both versions`);
+    assert.notDeepEqual(
+      normalizeSemanticValue(revisedById.get(slideId)),
+      normalizeSemanticValue(baselineById.get(slideId)),
+      `${fixture.id}: affected slide ${slideId} was not substantively revised`,
+    );
+  }
+  for (const slideId of unchangedSlideIds) {
+    assert(baselineById.has(slideId) && revisedById.has(slideId), `${fixture.id}: unchanged slide ${slideId} must exist in both versions`);
+    assert.deepEqual(
+      normalizeSemanticValue(revisedById.get(slideId)),
+      normalizeSemanticValue(baselineById.get(slideId)),
+      `${fixture.id}: unrelated slide ${slideId} changed`,
+    );
+  }
+  for (const [slideId, terms] of Object.entries(expectation.required_revised_terms || {})) {
+    const slide = revisedById.get(slideId);
+    assert(slide, `${fixture.id}: revised slide ${slideId} is missing`);
+    const text = `${slide.title}\n${slide.content}`.toLowerCase();
+    for (const term of terms) {
+      assert(text.includes(String(term).toLowerCase()), `${fixture.id}: revised slide ${slideId} is missing ${term}`);
+    }
+  }
+  for (const [slideId, terms] of Object.entries(expectation.forbidden_revised_terms || {})) {
+    const slide = revisedById.get(slideId);
+    assert(slide, `${fixture.id}: revised slide ${slideId} is missing`);
+    const text = `${slide.title}\n${slide.content}`.toLowerCase();
+    for (const term of terms) {
+      assert(!text.includes(String(term).toLowerCase()), `${fixture.id}: revised slide ${slideId} retained ${term}`);
+    }
+  }
+}
+
+function validatePptRevisionRejectionProbes(fixture, outputs) {
+  const expectation = fixture.fixture?.revision_expectation;
+  if (!expectation) return;
+  for (const probe of fixture.fixture?.revision_rejection_probes || []) {
+    const mutantFixture = structuredClone(fixture);
+    const mutantOutputs = structuredClone(outputs);
+    const mutantExpectation = mutantFixture.fixture.revision_expectation;
+    const [baseline, revised] = mutantOutputs;
+    const baselineById = new Map(baseline.slides.map(slide => [slide.id, slide]));
+
+    if (probe === 'whitespace-only') {
+      revised.slides = revised.slides.map((slide) => {
+        if (!(mutantExpectation.changed_slide_ids || []).includes(slide.id)) return slide;
+        const original = structuredClone(baselineById.get(slide.id));
+        original.content = `  ${original.content.replaceAll('\n', '  \n')}  `;
+        return original;
+      });
+    } else if (probe === 'unclassified-common-slide') {
+      mutantExpectation.changed_slide_ids = mutantExpectation.changed_slide_ids.slice(1);
+    } else if (probe === 'duplicate-classification') {
+      const slideId = mutantExpectation.changed_slide_ids[0] || mutantExpectation.unchanged_slide_ids[0];
+      mutantExpectation.unchanged_slide_ids.push(slideId);
+    } else if (probe === 'nonexistent-classification') {
+      mutantExpectation.changed_slide_ids.push('missing-slide');
+    } else {
+      throw new Error(`${fixture.id}: unknown revision rejection probe ${probe}`);
+    }
+
+    assert.throws(
+      () => validatePptRevisionRoundTrip(mutantFixture, mutantOutputs),
+      `${fixture.id}: revision rejection probe ${probe} unexpectedly passed`,
+    );
+  }
+}
+
 export function validateWeeklyPptReadyMarkdownContract(fixture) {
-  validatePptReadyMarkdownOutput(fixture, fixture.fixture?.candidate_output || {});
+  const outputs = fixture.fixture?.candidate_outputs || [fixture.fixture?.candidate_output || {}];
+  for (const output of outputs) validatePptReadyMarkdownOutput(fixture, output);
+  validatePptRevisionRoundTrip(fixture, outputs);
+  validatePptRevisionRejectionProbes(fixture, outputs);
 }
 
 export function validateWeeklyPptReadyMarkdownRejectionProbes(fixture) {
   for (const probe of fixture.fixture?.rejection_probes || []) {
     const mutant = structuredClone(fixture);
     mutant.id = `${fixture.id}:${probe}`;
-    const output = mutant.fixture.candidate_output;
-    const story = output.stories[0];
-    const slides = story.slides;
+    const output = mutant.fixture.candidate_output || mutant.fixture.candidate_outputs[0];
+    const slides = output.slides;
 
-    if (probe === 'missing-why') {
-      story.why = '';
-    } else if (probe === 'missing-goal') {
-      story.goal = '';
+    if (probe === 'missing-audience') {
+      output.audience_contract.primary_audience = '';
+    } else if (probe === 'missing-outcome') {
+      output.audience_contract.audience_outcome = '';
+    } else if (probe === 'missing-thesis') {
+      output.thesis = '';
     } else if (probe === 'missing-content') {
       slides[0].content = '';
+    } else if (probe === 'empty-deck') {
+      output.slides = [];
+    } else if (probe === 'diagram-first') {
+      const content = slides[0].content.replaceAll('\\n', '\n');
+      const diagramIndex = content.search(/```(?:mermaid|text)\b/i);
+      slides[0].content = content.slice(diagramIndex);
     } else if (probe === 'production-guideline') {
       slides[0].content += '\n\n### Page composition\nPlace nodes on the left using blue cards.';
-    } else if (probe === 'takeaway-leak') {
-      slides[0].title = mutant.fixture.hidden_intended_takeaways[0].text;
+    } else if (probe === 'topic-title') {
+      slides[0].title = 'Provider comparison';
+    } else if (probe === 'question-title') {
+      slides[0].title = 'Which provider should we choose?';
+    } else if (probe === 'claim-proof-gap') {
+      slides[0].content = 'Implementation work was completed during the week.';
     } else if (probe === 'role-title') {
       slides[0].title = '设计判断';
     } else if (probe === 'unsafe-main-deck-reference') {
@@ -483,8 +633,8 @@ export function validateWeeklyPptReadyMarkdownRejectionProbes(fixture) {
       slides.splice(
         0,
         1,
-        {...original, title: 'Before'},
-        {...original, title: 'After'},
+        {...original, id: `${original.id}-before`, title: 'The previous handoff had two owners'},
+        {...original, id: `${original.id}-after`, title: 'The new handoff has one owner'},
       );
     } else {
       throw new Error(`${fixture.id}: unknown PPT-ready Markdown rejection probe ${probe}`);

@@ -179,6 +179,60 @@ function runJson(command, args, options = {}) {
   return JSON.parse(result.stdout);
 }
 
+function runGit(cwd, args, env = {}) {
+  const result = spawnSync('git', args, {
+    cwd,
+    encoding: 'utf-8',
+    env: { ...process.env, ...env },
+  });
+  if (result.status !== 0) {
+    throw new Error([
+      `git ${args.join(' ')} failed with status ${result.status}`,
+      result.stdout.trim(),
+      result.stderr.trim(),
+    ].filter(Boolean).join('\n'));
+  }
+  return result.stdout.trim();
+}
+
+function gitCommitExists(repo, objectId) {
+  return spawnSync('git', ['cat-file', '-e', `${objectId}^{commit}`], {
+    cwd: repo,
+    encoding: 'utf-8',
+  }).status === 0;
+}
+
+function gitRepositoryIdentity(repo) {
+  try {
+    const commonDir = runGit(repo, ['rev-parse', '--git-common-dir']);
+    return fs.realpathSync(path.resolve(repo, commonDir));
+  } catch {
+    return null;
+  }
+}
+
+function gitIsAncestor(repo, ancestor, descendant) {
+  return spawnSync('git', ['merge-base', '--is-ancestor', ancestor, descendant], {
+    cwd: repo,
+    encoding: 'utf-8',
+  }).status === 0;
+}
+
+function selectCapturedSnapshot(candidates, asOf, targetRepository, evidenceCommit) {
+  const targetIdentity = gitRepositoryIdentity(targetRepository);
+  if (!targetIdentity) return null;
+  return [...candidates]
+    .filter(candidate => Date.parse(candidate.entry_timestamp) <= Date.parse(asOf))
+    .sort((left, right) => Date.parse(right.entry_timestamp) - Date.parse(left.entry_timestamp))
+    .find(candidate => (
+      candidate.source_ref?.type === 'repository_snapshot'
+      && path.isAbsolute(candidate.source_ref.path)
+      && gitRepositoryIdentity(candidate.source_ref.path) === targetIdentity
+      && gitCommitExists(candidate.source_ref.path, candidate.source_ref.ref)
+      && gitIsAncestor(candidate.source_ref.path, evidenceCommit, candidate.source_ref.ref)
+    )) || null;
+}
+
 function assertSourceRefs(nodes, fixtureId) {
   assert(nodes.length > 0, `${fixtureId}: expected at least one node`);
   for (const node of nodes) {
@@ -790,8 +844,156 @@ function runCaptureHelperReportingValidFixture(fixture) {
       appended.reporting?.hard_signals?.some(signal => signal.kind === config.expected_hard_signal_kind),
       `${fixture.id}: hard signal kind not preserved`,
     );
+    if (config.expected_commit_source_path) {
+      assert(
+        appended.source_refs?.some(ref => ref.type === 'commit' && ref.path === config.expected_commit_source_path),
+        `${fixture.id}: qualified commit source path not preserved`,
+      );
+    }
+    if (config.expected_repository_snapshot_ref) {
+      assert(
+        appended.source_refs?.some(ref => (
+          ref.type === 'repository_snapshot'
+          && ref.ref === config.expected_repository_snapshot_ref
+          && ref.path === config.expected_repository_snapshot_path
+        )),
+        `${fixture.id}: immutable repository snapshot not preserved`,
+      );
+    }
+    for (const [index, probe] of (config.invalid_repository_snapshot_probes || []).entries()) {
+      const invalidEntry = structuredClone(entry);
+      const snapshot = invalidEntry.source_refs.find(ref => ref.type === 'repository_snapshot');
+      snapshot.ref = probe.ref;
+      snapshot.path = probe.path;
+      const invalidPath = path.join(tempRoot, `invalid-snapshot-${index}.json`);
+      fs.writeFileSync(invalidPath, JSON.stringify(invalidEntry, null, 2), 'utf-8');
+      const result = spawnSync('python3', [
+        captureRaw,
+        'append-entry',
+        '--entry',
+        invalidPath,
+        '--cwd',
+        repoRoot,
+        '--vault',
+        tempVault,
+        '--slug',
+        slug,
+        '--date',
+        config.date,
+      ], {
+        cwd: repoRoot,
+        encoding: 'utf-8',
+        env: pythonEnv,
+      });
+      assert(result.status !== 0, `${fixture.id}: malformed repository snapshot should fail`);
+      assert(
+        `${result.stderr}\n${result.stdout}`.includes(probe.expected_error_text),
+        `${fixture.id}: missing snapshot validation error ${probe.expected_error_text}`,
+      );
+    }
   } finally {
     fs.rmSync(tempRoot, { recursive: true, force: true });
+  }
+}
+
+function runGitSnapshotResolutionFixture(fixture) {
+  const config = fixture.fixture || {};
+  const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'tracework-git-snapshot-'));
+  const otherRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'tracework-other-repo-'));
+
+  try {
+    runGit(tempRoot, ['init', '-b', 'main']);
+    runGit(tempRoot, ['config', 'user.name', 'Tracework Benchmark']);
+    runGit(tempRoot, ['config', 'user.email', 'benchmark@example.invalid']);
+
+    fs.writeFileSync(path.join(tempRoot, 'architecture.txt'), 'base\n', 'utf-8');
+    runGit(tempRoot, ['add', 'architecture.txt']);
+    runGit(tempRoot, ['commit', '-m', 'base'], {
+      GIT_AUTHOR_DATE: '2026-07-30T10:00:00+08:00',
+      GIT_COMMITTER_DATE: '2026-07-30T10:00:00+08:00',
+    });
+    const baseCommit = runGit(tempRoot, ['rev-parse', 'HEAD']);
+
+    fs.writeFileSync(path.join(tempRoot, 'architecture.txt'), 'base\nevidence delta\n', 'utf-8');
+    runGit(tempRoot, ['add', 'architecture.txt']);
+    runGit(tempRoot, ['commit', '-m', 'evidence delta'], {
+      GIT_AUTHOR_DATE: '2026-07-31T10:00:00+08:00',
+      GIT_COMMITTER_DATE: '2026-07-31T10:00:00+08:00',
+    });
+    const evidenceCommit = runGit(tempRoot, ['rev-parse', 'HEAD']);
+
+    fs.writeFileSync(path.join(tempRoot, 'architecture.txt'), 'base\nevidence delta\ncaptured state\n', 'utf-8');
+    runGit(tempRoot, ['add', 'architecture.txt']);
+    runGit(tempRoot, ['commit', '-m', 'captured architecture'], {
+      GIT_AUTHOR_DATE: '2026-07-31T17:00:00+08:00',
+      GIT_COMMITTER_DATE: '2026-07-31T17:00:00+08:00',
+    });
+    const capturedSnapshot = runGit(tempRoot, ['rev-parse', 'HEAD']);
+
+    runGit(tempRoot, ['checkout', '-b', 'divergent', baseCommit]);
+    fs.writeFileSync(path.join(tempRoot, 'architecture.txt'), 'base\ndivergent state\n', 'utf-8');
+    runGit(tempRoot, ['add', 'architecture.txt']);
+    runGit(tempRoot, ['commit', '-m', 'later divergent architecture'], {
+      GIT_AUTHOR_DATE: '2026-08-01T08:00:00+08:00',
+      GIT_COMMITTER_DATE: '2026-08-01T08:00:00+08:00',
+    });
+    const laterSnapshot = runGit(tempRoot, ['rev-parse', 'HEAD']);
+    const divergentSnapshot = laterSnapshot;
+
+    runGit(otherRoot, ['init', '-b', 'main']);
+    runGit(otherRoot, ['config', 'user.name', 'Tracework Benchmark']);
+    runGit(otherRoot, ['config', 'user.email', 'benchmark@example.invalid']);
+    fs.writeFileSync(path.join(otherRoot, 'architecture.txt'), 'unrelated repository\n', 'utf-8');
+    runGit(otherRoot, ['add', 'architecture.txt']);
+    runGit(otherRoot, ['commit', '-m', 'unrelated snapshot']);
+    const otherSnapshot = runGit(otherRoot, ['rev-parse', 'HEAD']);
+    const missingObject = 'f'.repeat(capturedSnapshot.length);
+    const candidates = [
+      {
+        entry_timestamp: config.eligible_snapshot_at,
+        source_ref: {type: 'repository_snapshot', ref: capturedSnapshot, path: tempRoot},
+      },
+      {
+        entry_timestamp: '2026-07-31T20:00:00+08:00',
+        source_ref: {type: 'repository_snapshot', ref: otherSnapshot, path: otherRoot},
+      },
+      {
+        entry_timestamp: '2026-07-31T19:00:00+08:00',
+        source_ref: {type: 'repository_snapshot', ref: divergentSnapshot, path: tempRoot},
+      },
+      {
+        entry_timestamp: '2026-07-31T18:30:00+08:00',
+        source_ref: {type: 'repository_snapshot', ref: missingObject, path: tempRoot},
+      },
+      {
+        entry_timestamp: config.late_snapshot_at,
+        source_ref: {type: 'repository_snapshot', ref: laterSnapshot, path: tempRoot},
+      },
+    ];
+
+    const selected = selectCapturedSnapshot(candidates, config.as_of, tempRoot, evidenceCommit);
+    assert(selected?.source_ref.ref === capturedSnapshot, `${fixture.id}: wrong snapshot selected for as_of`);
+    assert(runGit(tempRoot, ['rev-parse', 'HEAD']) !== capturedSnapshot, `${fixture.id}: fixture did not move current HEAD`);
+    assert(
+      spawnSync('git', ['merge-base', '--is-ancestor', evidenceCommit, capturedSnapshot], {cwd: tempRoot}).status === 0,
+      `${fixture.id}: evidence commit should be an ancestor of the captured snapshot`,
+    );
+    assert(!gitCommitExists(tempRoot, missingObject), `${fixture.id}: missing object unexpectedly resolved`);
+    assert(
+      selectCapturedSnapshot([{entry_timestamp: config.eligible_snapshot_at, source_ref: {type: 'repository_snapshot', ref: missingObject, path: tempRoot}}], config.as_of, tempRoot, evidenceCommit) === null,
+      `${fixture.id}: unavailable snapshot should degrade instead of resolving`,
+    );
+    assert(
+      selectCapturedSnapshot([{entry_timestamp: config.eligible_snapshot_at, source_ref: {type: 'repository_snapshot', ref: divergentSnapshot, path: tempRoot}}], config.as_of, tempRoot, evidenceCommit) === null,
+      `${fixture.id}: divergent snapshot should degrade instead of resolving`,
+    );
+    assert(
+      selectCapturedSnapshot([{entry_timestamp: config.eligible_snapshot_at, source_ref: {type: 'repository_snapshot', ref: otherSnapshot, path: otherRoot}}], config.as_of, tempRoot, evidenceCommit) === null,
+      `${fixture.id}: other repository snapshot should degrade instead of resolving`,
+    );
+  } finally {
+    fs.rmSync(tempRoot, {recursive: true, force: true});
+    fs.rmSync(otherRoot, {recursive: true, force: true});
   }
 }
 
@@ -1037,6 +1239,8 @@ function runExecutableFixture(fixture) {
   } else if (kind === 'weekly-ppt-ready-markdown-contract') {
     validateWeeklyPptReadyMarkdownContract(fixture);
     validateWeeklyPptReadyMarkdownRejectionProbes(fixture);
+  } else if (kind === 'git-snapshot-resolution') {
+    runGitSnapshotResolutionFixture(fixture);
   } else if (kind === 'query-positive') {
     runQueryPositiveFixture(fixture);
   } else if (kind === 'query-negative') {

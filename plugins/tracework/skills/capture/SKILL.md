@@ -78,6 +78,10 @@ optional fields.
      action.
    - Group related work into 1-3 entries. Use at most 5 entries for unusually
      broad sessions.
+   - For normal session-end or checkpoint capture, resolve one immutable
+     committed-tree snapshot for code-backed entries as described in
+     `references/capture-entry-writing.md`. Never backfill Capture Day with the
+     repository's current `HEAD`.
 
 3. **Generate raw entries.**
    - Include `capture_depth` on every new `session-recap` entry.
@@ -134,6 +138,10 @@ Before finalizing each entry, check:
   factual fields without relying on pre-written channel prose?
 - Are git, files, docs, and logs treated as evidence or coverage rather than
   outcomes by themselves?
+- Does every visible commit `source_refs` item include the repository root in
+  `path` when that root is known?
+- Does every `repository_snapshot` use the full committed `HEAD` object id and
+  absolute repository root, without implying that uncommitted work is included?
 - Are durable artifacts represented through `artifact_context` or dossier
   metadata only when they are material?
 - For checkpoint mode, is this a durable stage signal rather than a progress

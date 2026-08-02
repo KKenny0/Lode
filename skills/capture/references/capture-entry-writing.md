@@ -67,7 +67,7 @@ Follow `references/tracework-storage-convention.md`. New entries should use:
   },
   "source_refs": [
     {
-      "type": "commit | issue | eval | doc | conversation | other",
+      "type": "commit | repository_snapshot | issue | eval | doc | conversation | other",
       "ref": "stable source id",
       "path": "/absolute/path/when-local",
       "url": "https://example.com/when-remote",
@@ -104,6 +104,48 @@ Follow `references/tracework-storage-convention.md`. New entries should use:
 
 The helper warns on missing adaptive-depth fields but should not reject entries
 that lack optional evidence.
+
+### Commit source qualification
+
+When a visible source is a git commit, preserve it as a typed `source_refs`
+item. If the repository root is known, include it in `path`; a commit hash alone
+is not globally resolvable when Weekly later runs from another project. Capture
+does not need to inspect the commit or summarize code to populate this locator.
+
+If the path is unavailable, keep the commit ref without guessing a repository.
+Later consumers must degrade to the raw claim instead of treating an
+unresolvable commit as code-grounded evidence.
+
+### Repository snapshot qualification
+
+For normal session-end and checkpoint capture, observe the current committed
+tree when the entry has a code-backed claim. Use Git's own immutable identifiers:
+
+```bash
+git rev-parse --show-toplevel
+git rev-parse --verify 'HEAD^{commit}'
+```
+
+When both commands succeed, add one `source_refs` item to each code-backed entry:
+
+```json
+{
+  "type": "repository_snapshot",
+  "ref": "full HEAD object id",
+  "path": "/absolute/repository/root",
+  "note": "Committed tree observed at capture; uncommitted work is not represented."
+}
+```
+
+Do not inspect or summarize the code merely to create this locator. Do not store
+the branch as the locator: branches move, while the captured object id is
+immutable. The snapshot proves only the committed tree. It excludes staged,
+unstaged, and untracked work even when the session discussed those changes.
+
+Do not add a repository snapshot during Capture Day unless the recovered source
+already contains that historical snapshot. Reading today's `HEAD` would
+misrepresent the earlier session. Keep the older raw claim and its direct refs
+instead.
 
 ## Reporting Metadata
 

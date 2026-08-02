@@ -21,11 +21,12 @@ Three modes:
   next commitments. Its body is decision-complete; its appendix preserves
   accountability, work coverage, and provenance.
 - **slides**: explicit `weekly PPT` / slides wording — a standalone PPT-ready
-  Markdown Deck with no minimum and at most eight main-deck pages.
+  Markdown Deck with 1-8 necessary main-deck pages and no preset target count;
+  zero admitted pages return an empty state instead of an empty deck.
 
 Slides reopens raw sources and uses internal cognitive tasks, intended
 takeaways, and grounding packets to materialize presentation content. Public
-output contains Story Why/Goal, slide content, and a compact Evidence Appendix;
+output contains claim-led slide content and a compact Evidence Appendix;
 it contains no production guidelines or page-level source packets.
 
 Design rationale and mechanism split only when they use different grounded

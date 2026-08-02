@@ -6,9 +6,10 @@ Verify that Weekly produces a scoped, objective-anchored management judgment
 from raw evidence: intended direction, actual change, material variance,
 current decision, and next commitment. It must keep every meaningful stream
 visible without inventing a retrospective Why. When slides are explicit, it
-must reopen the supporting sources and turn that analysis into a standalone,
-PPT-ready Markdown Deck rather than paginate the Brief or emit production
-instructions.
+must resolve the communication job, reopen supporting sources, and turn the
+analysis into an audience-facing PPT-ready Markdown Deck rather than paginate
+the Brief. When an editable PPTX and template are explicit, it must preserve the
+template and support a real revision round trip.
 
 ## Goal-Loop Scenarios
 
@@ -42,9 +43,9 @@ instructions.
    portfolio coverage. Do not force a headline count.
 14. **Conflict**: later or conflicting raw states remain visible and lower
    confidence.
-15. **Explicit PPT request**: produce one PPT-ready Markdown Deck with no
-    minimum and at most eight necessary main slides per group. Default Weekly
-    remains a Brief.
+15. **Explicit PPT request**: produce one PPT-ready Markdown Deck with 1-8
+    necessary main slides per group and no preset target count. Zero admitted
+    pages return an empty state. Default Weekly remains a Brief.
 16. **Quantified algorithm result**: recommend a result chart only when metric,
    unit, baseline, current value, delta, sample scope, method, and comparability
    support it.
@@ -61,15 +62,28 @@ instructions.
 21. **Maintenance-only work**: retain parameter tuning, cleanup, and
     non-mechanism configuration work in the portfolio without decorative
     architecture diagrams or implementation narratives.
-22. **Story formation**: publish one Why and Goal at the start of each Story;
-    do not repeat them per slide.
-23. **Content materialization**: reopen raw sources, keep source packets
+22. **Audience and occasion**: resolve one primary audience, prior knowledge,
+    occasion or duration, deck job, and required audience outcome before page
+    selection. A reporting group alone is not an audience definition.
+23. **Story formation**: keep Story Why/Goal and cognitive roles internal; the
+    public deck begins with audience-facing claims rather than authoring fields.
+24. **Content materialization**: reopen raw sources, keep source packets
     internal, and turn facts, relations, comparisons, mechanisms, numbers,
     boundaries, and gates into presentation content itself.
-24. **Contract rejection probes**: reject missing Story Why/Goal, production
-    guidelines in public content, intended-takeaway leakage, unsafe main-deck
-    references, false complex-result merges, mechanical simple-result splits,
-    and appendix-only meaning.
+25. **Contract rejection probes**: reject missing audience outcome, topic-only
+    titles, unsupported title claims, production guidelines in public content,
+    unsafe main-deck references, false complex-result merges, mechanical
+    simple-result splits, and appendix-only meaning.
+26. **Qualified commit source**: when a technical claim points to a commit,
+    resolve its repository, inspect the delta, and use only an immutable captured
+    snapshot within the report cutoff for the resulting committed tree. An
+    unresolvable commit or snapshot cannot support a current-topology visual.
+27. **Truth-state separation**: distinguish recorded intent, implemented
+    structure, tested behavior, observed effect, and target design. Never use a
+    code or design diagram as effect evidence.
+28. **Representation utility**: state the concept in plain language first, then
+    add only the lightest diagram, table, trace, curve, formula, or text view
+    that materially reduces the declared audience's understanding cost.
 
 ## PPT-ready Markdown Deck Scenarios
 
@@ -101,24 +115,25 @@ design constraint, the new operating path, and an unchanged boundary.
 
 Pass only when:
 
-- the Story publishes Why and Goal first;
-- page one directly presents the design problem, constraints, and trade-offs;
-- page two directly presents the mechanism and depends on page one's premise;
+- one communication job and one primary audience govern both pages;
+- page-one title states the supported design judgment and its body proves the
+  constraints and trade-offs;
+- page-two title states the operating claim and depends on page one's premise;
 - pages use different grounded source material and cognitive tasks;
-- no production guideline or intended takeaway appears in public content;
-- a fresh reader can infer the expected understanding;
-- deleting either page prevents the Story Goal from being completed.
+- no authoring field or production guideline appears in public content;
+- a fresh target reader can state both conclusions and their dependency;
+- deleting either page changes the audience's understanding or decision.
 
 ### P2-B — Simple result must merge
 
 When one Before/After, relationship, or flow can fully express root cause,
-choice, and operation, emit one content page under one Story Why/Goal.
+choice, and operation, emit one claim-led content page.
 
 Fail when:
 
 - design and mechanism are split by convention;
 - page two only expands page-one detail;
-- deleting either page leaves the Story Goal intact.
+- deleting either page leaves the audience outcome intact.
 
 ### P2-C — Blind Content Handoff
 
@@ -126,26 +141,89 @@ Give only the final Markdown Deck to an independent maker who did not perform
 Weekly Analysis.
 
 The maker may choose layout, type, color, and visual translation. They may not
-browse the vault, add Story Why/Goal, research trade-offs, invent nodes,
-relations, numbers, or risks, or re-decide the split. Pass only when PPT and
-Markdown carry the same argument and the maker performs visual translation
-only.
+browse the vault, research trade-offs, invent nodes, relations, numbers, or
+risks, or re-decide the split. Pass only when PPT and Markdown carry the same
+argument and the maker performs visual translation only.
 
-### P2-D — Takeaway Inference
+### P3-A — Audience Outcome Read
 
-Keep hidden `intended_takeaway` values separate from the public Markdown. Give
-only the public deck to a fresh reader.
+Give only the public deck to a fresh member of the declared primary audience.
 
-Pass only when the public deck does not directly repeat the takeaway, the title
-does not leak it, and the reader can express a materially similar understanding
-in their own words.
+Pass only when the reader can state, after a short read:
 
-### P2-E — Standalone Markdown Reading
+- the deck thesis;
+- the confidence boundary;
+- the decision, action, or understanding expected of them.
+
+Fail when they mainly recall modules, commits, process steps, or raw facts while
+missing the management conclusion.
+
+### P3-B — Standalone Claim-led Markdown
 
 Read the Markdown without making a PPT. Pass only when a reader can reconstruct
-the Story order, every Why and Goal, the material facts, relationships, numbers,
-risks, and decisions without production guidance or the Evidence Appendix as a
+the cumulative claim sequence, material facts, relationships, numbers, risks,
+and decision without production guidance or the Evidence Appendix as a
 prerequisite.
+
+### P3-C — Template-native Editable Delivery
+
+When the user supplies a template and requests an actual PPTX, inspect every
+source slide and map each output page to one source page. Pass only when:
+
+- copied slides preserve source masters, layouts, typography, and spacing;
+- narrative content edits inherited elements instead of overlaying a rebuild;
+- all titles, numbers, charts, and key objects remain natively editable;
+- copy fits at source type sizes without clipping or silent shrinkage;
+- every rendered page passes overflow and template-fidelity review;
+- no fixed Tracework style gallery or flattened slide image substitutes for the
+  supplied template.
+
+### P3-D — Revision Round Trip
+
+Preserve the accepted PPTX, add later evidence or a precise user comment, and
+write a new version. Pass only when affected claims, proof, and dependent
+decision pages update together; unrelated page logic and template mapping do
+not get re-decided; the previous version remains recoverable; and the revised
+deck still passes audience, source, editability, and render checks. Preserve
+stable page ids where the cognitive job survives, but allow a grounded revision
+to add, remove, or reorder pages when the evidence changes the necessary claim
+sequence. Whitespace-only or formatting-only differences do not count as a
+revision.
+
+### P3-E — Code-grounded Current Architecture
+
+Input contains a raw entry whose typed commit source includes a repository
+path, plus a later target-design document.
+
+Pass only when:
+
+- the commit diff supplies the weekly delta and an immutable captured repository
+  snapshot at or before `as_of` supplies the resulting committed modules and
+  relationships;
+- the slide explains the concept in plain language before the diagram;
+- every diagram node and edge is traceable to the source chain;
+- tests are described only as exercised behavior, not quality or production
+  proof;
+- current implementation and target design are visibly different claims with
+  different sources;
+- the Evidence Appendix preserves the qualified commit, captured snapshot, and
+  design source without leaking paths or hashes into the spoken slide.
+
+If the repo path, commit, or captured snapshot cannot be resolved, pass only by
+falling back to a raw-supported conceptual view and stating that the current
+code topology is unavailable. Inventing a plausible architecture fails.
+
+### P3-F — Visual Utility and Text-only Restraint
+
+For a complex mechanism, a fresh peer viewing only the visual must be able to
+explain the supported objects, relationships, and evidence boundary without
+claiming an unobserved effect. The concept must already be understandable in
+plain language before the visual appears.
+
+For a simple repair that two or three sentences explain completely, pass only
+with text. A diagram fails when it merely turns those sentences into boxes and
+arrows, adds no relationship the audience needs, or survives deletion without
+changing understanding.
 
 ## Brief Compression Scenarios
 
@@ -199,13 +277,17 @@ variance, decision or support, next commitment, and confidence boundary.
   not expand the body.
 - Adding a material decision-blocking risk does change the body.
 - The appendix maps body claims to evidence without retelling body prose.
-- Plain slide wording defaults to an IC department update; a technical-review
-  deck requires explicit wording.
-- The Markdown Deck states its context and management question.
-- The main deck has no minimum and no more than eight necessary slides.
-- Every Story states Why and Goal once before its slides.
-- Each title names a question, object, mechanism, comparison, or decision gate
-  without directly leaking the hidden intended takeaway.
+- Slides resolve one primary audience, prior knowledge, occasion or duration,
+  deck job, audience outcome, central claim, and confidence boundary before
+  selection. If skipped, use the manager-decision default.
+- The Markdown Deck states a compact presentation context and one required
+  audience judgment or action.
+- A produced main deck has 1-8 necessary slides with no preset target count;
+  zero admitted candidates return an empty state instead of an empty deck.
+- Story Why/Goal and cognitive roles remain internal rather than public
+  authoring scaffolding.
+- Each title states an evidence-bounded audience-facing claim, and the page body
+  visibly proves it.
 - Each page directly presents supported facts, relationships, comparison,
   mechanism, numbers, boundaries, or risks; it contains no production fields.
 - Full Source Grounding Packets and unsupported-claim ledgers remain internal;
@@ -216,9 +298,10 @@ variance, decision or support, next commitment, and confidence boundary.
   choice, and operation.
 - Validation receives a separate page only when it changes confidence, risk, or
   the audience decision.
-- Removing any slide breaks its Story Goal or the deck's management question.
-- The deck passes standalone reading, takeaway inference, and blind content
-  handoff.
+- Removing any slide changes the audience's decision, understanding, or
+  confidence.
+- The deck passes audience outcome reading, claim-to-proof review, standalone
+  reading, and blind content handoff.
 - Mechanism completion, effect validation, and production acceptance are
   reported separately.
 - Every open risk and next-week acceptance target has a pass/fail closure
@@ -228,6 +311,9 @@ variance, decision or support, next commitment, and confidence boundary.
 - Default department slides keep source paths, commit hashes, raw evidence ids,
   and internal links in the appendix; only explicit technical-review decks may
   show sanitized compact references.
+- A requested template-native PPTX maps every output page to a real source page,
+  remains natively editable, preserves the prior version, and passes rendered
+  fit, fidelity, and one revision round trip.
 
 ## Fresh-Context Brief Check
 
@@ -251,25 +337,70 @@ Missing any answer fails Phase 1 even when the executable contract is green.
 | Failure handling and fallback | failure path |
 | Lifecycle or state transition | state machine |
 | Component responsibility change | architecture relationship |
+| Feedback, retry, or iterative update | loop diagram |
+| One case changing step by step | aligned example trace |
+| Repeated old/new comparison | small table or matrix |
+| Formula is the irreducible relationship | one minimal formula plus plain-language translation |
 | Comparable algorithm or outcome data | `comparison_chart`, `distribution_chart`, `trend_chart`, `timeline_chart`, or `waterfall_chart` |
 | One reliable number | `number_card` |
 | Missing or conflicting outcome data | mechanism/validation summary plus measurement plan |
+| Two or three sentences already explain the result | text only |
 
 ## Real-Output Check
 
-Use current real vault data to regenerate `2026-W28` in slides mode without
-overwriting the source report or raw entries. Save the candidate under the
-ignored weekly eval directory.
+Use the real `2026-W31` vault entries with an explicit
+`as_of: 2026-07-30T23:59:59+08:00`. Do not overwrite the source report or raw
+entries. Save candidates under the ignored weekly eval directory.
 
-The W28 candidate must be regenerated from raw sources rather than expand the
-existing Weekly summary, Storyboard, or Production Brief. It must contain a DAG
-Story with public Why/Goal and a two-page `design judgment -> mechanism`
-progression, plus a scene-reuse Story that stays on one content page. Source
-Grounding stays internal and the public Evidence Appendix remains compact.
+The frozen W31 run uses this communication job unless the user overrides it:
 
-The candidate fails when the pair appears only after hand editing, when either
-page is background or inventory, when the intended takeaway is exposed, or when
-the Markdown requires production guidance to be understood. Complete P2-D and
-P2-E before P2-C; then give only the Markdown to an independent maker, render
-and review the PPT. Green checks and fresh-context validation do not replace
-explicit user acceptance.
+> By the end, the responsible manager or project owner should decide whether
+> source-faithful routing is ready to merge because the implementation is
+> complete but the 10-episode evidence does not establish a quality gain.
+
+The expected main argument is three necessary claims, not a reusable page
+formula:
+
+1. source-faithful routing is code-complete, but 10-episode evidence does not
+   support merging it;
+2. `117 -> 115` is not a demonstrated quality gain because five episodes
+   improved and five regressed under a small, high-variance sample;
+3. expand to at least 30 episodes or a second series, then apply a stated
+   go/no-go gate.
+
+Duration-route history, module topology, test and branch inventory, and the
+agent-native v3.1 mechanism stay in appendix or a separate explicit technical
+review unless the audience outcome requires them. Terms such as `B0/B1`,
+`CP1-CP4`, `mode_id`, `TaskSkillSnapshot`, and commit or branch inventories must
+not dominate the manager deck.
+
+The frozen candidate fails when it expands the existing W31 Markdown instead of
+reopening raw sources, mixes routing and agent-native architecture into one
+thesis, exceeds eight pages, hides the conclusion in topic titles, or requires
+technical prior knowledge not declared in the audience contract.
+
+For the user-selected same-department weekly meeting, change the communication
+job to progress synchronization. A real technical architecture page is
+admissible when it helps peers continue development or review and survives the
+deletion test. It must follow a qualified commit into a captured W31 snapshot,
+present actual modules and relationships, and remain separate from the
+Agent-native target design. The current W31 raw commit refs omit repository
+paths, contain no repository snapshot, and the project registry does not resolve
+the storyboard repository, so
+the local candidate must visibly degrade to a raw-supported conceptual relation
+rather than fabricate the S1-S5 code topology. This degraded result verifies
+failure safety but does not satisfy the code-grounded happy path in P3-E.
+
+Then extend the same W31 run to
+`as_of: 2026-07-31T23:59:59+08:00` as a revision test. The new evidence says the
+cleanup v2 signal is about 13% lower errors but entirely from
+`too_many_actions`; `wrong_shot_size` remains 35; attribution remains incomplete.
+Write a new version, update every affected claim and decision, keep the prior
+version recoverable, and preserve template mapping unless the revised claim no
+longer fits honestly.
+
+Finally use a real user-selected editable template, complete P3-C and P3-D, and
+give the Markdown, versioned PPTX, and renders to the user. If the user judges
+the audience, argument, clarity, template use, or editability inadequate, the
+Weekly PPT Mode correction does not pass. Automated checks and independent
+reader/maker validation do not replace explicit user acceptance.

@@ -65,6 +65,21 @@
         "expected_impact_boundary": "expected",
         "expected_evidence_boundary": "recorded",
         "expected_hard_signal_kind": "open_question",
+        "expected_commit_source_path": "/tmp/storyboard-pipeline",
+        "expected_repository_snapshot_ref": "0123456789abcdef0123456789abcdef01234567",
+        "expected_repository_snapshot_path": "/tmp/storyboard-pipeline",
+        "invalid_repository_snapshot_probes": [
+          {
+            "ref": "abc1234",
+            "path": "/tmp/storyboard-pipeline",
+            "expected_error_text": "full Git object id"
+          },
+          {
+            "ref": "0123456789abcdef0123456789abcdef01234567",
+            "path": "relative/storyboard-pipeline",
+            "expected_error_text": "absolute repository root"
+          }
+        ],
         "entry": {
           "timestamp": "2026-07-06T19:00:00+08:00",
           "capture_depth": "standard",
@@ -75,6 +90,20 @@
           "source": "session-recap",
           "status": "ongoing",
           "impact": "Expected to make monthly review easier to generate from daily reports.",
+          "source_refs": [
+            {
+              "type": "commit",
+              "ref": "abc1234",
+              "path": "/tmp/storyboard-pipeline",
+              "note": "Implemented the report-led Daily output contract."
+            },
+            {
+              "type": "repository_snapshot",
+              "ref": "0123456789abcdef0123456789abcdef01234567",
+              "path": "/tmp/storyboard-pipeline",
+              "note": "Committed tree observed at capture; uncommitted work is not represented."
+            }
+          ],
           "reporting": {
             "outcome_candidate": {
               "kind": "progress",
@@ -102,7 +131,7 @@
           }
         }
       },
-      "expected_behavior": "The capture helper accepts optional reporting metadata, preserves it unchanged, and keeps O#/W#/D#/E# labels out of raw entries.",
+      "expected_behavior": "The capture helper preserves a repository-qualified commit and immutable committed-tree snapshot, rejects malformed snapshots, and keeps O#/W#/D#/E# labels out of raw entries.",
       "assertions": [
         {
           "name": "reporting_metadata_accepted",
@@ -1718,104 +1747,126 @@
       "execution": {"kind": "weekly-ppt-ready-markdown-contract"},
       "skill": "weekly",
       "fixture": {
-        "expected_story_slide_counts": [2],
-        "required_content_terms": [[
+        "expected_slide_count": 2,
+        "required_title_terms": [
+          ["local repair", "validation internals"],
+          ["retry", "fallback"]
+        ],
+        "required_content_terms": [
           ["ambiguous repair owner", "upstream repair", "local repair", "retry boundary"],
           ["repair locally", "budget exhausted", "fallback", "ownership remains in validation"]
-        ]],
-        "unique_content_terms": ["upstream repair", "budget exhausted"],
-        "hidden_intended_takeaways": [
-          {"story_index": 0, "slide_index": 0, "text": "Local repair wins because upstream ownership leaks validation internals."},
-          {"story_index": 0, "slide_index": 1, "text": "Repair stays local while fallback preserves the orchestration boundary."}
         ],
+        "required_pre_diagram_terms": [[], ["local repair", "retry budget"]],
+        "unique_content_terms": ["upstream repair", "budget exhausted"],
         "rejection_probes": [
-          "missing-why",
-          "missing-goal",
+          "missing-audience",
+          "missing-outcome",
+          "missing-thesis",
           "missing-content",
           "production-guideline",
-          "takeaway-leak",
+          "topic-title",
+          "question-title",
+          "claim-proof-gap",
           "role-title",
           "unsafe-main-deck-reference",
           "complex-result-merged"
         ],
         "candidate_output": {
+          "audience_contract": {
+            "primary_audience": "Engineering manager deciding repair ownership",
+            "prior_knowledge": "Knows the validation and orchestration boundary, not the implementation details",
+            "occasion": "10-minute architecture decision review",
+            "deck_job": "decide",
+            "audience_outcome": "Approve validation-local repair ownership",
+            "central_claim": "Local repair preserves the stage boundary while retaining a bounded fallback",
+            "confidence_boundary": "Establishes path semantics, not measured latency"
+          },
           "deck_context": "Validation failures exposed an ownership question that affects retry reliability.",
-          "management_question": "Where should repair live without coupling orchestration to validation internals?",
-          "stories": [{
-            "title": "Repair ownership and retry boundaries",
-            "why": "The previous path had an ambiguous repair owner, so validation failures could leak into orchestration decisions.",
-            "goal": "Compare the ownership choices and explain the selected runtime path.",
-            "slides": [
-              {
-                "title": "Where repair ownership creates coupling",
-                "content": "The ambiguous repair owner made the retry boundary the governing constraint.\\n\\n| Option | Effect |\\n|---|---|\\n| upstream repair | exposes validation internals to orchestration |\\n| local repair | keeps failure handling inside validation |"
-              },
-              {
-                "title": "The local repair and fallback path",
-                "content": "```mermaid\\nflowchart LR\\n  Validate[validate] --> Repair[repair locally]\\n  Repair --> Validate\\n  Repair -->|budget exhausted| Fallback[orchestration fallback]\\n```\\n\\nThe retry budget controls the branch; ownership remains in validation."
-              }
-            ]
-          }],
+          "management_question": "Approve where repair should live without coupling orchestration to validation internals.",
+          "thesis": "Repair should remain local to validation; fallback activates only after the local budget is exhausted.",
+          "slides": [
+            {
+              "id": "repair-ownership",
+              "title": "Local repair avoids leaking validation internals into orchestration",
+              "content": "The ambiguous repair owner made the retry boundary the governing constraint.\\n\\n| Option | Effect |\\n|---|---|\\n| upstream repair | exposes validation internals to orchestration |\\n| local repair | keeps failure handling inside validation |"
+            },
+            {
+              "id": "repair-path",
+              "title": "Retry and fallback stay inside validation until the budget is exhausted",
+              "content": "Local repair retains validation ownership; the retry budget is the only condition that opens the orchestration fallback.\\n\\n```mermaid\\nflowchart LR\\n  Validate[validate] --> Repair[repair locally]\\n  Repair --> Validate\\n  Repair -->|budget exhausted| Fallback[orchestration fallback]\\n```\\n\\nThe retry budget controls the branch; ownership remains in validation."
+            }
+          ],
           "evidence_appendix": [
             {"claim": "Upstream repair exposes validation internals.", "source": "design:tradeoffs", "boundary": "Design comparison, not measured latency."},
             {"claim": "Exhausted local retries enter fallback.", "source": "mechanism:fallback", "boundary": "Path semantics, not fallback frequency."}
           ]
         }
       },
-      "expected_behavior": "P2-A: one Story publishes Why and Goal, then directly presents trade-offs and the dependent runtime path without exposing intended takeaways or production guidance."
+      "expected_behavior": "P2-A: two claim-led pages use distinct grounded material for the design judgment and its dependent operating path."
     },
     {
       "id": "weekly-ppt-b-simple-story-content-merge",
       "execution": {"kind": "weekly-ppt-ready-markdown-contract"},
       "skill": "weekly",
       "fixture": {
-        "expected_story_slide_counts": [1],
-        "required_content_terms": [[[
-          "two owners", "one explicit owner", "downstream interface stays unchanged"
-        ]]],
+        "expected_slide_count": 1,
+        "required_title_terms": [["one explicit owner", "downstream work"]],
+        "required_content_terms": [["two owners", "one explicit owner", "downstream interface stays unchanged"]],
+        "required_pre_diagram_terms": [["two owners", "one explicit owner"]],
         "unique_content_terms": ["downstream interface stays unchanged"],
-        "hidden_intended_takeaways": [
-          {"story_index": 0, "slide_index": 0, "text": "One ownership edge removes the ambiguous handoff without changing downstream work."}
-        ],
-        "rejection_probes": ["missing-why", "missing-goal", "production-guideline", "simple-result-split"],
+        "rejection_probes": ["missing-audience", "missing-outcome", "empty-deck", "diagram-first", "production-guideline", "simple-result-split"],
         "candidate_output": {
+          "audience_contract": {
+            "primary_audience": "Service owner approving a handoff change",
+            "prior_knowledge": "Knows the current downstream contract",
+            "occasion": "5-minute decision brief",
+            "deck_job": "decide",
+            "audience_outcome": "Approve one explicit owner",
+            "central_claim": "One ownership edge removes ambiguity without changing downstream work",
+            "confidence_boundary": "Contract preservation, not measured speed"
+          },
           "deck_context": "A bounded ownership change needs one complete explanation.",
-          "management_question": "Can the handoff be clarified without changing downstream work?",
-          "stories": [{
-            "title": "Ownership handoff",
-            "why": "Two owners shared one handoff and neither was the explicit source of truth.",
-            "goal": "Show the root cause, selected ownership, and unchanged interface together.",
-            "slides": [{
-              "title": "Before and after the ownership change",
-              "content": "```mermaid\\nflowchart LR\\n  A[owner A] -. ambiguous .-> Downstream[downstream]\\n  B[owner B] -. ambiguous .-> Downstream\\n  C[one explicit owner] --> DownstreamAfter[downstream interface stays unchanged]\\n```\\n\\nBefore: two owners. After: one explicit owner."
-            }]
+          "management_question": "Approve the ownership change without changing downstream work.",
+          "thesis": "One explicit owner removes the ambiguous handoff while preserving the interface.",
+          "slides": [{
+            "id": "ownership-change",
+            "title": "One explicit owner removes ambiguity without changing downstream work",
+            "content": "Before, two owners shared one handoff; after, one explicit owner preserves the same downstream interface.\\n\\n```mermaid\\nflowchart LR\\n  A[owner A] -. ambiguous .-> Downstream[downstream]\\n  B[owner B] -. ambiguous .-> Downstream\\n  C[one explicit owner] --> DownstreamAfter[downstream interface stays unchanged]\\n```\\n\\nBefore: two owners. After: one explicit owner."
           }],
           "evidence_appendix": [
             {"claim": "The explicit owner preserves the downstream interface.", "source": "simple:mechanism-path", "boundary": "Contract preservation, not measured speed."}
           ]
         }
       },
-      "expected_behavior": "P2-B: one Story and one content page carry root cause, choice, operation, and invariant without mechanical splitting."
+      "expected_behavior": "P2-B: one claim-led page carries root cause, choice, operation, and invariant without mechanical splitting."
     },
     {
       "id": "weekly-ppt-c-blind-content-handoff-preflight",
       "execution": {"kind": "weekly-ppt-ready-markdown-contract"},
       "skill": "weekly",
       "fixture": {
-        "expected_story_slide_counts": [1],
-        "required_content_terms": [[["normal", "force", "partial recovery", "selected stages", "per-episode DAG"]]],
+        "expected_slide_count": 1,
+        "required_title_terms": [["normal", "force", "recovery", "per-episode DAG"]],
+        "required_content_terms": [["normal", "force", "partial recovery", "selected stages", "per-episode DAG"]],
+        "required_pre_diagram_terms": [["normal", "force", "partial recovery", "per-episode DAG"]],
         "unique_content_terms": ["per-episode DAG"],
         "candidate_output": {
+          "audience_contract": {
+            "primary_audience": "Runtime owner reviewing execution semantics",
+            "prior_knowledge": "Knows the three entry paths",
+            "occasion": "Async technical review",
+            "deck_job": "technical_review",
+            "audience_outcome": "Confirm that every entry shares one execution truth",
+            "central_claim": "Normal, force, and recovery converge before one per-episode DAG",
+            "confidence_boundary": "Execution semantics, not production acceptance"
+          },
           "deck_context": "Three entry paths need one execution model.",
-          "management_question": "Can a maker translate the operating path without source research?",
-          "stories": [{
-            "title": "Unified execution path",
-            "why": "Normal, force, and partial recovery previously diverged before execution.",
-            "goal": "Present every semantic node and relationship needed for visual translation.",
-            "slides": [{
-              "title": "Execution path shared by every entry",
-              "content": "```mermaid\\nflowchart LR\\n  normal --> Selection[selected stages]\\n  force --> Selection\\n  recovery[partial recovery] --> Selection\\n  Selection --> DAG[per-episode DAG]\\n  DAG --> Result[episode artifacts and final result]\\n```\\n\\nUnchanged: force API, result contract, rolling metadata."
-            }]
+          "management_question": "Confirm the unified operating path without source research.",
+          "thesis": "Every entry now converges on the same episode-level execution path.",
+          "slides": [{
+            "id": "unified-dag",
+            "title": "Normal, force, and recovery now share one per-episode DAG",
+            "content": "Normal, force, and partial recovery now converge before one per-episode DAG, so entry differences no longer create separate execution semantics.\\n\\n```mermaid\\nflowchart LR\\n  normal --> Selection[selected stages]\\n  force --> Selection\\n  recovery[partial recovery] --> Selection\\n  Selection --> DAG[per-episode DAG]\\n  DAG --> Result[episode artifacts and final result]\\n```\\n\\nUnchanged: force API, result contract, rolling metadata."
           }],
           "evidence_appendix": [
             {"claim": "All entries converge before the per-episode DAG.", "source": "mechanism:unified-path", "boundary": "Execution semantics, not production acceptance."}
@@ -1825,63 +1876,71 @@
       "expected_behavior": "P2-C preflight: all semantic content is in Markdown, leaving only visual translation to the blind maker."
     },
     {
-      "id": "weekly-ppt-d-takeaway-inference-separation",
+      "id": "weekly-ppt-d-audience-outcome-claim",
       "execution": {"kind": "weekly-ppt-ready-markdown-contract"},
       "skill": "weekly",
       "fixture": {
-        "expected_story_slide_counts": [1],
-        "required_content_terms": [[["same 88 shots", "Sonnet 28", "visual dimensions 7", "manual review"]]],
+        "expected_slide_count": 1,
+        "required_title_terms": [["Sonnet", "manual review"]],
+        "required_content_terms": [["same 88 shots", "Sonnet 28", "visual dimensions 7", "manual review"]],
         "unique_content_terms": ["visual dimensions 7"],
-        "hidden_intended_takeaways": [
-          {"story_index": 0, "slide_index": 0, "text": "Sonnet reveals a real visual-quality advantage but is not yet an automatic production choice."}
-        ],
-        "rejection_probes": ["takeaway-leak"],
+        "rejection_probes": ["topic-title", "question-title", "claim-proof-gap"],
         "candidate_output": {
+          "audience_contract": {
+            "primary_audience": "Quality owner deciding provider adoption",
+            "prior_knowledge": "Understands the evaluation dimensions but not the provider comparison",
+            "occasion": "5-minute provider decision brief",
+            "deck_job": "recommend",
+            "audience_outcome": "Keep manual review while validating Sonnet's advantage",
+            "central_claim": "Sonnet exposes more visual issues but is not yet an automatic production choice",
+            "confidence_boundary": "Hit counts do not establish precision or approval"
+          },
           "deck_context": "Provider choice requires comparable evidence and explicit limits.",
-          "management_question": "What does the same-sample comparison establish, and what remains undecided?",
-          "stories": [{
-            "title": "Provider comparison",
-            "why": "Visual issue dimensions remained silent under the current provider.",
-            "goal": "Compare observed signals without turning hit counts into accuracy.",
-            "slides": [{
-              "title": "Four models on the same sample",
-              "content": "Same 88 shots and prompt:\\n\\n| Model group | Total hits | Visual dimensions |\\n|---|---:|---:|\\n| Other providers | 5–11 | 0–1 |\\n| Sonnet | Sonnet 28 | visual dimensions 7 |\\n\\nHit count is not accuracy; cost and over-judgment still require manual review."
-            }]
+          "management_question": "Decide whether the observed signal is enough for automatic adoption.",
+          "thesis": "Sonnet shows a visual-detection advantage, but manual review still gates adoption.",
+          "slides": [{
+            "id": "provider-signal",
+            "title": "Sonnet shows a visual-detection advantage, but manual review still gates adoption",
+            "content": "Same 88 shots and prompt:\\n\\n| Model group | Total hits | Visual dimensions |\\n|---|---:|---:|\\n| Other providers | 5–11 | 0–1 |\\n| Sonnet | Sonnet 28 | visual dimensions 7 |\\n\\nHit count is not accuracy; cost and over-judgment still require manual review."
           }],
           "evidence_appendix": [
             {"claim": "Sonnet produced 28 total and 7 visual-dimension hits.", "source": "eval:model-comparison", "boundary": "Observed hits, not precision or approval."}
           ]
         }
       },
-      "expected_behavior": "P2-D: hidden intended takeaway is inferable from evidence and limits but is not directly copied into the public deck."
+      "expected_behavior": "P3-A: the public title states the bounded conclusion and the same page proves it for the declared audience decision."
     },
     {
       "id": "weekly-ppt-e-standalone-markdown-reading",
       "execution": {"kind": "weekly-ppt-ready-markdown-contract"},
       "skill": "weekly",
       "fixture": {
-        "expected_story_slide_counts": [1, 1],
+        "expected_slide_count": 2,
+        "required_title_terms": [
+          ["episode-level DAG", "aligned"],
+          ["locked baselines", "acceptance remains open"]
+        ],
         "required_content_terms": [
-          [["batch and episode", "single DAG", "cache miss"]],
-          [["locked baseline", "variant", "end-to-end rerun"]]
+          ["batch and episode", "single DAG", "cache miss"],
+          ["locked baseline", "variant", "end-to-end rerun"]
         ],
         "unique_content_terms": ["cache miss", "end-to-end rerun"],
         "candidate_output": {
+          "audience_contract": {
+            "primary_audience": "Engineering manager reviewing two semantic risks",
+            "prior_knowledge": "Knows the pipeline stages but not the weekly changes",
+            "occasion": "Async weekly review",
+            "deck_job": "inform",
+            "audience_outcome": "Separate established mechanisms from open acceptance gates",
+            "central_claim": "Two hidden semantic risks now have explicit mechanisms and bounded gates",
+            "confidence_boundary": "Neither mechanism is yet production-accepted"
+          },
           "deck_context": "The week moved two hidden semantic risks into explicit mechanisms and gates.",
-          "management_question": "Which mechanisms are established, and which evidence gates remain?",
-          "stories": [
-            {
-              "title": "Pipeline execution semantics",
-              "why": "Batch and episode semantics diverged during partial recovery.",
-              "goal": "Explain the single DAG path and its remaining cache boundary.",
-              "slides": [{"title": "The shared execution path", "content": "Every entry converges on a single DAG at episode granularity, removing the batch and episode divergence. Historical batch cache may produce a first-run cache miss; force can bypass it."}]
-            },
-            {
-              "title": "Cross-episode scene reuse",
-              "why": "The model did not see the locked baseline and recreated stable fields.",
-              "goal": "Explain baseline reuse, allowed variation, and the validation gate.",
-              "slides": [{"title": "The location-cluster generation path", "content": "Each location cluster receives the locked baseline. Stable fields are reused; change enters variant and anchors. An end-to-end rerun must confirm ep7/ep8 consistency."}]
-            }
+          "management_question": "Separate established mechanisms from their remaining evidence gates.",
+          "thesis": "Execution semantics and scene reuse are explicit, while cache and end-to-end acceptance remain open.",
+          "slides": [
+            {"id": "dag-semantics", "title": "One episode-level DAG now keeps batch and recovery semantics aligned", "content": "Every entry converges on a single DAG at episode granularity, removing the batch and episode divergence. Historical batch cache may produce a first-run cache miss; force can bypass it."},
+            {"id": "baseline-reuse", "title": "Locked baselines preserve stable scene fields, but acceptance remains open", "content": "Each location cluster receives the locked baseline. Stable fields are reused; change enters variant and anchors. An end-to-end rerun must confirm ep7/ep8 consistency."}
           ],
           "evidence_appendix": [
             {"claim": "Single DAG preserves episode semantics.", "source": "runtime:dag", "boundary": "Mechanism complete, cache gate open."},
@@ -1889,7 +1948,321 @@
           ]
         }
       },
-      "expected_behavior": "P2-E: a reader can reconstruct Story order, Why, Goal, mechanisms, and open gates without PPT or production guidance."
+      "expected_behavior": "P3-B: a reader can reconstruct the cumulative claims, mechanisms, and open gates without PPT or production guidance."
+    },
+    {
+      "id": "weekly-ppt-f-code-grounded-current-vs-target",
+      "execution": {"kind": "documented-only"},
+      "skill": "weekly",
+      "fixture": {
+        "manual_only_reason": "Node, edge, truth-state, and audience comprehension require a real repository and human semantic review; the executable suite validates only the immutable Git locator protocol.",
+        "expected_slide_count": 2,
+        "required_title_terms": [
+          ["当前实现", "scheduler"],
+          ["目标设计", "尚未实现"]
+        ],
+        "required_content_terms": [
+          ["当前实现", "SchedulerState", "phase helpers", "tested behavior", "不证明质量提升"],
+          ["目标设计", "Editor Intent Compiler", "Quality Gate", "尚未实现"]
+        ],
+        "required_appendix_source_terms": [
+          "commit <qualified-commit>",
+          "<resolved-repository>",
+          "captured repository snapshot",
+          "design:agent-native-v3.1"
+        ],
+        "unique_content_terms": ["phase helpers", "Quality Gate"],
+        "candidate_output": {
+          "audience_contract": {
+            "primary_audience": "同部门、需要继续开发和评审该链路的工程同事",
+            "prior_knowledge": "了解现有 pipeline 阶段，但没有阅读本周 commits",
+            "occasion": "8 分钟现场周会",
+            "deck_job": "inform",
+            "audience_outcome": "区分本周已经形成的代码结构与下一阶段目标设计",
+            "central_claim": "当前 scheduler 拆分已经落地，Agent-native 仍只是待实施设计",
+            "confidence_boundary": "代码和测试支持结构与行为边界，不支持质量收益或生产接纳"
+          },
+          "deck_context": "同事需要看懂本周后的真实代码边界，同时避免把下一代方案误认为已落地。",
+          "management_question": "哪些结构现在已经可以接手，哪些仍只能作为下一阶段设计讨论。",
+          "thesis": "当前架构与目标架构必须用不同来源和明确状态分别呈现。",
+          "slides": [
+            {
+              "id": "current-architecture",
+              "title": "当前实现已把 scheduler 收敛为状态对象与分阶段 helpers",
+              "content": "当前实现把一个大型调度过程拆成 SchedulerState 与 7 个 phase helpers；调用入口和结果契约保持不变。\n\n```mermaid\nflowchart LR\n  Entry[episode entry] --> State[SchedulerState]\n  State --> Phases[7 phase helpers]\n  Phases --> Binding[binding module]\n  Phases --> Shot[shot module]\n  Phases --> Result[episode result]\n```\n\n4/4 harness 支持 tested behavior 等价；这张结构图不证明质量提升或生产接纳。"
+            },
+            {
+              "id": "target-architecture",
+              "title": "目标设计引入意图编译与质量门，但尚未实现",
+              "content": "目标设计是在现有 generation 前后增加两个受控能力，不替换现有 DAG；Phase 1–5 尚未实现。\n\n```mermaid\nflowchart LR\n  Notes[editor notes] --> Compiler[Editor Intent Compiler]\n  Compiler --> Generation[existing generation]\n  Generation --> Gate[Quality Gate]\n  Gate --> Output[validated output]\n```\n\n该图表达 design target，不是当前代码拓扑。"
+            }
+          ],
+          "evidence_appendix": [
+            {
+              "claim": "Scheduler extraction exists in the current weekly snapshot.",
+              "source": "commit <qualified-commit> @ <resolved-repository>; captured repository snapshot at or before 2026-07-31",
+              "boundary": "Commit and tree support implemented structure; 4/4 harness supports only exercised behavior."
+            },
+            {
+              "claim": "Editor Intent Compiler and Quality Gate are target design.",
+              "source": "design:agent-native-v3.1",
+              "boundary": "Design is implementation-ready but not implemented."
+            }
+          ]
+        }
+      },
+      "expected_behavior": "Manual P3-E: a peer-facing Weekly follows a qualified commit into an immutable captured snapshot, verifies every architecture relation against real source, explains the concept before the visual, and keeps current implementation separate from target design and observed effect."
+    },
+    {
+      "id": "weekly-git-snapshot-resolution-protocol",
+      "execution": {"kind": "git-snapshot-resolution"},
+      "skill": "weekly",
+      "fixture": {
+        "as_of": "2026-07-31T23:59:59+08:00",
+        "eligible_snapshot_at": "2026-07-31T18:00:00+08:00",
+        "late_snapshot_at": "2026-08-01T09:00:00+08:00"
+      },
+      "expected_behavior": "The deterministic protocol selects the immutable captured snapshot before as_of, remains stable after the checked-out branch diverges, verifies commit ancestry, ignores a later snapshot, and degrades when the object is unavailable."
+    },
+    {
+      "id": "weekly-ppt-g-visual-utility-no-forced-diagram",
+      "execution": {"kind": "weekly-ppt-ready-markdown-contract"},
+      "skill": "weekly",
+      "fixture": {
+        "expected_slide_count": 1,
+        "required_title_terms": [["环境变量", "显式告警"]],
+        "required_content_terms": [["静默失败", "启动时告警", "运行路径和输出契约没有变化"]],
+        "forbidden_main_terms": ["```mermaid", "```text", "flowchart", "graph lr", "graph td"],
+        "candidate_output": {
+          "audience_contract": {
+            "primary_audience": "同部门维护该服务的工程同事",
+            "prior_knowledge": "知道服务配置入口",
+            "occasion": "5 分钟现场周会",
+            "deck_job": "inform",
+            "audience_outcome": "知道配置失败现在会在哪里暴露",
+            "central_claim": "未解析环境变量从静默失败改为启动时显式告警",
+            "confidence_boundary": "只改变诊断可见性，不改变运行路径或输出契约"
+          },
+          "deck_context": "一个简单修复需要同步新的故障可见性。",
+          "management_question": "维护者现在应在哪里发现配置错误。",
+          "thesis": "配置错误更早可见，其他语义保持不变。",
+          "slides": [
+            {
+              "id": "config-warning",
+              "title": "未解析环境变量不再静默失败，而是在启动时显式告警",
+              "content": "此前 `${VAR}` 未解析时会保留为普通字符串，形成静默失败，错误直到 provider 调用才暴露。现在配置加载阶段直接给出启动时告警；运行路径和输出契约没有变化。"
+            }
+          ],
+          "evidence_appendix": [
+            {
+              "claim": "Unresolved placeholders emit a loader warning.",
+              "source": "raw:config-warning; test:config-placeholder",
+              "boundary": "Diagnostic behavior only; no production reliability metric."
+            }
+          ]
+        }
+      },
+      "expected_behavior": "A simple change that is clearer in two sentences remains text-only; Weekly does not add a decorative diagram merely because code changed."
+    },
+    {
+      "id": "weekly-ppt-w31-audience-framing-and-revision",
+      "execution": {"kind": "weekly-ppt-ready-markdown-contract"},
+      "skill": "weekly",
+      "fixture": {
+        "expected_slide_count": 3,
+        "required_title_terms": [
+          ["routing", "合并"],
+          ["质量"],
+          ["go/no-go"]
+        ],
+        "required_content_terms": [
+          ["10 集", "主线"],
+          ["wrong_shot_size", "35", "limited", "5 集改善 / 5 集劣化"],
+          ["30 集", "go", "no-go"]
+        ],
+        "forbidden_main_terms": ["B0", "B1", "CP1", "mode_id", "TaskSkillSnapshot", "Foundation 0", "pytest", "feature/", "commit"],
+        "rejection_probes": ["missing-audience", "missing-outcome", "missing-thesis", "topic-title", "question-title", "claim-proof-gap"],
+        "revision_expectation": {
+          "changed_slide_ids": ["routing-thesis", "routing-evidence", "routing-gate"],
+          "unchanged_slide_ids": [],
+          "added_slide_ids": [],
+          "removed_slide_ids": [],
+          "expected_slide_order": ["routing-thesis", "routing-evidence", "routing-gate"],
+          "required_revised_terms": {
+            "routing-thesis": ["cleanup", "非 routing"],
+            "routing-evidence": ["13%", "wrong_shot_size", "35"],
+            "routing-gate": ["cleanup 归因", "30 集"]
+          }
+        },
+        "revision_rejection_probes": [
+          "whitespace-only",
+          "unclassified-common-slide",
+          "duplicate-classification",
+          "nonexistent-classification"
+        ],
+        "candidate_outputs": [
+          {
+            "version": "w31-as-of-0730",
+            "as_of": "2026-07-30T23:59:59+08:00",
+            "audience_contract": {
+              "primary_audience": "负责决定是否继续投入和合并的项目负责人",
+              "prior_knowledge": "了解分镜质量目标，不需要掌握内部路由、缓存或模块实现",
+              "occasion": "5 分钟现场周会",
+              "deck_job": "decide",
+              "audience_outcome": "暂缓合并 source-faithful routing，并批准下一轮验证门槛",
+              "central_claim": "实现已经完成，但 10 集数据没有证明质量提升",
+              "confidence_boundary": "样本小、高方差，不能据此断言方案长期无效"
+            },
+            "deck_context": "本周需要判断 source-faithful routing 是否值得进入主线。",
+            "management_question": "现有证据是否足以合并，下一轮用什么门槛结束争论。",
+            "thesis": "代码完成不等于质量提升；当前不应合并，先扩样本再做 go/no-go。",
+            "slides": [
+              {
+                "id": "routing-thesis",
+                "title": "Source-faithful routing 代码完成，但 10 集数据不支持合并",
+                "content": "本周完成保守职责边界、三项可靠性修复和架构清理，方案已经可以进入真实的 10 集评估。\\n\\n但它尚未进入主线；是否合并必须由质量效果而不是实现完成度决定。"
+              },
+              {
+                "id": "routing-evidence",
+                "title": "117→115 不是已证明的质量提升",
+                "content": "同一 10 集样本：动作过多 81→80；wrong_shot_size 36→35；合计 117→115（−1.7%）。\\n\\n5 集改善 / 5 集劣化，逐集波动大。结论为 limited：当前更像重新分布错误，而不是稳定减少错误。"
+              },
+              {
+                "id": "routing-gate",
+                "title": "扩到至少 30 集或第二个 series 后，再做 go/no-go",
+                "content": "Go：扩大到至少 30 集或第二个 series 后，整体错误稳定下降且改善集明显多于劣化集。\\n\\nNo-go：净变化仍接近零、高方差，或劣化集中在关键模式；届时回滚或重设方案。"
+              }
+            ],
+            "evidence_appendix": [
+              {"claim": "可靠性修复已通过验收。", "source": "raw:2026-07-30T11:18:07+08:00", "boundary": "证明机制完成，不证明质量收益。"},
+              {"claim": "10 集错误 117→115，5 集改善、5 集劣化。", "source": "raw:2026-07-30T16:01:55+08:00", "boundary": "10 集小样本、高方差。"}
+            ]
+          },
+          {
+            "version": "w31-as-of-0731",
+            "previous_version": "w31-as-of-0730",
+            "as_of": "2026-07-31T23:59:59+08:00",
+            "audience_contract": {
+              "primary_audience": "负责决定是否继续投入和合并的项目负责人",
+              "prior_knowledge": "了解分镜质量目标，不需要掌握内部路由、缓存或模块实现",
+              "occasion": "5 分钟现场周会修订版",
+              "deck_job": "decide",
+              "audience_outcome": "继续暂缓 routing 合并，将后续投入转向 cleanup 归因与景别专项",
+              "central_claim": "新增降错信号来自 cleanup，仍不能证明 routing 有效",
+              "confidence_boundary": "cleanup 两轮叠加且归因未拆开，不能把约 13% 全部归给单一改动"
+            },
+            "deck_context": "7 月 31 日新增评估改变了收益来源判断，但没有解除 routing 的合并门槛。",
+            "management_question": "新增降错信号应改变哪项投入，而不是被错误归因给 routing。",
+            "thesis": "Routing 仍不应合并；下一轮应验证 cleanup 的独立贡献并单独解决景别问题。",
+            "slides": [
+              {
+                "id": "routing-thesis",
+                "title": "Source-faithful routing 仍不支持合并，新增收益来自 cleanup 而非 routing",
+                "content": "原 10 集 routing 结果仍接近零收益，不能进入主线。7 月 31 日新增的约 13% 降错信号来自两轮 cleanup 叠加；它改变了下一项投入，但没有证明 routing 有效。"
+              },
+              {
+                "id": "routing-evidence",
+                "title": "约 13% 降错只改善动作过多，景别质量没有变化",
+                "content": "Cleanup v2 相比基线/routing 约少 13% 错误，收益全部来自动作过多；routing 与 v2 的 wrong_shot_size 都是 35。\\n\\n原 routing 结果仍是 5 集改善 / 5 集劣化。结论为 limited：两轮 cleanup 的独立贡献尚未拆开，且三集动作过多出现尖峰。"
+              },
+              {
+                "id": "routing-gate",
+                "title": "补齐 cleanup 归因并解决景别后，再做 go/no-go",
+                "content": "Go：补齐单轮 cleanup 的 10 集归因，扩大到至少 30 集或第二个 series，确认降错稳定且关键集不回归。\\n\\nNo-go：收益无法复现、尖峰持续，或 wrong_shot_size 仍无改善；届时停止叠加 prompt 清理并转向镜头实现侧专项。"
+              }
+            ],
+            "evidence_appendix": [
+              {"claim": "Routing 的 10 集结果仍为 117→115。", "source": "raw:2026-07-30T16:01:55+08:00", "boundary": "小样本、高方差。"},
+              {"claim": "Cleanup v2 约降错 13%，但只改善动作过多。", "source": "raw:2026-07-31T17:59:59+08:00", "boundary": "两轮 cleanup 叠加，独立归因未完成。"}
+            ]
+          }
+        ]
+      },
+      "expected_behavior": "W31 freezes the initial cutoff, produces a three-claim manager deck, then advances the cutoff in a versioned revision without changing slide identity or overstating cleanup attribution."
+    },
+    {
+      "id": "weekly-ppt-revision-allows-grounded-structural-change",
+      "execution": {"kind": "weekly-ppt-ready-markdown-contract"},
+      "skill": "weekly",
+      "fixture": {
+        "revision_expectation": {
+          "changed_slide_ids": [],
+          "unchanged_slide_ids": ["stable-boundary"],
+          "added_slide_ids": ["replacement-decision"],
+          "removed_slide_ids": ["obsolete-gate"],
+          "expected_slide_order": ["stable-boundary", "replacement-decision"],
+          "required_revised_terms": {
+            "replacement-decision": ["new evidence", "replacement path"]
+          }
+        },
+        "candidate_outputs": [
+          {
+            "version": "structural-baseline",
+            "as_of": "2026-07-30T18:00:00+08:00",
+            "audience_contract": {
+              "primary_audience": "同部门负责继续实现的工程同事",
+              "prior_knowledge": "了解稳定接口，不了解本周决策变化",
+              "occasion": "周会修订检查",
+              "deck_job": "inform",
+              "audience_outcome": "理解稳定边界与当前决策门",
+              "central_claim": "接口不变，但旧门槛仍在等待证据",
+              "confidence_boundary": "旧门槛只反映当时可用证据"
+            },
+            "deck_context": "旧证据支持一个暂时的实现门槛。",
+            "management_question": "哪些内容必须稳定，哪些会随证据改变。",
+            "thesis": "稳定接口不变，旧决策门等待后续证据。",
+            "slides": [
+              {
+                "id": "stable-boundary",
+                "title": "下游接口保持不变",
+                "content": "输入、输出和错误契约在本轮都保持不变。"
+              },
+              {
+                "id": "obsolete-gate",
+                "title": "旧证据要求继续等待",
+                "content": "当前样本不足，因此旧决策门仍然阻止切换。"
+              }
+            ],
+            "evidence_appendix": [
+              {"claim": "下游接口保持不变。", "source": "contract:stable", "boundary": "接口证据，不证明决策门永久有效。"}
+            ]
+          },
+          {
+            "version": "structural-revision",
+            "previous_version": "structural-baseline",
+            "as_of": "2026-07-31T18:00:00+08:00",
+            "audience_contract": {
+              "primary_audience": "同部门负责继续实现的工程同事",
+              "prior_knowledge": "了解稳定接口，不了解本周决策变化",
+              "occasion": "周会修订检查",
+              "deck_job": "inform",
+              "audience_outcome": "理解稳定边界与新的替代路径",
+              "central_claim": "接口不变，新证据使旧门槛退出并形成替代路径",
+              "confidence_boundary": "新证据只支持当前替代决策"
+            },
+            "deck_context": "New evidence replaces the old gate without changing the stable interface.",
+            "management_question": "哪些内容必须稳定，哪些会随证据改变。",
+            "thesis": "稳定接口不变，new evidence 支持 replacement path。",
+            "slides": [
+              {
+                "id": "stable-boundary",
+                "title": "下游接口保持不变",
+                "content": "输入、输出和错误契约在本轮都保持不变。"
+              },
+              {
+                "id": "replacement-decision",
+                "title": "New evidence 支持 replacement path",
+                "content": "New evidence 已关闭旧门槛，并让 replacement path 成为当前可执行选择。"
+              }
+            ],
+            "evidence_appendix": [
+              {"claim": "下游接口保持不变。", "source": "contract:stable", "boundary": "接口证据。"},
+              {"claim": "新证据替代旧门槛。", "source": "eval:new-evidence", "boundary": "只支持当前替代决策。"}
+            ]
+          }
+        ]
+      },
+      "expected_behavior": "A revision preserves an unrelated stable slide while removing an obsolete gate and adding the replacement decision supported by new evidence."
     },
     {
       "id": "decision-replay-unsafe-slug-rejected",

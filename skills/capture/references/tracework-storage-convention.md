@@ -480,6 +480,12 @@ Each `{vault}/raw/weeks/{week}/{slug}.json` file contains a **JSON array** of en
         "ref": "abc1234",
         "path": "/Users/dev/projects/my-project",
         "note": "Implemented the composition layout change."
+      },
+      {
+        "type": "repository_snapshot",
+        "ref": "0123456789abcdef0123456789abcdef01234567",
+        "path": "/Users/dev/projects/my-project",
+        "note": "Committed tree observed at capture; uncommitted work is not represented."
       }
     ],
     "artifact_context": [
@@ -521,7 +527,7 @@ Consumers must tolerate these fields being absent. Producers should add them whe
 | `evidence_refs` | string[] | Direct commit, eval, issue, or document references supporting the entry; their presence alone does not prove `impact` |
 | `decision_threads` | string[] | Stable thread keys for decision replay. These override artifact hints and keyword fallback when deriving `thread_id` |
 | `lifecycle_transition` | object | Explicit state change for an open question, risk, decision, or artifact |
-| `source_refs` | object[] | Typed source references with `type` and `ref`, plus optional `path`, `url`, `note`, or `timestamp` |
+| `source_refs` | object[] | Typed source references with `type` and `ref`, plus optional `path`, `url`, `note`, or `timestamp`; `repository_snapshot` uses a full Git object id and absolute repository root |
 | `motivation` | string | Trigger reason and goal for the change — what problem was being solved |
 | `exploration_paths` | string[] | Approaches tried during the session and their outcomes |
 | `abandoned_alternatives` | string[] | Approaches explicitly rejected and why |
@@ -658,6 +664,12 @@ Recommended producer behavior:
 - Add `source_refs` when evidence needs a typed reference rather than a plain
   string. Each object must include `type` and `ref`; optional fields are
   `path`, `url`, `note`, and `timestamp`.
+- For a code-backed session-end or checkpoint entry, add a
+  `repository_snapshot` source when the current repository and committed `HEAD`
+  can be resolved cheaply. Use the full object id as `ref` and the absolute
+  repository root as `path`. It identifies only the committed tree observed at
+  capture time; it never includes or proves uncommitted work. Do not reconstruct
+  a historical snapshot during Capture Day from the repository's current state.
 - Add `project_area` or `work_stream` when the natural module or narrative grouping is obvious. Leave them absent rather than guessing.
 - Add `motivation` when the trigger for the change is clear — the problem being solved, the constraint that forced the change, or the goal being pursued. This is the "why now" behind the change.
 - Add `exploration_paths` when the session involved trying multiple approaches. Each entry should describe the approach and its outcome (e.g. "lazy loading → marginal gain on mobile first-screen").

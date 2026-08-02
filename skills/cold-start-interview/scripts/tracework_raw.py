@@ -26,6 +26,7 @@ VALID_TYPES = {"feature", "fix", "refactor", "decision", "risk"}
 VALID_SOURCES = {"session-recap", "arch-doc"}
 VALID_STATUSES = {"done", "ongoing", "risk", "decision"}
 VALID_CAPTURE_DEPTHS = {"lite", "standard", "deep"}
+REPOSITORY_SNAPSHOT_TYPE = "repository_snapshot"
 REQUIRED_FIELDS = ("timestamp", "type", "summary", "context", "source")
 VALID_ARCHETYPES = {"decision", "build", "investigation", "repair", "maintenance"}
 ARCHETYPE_REQUIRED_FIELDS = {
@@ -441,6 +442,16 @@ def validate_source_refs(entry: dict[str, Any]) -> None:
         for field in ("path", "url", "note", "timestamp"):
             if field in ref and (not isinstance(ref[field], str) or not ref[field].strip()):
                 raise ValueError(f"entry source_refs[{index}].{field} must be a non-empty string when present")
+        if ref["type"] == REPOSITORY_SNAPSHOT_TYPE:
+            if not re.fullmatch(r"(?:[0-9a-fA-F]{40}|[0-9a-fA-F]{64})", ref["ref"]):
+                raise ValueError(
+                    f"entry source_refs[{index}].ref must be a full Git object id for repository_snapshot"
+                )
+            path = ref.get("path")
+            if not isinstance(path, str) or not Path(path).expanduser().is_absolute():
+                raise ValueError(
+                    f"entry source_refs[{index}].path must be an absolute repository root for repository_snapshot"
+                )
 
 
 def validate_lifecycle_transition(entry: dict[str, Any]) -> None:
