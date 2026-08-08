@@ -1,24 +1,25 @@
 # Weekly Audience-facing PPT Mode Markdown Template
 
-Use only for explicit **slides** mode. Complete Weekly Analysis, Audience and
-Occasion Framing, Main-deck Admission, internal Story Formation, Cognitive Task
-Decomposition, source grounding, and Content Materialization first.
+Use only for explicit **slides** mode. Resolve shared weekly facts and goals,
+then branch into Audience and Occasion Framing, Result Selection,
+Selected-source Reopen, and Final Deck writing. Use Cognitive Task Decomposition
+only when a complex result still needs merge/split diagnosis.
 
 The Markdown is the audience-facing semantic presentation. It must read like
 candidate slide content, not an analysis form, Storyboard, or Production Brief.
 A PPT maker may choose visual translation but may not research the vault,
 invent semantics, or re-decide the argument.
 
-Keep the internal communication job, Story Why/Goal, cognitive roles, source
-packets, and template mapping out of the public document.
+Keep internal semantic groups, cognitive roles, source packets, and template
+mapping out of the public document.
 
 ## Deck
 
 ```markdown
 # {YYYY-WNN} Weekly Review
 
-**汇报场景：** {primary audience · occasion or duration}
-**需要形成的判断：** {one audience decision, action, or understanding}
+**汇报场景：** {primary audience · occasion; duration only when supplied}
+**需要形成的理解或行动：** {one audience understanding, action, or decision}
 
 ---
 
@@ -36,9 +37,18 @@ creates the need for the next decision.}
 
 ---
 
-## Slide 3｜{decision, action, or closure claim}
+## Slide N｜{decision, action, or closure claim}
 
 {The bounded implication and a pass/fail next gate.}
+
+---
+
+## Slide N+1｜下周计划围绕{goal or remaining gate}收口
+
+{Confirmed commitments and proposed items, each with owner or dependency when
+known and a pass/fail closure criterion. Required for the default
+same-department weekly-meeting deck; adapt only when explicit framing changes
+the communication job.}
 
 ---
 
@@ -49,15 +59,21 @@ creates the need for the next decision.}
 | {compact claim} | {raw entry or direct artifact locator} | {what it does not prove} |
 ```
 
-The example has three slides because many decision briefs need thesis,
-evidence, and action. It is not a required page count. A produced deck contains
-1-8 pages that survive Main-deck Admission, with no preset target count. When no
+The example shows a claim sequence, not a required page count. A produced deck
+contains only pages that survive Result Selection and deletion review. Unusual
+length triggers compression review rather than a numeric failure. When no
 candidate survives, return an evidence-insufficient empty state instead of an
 empty deck.
 
 ## Content Rules
 
 - Use one primary audience and one communication job.
+- When framing is absent, write for same-department colleagues who know the
+  project background but not this week's implementation and validation. Do not
+  silently substitute a manager decision brief or invent a duration.
+- Make the work goal visible before asking the audience to interpret actions:
+  why this work exists, what this week changed, and why the final choice serves
+  that goal.
 - Write each slide title as a supported claim a presenter could naturally say
   aloud. Do not use a topic, question, process, object, or cognitive-role label
   when the evidence supports a conclusion.
@@ -65,8 +81,13 @@ empty deck.
   expected-only boundaries beside the claim they qualify.
 - Keep each slide to one narrative job and one primary claim. Prefer less copy
   and higher-value evidence over comprehensive implementation detail.
-- Put the actual facts, conflicts, alternatives, relationships, numbers,
-  branches, fallbacks, invariants, risks, and gates in the slide body.
+- Put the actual facts, conflicts, relationships, numbers, branches, fallbacks,
+  invariants, risks, and gates in the slide body. Show alternatives only when
+  the audience must compare or choose them now; otherwise give the final choice
+  and its shortest necessary rationale.
+- Allow complementary text, diagrams, numbers, tests, and traces on one page
+  when they perform one cognitive job. State what each proves; proximity must
+  not imply unsupported causality.
 - For technical explanation, state the concept in plain audience language
   before any diagram; the diagram must not be the first body block. Use one
   minimal example when it reduces ambiguity.
@@ -80,13 +101,16 @@ empty deck.
   feedback, aligned trace for one evolving example, a small matrix for repeated
   old/new comparison, and a chart only for comparable quantitative evidence.
   Use text when it already carries the idea with lower reading cost.
-- Keep a complex design-to-mechanism result in one internal Story and use two
-  pages only when both claims have independent evidence and the mechanism
+- Keep a complex design-to-mechanism result in one semantic composition and use
+  two pages only when both claims have independent evidence and the mechanism
   depends on the design premise established first.
 - Keep a simple result on one page when one Before/After, relation, or flow
   explains root cause, choice, and operation.
 - Move implementation inventory, complete work-stream accounting, and
   provenance to notes or appendix unless they change the audience decision.
+- For the default same-department weekly meeting, end with a next-week plan page
+  that separates confirmed commitments from proposals and gives each a closure
+  criterion.
 - Keep full source packets and unsupported-claim analysis internal. The
   Evidence Appendix is compact and does not repeat the deck.
 
@@ -94,7 +118,7 @@ empty deck.
 
 Do not emit:
 
-- public `Story`, `Why`, or `Goal` authoring scaffolding
+- public `Story`, cognitive-role, or analysis-field scaffolding
 - `Audience takeaway`
 - `Recommended visual form`
 - `Page composition`
@@ -115,9 +139,9 @@ Shorten, remap, or split copy that does not fit; never shrink or flatten it.
 
 ## Preflight
 
-1. Give only the Markdown to a fresh member of the target audience. Within a
-   short read they must state the thesis, confidence boundary, and requested
-   decision or action.
+1. Give only the Markdown to a fresh member of the target audience. They must
+   state the work goal, thesis, confidence boundary, and requested understanding
+   or action without additional project research.
 2. Check every title against its body. Unsupported certainty, topic-only titles,
    or evidence that does not prove the title fail.
 3. Remove each page in turn. If the audience decision, understanding, and

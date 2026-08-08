@@ -17,7 +17,8 @@ template and support a real revision round trip.
    and two customer follow-ups must produce different ranking and management
    meaning for “win next week's proposal” versus “reduce delivery risk.”
 2. **No reliable goal source**: label the goal unknown, ask at most one question
-   in brief/slides mode, continue when skipped, and never invent a confirmed Why.
+   only when ambiguity would change selection or priority, continue when skipped,
+   and never infer a confirmed Why from actions, commits, modules, or effort.
 3. **Prior commitments**: account for every prior confirmed commitment and
    proposal as `met`, `advanced`, `blocked`, `replanned`, or `not_started`.
 4. **Evidence-led replan**: preserve the old direction, evidence trigger,
@@ -43,9 +44,9 @@ template and support a real revision round trip.
    portfolio coverage. Do not force a headline count.
 14. **Conflict**: later or conflicting raw states remain visible and lower
    confidence.
-15. **Explicit PPT request**: produce one PPT-ready Markdown Deck with 1-8
-    necessary main slides per group and no preset target count. Zero admitted
-    pages return an empty state. Default Weekly remains a Brief.
+15. **Explicit PPT request**: produce one PPT-ready Markdown Deck with only
+    necessary main slides per group. Zero admitted pages return an empty state.
+    Default Weekly remains a Brief.
 16. **Quantified algorithm result**: recommend a result chart only when metric,
    unit, baseline, current value, delta, sample scope, method, and comparability
    support it.
@@ -56,20 +57,25 @@ template and support a real revision round trip.
 19. **Core runtime mechanism**: use mechanism evidence only when it materially
     advances the audience's understanding; a diagram explains causality rather
     than enumerate actors or steps.
-20. **Cognitive decomposition**: identify necessary problem reframe, design
-    rationale, mechanism, validation, and decision tasks internally; tasks are
-    candidates, not pages.
+20. **Cognitive decomposition**: only when a complex result has an uncertain
+    merge/split decision, identify necessary problem reframe, design rationale,
+    mechanism, validation, and decision roles internally; roles are diagnostics,
+    not pages or a mandatory stage.
 21. **Maintenance-only work**: retain parameter tuning, cleanup, and
     non-mechanism configuration work in the portfolio without decorative
     architecture diagrams or implementation narratives.
 22. **Audience and occasion**: resolve one primary audience, prior knowledge,
-    occasion or duration, deck job, and required audience outcome before page
-    selection. A reporting group alone is not an audience definition.
-23. **Story formation**: keep Story Why/Goal and cognitive roles internal; the
-    public deck begins with audience-facing claims rather than authoring fields.
-24. **Content materialization**: reopen raw sources, keep source packets
-    internal, and turn facts, relations, comparisons, mechanisms, numbers,
-    boundaries, and gates into presentation content itself.
+    occasion, optional duration, deck job, and required audience outcome before
+    page selection. With no explicit framing, default to same-department
+    colleagues at a weekly meeting—not a timed manager decision brief.
+23. **Goal-grounded semantic composition**: start from why the work exists,
+    then present the weekly result or final choice, shortest rationale, evidence
+    boundary, and next closure. Internal grouping does not become public
+    authoring fields.
+24. **Selected-source reopen**: reopen raw and direct sources only for selected
+    results, keep source packets internal, and turn facts, relations,
+    comparisons, mechanisms, numbers, boundaries, and gates into presentation
+    content itself.
 25. **Contract rejection probes**: reject missing audience outcome, topic-only
     titles, unsupported title claims, production guidelines in public content,
     unsafe main-deck references, false complex-result merges, mechanical
@@ -277,23 +283,29 @@ variance, decision or support, next commitment, and confidence boundary.
   not expand the body.
 - Adding a material decision-blocking risk does change the body.
 - The appendix maps body claims to evidence without retelling body prose.
-- Slides resolve one primary audience, prior knowledge, occasion or duration,
-  deck job, audience outcome, central claim, and confidence boundary before
-  selection. If skipped, use the manager-decision default.
+- Slides resolve one primary audience, prior knowledge, occasion, optional
+  duration, deck job, audience outcome, central claim, and confidence boundary
+  before selection. If framing is absent, use the same-department weekly-meeting
+  default with no invented duration.
 - The Markdown Deck states a compact presentation context and one required
-  audience judgment or action.
-- A produced main deck has 1-8 necessary slides with no preset target count;
-  zero admitted candidates return an empty state instead of an empty deck.
-- Story Why/Goal and cognitive roles remain internal rather than public
-  authoring scaffolding.
+  audience understanding, judgment, or action.
+- A produced main deck has only necessary slides; unusual length triggers
+  deletion/compression review rather than a numeric cap. Zero admitted
+  candidates return an empty state instead of an empty deck.
+- The work goal is visible and not reconstructed from actions. Cognitive roles
+  are invoked only for complex merge/split diagnosis and remain internal.
 - Each title states an evidence-bounded audience-facing claim, and the page body
   visibly proves it.
 - Each page directly presents supported facts, relationships, comparison,
   mechanism, numbers, boundaries, or risks; it contains no production fields.
+- Complementary proof objects may share one page when they serve one cognitive
+  job, and each evidence item states its proof responsibility.
+- The main deck defaults to the final choice and shortest rationale; complete
+  rejected-path archaeology stays local unless the audience must choose now.
 - Full Source Grounding Packets and unsupported-claim ledgers remain internal;
   the public appendix contains only compact claim-to-source boundaries.
 - Complex results split only when pages use different grounded material and
-  cognitive tasks, serve one Story Goal, and form a prerequisite sequence.
+  cognitive tasks, serve one Deck Thesis, and form a prerequisite sequence.
 - Simple results remain merged when one content block explains root cause,
   choice, and operation.
 - Validation receives a separate page only when it changes confidence, risk, or
@@ -306,6 +318,8 @@ variance, decision or support, next commitment, and confidence boundary.
   reported separately.
 - Every open risk and next-week acceptance target has a pass/fail closure
   criterion.
+- The default same-department deck ends with a next-week plan page that
+  distinguishes confirmed commitments from proposals.
 - Expected effects never appear as observed outcomes, and missing numeric
   evidence never becomes a guessed baseline, target, or trend.
 - Default department slides keep source paths, commit hashes, raw evidence ids,

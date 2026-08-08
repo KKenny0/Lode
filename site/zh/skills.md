@@ -16,11 +16,12 @@
 - **quick**：`这周做了啥` / `周报简版` — 对话内 5–7 条 + 结转，不写文件。
 - **brief**（默认）：`/tracework:weekly` / `写周报` — management brief。
 - **slides**：明确 `weekly PPT` / `周报 PPT` 时 — 面向部门内部汇报、以 IC 为讲述者的
-  PPT-ready Markdown Deck；没有最低页数，主 deck 最多 8 页。
+  PPT-ready Markdown Deck；只保留必要页面，异常长度触发压缩检查而不是数字上限。
 
-Slides 会先形成 Story Why/Goal，再通过内部认知任务、source grounding 与 Content
-Materialization 把事实、关系、数字、机制和风险直接写入演示正文。intended takeaway
-与完整 source packet 不公开；读者应从内容中自然得到认识，PPT 制作者只做视觉转译。
+没有显式受众时，Slides 默认服务同部门周会：同事知道项目背景，但不了解本周最新
+实现与验证；正文从“为什么做”进入本周结果或最终选择，给出最短必要理由，并以下周
+计划收口。系统只为入选结果回溯 source；认知任务仅在复杂拆合页时使用。完整 source
+packet 不公开，PPT 制作者只做视觉转译。
 
 ### Monthly
 

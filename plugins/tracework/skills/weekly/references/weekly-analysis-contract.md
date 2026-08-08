@@ -4,11 +4,13 @@ Use after scope partition and evidence gathering for **brief** and **slides**.
 Do not use for **quick**. Analysis runs in the main dialog.
 
 - `brief`: complete the goal loop, then apply **Brief Projection**.
-- `slides`: complete the same goal loop, then resolve **Audience and Occasion**,
-  apply **Main-deck Admission**, form internal Stories, run **Cognitive Task
-  Decomposition**, source grounding, and **Content Materialization**. Emit one
-  audience-facing PPT-ready Markdown Deck and, only when explicitly requested
-  and supported, an editable template-native PPTX.
+- `slides`: share scope, goal lanes, prior commitments, coverage, work-stream
+  state transitions, and truth boundaries with Brief, then branch before
+  audience-specific ranking. Use **Result Selection**, reopen only selected
+  sources, and write one audience-facing PPT-ready Markdown Deck. Run
+  **Cognitive Task Decomposition** only when a complex merge/split decision
+  requires it. Emit an editable template-native PPTX only when explicitly
+  requested and supported.
 
 Return one analysis object per reporting group:
 
@@ -40,8 +42,9 @@ Resolve goals before selecting changes:
 1. explicit current-request goal;
 2. confirmed prior-Weekly commitment;
 3. explicit milestone, plan, or project-goal artifact;
-4. inference from raw motivation, decision, or carry-forward;
-5. unknown.
+4. a raw entry's recorded local objective or constraint;
+5. bounded inference from raw motivation;
+6. unknown.
 
 ```json
 {
@@ -61,7 +64,10 @@ Resolve goals before selecting changes:
 An empty source is `unknown`, not permission to invent a Why. Goals inferred
 after work remain `inferred`. An agent recommendation from the prior report
 remains `proposed`. Keep unrelated goal lanes separate even when they share a
-reporting group.
+reporting group. Actions, commits, modules, and effort volume are evidence of
+work, not goal sources. If an unknown goal would change selection, grouping,
+the period judgment, or next priority, ask once; otherwise continue with the
+unknown boundary and do not claim goal progress.
 
 ## Prior Commitment Accounting
 
@@ -109,8 +115,11 @@ module, day, or archetype when the management meaning is shared.
 }
 ```
 
-Rank by observable end-state significance, audience relevance, evidence
-strength, and effect on the next decision. Do not force a headline count.
+For Brief, rank by observable end-state significance, management relevance,
+evidence strength, and effect on the next decision. For Slides, preserve the
+same state transitions and truth boundaries but postpone audience-specific
+ranking to Result Selection; do not first produce the Brief ranking. Do not
+force a headline count.
 
 Each selected material change keeps a stable id and includes:
 
@@ -216,7 +225,7 @@ content. Keep this as internal analysis rather than another public page schema:
   "primary_audience": "one role, not managers plus peers plus reviewers",
   "prior_knowledge": "what this audience can safely be assumed to know",
   "occasion": "live_brief | async_read | technical_review",
-  "duration": "for example 5 minutes, or unknown",
+  "duration": "optional user-supplied constraint",
   "deck_job": "inform | recommend | decide | request_support | technical_review",
   "audience_outcome": "the judgment, action, or understanding required",
   "central_claim": "one evidence-bounded conclusion",
@@ -229,15 +238,27 @@ Express the communication job in one sentence:
 > By the end, **[primary audience]** should **[audience outcome]** because
 > **[central claim within its confidence boundary]**.
 
-If the primary audience or required outcome is missing, ask at most one combined
-question. When skipped, use a non-technical five-minute decision brief for the
-responsible manager or project owner. Never use `reporting_group` alone as the
-audience definition, and do not mix distinct audience roles in one deck.
+When framing is absent, use this product default:
 
-## Main-deck Admission
+- primary audience: same-department colleagues;
+- prior knowledge: they know the project's basic context but not this week's
+  latest implementation and validation;
+- occasion: department weekly meeting;
+- duration: unspecified;
+- deck job: inform;
+- audience outcome: understand this week's progress and implementation state,
+  know material boundaries or collaboration needs, and see the next-week plan.
 
-**Slides only.** Admit a result only when removing it would change the primary
-audience's decision, understanding, or confidence. Implementation inventory,
+Explicit manager, leadership, async-read, or technical-review wording overrides
+the default. Ask at most one combined question only when unresolved ambiguity
+would materially change result selection, grouping, or the requested action.
+Never use `reporting_group` alone as the audience definition, and do not mix
+distinct audience roles in one deck.
+
+## Result Selection and Deck Thesis
+
+**Slides only.** Select a result only when removing it would change the primary
+audience's understanding, action, or confidence. Implementation inventory,
 secondary work streams, provenance, and details useful only for technical
 follow-up go to speaker notes or appendix.
 
@@ -245,30 +266,30 @@ Do not admit a result merely because it is effortful, complete, technically
 interesting, or present in Weekly Analysis. The main deck answers the
 communication job; the appendix preserves accountability.
 
-## Story Formation
+Build one Deck Thesis before page writing:
 
-**Slides only.** Group selected results into the fewest Stories that give the
-deck a coherent management argument. A Story is a shared objective across one
-or more slides, not a slide type or mandatory public heading.
+```text
+work goal
+→ weekly result or final choice
+→ shortest necessary rationale
+→ evidence and current boundary
+→ next closure
+```
 
-For every Story, record internally:
-
-- `Why`: the problem, constraint, opportunity, or uncertainty that makes the
-  Story necessary;
-- `Goal`: the understanding or question this group of slides must resolve.
-
-Do not force Why and Goal into the public Markdown. Their job is to keep the
-claim sequence honest. Do not use a reporting group as proof that unrelated
-results share one Story.
+The work goal answers why the work exists; it must not be reconstructed from
+actions, commits, modules, or effort. Group claims into the fewest semantic
+compositions that preserve this thesis. These groups are internal authoring
+logic, not public Story/Why/Goal fields or mandatory pages.
 
 ## Cognitive Task Decomposition
 
-**Slides only.** This is a temporary reasoning step inside each Story. Do not
-expose its role labels or create another public schema. A cognitive task is a
-candidate, not a page.
+**Slides only and on demand.** Use this temporary reasoning step only when a
+complex selected result still has an uncertain merge/split decision. Do not run
+it for every result, expose its role labels, or create another public schema. A
+cognitive task is a diagnostic unit, not a page.
 
-First state the management conclusion each selected result must support. Then
-identify only the necessary cognitive tasks:
+First state the audience-facing conclusion the selected result must support.
+Then identify only the roles needed to test independence:
 
 - `problem_reframe`: replace the apparent problem with the real constraint;
 - `design_rationale`: explain the trade-off and why the chosen direction wins;
@@ -280,14 +301,15 @@ identify only the necessary cognitive tasks:
 
 For each temporary task, record an internal `supported_claim`, its evidence
 boundary, likely source locators, the facts or relationship that prove it, and
-the prior understanding it needs. Discard tasks that do not advance the Story
-Goal. A retained `supported_claim` should become the public slide title or be
+the prior understanding it needs. Discard tasks that do not advance the Deck
+Thesis. A retained `supported_claim` should become the public slide title or be
 combined into another title; do not make the audience infer the conclusion from
 a topic label.
 
-## Source Grounding
+## Selected-source Reopen
 
-Reopen the raw entries and direct artifacts behind every candidate task.
+Reopen the raw entries and direct artifacts behind every selected result and
+retained claim. Do not construct full packets for unselected results.
 Existing Weekly prose may locate evidence but cannot substitute for it. Build
 an internal Source Grounding Packet containing:
 
@@ -340,17 +362,29 @@ recorded intent, implemented structure, tested behavior, observed effect, and
 target design. A commit or code diagram never proves quality improvement, and a
 target-design diagram must be visibly described as not yet implemented.
 
-## Content Materialization
+## Evidence Responsibility and Final Deck Writing
 
-Convert the grounded packet into presentation content itself:
+Convert selected grounded material directly into presentation content:
 
+- the work goal and why it matters now;
+- the final choice and its shortest goal-serving rationale;
 - facts and contradictions the audience must see;
-- candidates, constraints, and rejection reasons;
 - actual objects and relationships;
 - observed numbers with sample and boundary;
 - main path, material branch, fallback, input, output, and invariant;
 - Before/After, Mermaid, Markdown tables, quote blocks, or concise prose;
 - remaining risks, decisions, and pass/fail gates.
+
+Do not expose full candidate, constraint, or rejected-alternative inventories by
+default. Keep that evidence local unless the current audience must compare or
+choose among those paths.
+
+Assign every retained evidence item one responsibility: for example,
+architecture establishes structure, a test establishes exercised behavior, an
+eval establishes observed effect within its sample, and a design artifact
+establishes target intent. One page may combine several proof objects when they
+jointly support one claim. Spatial adjacency must not imply that one evidence
+type proves another.
 
 Do not specify layout, font, color, cards, regions, or drawing instructions in
 the public Markdown. Markdown is the audience-facing semantic presentation,
@@ -393,7 +427,7 @@ cannot be deleted without changing the audience's decision, understanding, or
 confidence.
 
 Prefer one page. Split `design_rationale` from `mechanism` only when both
-pages serve the same Story Goal, use different source material and cognitive
+pages serve the same Deck Thesis, use different source material and cognitive
 tasks, and the mechanism depends on the facts, constraints, and trade-offs
 presented first. The first page directly presents the design problem and
 choice; the second directly presents operation, branch or fallback, and
@@ -418,16 +452,22 @@ lists, interchangeable pages, and detail pages whose deletion changes nothing.
 **Slides only.** Return one public Markdown document using `slide-template.md`.
 It must remain complete and readable without a `.pptx`.
 
-Use the resolved primary audience. When framing is skipped, use
-`manager_decision_brief`, five-minute live delivery, and non-technical wording.
-Keep only necessary main-deck slides, never more than eight. A result may use
-zero, one, two, or—only when independent validation changes the decision—three
-slides.
+Use the resolved primary audience. When framing is skipped, use the
+same-department weekly-meeting default above. Duration remains unspecified.
+Keep only necessary main-deck slides; use no numeric page cap. An unusual length
+triggers deletion and compression review. A result may use zero, one, two, or—
+only when independent validation changes understanding or action—three slides.
 
 Public content consists of a compact deck framing line, audience-facing slide
-content, optional speaker notes, and a compact Evidence Appendix. Internal Story
-Why/Goal, cognitive roles, source packets, visual feasibility, merge/split
-analysis, unsupported-claim ledgers, and production guidance remain hidden.
+content, optional speaker notes, and a compact Evidence Appendix. Internal
+semantic groups, cognitive roles, source packets, visual feasibility,
+merge/split analysis, unsupported-claim ledgers, and production guidance remain
+hidden.
+
+For the default same-department weekly meeting, end with one next-week plan page
+that distinguishes confirmed commitments from proposals and gives each item a
+pass/fail closure criterion. Do not fabricate a plan; mark missing ownership or
+an unresolved target explicitly.
 
 Run these preflights:
 

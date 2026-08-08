@@ -410,7 +410,7 @@ function validatePptReadyMarkdownOutput(fixture, output) {
   assert(nonEmptyString(output.management_question), `${fixture.id}: management question is missing`);
   assert(nonEmptyString(output.thesis), `${fixture.id}: deck thesis is missing`);
   const slides = Array.isArray(output.slides) ? output.slides : [];
-  assert(slides.length > 0 && slides.length <= 8, `${fixture.id}: main deck must contain 1-8 necessary slides`);
+  assert(slides.length > 0, `${fixture.id}: main deck must contain at least one necessary slide`);
   if (Number.isInteger(fixture.fixture?.expected_slide_count)) {
     assert.equal(slides.length, fixture.fixture.expected_slide_count, `${fixture.id}: deck has the wrong merge/split result`);
   }
@@ -484,6 +484,20 @@ function validatePptReadyMarkdownOutput(fixture, output) {
   for (const unique of fixture.fixture?.unique_content_terms || []) {
     const owners = slides.filter((slide) => slide.content.toLowerCase().includes(unique.toLowerCase()));
     assert.equal(owners.length, 1, `${fixture.id}: content unit ${unique} is missing or does not justify one page`);
+  }
+
+  if (fixture.fixture?.default_team_sync) {
+    assert(/同部门|部门同事/.test(audience.primary_audience), `${fixture.id}: default audience is not same-department colleagues`);
+    assert.equal(audience.deck_job, 'inform', `${fixture.id}: default team weekly must inform rather than silently become a decision brief`);
+    assert(!/\d+\s*(分钟|minutes?|mins?)/i.test(audience.occasion), `${fixture.id}: default framing invented a duration`);
+    const deckText = slides.map(slide => `${slide.title}\n${slide.content}`).join('\n').toLowerCase();
+    for (const term of fixture.fixture?.required_goal_terms || []) {
+      assert(deckText.includes(String(term).toLowerCase()), `${fixture.id}: deck is missing goal grounding term ${term}`);
+    }
+    const finalSlideText = `${slides.at(-1).title}\n${slides.at(-1).content}`.toLowerCase();
+    for (const term of fixture.fixture?.required_next_plan_terms || []) {
+      assert(finalSlideText.includes(String(term).toLowerCase()), `${fixture.id}: final slide is missing next-plan term ${term}`);
+    }
   }
 }
 
@@ -636,6 +650,16 @@ export function validateWeeklyPptReadyMarkdownRejectionProbes(fixture) {
         {...original, id: `${original.id}-before`, title: 'The previous handoff had two owners'},
         {...original, id: `${original.id}-after`, title: 'The new handoff has one owner'},
       );
+    } else if (probe === 'wrong-default-audience') {
+      output.audience_contract.primary_audience = '负责拍板的项目经理';
+      output.audience_contract.deck_job = 'decide';
+    } else if (probe === 'missing-goal-grounding') {
+      for (const slide of slides) {
+        slide.title = slide.title.replaceAll('目标', '事项');
+        slide.content = slide.content.replaceAll('目标', '事项').replaceAll('可复现', '可用');
+      }
+    } else if (probe === 'missing-next-plan') {
+      slides.pop();
     } else {
       throw new Error(`${fixture.id}: unknown PPT-ready Markdown rejection probe ${probe}`);
     }

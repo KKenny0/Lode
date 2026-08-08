@@ -104,10 +104,11 @@ headline 数量。Brief 正文只保留会改变管理判断的信息，完整�
 | `/tracework:roadmap` | 低频进阶 | 长周期决策线程叙事 |
 | `/tracework:cold-start-interview` | 一次性增强 | Vault、项目身份和报告分组 |
 
-明确请求 `weekly PPT` 时，Tracework 会生成最多 8 页、没有最低页数的 PPT-ready
-Markdown Deck。每个 Story 先公开 Why 与 Goal，随后直接呈现事实、关系、比较、
-机制、数字和风险；source packet 与 intended takeaway 留在内部，公开附录只保留
-紧凑证据映射。Markdown 本身可以独立阅读，PPT 只是它的视觉转译。
+明确请求 `weekly PPT` 时，Tracework 会生成只保留必要页面的 PPT-ready Markdown
+Deck；异常长度触发压缩检查，而不是数字上限。没有显式受众时，默认服务同部门周会：
+从工作目标进入本周结果或最终选择、最短必要理由和证据边界，并以下周计划收口。
+系统只为入选结果回溯 source，完整 source packet 留在内部，公开附录只保留紧凑证据
+映射。Markdown 本身可以独立阅读，PPT 只是它的视觉转译。
 
 Decision replay 是可信机制，而不是需要每天使用的操作。读者可以从报告主张向下追到
 raw entry、被拒方案、风险和直接证据。记录不足时，Tracework 应该明确暴露缺口，而

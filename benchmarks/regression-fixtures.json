@@ -2065,6 +2065,117 @@
       "expected_behavior": "A simple change that is clearer in two sentences remains text-only; Weekly does not add a decorative diagram merely because code changed."
     },
     {
+      "id": "weekly-ppt-default-team-sync-goal-grounded",
+      "execution": {"kind": "weekly-ppt-ready-markdown-contract"},
+      "skill": "weekly",
+      "fixture": {
+        "default_team_sync": true,
+        "expected_slide_count": 4,
+        "required_goal_terms": ["目标", "可复现"],
+        "required_next_plan_terms": ["下周计划", "confirmed", "proposed", "通过标准"],
+        "required_title_terms": [
+          ["可复现", "召回边界"],
+          ["统一入口", "检索路径"],
+          ["回归样本", "边界"],
+          ["下周计划", "扩样本"]
+        ],
+        "required_content_terms": [
+          ["目标", "最终选择", "原因"],
+          ["结构", "测试", "不证明质量"],
+          ["20 个", "18 个", "limited"],
+          ["confirmed", "proposed", "通过标准"]
+        ],
+        "forbidden_main_terms": ["候选方案清单", "被排除方案"],
+        "rejection_probes": ["wrong-default-audience", "missing-goal-grounding", "missing-next-plan"],
+        "candidate_output": {
+          "audience_contract": {
+            "primary_audience": "同部门参与检索链路开发的同事",
+            "prior_knowledge": "了解素材检索的项目背景，但没有阅读本周实现与验证记录",
+            "occasion": "部门周会",
+            "deck_job": "inform",
+            "audience_outcome": "理解本周为何收敛召回边界、当前实现到哪里以及下周如何验证",
+            "central_claim": "固定召回边界已经统一执行语义，但效果结论仍需扩样本",
+            "confidence_boundary": "结构和回归支持当前行为，不支持生产质量已经提升"
+          },
+          "deck_context": "团队需要同步素材检索链路本周的实现进展和下一步验证。",
+          "management_question": "本周工作服务什么目标、形成了什么选择，以及下一步怎样关闭效果不确定性。",
+          "thesis": "为了让召回结果可复现，本周统一检索入口和边界；实现已验证，质量仍是 limited。",
+          "slides": [
+            {
+              "id": "goal-and-choice",
+              "title": "为了让召回结果可复现，本周把动态边界收敛为固定召回边界",
+              "content": "目标：让同一输入在不同入口获得一致、可复现的候选集合。\n\n最终选择：所有入口共享固定召回边界。原因：它先消除执行语义漂移，同时保留后续调参空间。"
+            },
+            {
+              "id": "shared-path",
+              "title": "统一入口让三类请求共享同一条检索路径",
+              "content": "结构关系已经落地，三类入口先进入同一 selection 节点，再执行过滤和排序。\n\n```mermaid\nflowchart LR\n  Normal[normal] --> Select[selection]\n  Force[force] --> Select\n  Recovery[recovery] --> Select\n  Select --> Filter[filter]\n  Filter --> Rank[rank]\n```\n\n结构图证明当前连接关系；4/4 测试证明覆盖到的行为一致。两者都不证明质量已经提升。"
+            },
+            {
+              "id": "bounded-validation",
+              "title": "20 个回归样本守住执行边界，但还不足以判断召回质量",
+              "content": "同一 20 个回归样本中，18 个结果集合完全一致，2 个差异来自尚未统一的历史缓存。\n\n结论为 limited：当前数据支持执行边界趋于一致，不支持生产召回质量提升。"
+            },
+            {
+              "id": "next-week-plan",
+              "title": "下周计划先扩样本并关闭历史缓存边界",
+              "content": "Confirmed：补齐历史缓存迁移并重跑 20 个回归样本；通过标准是 20/20 结果集合一致。\n\nProposed：扩到 100 个真实查询评估召回质量；通过标准是样本定义和基线确认后再形成质量结论。"
+            }
+          ],
+          "evidence_appendix": [
+            {
+              "claim": "三类入口共享 selection、filter 和 rank。",
+              "source": "raw:shared-retrieval-path; commit:retrieval-boundary",
+              "boundary": "证明已实现结构，不证明召回质量。"
+            },
+            {
+              "claim": "20 个回归样本中 18 个一致。",
+              "source": "eval:retrieval-regression-20",
+              "boundary": "小样本且两个历史缓存差异未关闭。"
+            }
+          ]
+        }
+      },
+      "expected_behavior": "With no explicit framing, Weekly serves same-department colleagues, starts from the work goal and final choice, allows complementary structure and test evidence on one page with separate proof responsibilities, and ends with a bounded next-week plan without inventing a duration or rejected-path inventory."
+    },
+    {
+      "id": "weekly-ppt-no-numeric-page-cap",
+      "execution": {"kind": "weekly-ppt-ready-markdown-contract"},
+      "skill": "weekly",
+      "fixture": {
+        "expected_slide_count": 9,
+        "candidate_output": {
+          "audience_contract": {
+            "primary_audience": "参与九项独立边界评审的技术同事",
+            "prior_knowledge": "了解系统背景，需要逐项确认本周形成的独立边界",
+            "occasion": "显式技术评审",
+            "deck_job": "technical_review",
+            "audience_outcome": "逐项确认九个不可互相替代的技术结论",
+            "central_claim": "九项边界分别改变后续实现或验证，不能仅为满足页数上限而合并",
+            "confidence_boundary": "每页只陈述对应来源支持的边界"
+          },
+          "deck_context": "本周技术评审包含九项证据独立、删除后会损失必要认知的结论。",
+          "management_question": "九项独立边界是否都已被正确理解并保留。",
+          "thesis": "页面数量服从必要认知，而不是固定上限。",
+          "slides": [
+            {"id": "boundary-1", "title": "入口契约保持不变", "content": "输入字段和错误契约保持不变，调用方无需迁移。"},
+            {"id": "boundary-2", "title": "调度状态已经集中管理", "content": "状态写入已收敛到单一状态对象，旧的分散写入已退出。"},
+            {"id": "boundary-3", "title": "依赖解析按请求粒度等待", "content": "依赖等待从批次级改为请求级，避免无关请求互相阻塞。"},
+            {"id": "boundary-4", "title": "强制路径继续复用统一执行语义", "content": "Force 入口仍然可用，但不再维护第二套执行路径。"},
+            {"id": "boundary-5", "title": "缓存缺失现在显式回退", "content": "历史缓存 miss 会进入显式回退并留下诊断信号。"},
+            {"id": "boundary-6", "title": "结果契约继续兼容现有消费者", "content": "结果字段和 rolling metadata 保持兼容。"},
+            {"id": "boundary-7", "title": "回归只证明覆盖到的行为一致", "content": "现有回归支持行为边界，不支持质量收益。"},
+            {"id": "boundary-8", "title": "生产接纳仍由真实流量验证决定", "content": "上线接受门尚未关闭，不能把实现完成写成生产接纳。"},
+            {"id": "boundary-9", "title": "下一步用扩样本关闭剩余质量风险", "content": "扩样本后按预先声明的通过标准决定是否进入主线。"}
+          ],
+          "evidence_appendix": [
+            {"claim": "九项结论拥有独立证据责任。", "source": "fixture:dense-technical-review", "boundary": "只验证无数字页数上限；真实内容仍需逐页证据。"}
+          ]
+        }
+      },
+      "expected_behavior": "An explicitly justified nine-page technical review passes because every page carries an independent conclusion; unusual length is reviewed semantically rather than rejected by a numeric cap."
+    },
+    {
       "id": "weekly-ppt-w31-audience-framing-and-revision",
       "execution": {"kind": "weekly-ppt-ready-markdown-contract"},
       "skill": "weekly",

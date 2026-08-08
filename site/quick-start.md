@@ -64,11 +64,12 @@ Use `personal` for personal projects or `all` for a private combined view with
 separate group sections. Weekly has three modes: say `这周做了啥` / `quick weekly`
 for a conversation-only quick review; default `write the weekly report` for a
 Markdown brief; say `weekly PPT` when you need a standalone PPT-ready Markdown
-Deck for a department update. A produced Slides deck contains 1-8 necessary
-pages with no preset target count; zero admitted pages return an empty state.
-Each Story opens with Why and Goal internally, then the public deck directly
-presents facts, relationships, comparisons, mechanisms, values, and risks.
-The Markdown is independently readable; PPT is its visual translation.
+Deck for a department update. Without explicit framing, it serves
+same-department colleagues at a weekly meeting and does not invent a duration.
+The deck starts from why the work exists, presents this week's result or final
+choice and shortest rationale, and ends with next-week closure. It contains only
+necessary pages; zero admitted pages return an empty state. The Markdown is
+independently readable; PPT is its visual translation.
 
 ## 4. Improve the Evidence with Capture
 

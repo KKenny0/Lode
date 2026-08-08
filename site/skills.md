@@ -21,18 +21,21 @@ Three modes:
   next commitments. Its body is decision-complete; its appendix preserves
   accountability, work coverage, and provenance.
 - **slides**: explicit `weekly PPT` / slides wording — a standalone PPT-ready
-  Markdown Deck with 1-8 necessary main-deck pages and no preset target count;
-  zero admitted pages return an empty state instead of an empty deck.
+  Markdown Deck with only necessary main-deck pages; unusual length triggers
+  compression review, and zero admitted pages return an empty state.
 
-Slides reopens raw sources and uses internal cognitive tasks, intended
-takeaways, and grounding packets to materialize presentation content. Public
-output contains claim-led slide content and a compact Evidence Appendix;
+Without explicit framing, Slides serves same-department colleagues at a weekly
+meeting, assumes they know the project background but not this week's changes,
+and ends with next-week closure. It starts from why the work exists, selects the
+weekly result or final choice, reopens sources only for selected claims, and
+uses cognitive roles only when a complex merge/split decision needs them.
+Public output contains claim-led slide content and a compact Evidence Appendix;
 it contains no production guidelines or page-level source packets.
 
 Design rationale and mechanism split only when they use different grounded
-content, serve the same Story Goal, and the mechanism depends on the design
-premise. Hidden intended takeaways must be inferable rather than repeated in
-titles or prose.
+content, serve the same Deck Thesis, and the mechanism depends on the design
+premise. Complementary proof objects may share a page when each has a clear
+evidence responsibility for one claim.
 
 ### Monthly
 
