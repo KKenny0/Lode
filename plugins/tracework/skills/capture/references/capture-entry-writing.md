@@ -193,6 +193,35 @@ artifact dossier through `tracework_raw.py upsert-artifact` unless
 and `deletion_behavior` for a future agent to understand the artifact boundary.
 Do not copy full artifact content into the dossier.
 
+For a design or architecture artifact that may later move or disappear, make
+the existing entry and dossier fields a compact recovery aid rather than a
+document backup. Preserve the goal or constraint, final choice and shortest
+rationale, core objects and relationships, material input/output/path/fallback,
+current-versus-target boundary, and remaining gate when known. Use
+`motivation`, `summary`, `impact`, `context`, `artifact_context`, and
+`artifact_summary`; do not add a second architecture schema. A dossier can
+support recorded intent and conceptual boundaries after deletion, but it cannot
+reconstruct exact topology or verify every document claim.
+
+When a local document is synchronized to a durable cloud document, keep the
+last local path in the dossier and add a typed raw-entry source ref when the
+stable locator is known:
+
+```json
+{
+  "type": "doc",
+  "ref": "stable document or revision id",
+  "url": "https://example.com/durable-document",
+  "note": "Target design; not evidence of current implementation."
+}
+```
+
+Use `deletion_behavior: "summary_remains_usable"` only when the digest is
+enough for later orientation. Use `source_required` when exact architecture,
+algorithm, or mechanism still depends on opening the source. If a
+`source_required` artifact has no durable path, commit, or remote locator, say
+so in the Capture receipt before the user deletes the only local copy.
+
 ## Sync Suggestions
 
 Add `sync_suggestions` when decisions, contract changes, prompt/schema changes,

@@ -90,6 +90,14 @@ optional fields.
      Daily/Weekly/Monthly carry-forward prose.
    - Add `artifact_context` and artifact dossier side effects only when the
      session materially changed durable artifacts or routed to `deep`.
+   - For a durable design or architecture artifact, preserve a compact
+     recoverable digest in existing entry and dossier fields: why it exists,
+     its goal, final choice and shortest rationale, core objects and
+     relationships, material path or fallback, current-versus-target boundary,
+     and remaining gate. Do not copy the full document.
+   - When a local design source moved to a cloud document, keep the last local
+     path for provenance and add a typed `doc` source ref with the stable URL
+     and document or revision id when known.
    - Do not assign report-local `O#`, `W#`, `D#`, or `E#` labels.
 
 4. **Write or fallback.**
@@ -110,6 +118,8 @@ Vault mode returns a concise confirmation plus a capture receipt from
 - non-zero risk / open-question / abandoned-alternative counts only;
 - one forward-looking line that connects this capture to later Daily/Weekly
   reports (for example that it can enter this week's report candidates).
+- when a `source_required` artifact has no durable locator, one explicit warning
+  that deleting its only local copy will prevent exact design reconstruction.
 
 Keep the default vault reply about six lines or fewer. Do not dump transcript
 bodies or long recaps unless verbose mode is requested.
@@ -144,6 +154,9 @@ Before finalizing each entry, check:
   absolute repository root, without implying that uncommitted work is included?
 - Are durable artifacts represented through `artifact_context` or dossier
   metadata only when they are material?
+- If an artifact is `source_required`, is there a durable commit, path, or
+  remote document locator? If not, warn that deleting the only local copy will
+  prevent later reconstruction of exact architecture or design mechanics.
 - For checkpoint mode, is this a durable stage signal rather than a progress
   log?
 

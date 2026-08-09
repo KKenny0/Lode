@@ -10,6 +10,7 @@ import {
   validateWeeklyGoalLoopContract,
   validateWeeklyPptReadyMarkdownContract,
   validateWeeklyPptReadyMarkdownRejectionProbes,
+  validateWeeklySourceGroundingRecoveryContract,
 } from './report-contract.mjs';
 
 const scriptDir = path.dirname(fileURLToPath(import.meta.url));
@@ -860,6 +861,16 @@ function runCaptureHelperReportingValidFixture(fixture) {
         `${fixture.id}: immutable repository snapshot not preserved`,
       );
     }
+    if (config.expected_doc_source_ref) {
+      assert(
+        appended.source_refs?.some(ref => (
+          ref.type === 'doc'
+          && ref.ref === config.expected_doc_source_ref
+          && ref.url === config.expected_doc_source_url
+        )),
+        `${fixture.id}: durable document locator not preserved`,
+      );
+    }
     for (const [index, probe] of (config.invalid_repository_snapshot_probes || []).entries()) {
       const invalidEntry = structuredClone(entry);
       const snapshot = invalidEntry.source_refs.find(ref => ref.type === 'repository_snapshot');
@@ -1127,10 +1138,31 @@ function runArtifactUpsertDossierFixture(fixture) {
     assert(dossier.artifact_summary?.scope === config.expected_scope, `${fixture.id}: dossier scope not preserved`);
     assert(dossier.source_availability === config.expected_source_availability, `${fixture.id}: source availability not preserved`);
     assert(dossier.deletion_behavior === config.expected_deletion_behavior, `${fixture.id}: deletion behavior not preserved`);
+    assert(
+      dossier.artifact_summary?.key_decisions?.includes(config.expected_design_relationship),
+      `${fixture.id}: recoverable design relationship not preserved`,
+    );
     assert(thin.id === config.thin_artifact.id && !thin.artifact_summary, `${fixture.id}: old thin artifact was not preserved as thin`);
   } finally {
     fs.rmSync(tempRoot, { recursive: true, force: true });
   }
+}
+
+function runCaptureSourceRequiredWarningFixture(fixture) {
+  const config = fixture.fixture || {};
+  const artifact = config.artifact || {};
+  const receipt = String(config.candidate_receipt || '');
+  assert(artifact.deletion_behavior === 'source_required', `${fixture.id}: fixture is not source-required`);
+  assert(artifact.source_availability === 'missing', `${fixture.id}: fixture source is not missing`);
+  assert(artifact.last_seen?.exists === false, `${fixture.id}: fixture still claims the source exists`);
+  for (const term of config.required_warning_terms || []) {
+    assert(receipt.includes(term), `${fixture.id}: capture receipt omits source deletion warning term ${term}`);
+  }
+  const mutant = receipt.replace(config.warning_line, '');
+  assert(
+    (config.required_warning_terms || []).some(term => !mutant.includes(term)),
+    `${fixture.id}: removing the warning line did not invalidate the receipt`,
+  );
 }
 
 function runMonthlyPrepareDailyReportFixture(fixture) {
@@ -1228,6 +1260,8 @@ function runExecutableFixture(fixture) {
     runCaptureHelperReportingInvalidFixture(fixture);
   } else if (kind === 'artifact-upsert-dossier') {
     runArtifactUpsertDossierFixture(fixture);
+  } else if (kind === 'capture-source-required-warning') {
+    runCaptureSourceRequiredWarningFixture(fixture);
   } else if (kind === 'monthly-prepare-daily-report-format') {
     runMonthlyPrepareDailyReportFixture(fixture);
   } else if (kind === 'report-contract') {
@@ -1239,6 +1273,8 @@ function runExecutableFixture(fixture) {
   } else if (kind === 'weekly-ppt-ready-markdown-contract') {
     validateWeeklyPptReadyMarkdownContract(fixture);
     validateWeeklyPptReadyMarkdownRejectionProbes(fixture);
+  } else if (kind === 'weekly-source-grounding-recovery-contract') {
+    validateWeeklySourceGroundingRecoveryContract(fixture);
   } else if (kind === 'git-snapshot-resolution') {
     runGitSnapshotResolutionFixture(fixture);
   } else if (kind === 'query-positive') {

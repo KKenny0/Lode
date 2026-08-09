@@ -13,10 +13,9 @@ description: >
 
 # Tracework Weekly
 
-Turn a week of agent work into an objective-anchored feedback loop: intended
-direction, actual change, variance, the resulting workplace judgment, and the
-next commitment. Preserve meaningful work without inventing a retrospective goal.
-
+Turn a week of agent work into an objective-anchored feedback loop: direction,
+actual change, variance, workplace judgment, and next commitment. Preserve
+meaningful work without inventing a retrospective goal.
 ## Modes
 
 Resolve mode before gathering evidence. Prefer the strongest explicit cue.
@@ -29,14 +28,11 @@ Priority when cues conflict: `slides` > `quick` > `brief`.
 | `brief` | 写周报, 周报, /tracework:weekly, weekly brief, 本周总结, weekly report | Management brief | Yes when vault exists; else conversation | No |
 | `slides` | weekly PPT, 周报 PPT, weekly slides, 演示大纲; or PPT/slides only after this skill is already selected for a weekly report | Audience-framed PPT-ready Markdown Deck; optional editable template-native PPTX when explicitly requested and supported | Same as brief; PPTX is a versioned copy | Yes |
 
-Default is `brief` when the request is a normal weekly report without PPT or
-quick wording. Do not treat bare “PPT” or “slides” alone as a reason to start
-this skill; those words select slides mode only inside an already weekly
-report request.
+Default to `brief` for a normal weekly report. Bare “PPT” or “slides” selects
+slides only inside an already weekly-report request.
 
-Slide mode selects from the shared weekly facts for one primary audience,
-occasion, and communication job before audience-specific ranking. Do not first
-write a Brief and paginate it. When the user does not specify framing, default
+Slide mode selects for one audience, occasion, and communication job. Do not
+paginate a Brief or force source-independent lanes under a shared goal. Default
 to a same-department weekly meeting: colleagues know the project's basic
 context, need this week's progress and implementation update, and need a final
 next-week plan. Duration is optional and never supplies a default page count.
@@ -143,31 +139,6 @@ Weekly must produce value without prior setup.
 
 If local first-run has no raw entries and no meaningful git activity, return a
 short empty-state and suggest capture or waiting for more work signal.
-
-### Conversation brief shape (no vault or local first-run)
-
-When not writing the weekly file, a compact brief is enough:
-
-```markdown
-## {YYYY-WNN} · {work | personal | all | local}
-
-**目标与判断：** {confirmed goal, inferred goal with boundary, or 目标未记录}；…
-
-### 目标推进
-- {goal}: {actual change and status}
-
-### 偏差与决策
-- {variance, replanning, decision, support, or unplanned material change}
-
-### 下周承诺
-- {commitment}: {pass/fail closure criterion}
-
-### 证据边界
-- raw / git / limited 各一句
-
----
-可选：配置 knowledge vault 后可跨天累计并写入文件。`/tracework:cold-start-interview`
-```
 
 ## Workflow
 
@@ -285,26 +256,40 @@ Skip this entire step for `quick` and `brief`. Run it only for `slides`.
 Coverage
 → Result Selection
 → Selected-source Reopen
+→ Source Grounding Recovery when a necessary page remains unsupported
 → Final Deck
 ```
 
 Apply the complete slides path in `weekly-analysis-contract.md`. In short:
 
 1. Resolve framing before ranking; default to the same-department weekly meeting.
-2. Build the Deck Thesis from goal → result/final choice → shortest rationale →
-   evidence boundary → next closure. Do not paginate a manager Brief.
+2. Build one local narrative per selected lane. A single lane starts directly;
+   multiple lanes use one grounded goal map and contiguous lane pages.
 3. Reopen sources only for selected results and state each evidence item's proof
-   responsibility. Complementary proof objects may share one page.
-4. Use Cognitive Task Decomposition only to diagnose a complex split. Keep full
+   responsibility. Start from the selected raw locators, then open only the
+   commit, snapshot, code, eval, or document needed by the retained claim.
+   Complementary proof objects may share one page.
+4. If a necessary page still lacks exact architecture, design mechanics, or a
+   decision-changing fact, ask once for all material missing sources. State the
+   affected claim, what is missing, what source forms would resolve it, and how
+   the page will degrade if the user skips. Do not ask for appendix-only detail.
+5. Use Cognitive Task Decomposition only to diagnose a complex split. Keep full
    alternatives local unless the audience must choose now.
-5. Form semantic compositions before template-native pagination. Delete or merge
+6. Form semantic compositions before template-native pagination. Delete or merge
    pages that do not change understanding, action, or confidence; review unusual
    length semantically rather than enforce a numeric cap.
-6. End the default team-weekly deck with confirmed/proposed next-week closure.
+7. End with confirmed/proposed next-week closure, grouped by selected goal lane.
 
 If data is missing, incomparable, or contradictory, do not invent a chart.
 Use a mechanism or state-change diagram, lower the evidence boundary, expose
 the measurement gap, and name its closure criterion.
+
+If one bounded repair still cannot preserve material goal lanes or produce
+audience-facing semantic compositions, do not emit numbered slides. Return
+`PPT Mode 未通过`, classify the failure as `evidence insufficient`, `contract
+validation failed`, or `model capability insufficient`, and preserve a compact
+recovery pack of candidate lanes, usable facts, boundaries, and next options.
+Do not silently switch models or modes.
 
 For an explicitly requested template-native PPTX, follow the optional contract
 in both slide references. Reuse runtime capability; do not build a renderer.
@@ -395,7 +380,6 @@ coverage in one line; it does not need badges.
 - No-vault runs return conversation output without blocking on cold-start.
 - Evidence grades and uncertainty are preserved; git-only material stays `limited`.
 - Activity volume is never promoted into outcomes.
-
 ### Quick only
 
 - Conversation output only; no weekly file write.
@@ -426,8 +410,8 @@ coverage in one line; it does not need badges.
 
 - Resolve one audience and outcome before selection. Absent framing defaults to
   same-department colleagues, no invented duration, and next-week closure.
-- State the work goal and one evidence-bounded thesis; use claim titles whose
-  bodies visibly prove them and keep limitations beside the claim.
+- State each selected goal and bounded conclusion; unrelated goals stay independent.
+- No single-goal overview; a multi-goal Slide 1 maps Why, result, status, and boundary.
 - Keep cognitive roles internal and on demand. Split complex results only for
   independent evidence and prerequisite claims; keep simple results merged.
 - Give every diagram, number, test, trace, or design artifact a distinct proof

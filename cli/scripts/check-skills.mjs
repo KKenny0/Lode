@@ -27,6 +27,7 @@ const pluginPathsSource = path.join(repoRoot, 'cli', 'src', 'plugin-paths.ts');
 const canonicalConvention = path.join(repoRoot, 'references', 'tracework-storage-convention.md');
 const canonicalDecisionReplay = path.join(repoRoot, 'references', 'decision_replay.py');
 const canonicalReportingContract = path.join(repoRoot, 'references', 'reporting-narrative-contract.md');
+const canonicalRawHelper = path.join(repoRoot, 'scripts', 'tracework_raw.py');
 
 const officialSkills = [
   'capture',
@@ -88,6 +89,11 @@ const decisionReplayCopies = [
   path.join(bundledSkillsDir, 'query', 'scripts', 'decision_replay.py'),
   path.join(bundledSkillsDir, 'roadmap', 'scripts', 'decision_replay.py'),
   path.join(bundledSkillsDir, 'recall', 'scripts', 'decision_replay.py'),
+];
+
+const rawHelperCopies = [
+  path.join(sourceSkillsDir, 'capture', 'scripts', 'tracework_raw.py'),
+  path.join(sourceSkillsDir, 'cold-start-interview', 'scripts', 'tracework_raw.py'),
 ];
 
 const errors = [];
@@ -456,6 +462,17 @@ if (decisionReplay) {
     if (exists(copy)) {
       const content = fs.readFileSync(copy, 'utf-8');
       assert(content === decisionReplay, `Decision replay copy is stale: ${copy}`);
+    }
+  }
+}
+
+const rawHelper = exists(canonicalRawHelper) ? fs.readFileSync(canonicalRawHelper, 'utf-8') : null;
+assert(Boolean(rawHelper), 'Canonical tracework_raw.py is missing');
+if (rawHelper) {
+  for (const copy of rawHelperCopies) {
+    assert(exists(copy), `Raw helper copy is missing: ${copy}`);
+    if (exists(copy)) {
+      assert(fs.readFileSync(copy, 'utf-8') === rawHelper, `Raw helper copy is stale: ${copy}`);
     }
   }
 }

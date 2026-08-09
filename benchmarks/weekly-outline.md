@@ -90,6 +90,10 @@ template and support a real revision round trip.
 28. **Representation utility**: state the concept in plain language first, then
     add only the lightest diagram, table, trace, curve, formula, or text view
     that materially reduces the declared audience's understanding cost.
+29. **Independent goal lanes**: one communication job does not create a common
+    business goal. A single-goal deck starts directly with its local narrative;
+    a multi-goal deck starts with a grounded goal map, keeps lane narratives
+    contiguous, and groups next-week closure by lane.
 
 ## PPT-ready Markdown Deck Scenarios
 
@@ -113,6 +117,9 @@ template and support a real revision round trip.
    visible.
 10. **P10 — Deletion**: reject any page whose removal changes neither deck
     thesis nor audience decision.
+11. **P11 — Independent goals**: when two source-independent goals both change
+    colleague understanding or action, Slide 1 carries both Whys, results,
+    states, and boundaries; each lane then receives its own evidence and gate.
 
 ### P2-A — Complex Story forms a natural progression
 
@@ -257,6 +264,52 @@ variance, decision or support, next commitment, and confidence boundary.
    when each represents an independent management change, not more activity or
    evidence volume.
 
+## Semantic Admission, Grounding Recovery, and Capability Failure
+
+Semantic Admission is a routing aid, not page evidence. Its cost ledger reports
+`evidence_source_input` separately and applies the efficiency gate to comparable
+input that includes the mandatory Weekly skill and references on both sides.
+Classifying every card is not semantic completeness: material goal lanes must
+remain in the main narrative and every prior commitment must be accounted for.
+The candidate ledger and required-lane/prior-obligation oracle are separate
+inputs. An evaluated run must execute ledger validation; card preparation alone
+cannot claim Coverage Gate success. Mandatory Weekly instructions and reopened
+evidence are measured from their actual files, and a failed comparable-input
+gate exits non-zero. The CLI keeps `model_input` separate from diagnostic
+`metrics`; only the former counts as the admission payload sent to the model.
+
+After Result Selection, reopen only the commit, snapshot, eval, document, or
+other direct source required by retained claims. Ask the user at most once when
+one or more missing sources affect necessary main-deck semantics. The combined
+request states the claim, missing grounding, accepted source forms, and the
+skip/degrade outcome. Appendix-only gaps do not interrupt the user. User prose
+establishes recorded context only; it never proves code topology or observed
+effect.
+
+The recovery fixture, not the candidate, owns the expected material and exact
+gap ids plus the source-type-to-proof-responsibility mapping. The single rendered
+question must include each requested claim, missing grounding, accepted source
+forms, and skip consequence. Gap and degradation actions use closed values so
+equivalent wording cannot recreate precise structure after a source is skipped.
+
+After one bounded repair, an output that still loses a material lane, exposes
+implementation inventory or internal coverage bookkeeping, or requires a maker
+to invent objects and relationships must return a non-slide `PPT Mode 未通过`
+recovery pack. It must not emit numbered slides or silently switch mode/model.
+
+Executable mutations must reject:
+
+- a material Agent-native card hidden as `explicit_exclusion`;
+- a prior commitment omitted from accounting;
+- source-only savings presented as total-input or token savings;
+- separate recovery questions for each missing source;
+- requests for nonmaterial or appendix-only sources;
+- user explanation promoted to committed architecture;
+- exact architecture generated after the source is skipped;
+- `coverage ledger`, undefined stage labels, line counts, or harness inventory
+  in same-department main slides;
+- a failed weak-model draft returned as numbered slides.
+
 ## Pass Criteria
 
 - Scope partition occurs before ranking.
@@ -283,15 +336,24 @@ variance, decision or support, next commitment, and confidence boundary.
   not expand the body.
 - Adding a material decision-blocking risk does change the body.
 - The appendix maps body claims to evidence without retelling body prose.
+- Executable fixtures map every admitted slide to an available source and an
+  explicit proof responsibility; fabricated sources fail validation.
 - Slides resolve one primary audience, prior knowledge, occasion, optional
   duration, deck job, audience outcome, central claim, and confidence boundary
   before selection. If framing is absent, use the same-department weekly-meeting
   default with no invented duration.
 - The Markdown Deck states a compact presentation context and one required
   audience understanding, judgment, or action.
+- One communication job does not force one business thesis. A single-goal deck
+  has no generic overview; a multi-goal deck uses one evidence-bearing goal map
+  and never derives commonality from project, group, audience, week, or generic
+  “improve quality” wording.
 - A produced main deck has only necessary slides; unusual length triggers
   deletion/compression review rather than a numeric cap. Zero admitted
   candidates return an empty state instead of an empty deck.
+- An unusual-length fixture must also reject duplicated pages that merely use
+  different ids, and an empty state must name missing evidence and a repair
+  action without bypassing audience defaults or leaking deck-only fields.
 - The work goal is visible and not reconstructed from actions. Cognitive roles
   are invoked only for complex merge/split diagnosis and remain internal.
 - Each title states an evidence-bounded audience-facing claim, and the page body
@@ -305,7 +367,8 @@ variance, decision or support, next commitment, and confidence boundary.
 - Full Source Grounding Packets and unsupported-claim ledgers remain internal;
   the public appendix contains only compact claim-to-source boundaries.
 - Complex results split only when pages use different grounded material and
-  cognitive tasks, serve one Deck Thesis, and form a prerequisite sequence.
+  cognitive tasks, serve one local goal narrative, and form a prerequisite
+  sequence.
 - Simple results remain merged when one content block explains root cause,
   choice, and operation.
 - Validation receives a separate page only when it changes confidence, risk, or
@@ -319,7 +382,12 @@ variance, decision or support, next commitment, and confidence boundary.
 - Every open risk and next-week acceptance target has a pass/fail closure
   criterion.
 - The default same-department deck ends with a next-week plan page that
-  distinguishes confirmed commitments from proposals.
+  distinguishes confirmed commitments from proposals. Each item preserves its
+  source commitment state and states a closure criterion; source commitments
+  and rendered plan blocks match one-to-one, while negated, omitted, swapped,
+  or promoted commitments fail validation.
+- A revision that changes, adds, or removes a supported claim also changes its
+  evidence appendix; reusing the prior appendix fails validation.
 - Expected effects never appear as observed outcomes, and missing numeric
   evidence never becomes a guessed baseline, target, or trend.
 - Default department slides keep source paths, commit hashes, raw evidence ids,

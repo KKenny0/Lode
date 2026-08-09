@@ -68,6 +68,8 @@
         "expected_commit_source_path": "/tmp/storyboard-pipeline",
         "expected_repository_snapshot_ref": "0123456789abcdef0123456789abcdef01234567",
         "expected_repository_snapshot_path": "/tmp/storyboard-pipeline",
+        "expected_doc_source_ref": "doc:reporting-design:r3",
+        "expected_doc_source_url": "https://docs.example.com/reporting-design-r3",
         "invalid_repository_snapshot_probes": [
           {
             "ref": "abc1234",
@@ -102,6 +104,12 @@
               "ref": "0123456789abcdef0123456789abcdef01234567",
               "path": "/tmp/storyboard-pipeline",
               "note": "Committed tree observed at capture; uncommitted work is not represented."
+            },
+            {
+              "type": "doc",
+              "ref": "doc:reporting-design:r3",
+              "url": "https://docs.example.com/reporting-design-r3",
+              "note": "Target design; not evidence of current implementation."
             }
           ],
           "reporting": {
@@ -243,6 +251,7 @@
         "expected_scope": "Daily, weekly, and monthly reporting model boundaries.",
         "expected_source_availability": "available",
         "expected_deletion_behavior": "summary_remains_usable",
+        "expected_design_relationship": "Raw evidence feeds Result Selection; selected claims alone reopen direct sources.",
         "dossier_artifact": {
           "id": "storyboard-pipeline:design-doc:reporting-model:v1",
           "project_slug": "storyboard-pipeline",
@@ -280,7 +289,8 @@
               }
             ],
             "key_decisions": [
-              "Keep raw/artifacts path and make schema changes additive."
+              "Keep raw/artifacts path and make schema changes additive.",
+              "Raw evidence feeds Result Selection; selected claims alone reopen direct sources."
             ],
             "open_questions": [
               "Whether source availability should be refreshed automatically."
@@ -317,6 +327,26 @@
           "description": "Existing thin artifact entries remain valid without migration."
         }
       ]
+    },
+    {
+      "id": "capture-source-required-missing-locator-warning",
+      "execution": {
+        "kind": "capture-source-required-warning"
+      },
+      "skill": "capture",
+      "prompt": "Warn before the user deletes the only copy of a source-required design artifact that has no durable locator.",
+      "fixture": {
+        "artifact": {
+          "title": "Agent-native Design",
+          "source_availability": "missing",
+          "deletion_behavior": "source_required",
+          "last_seen": {"exists": false}
+        },
+        "warning_line": "⚠️ Agent-native Design 缺少 durable locator；删除唯一 local source 后将无法重建精确架构或设计机制",
+        "candidate_receipt": "已记录 1 条进展 -> storyboard-automation-hub (2026-W31)\n⚠️ Agent-native Design 缺少 durable locator；删除唯一 local source 后将无法重建精确架构或设计机制\n→ 可进入本周 work 报告主线候选",
+        "required_warning_terms": ["Agent-native Design", "durable locator", "删除唯一 local source", "无法重建精确架构或设计机制"]
+      },
+      "expected_behavior": "The normal Capture receipt conditionally exposes the deletion consequence instead of silently recording an unrecoverable source-required artifact."
     },
     {
       "id": "daily-report-led-output-from-raw",
@@ -1748,6 +1778,21 @@
       "skill": "weekly",
       "fixture": {
         "expected_slide_count": 2,
+        "require_claim_source_coverage": true,
+        "require_distinct_slide_sources": true,
+        "available_source_refs": ["design:tradeoffs", "mechanism:fallback"],
+        "grounding_contracts": {
+          "design:tradeoffs": {
+            "claim_terms": ["Upstream repair", "validation internals"],
+            "boundary_terms": ["Design comparison"],
+            "allowed_slide_ids": ["repair-ownership"]
+          },
+          "mechanism:fallback": {
+            "claim_terms": ["Exhausted local retries", "fallback"],
+            "boundary_terms": ["Path semantics"],
+            "allowed_slide_ids": ["repair-path"]
+          }
+        },
         "required_title_terms": [
           ["local repair", "validation internals"],
           ["retry", "fallback"]
@@ -1769,7 +1814,9 @@
           "claim-proof-gap",
           "role-title",
           "unsafe-main-deck-reference",
-          "complex-result-merged"
+          "complex-result-merged",
+          "fake-visible-source",
+          "swapped-source-responsibility"
         ],
         "candidate_output": {
           "audience_contract": {
@@ -1797,8 +1844,8 @@
             }
           ],
           "evidence_appendix": [
-            {"claim": "Upstream repair exposes validation internals.", "source": "design:tradeoffs", "boundary": "Design comparison, not measured latency."},
-            {"claim": "Exhausted local retries enter fallback.", "source": "mechanism:fallback", "boundary": "Path semantics, not fallback frequency."}
+            {"claim": "Upstream repair exposes validation internals.", "source": "design:tradeoffs", "boundary": "Design comparison, not measured latency.", "slide_ids": ["repair-ownership"], "source_refs": ["design:tradeoffs"], "proof_responsibility": "design_choice"},
+            {"claim": "Exhausted local retries enter fallback.", "source": "mechanism:fallback", "boundary": "Path semantics, not fallback frequency.", "slide_ids": ["repair-path"], "source_refs": ["mechanism:fallback"], "proof_responsibility": "mechanism"}
           ]
         }
       },
@@ -1810,6 +1857,7 @@
       "skill": "weekly",
       "fixture": {
         "expected_slide_count": 1,
+        "available_source_refs": ["simple:mechanism-path"],
         "required_title_terms": [["one explicit owner", "downstream work"]],
         "required_content_terms": [["two owners", "one explicit owner", "downstream interface stays unchanged"]],
         "required_pre_diagram_terms": [["two owners", "one explicit owner"]],
@@ -1846,6 +1894,7 @@
       "skill": "weekly",
       "fixture": {
         "expected_slide_count": 1,
+        "available_source_refs": ["mechanism:unified-path"],
         "required_title_terms": [["normal", "force", "recovery", "per-episode DAG"]],
         "required_content_terms": [["normal", "force", "partial recovery", "selected stages", "per-episode DAG"]],
         "required_pre_diagram_terms": [["normal", "force", "partial recovery", "per-episode DAG"]],
@@ -1881,6 +1930,7 @@
       "skill": "weekly",
       "fixture": {
         "expected_slide_count": 1,
+        "available_source_refs": ["eval:model-comparison"],
         "required_title_terms": [["Sonnet", "manual review"]],
         "required_content_terms": [["same 88 shots", "Sonnet 28", "visual dimensions 7", "manual review"]],
         "unique_content_terms": ["visual dimensions 7"],
@@ -1916,6 +1966,7 @@
       "skill": "weekly",
       "fixture": {
         "expected_slide_count": 2,
+        "available_source_refs": ["runtime:dag", "scene:cluster"],
         "required_title_terms": [
           ["episode-level DAG", "aligned"],
           ["locked baselines", "acceptance remains open"]
@@ -2030,6 +2081,7 @@
       "skill": "weekly",
       "fixture": {
         "expected_slide_count": 1,
+        "available_source_refs": ["raw:config-warning", "test:config-placeholder"],
         "required_title_terms": [["环境变量", "显式告警"]],
         "required_content_terms": [["静默失败", "启动时告警", "运行路径和输出契约没有变化"]],
         "forbidden_main_terms": ["```mermaid", "```text", "flowchart", "graph lr", "graph td"],
@@ -2069,8 +2121,39 @@
       "execution": {"kind": "weekly-ppt-ready-markdown-contract"},
       "skill": "weekly",
       "fixture": {
-        "default_team_sync": true,
+        "expected_default_framing": {
+          "primary_audience": "同部门参与检索链路开发的同事",
+          "prior_knowledge": "了解素材检索的项目背景，但没有阅读本周实现与验证记录",
+          "occasion": "部门周会",
+          "deck_job": "inform",
+          "duration": null
+        },
         "expected_slide_count": 4,
+        "require_claim_source_coverage": true,
+        "available_source_refs": [
+          "raw:retrieval-goal",
+          "commit:retrieval-boundary",
+          "test:retrieval-path-4-of-4",
+          "eval:retrieval-regression-20",
+          "request:cache-migration-confirmed",
+          "raw:quality-expansion-proposed"
+        ],
+        "source_next_commitments": [
+          {"id": "cache-migration", "commitment_state": "confirmed", "statement": "补齐历史缓存迁移并重跑 20 个回归样本", "closure_criterion": "20/20 结果集合一致", "rendered_prefix": "Confirmed："},
+          {"id": "quality-expansion", "commitment_state": "proposed", "statement": "扩到 100 个真实查询评估召回质量", "closure_criterion": "样本定义和基线确认后再形成质量结论", "rendered_prefix": "Proposed："}
+        ],
+        "single_goal_direct_start": {
+          "first_slide_id": "goal-and-choice",
+          "forbidden_overview_terms": ["总览", "overview", "agenda"]
+        },
+        "grounding_contracts": {
+          "raw:retrieval-goal": {"claim_terms": ["目标", "可复现"], "boundary_terms": ["不证明实现或效果"], "allowed_slide_ids": ["goal-and-choice"]},
+          "commit:retrieval-boundary": {"claim_terms": ["三类入口", "selection"], "boundary_terms": ["不证明覆盖行为或召回质量"], "allowed_slide_ids": ["shared-path"]},
+          "test:retrieval-path-4-of-4": {"claim_terms": ["4/4", "行为一致"], "boundary_terms": ["不证明生产召回质量"], "allowed_slide_ids": ["shared-path"]},
+          "eval:retrieval-regression-20": {"claim_terms": ["20 个", "18 个"], "boundary_terms": ["两个历史缓存差异未关闭"], "allowed_slide_ids": ["bounded-validation"]},
+          "request:cache-migration-confirmed": {"claim_terms": ["缓存迁移已确认", "质量扩样仍是提议"], "boundary_terms": ["不证明未来结果"], "allowed_slide_ids": ["next-week-plan"]},
+          "raw:quality-expansion-proposed": {"claim_terms": ["缓存迁移已确认", "质量扩样仍是提议"], "boundary_terms": ["不证明未来结果"], "allowed_slide_ids": ["next-week-plan"]}
+        },
         "required_goal_terms": ["目标", "可复现"],
         "required_next_plan_terms": ["下周计划", "confirmed", "proposed", "通过标准"],
         "required_title_terms": [
@@ -2086,7 +2169,19 @@
           ["confirmed", "proposed", "通过标准"]
         ],
         "forbidden_main_terms": ["候选方案清单", "被排除方案"],
-        "rejection_probes": ["wrong-default-audience", "missing-goal-grounding", "missing-next-plan"],
+        "rejection_probes": [
+          "wrong-default-audience",
+          "invented-duration",
+          "wrong-prior-knowledge",
+          "missing-goal-grounding",
+          "missing-next-plan",
+          "negated-next-plan",
+          "omitted-next-plan-item",
+          "swapped-next-plan-provenance",
+          "fabricated-confirmed-plan",
+          "fake-source",
+          "single-goal-overview"
+        ],
         "candidate_output": {
           "audience_contract": {
             "primary_audience": "同部门参与检索链路开发的同事",
@@ -2122,16 +2217,62 @@
               "content": "Confirmed：补齐历史缓存迁移并重跑 20 个回归样本；通过标准是 20/20 结果集合一致。\n\nProposed：扩到 100 个真实查询评估召回质量；通过标准是样本定义和基线确认后再形成质量结论。"
             }
           ],
+          "next_plan_items": [
+            {
+              "id": "cache-migration",
+              "source_commitment_id": "cache-migration",
+              "commitment_state": "confirmed",
+              "statement": "补齐历史缓存迁移并重跑 20 个回归样本",
+              "closure_criterion": "20/20 结果集合一致"
+            },
+            {
+              "id": "quality-expansion",
+              "source_commitment_id": "quality-expansion",
+              "commitment_state": "proposed",
+              "statement": "扩到 100 个真实查询评估召回质量",
+              "closure_criterion": "样本定义和基线确认后再形成质量结论"
+            }
+          ],
           "evidence_appendix": [
             {
+              "claim": "本周目标是让召回结果可复现。",
+              "source": "raw:retrieval-goal",
+              "boundary": "记录目标，不证明实现或效果。",
+              "slide_ids": ["goal-and-choice"],
+              "source_refs": ["raw:retrieval-goal"],
+              "proof_responsibility": "recorded_intent"
+            },
+            {
               "claim": "三类入口共享 selection、filter 和 rank。",
-              "source": "raw:shared-retrieval-path; commit:retrieval-boundary",
-              "boundary": "证明已实现结构，不证明召回质量。"
+              "source": "commit:retrieval-boundary",
+              "boundary": "证明已实现结构，不证明覆盖行为或召回质量。",
+              "slide_ids": ["shared-path"],
+              "source_refs": ["commit:retrieval-boundary"],
+              "proof_responsibility": "implemented_structure"
+            },
+            {
+              "claim": "4/4 测试覆盖的入口行为一致。",
+              "source": "test:retrieval-path-4-of-4",
+              "boundary": "只证明测试覆盖到的行为，不证明生产召回质量。",
+              "slide_ids": ["shared-path"],
+              "source_refs": ["test:retrieval-path-4-of-4"],
+              "proof_responsibility": "tested_behavior"
             },
             {
               "claim": "20 个回归样本中 18 个一致。",
               "source": "eval:retrieval-regression-20",
-              "boundary": "小样本且两个历史缓存差异未关闭。"
+              "boundary": "小样本且两个历史缓存差异未关闭。",
+              "slide_ids": ["bounded-validation"],
+              "source_refs": ["eval:retrieval-regression-20"],
+              "proof_responsibility": "observed_effect"
+            },
+            {
+              "claim": "缓存迁移已确认，质量扩样仍是提议。",
+              "source": "request:cache-migration-confirmed; raw:quality-expansion-proposed",
+              "boundary": "记录承诺状态和关闭标准，不证明未来结果。",
+              "slide_ids": ["next-week-plan"],
+              "source_refs": ["request:cache-migration-confirmed", "raw:quality-expansion-proposed"],
+              "proof_responsibility": "commitment_provenance"
             }
           ]
         }
@@ -2139,11 +2280,195 @@
       "expected_behavior": "With no explicit framing, Weekly serves same-department colleagues, starts from the work goal and final choice, allows complementary structure and test evidence on one page with separate proof responsibilities, and ends with a bounded next-week plan without inventing a duration or rejected-path inventory."
     },
     {
+      "id": "weekly-ppt-independent-goal-lanes",
+      "execution": {"kind": "weekly-ppt-ready-markdown-contract"},
+      "skill": "weekly",
+      "fixture": {
+        "expected_default_framing": {
+          "primary_audience": "同部门参与生成链路开发的同事",
+          "prior_knowledge": "了解项目背景，但没有阅读本周两条主线的实现与验证记录",
+          "occasion": "部门周会",
+          "deck_job": "inform",
+          "duration": null
+        },
+        "expected_slide_count": 5,
+        "overview_slide_id": "weekly-goal-map",
+        "next_slide_id": "next-week-plan",
+        "require_claim_source_coverage": true,
+        "available_source_refs": [
+          "raw:quality-objective",
+          "raw:quality-boundary",
+          "eval:quality-10",
+          "weekly:agent-objective",
+          "raw:foundation-0",
+          "raw:quality-plan",
+          "weekly:agent-plan"
+        ],
+        "source_next_commitments": [
+          {"id": "quality-attribution", "commitment_state": "proposed", "statement": "补齐 cleanup 归因", "closure_criterion": "同一组 10 集能够拆出两轮 cleanup 的净贡献", "rendered_prefix": "分镜质量｜Proposed："},
+          {"id": "agent-shadow", "commitment_state": "proposed", "statement": "启动 Editor Intent shadow", "closure_criterion": "Foundation 0 独立提交并完成 smoke，shadow 的结构与路由正确", "rendered_prefix": "Agent-native｜Proposed："}
+        ],
+        "expected_thesis": "两条独立主线分别达到新的可验证节点，但剩余门槛不同。",
+        "expected_overview_title": "两条独立主线分别推进到可验证节点，不能用一个共同目标合并解释",
+        "expected_overview_content": "| 工作主线 | 为什么做 | 本周结果 | 当前状态 |\n|---|---|---|---|\n| 分镜质量 | 让质量问题可定位、可验证 | 职责边界收敛并完成 10 集评估 | routing 未证明收益，cleanup 归因未关闭 |\n| Agent-native | 让团队意图可控地进入下一代生成链路 | 路线收敛为意图编译与按需质量门；Foundation 0 推进 | 目标能力尚未实现，地基未完成 smoke |",
+        "grounding_contracts": {
+          "raw:quality-objective": {"claim_terms": ["分镜质量目标", "可定位"], "boundary_terms": ["只记录质量目标"], "allowed_slide_ids": ["weekly-goal-map"]},
+          "weekly:agent-objective": {"claim_terms": ["Agent-native"], "allowed_slide_ids": ["weekly-goal-map", "agent-native-path"]},
+          "raw:quality-boundary": {"claim_terms": ["职责边界"], "boundary_terms": ["不支持质量收益"], "allowed_slide_ids": ["weekly-goal-map", "quality-boundary"]},
+          "eval:quality-10": {"claim_terms": ["117 → 115"], "boundary_terms": ["高方差"], "allowed_slide_ids": ["weekly-goal-map", "quality-eval"]},
+          "raw:foundation-0": {"claim_terms": ["Foundation 0"], "boundary_terms": ["只证明地基行为"], "allowed_slide_ids": ["weekly-goal-map", "agent-native-path"]},
+          "raw:quality-plan": {"claim_terms": ["质量归因", "提议"], "boundary_terms": ["不是已确认承诺"], "allowed_slide_ids": ["next-week-plan"]},
+          "weekly:agent-plan": {"claim_terms": ["shadow", "提议"], "boundary_terms": ["不是已确认承诺"], "allowed_slide_ids": ["next-week-plan"]}
+        },
+        "independent_goal_lanes": [
+          {
+            "id": "quality",
+            "overview_terms": ["分镜质量", "让质量问题可定位", "职责边界收敛", "routing 未证明收益"],
+            "slide_ids": ["quality-boundary", "quality-eval"],
+            "allowed_source_refs": ["raw:quality-objective", "raw:quality-boundary", "eval:quality-10"],
+            "overview_source_refs": ["raw:quality-objective", "raw:quality-boundary", "eval:quality-10"],
+            "next_plan_terms": ["分镜质量", "补齐 cleanup 归因"]
+          },
+          {
+            "id": "agent-native",
+            "overview_terms": ["agent-native", "让团队意图可控", "意图编译", "目标能力尚未实现"],
+            "slide_ids": ["agent-native-path"],
+            "allowed_source_refs": ["weekly:agent-objective", "raw:foundation-0"],
+            "overview_source_refs": ["weekly:agent-objective", "raw:foundation-0"],
+            "next_plan_terms": ["agent-native", "启动 editor intent shadow"]
+          }
+        ],
+        "forbidden_common_goal_terms": ["共同目标：提升项目质量"],
+        "forbidden_main_terms": ["coverage ledger", "explicit exclusion", "b0–b3", "harness 4/4", "309 行"],
+        "required_goal_terms": ["让质量问题可定位", "让团队意图可控"],
+        "required_next_plan_terms": ["分镜质量", "agent-native", "proposed", "通过标准"],
+        "required_title_terms": [
+          ["两条独立主线"],
+          ["narrative", "generation"],
+          ["10 集", "routing"],
+          ["agent-native", "意图编译"],
+          ["两条主线", "下周"]
+        ],
+        "required_content_terms": [
+          ["为什么做", "本周结果", "当前状态", "分镜质量", "agent-native"],
+          ["忠实切分", "不改变 slice 边界"],
+          ["117", "115", "wrong_shot_size"],
+          ["目标设计", "尚未实现", "foundation 0"],
+          ["分镜质量", "agent-native", "proposed", "通过标准"]
+        ],
+        "rejection_probes": [
+          "forced-common-goal",
+          "overview-missing-second-lane",
+          "second-lane-plan-only",
+          "second-lane-appendix-only",
+          "cross-lane-source",
+          "overview-without-why",
+          "unsupported-overview-claim",
+          "swapped-slide-grounding",
+          "generic-grounding-text",
+          "mechanical-one-page-per-lane",
+          "internal-coverage-ledger",
+          "undefined-stage-labels",
+          "implementation-inventory",
+          "negated-next-plan",
+          "omitted-next-plan-item",
+          "swapped-next-plan-provenance",
+          "fabricated-confirmed-plan",
+          "fake-source"
+        ],
+        "candidate_output": {
+          "audience_contract": {
+            "primary_audience": "同部门参与生成链路开发的同事",
+            "prior_knowledge": "了解项目背景，但没有阅读本周两条主线的实现与验证记录",
+            "occasion": "部门周会",
+            "deck_job": "inform",
+            "audience_outcome": "理解两条独立主线为何存在、各自推进到哪里以及下周分别关闭什么门",
+            "central_claim": "分镜质量进入效果判断，Agent-native 完成地基但目标能力尚未实现",
+            "confidence_boundary": "两条主线使用独立证据，不能互相证明结果"
+          },
+          "deck_context": "同一周有两条都需要同步但目标互不从属的工作主线。",
+          "management_question": "同事需要分别理解两条主线的目标、结果、状态和下一步。",
+          "thesis": "两条独立主线分别达到新的可验证节点，但剩余门槛不同。",
+          "slides": [
+            {
+              "id": "weekly-goal-map",
+              "title": "两条独立主线分别推进到可验证节点，不能用一个共同目标合并解释",
+              "content": "| 工作主线 | 为什么做 | 本周结果 | 当前状态 |\n|---|---|---|---|\n| 分镜质量 | 让质量问题可定位、可验证 | 职责边界收敛并完成 10 集评估 | routing 未证明收益，cleanup 归因未关闭 |\n| Agent-native | 让团队意图可控地进入下一代生成链路 | 路线收敛为意图编译与按需质量门；Foundation 0 推进 | 目标能力尚未实现，地基未完成 smoke |"
+            },
+            {
+              "id": "quality-boundary",
+              "title": "Narrative 忠实切分原文，Generation 只决定已有内容怎么拍",
+              "content": "选择职责分离，是为了让质量问题拥有明确归因对象。Narrative 忠实切分原文；Generation 在已有 slice 上选择拍法，不补写原文，也不改变 slice 边界。"
+            },
+            {
+              "id": "quality-eval",
+              "title": "10 集数据没有证明 routing 有效，cleanup 的改善也没有覆盖景别问题",
+              "content": "routing 前后总错误 117 → 115，5 集改善、5 集退化。cleanup 出现约 13% 降错信号，但 `wrong_shot_size` 仍为 35，且两轮 cleanup 的净贡献尚未拆开。"
+            },
+            {
+              "id": "agent-native-path",
+              "title": "Agent-native 选择意图编译与按需质量门，但目标能力尚未实现",
+              "content": "这条主线是为了让团队意图可控地进入生成链路，而不替换现有 DAG 或引入无限多轮审查。目标设计是 editor notes / skills → Editor Intent Compiler → generation → 按需 Quality Gate；验收失败保留原输出。Foundation 0 已打通 cache provenance 与 skill resolution；Compiler、Gate 和 shadow 尚未实现。"
+            },
+            {
+              "id": "next-week-plan",
+              "title": "两条主线的下周计划分别关闭质量归因门和 Agent-native 启动门",
+              "content": "分镜质量｜Proposed：补齐 cleanup 归因；通过标准：同一组 10 集能够拆出两轮 cleanup 的净贡献。\n\nAgent-native｜Proposed：启动 Editor Intent shadow；通过标准：Foundation 0 独立提交并完成 smoke，shadow 的结构与路由正确。"
+            }
+          ],
+          "next_plan_items": [
+            {
+              "id": "quality-attribution",
+              "source_commitment_id": "quality-attribution",
+              "commitment_state": "proposed",
+              "statement": "补齐 cleanup 归因",
+              "closure_criterion": "同一组 10 集能够拆出两轮 cleanup 的净贡献"
+            },
+            {
+              "id": "agent-shadow",
+              "source_commitment_id": "agent-shadow",
+              "commitment_state": "proposed",
+              "statement": "启动 Editor Intent shadow",
+              "closure_criterion": "Foundation 0 独立提交并完成 smoke，shadow 的结构与路由正确"
+            }
+          ],
+          "evidence_appendix": [
+            {"claim": "分镜质量目标是让问题可定位和验证。", "source": "raw:quality-objective", "boundary": "只记录质量目标。", "slide_ids": ["weekly-goal-map"], "source_refs": ["raw:quality-objective"], "proof_responsibility": "recorded_intent"},
+            {"claim": "分镜质量职责边界已经收敛。", "source": "raw:quality-boundary", "boundary": "支持本周结果，不支持质量收益。", "slide_ids": ["weekly-goal-map"], "source_refs": ["raw:quality-boundary"], "proof_responsibility": "design_boundary"},
+            {"claim": "routing 10 集为 117 → 115。", "source": "eval:quality-10", "boundary": "支持当前状态，样本小且高方差。", "slide_ids": ["weekly-goal-map"], "source_refs": ["eval:quality-10"], "proof_responsibility": "observed_effect"},
+            {"claim": "Agent-native 目标是让团队意图可控地进入生成链路。", "source": "weekly:agent-objective", "boundary": "既有周报记录，未提升为效果证据。", "slide_ids": ["weekly-goal-map"], "source_refs": ["weekly:agent-objective"], "proof_responsibility": "recorded_intent"},
+            {"claim": "Foundation 0 已推进但目标能力尚未实现。", "source": "raw:foundation-0", "boundary": "只证明地基行为，不证明目标能力。", "slide_ids": ["weekly-goal-map"], "source_refs": ["raw:foundation-0"], "proof_responsibility": "implementation_boundary"},
+            {"claim": "Narrative 与 Generation 的职责边界已确定。", "source": "raw:quality-boundary", "boundary": "支持职责选择，不支持质量收益。", "slide_ids": ["quality-boundary"], "source_refs": ["raw:quality-boundary"], "proof_responsibility": "design_boundary"},
+            {"claim": "routing 10 集为 117 → 115。", "source": "eval:quality-10", "boundary": "10 集、高方差。", "slide_ids": ["quality-eval"], "source_refs": ["eval:quality-10"], "proof_responsibility": "observed_effect"},
+            {"claim": "Agent-native 目标设计与 Foundation 0 状态。", "source": "weekly:agent-objective; raw:foundation-0", "boundary": "目标设计尚未实现，Foundation 0 只证明地基行为。", "slide_ids": ["agent-native-path"], "source_refs": ["weekly:agent-objective", "raw:foundation-0"], "proof_responsibility": "target_and_foundation"},
+            {"claim": "质量归因仍是提议。", "source": "raw:quality-plan", "boundary": "不是已确认承诺。", "slide_ids": ["next-week-plan"], "source_refs": ["raw:quality-plan"], "proof_responsibility": "commitment_provenance"},
+            {"claim": "Agent-native shadow 仍是提议。", "source": "weekly:agent-plan", "boundary": "不是已确认承诺。", "slide_ids": ["next-week-plan"], "source_refs": ["weekly:agent-plan"], "proof_responsibility": "commitment_provenance"}
+          ]
+        }
+      },
+      "expected_behavior": "A same-department Weekly preserves two source-independent goal lanes under one communication job, starts with an evidence-bearing weekly goal map, keeps each lane's local narrative and evidence separate, and groups proposed next-week gates by lane without adding an overview to the single-goal fixture."
+    },
+    {
       "id": "weekly-ppt-no-numeric-page-cap",
       "execution": {"kind": "weekly-ppt-ready-markdown-contract"},
       "skill": "weekly",
       "fixture": {
         "expected_slide_count": 9,
+        "require_claim_source_coverage": true,
+        "require_distinct_slide_sources": true,
+        "require_distinct_slides": true,
+        "available_source_refs": [
+          "fixture:dense-boundary-1",
+          "fixture:dense-boundary-2",
+          "fixture:dense-boundary-3",
+          "fixture:dense-boundary-4",
+          "fixture:dense-boundary-5",
+          "fixture:dense-boundary-6",
+          "fixture:dense-boundary-7",
+          "fixture:dense-boundary-8",
+          "fixture:dense-boundary-9"
+        ],
+        "rejection_probes": ["duplicate-pages", "fake-source"],
         "candidate_output": {
           "audience_contract": {
             "primary_audience": "参与九项独立边界评审的技术同事",
@@ -2169,11 +2494,48 @@
             {"id": "boundary-9", "title": "下一步用扩样本关闭剩余质量风险", "content": "扩样本后按预先声明的通过标准决定是否进入主线。"}
           ],
           "evidence_appendix": [
-            {"claim": "九项结论拥有独立证据责任。", "source": "fixture:dense-technical-review", "boundary": "只验证无数字页数上限；真实内容仍需逐页证据。"}
+            {"claim": "入口契约保持不变。", "source": "fixture:dense-boundary-1", "boundary": "仅支持入口兼容边界。", "slide_ids": ["boundary-1"], "source_refs": ["fixture:dense-boundary-1"], "proof_responsibility": "interface_boundary"},
+            {"claim": "调度状态集中管理。", "source": "fixture:dense-boundary-2", "boundary": "仅支持状态所有权。", "slide_ids": ["boundary-2"], "source_refs": ["fixture:dense-boundary-2"], "proof_responsibility": "state_ownership"},
+            {"claim": "依赖按请求粒度等待。", "source": "fixture:dense-boundary-3", "boundary": "仅支持依赖等待语义。", "slide_ids": ["boundary-3"], "source_refs": ["fixture:dense-boundary-3"], "proof_responsibility": "dependency_semantics"},
+            {"claim": "Force 入口复用统一执行路径。", "source": "fixture:dense-boundary-4", "boundary": "仅支持强制路径语义。", "slide_ids": ["boundary-4"], "source_refs": ["fixture:dense-boundary-4"], "proof_responsibility": "force_path"},
+            {"claim": "缓存缺失显式回退。", "source": "fixture:dense-boundary-5", "boundary": "仅支持缓存回退行为。", "slide_ids": ["boundary-5"], "source_refs": ["fixture:dense-boundary-5"], "proof_responsibility": "fallback_behavior"},
+            {"claim": "结果契约保持兼容。", "source": "fixture:dense-boundary-6", "boundary": "仅支持结果兼容边界。", "slide_ids": ["boundary-6"], "source_refs": ["fixture:dense-boundary-6"], "proof_responsibility": "result_contract"},
+            {"claim": "回归只证明覆盖行为一致。", "source": "fixture:dense-boundary-7", "boundary": "不支持质量收益。", "slide_ids": ["boundary-7"], "source_refs": ["fixture:dense-boundary-7"], "proof_responsibility": "tested_behavior"},
+            {"claim": "生产接纳门尚未关闭。", "source": "fixture:dense-boundary-8", "boundary": "不支持生产接纳。", "slide_ids": ["boundary-8"], "source_refs": ["fixture:dense-boundary-8"], "proof_responsibility": "acceptance_boundary"},
+            {"claim": "扩样本后才决定是否进入主线。", "source": "fixture:dense-boundary-9", "boundary": "只支持下一步门槛。", "slide_ids": ["boundary-9"], "source_refs": ["fixture:dense-boundary-9"], "proof_responsibility": "next_gate"}
           ]
         }
       },
       "expected_behavior": "An explicitly justified nine-page technical review passes because every page carries an independent conclusion; unusual length is reviewed semantically rather than rejected by a numeric cap."
+    },
+    {
+      "id": "weekly-ppt-evidence-insufficient-empty-state",
+      "execution": {"kind": "weekly-ppt-ready-markdown-contract"},
+      "skill": "weekly",
+      "fixture": {
+        "expected_empty_state": true,
+        "expected_default_framing": {
+          "primary_audience": "同部门同事",
+          "occasion": "部门周会",
+          "deck_job": "inform",
+          "duration": null
+        },
+        "rejection_probes": ["empty-state-with-slide", "empty-state-missing-repair", "empty-state-leaks-deck", "empty-state-wrong-framing"],
+        "candidate_output": {
+          "audience_contract": {
+            "primary_audience": "同部门同事",
+            "occasion": "部门周会",
+            "deck_job": "inform"
+          },
+          "slides": [],
+          "empty_state": {
+            "reason": "本周没有足够证据形成可支持的汇报结论。",
+            "missing_evidence": ["工作目标", "可验证结果"],
+            "next_action": "补充目标或 Capture 后重新生成。"
+          }
+        }
+      },
+      "expected_behavior": "Evidence-insufficient mode returns a repairable empty state instead of inventing slides, while malformed empty states are rejected."
     },
     {
       "id": "weekly-ppt-w31-audience-framing-and-revision",
@@ -2181,6 +2543,11 @@
       "skill": "weekly",
       "fixture": {
         "expected_slide_count": 3,
+        "available_source_refs": [
+          "raw:2026-07-30T11:18:07+08:00",
+          "raw:2026-07-30T16:01:55+08:00",
+          "raw:2026-07-31T17:59:59+08:00"
+        ],
         "required_title_terms": [
           ["routing", "合并"],
           ["质量"],
@@ -2203,13 +2570,19 @@
             "routing-thesis": ["cleanup", "非 routing"],
             "routing-evidence": ["13%", "wrong_shot_size", "35"],
             "routing-gate": ["cleanup 归因", "30 集"]
+          },
+          "required_revised_evidence": {
+            "routing-thesis": ["raw:2026-07-31T17:59:59+08:00"],
+            "routing-evidence": ["raw:2026-07-31T17:59:59+08:00"],
+            "routing-gate": ["raw:2026-07-31T17:59:59+08:00"]
           }
         },
         "revision_rejection_probes": [
           "whitespace-only",
           "unclassified-common-slide",
           "duplicate-classification",
-          "nonexistent-classification"
+          "nonexistent-classification",
+          "stale-evidence-appendix"
         ],
         "candidate_outputs": [
           {
@@ -2245,8 +2618,8 @@
               }
             ],
             "evidence_appendix": [
-              {"claim": "可靠性修复已通过验收。", "source": "raw:2026-07-30T11:18:07+08:00", "boundary": "证明机制完成，不证明质量收益。"},
-              {"claim": "10 集错误 117→115，5 集改善、5 集劣化。", "source": "raw:2026-07-30T16:01:55+08:00", "boundary": "10 集小样本、高方差。"}
+              {"claim": "可靠性修复已通过验收。", "source": "raw:2026-07-30T11:18:07+08:00", "boundary": "证明机制完成，不证明质量收益。", "slide_ids": ["routing-thesis"]},
+              {"claim": "10 集错误 117→115，5 集改善、5 集劣化。", "source": "raw:2026-07-30T16:01:55+08:00", "boundary": "10 集小样本、高方差。", "slide_ids": ["routing-thesis", "routing-evidence", "routing-gate"]}
             ]
           },
           {
@@ -2283,8 +2656,8 @@
               }
             ],
             "evidence_appendix": [
-              {"claim": "Routing 的 10 集结果仍为 117→115。", "source": "raw:2026-07-30T16:01:55+08:00", "boundary": "小样本、高方差。"},
-              {"claim": "Cleanup v2 约降错 13%，但只改善动作过多。", "source": "raw:2026-07-31T17:59:59+08:00", "boundary": "两轮 cleanup 叠加，独立归因未完成。"}
+              {"claim": "Routing 的 10 集结果仍为 117→115。", "source": "raw:2026-07-30T16:01:55+08:00", "boundary": "小样本、高方差。", "slide_ids": ["routing-thesis", "routing-evidence"]},
+              {"claim": "Cleanup v2 约降错 13%，但只改善动作过多。", "source": "raw:2026-07-31T17:59:59+08:00", "boundary": "两轮 cleanup 叠加，独立归因未完成。", "slide_ids": ["routing-thesis", "routing-evidence", "routing-gate"]}
             ]
           }
         ]
@@ -2296,6 +2669,7 @@
       "execution": {"kind": "weekly-ppt-ready-markdown-contract"},
       "skill": "weekly",
       "fixture": {
+        "available_source_refs": ["contract:stable", "eval:new-evidence"],
         "revision_expectation": {
           "changed_slide_ids": [],
           "unchanged_slide_ids": ["stable-boundary"],
@@ -2374,6 +2748,135 @@
         ]
       },
       "expected_behavior": "A revision preserves an unrelated stable slide while removing an obsolete gate and adding the replacement decision supported by new evidence."
+    },
+    {
+      "id": "weekly-ppt-capability-failure",
+      "execution": {
+        "kind": "weekly-ppt-ready-markdown-contract"
+      },
+      "skill": "weekly",
+      "prompt": "After one bounded repair, the model still omits a material goal lane and emits implementation inventory. Return an honest recovery pack instead of numbered slides.",
+      "fixture": {
+        "expected_empty_state": true,
+        "expected_failure_type": "model capability insufficient",
+        "expected_default_framing": {
+          "primary_audience": "同部门同事",
+          "prior_knowledge": "了解项目背景，但不了解本周实现与验证",
+          "occasion": "部门周会",
+          "duration": null,
+          "deck_job": "inform"
+        },
+        "candidate_output": {
+          "audience_contract": {
+            "primary_audience": "同部门同事",
+            "prior_knowledge": "了解项目背景，但不了解本周实现与验证",
+            "occasion": "部门周会",
+            "deck_job": "inform"
+          },
+          "slides": [],
+          "empty_state": {
+            "heading": "PPT Mode 未通过",
+            "failure_type": "model capability insufficient",
+            "reason": "一次 bounded repair 后仍遗漏独立 Agent-native 主线，且页面正文仍是实现库存。",
+            "missing_evidence": ["Agent-native 目标机制的直接设计材料"],
+            "candidate_lanes": ["分镜质量", "Agent-native"],
+            "usable_facts": ["routing 的 10 集结果可用于有限的质量判断", "Foundation 0 已记录为地基进展"],
+            "evidence_boundaries": ["Foundation 0 不证明 Agent-native 目标能力已经实现"],
+            "next_options": ["提供设计 source", "确认主线后重试", "选择更有能力的模型", "明确改为 Brief"],
+            "next_action": "补充 Agent-native 设计 source，或明确选择其他恢复选项。"
+          }
+        },
+        "rejection_probes": [
+          "empty-state-with-slide",
+          "empty-state-missing-repair",
+          "capability-failure-missing-lanes",
+          "capability-failure-numbered-content"
+        ]
+      },
+      "expected_behavior": "A weak model that still fails after one bounded repair returns a non-slide recovery pack instead of a plausible-looking low-quality deck."
+    },
+    {
+      "id": "weekly-source-grounding-recovery",
+      "execution": {
+        "kind": "weekly-source-grounding-recovery-contract"
+      },
+      "skill": "weekly",
+      "prompt": "A selected Weekly deck has one necessary architecture gap, one necessary target-design gap, and one appendix-only locator gap. Ask once for material grounding and degrade honestly when it is skipped.",
+      "fixture": {
+        "expected_material_gap_ids": ["current-code-structure", "agent-native-target-design"],
+        "expected_exact_gap_ids": ["current-code-structure", "agent-native-target-design"],
+        "expected_source_responsibilities": {
+          "commit_and_snapshot": "committed_structure",
+          "design_document": "target_design",
+          "screenshot": "visible_content",
+          "user_explanation": "recorded_context"
+        },
+        "candidate_output": {
+          "gaps": [
+            {
+              "id": "current-code-structure",
+              "claim": "The current committed architecture routes every entry through one DAG.",
+              "missing": "Repository path and qualified snapshot for the recorded commit.",
+              "material_to_main_deck": true,
+              "requires_exact_grounding": true,
+              "summary_insufficient": true,
+              "action": "request_source",
+              "degrade_action": "omit",
+              "accepted_source_forms": ["repository path plus commit id", "repository snapshot"],
+              "skip_outcome": "omit precise architecture page and retain only the raw-supported implementation delta"
+            },
+            {
+              "id": "agent-native-target-design",
+              "claim": "Editor Intent and the on-demand Quality Gate form the target Agent-native path.",
+              "missing": "The design document or an export that defines objects and relationships.",
+              "material_to_main_deck": true,
+              "requires_exact_grounding": true,
+              "summary_insufficient": true,
+              "action": "request_source",
+              "degrade_action": "conceptual_only",
+              "accepted_source_forms": ["local design document", "durable document URL", "screenshot"],
+              "skip_outcome": "keep only recorded intent and omit the exact mechanism view"
+            },
+            {
+              "id": "appendix-locator",
+              "claim": "An implementation note supplied provenance for an appendix-only detail.",
+              "missing": "The original note path.",
+              "material_to_main_deck": false,
+              "requires_exact_grounding": false,
+              "summary_insufficient": false,
+              "action": "omit",
+              "degrade_action": "omit",
+              "accepted_source_forms": [],
+              "skip_outcome": "retain the compact boundary without interrupting the user"
+            }
+          ],
+          "questions": [
+            {
+              "gap_ids": ["current-code-structure", "agent-native-target-design"],
+              "text": "请补充以下必要 source。The current committed architecture routes every entry through one DAG. 缺少 Repository path and qualified snapshot for the recorded commit. 可提供 repository path plus commit id 或 repository snapshot；若跳过，将 omit precise architecture page and retain only the raw-supported implementation delta。Editor Intent and the on-demand Quality Gate form the target Agent-native path. 缺少 The design document or an export that defines objects and relationships. 可提供 local design document、durable document URL 或 screenshot；若跳过，将 keep only recorded intent and omit the exact mechanism view。"
+            }
+          ],
+          "supplied_source_treatments": [
+            {"source_type": "commit_and_snapshot", "proof_responsibility": "committed_structure"},
+            {"source_type": "design_document", "proof_responsibility": "target_design"},
+            {"source_type": "screenshot", "proof_responsibility": "visible_content"},
+            {"source_type": "user_explanation", "proof_responsibility": "recorded_context"}
+          ]
+        },
+        "rejection_probes": [
+          "ask-for-nonmaterial-source",
+          "split-recovery-questions",
+          "verbal-code-grounding",
+          "skipped-exact-architecture",
+          "missing-recovery-impact",
+          "self-classified-material-gaps",
+          "opaque-recovery-question",
+          "missing-source-treatments",
+          "wrong-screenshot-responsibility",
+          "stale-recovery-question"
+        ]
+      },
+      "expected_behavior": "Weekly batches only material source gaps into one recovery question, preserves each supplied source's proof responsibility, and omits exact architecture when the user skips grounding."
     },
     {
       "id": "decision-replay-unsafe-slug-rejected",

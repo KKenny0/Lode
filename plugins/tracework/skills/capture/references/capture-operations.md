@@ -174,8 +174,13 @@ depth={lite|standard|deep}: {one short routing reason}
 
 {最关键的 summary}
 ⚠️ {N} 个风险 · ❓ {N} 个开放问题 · 🔄 {N} 个放弃方案
+⚠️ {artifact title} 缺少 durable locator；删除唯一 local source 后将无法重建精确架构或设计机制
 → 可进入本周 {scope} 报告主线候选；需要时运行 /tracework:weekly 或「写周报」
 ```
+
+The source warning line is conditional. Include it only for a `source_required`
+artifact whose durable commit, reachable path, or remote document locator is
+missing. It is a preservation warning, not a generic risk count.
 
 `scope` is the project's `reporting_group` when known (`work`, `personal`, or
 another stable group). If the project is unassigned, use `local` and keep the

@@ -59,6 +59,22 @@ the communication job.}
 | {compact claim} | {raw entry or direct artifact locator} | {what it does not prove} |
 ```
 
+For a single selected goal, use the sequence above directly and do not add an
+overview. For multiple independent selected goals, replace Slide 1 with a
+grounded weekly goal map:
+
+```markdown
+## Slide 1｜{evidence-bounded weekly judgment across independent lanes}
+
+| 工作主线 | 为什么做 | 本周结果 | 当前状态与剩余边界 |
+|---|---|---|---|
+| {lane A} | {source-grounded Why} | {result or choice} | {state and gate} |
+| {lane B} | {source-grounded Why} | {result or choice} | {state and gate} |
+```
+
+This is not an agenda. Keep each lane's following pages contiguous, and group
+the final next-week plan by lane.
+
 The example shows a claim sequence, not a required page count. A produced deck
 contains only pages that survive Result Selection and deletion review. Unusual
 length triggers compression review rather than a numeric failure. When no
@@ -68,12 +84,18 @@ empty deck.
 ## Content Rules
 
 - Use one primary audience and one communication job.
+- Do not confuse one communication job with one business goal. Preserve
+  independent selected goal lanes when no source supports a common objective.
 - When framing is absent, write for same-department colleagues who know the
   project background but not this week's implementation and validation. Do not
   silently substitute a manager decision brief or invent a duration.
 - Make the work goal visible before asking the audience to interpret actions:
   why this work exists, what this week changed, and why the final choice serves
   that goal.
+- For one selected goal, start directly with its result narrative. For multiple
+  independent goals, use Slide 1 as a weekly goal map containing each lane's
+  Why, result, status, and remaining boundary. Do not reduce it to names,
+  activities, or an agenda.
 - Write each slide title as a supported claim a presenter could naturally say
   aloud. Do not use a topic, question, process, object, or cognitive-role label
   when the evidence supports a conclusion.
@@ -110,7 +132,7 @@ empty deck.
   provenance to notes or appendix unless they change the audience decision.
 - For the default same-department weekly meeting, end with a next-week plan page
   that separates confirmed commitments from proposals and gives each a closure
-  criterion.
+  criterion. Group a multi-goal plan by lane; no lane may first appear there.
 - Keep full source packets and unsupported-claim analysis internal. The
   Evidence Appendix is compact and does not repeat the deck.
 
@@ -154,3 +176,10 @@ Shorten, remap, or split copy that does not fit; never shrink or flatten it.
 6. When an editable template-native PPTX is requested, render every page,
    inspect template fidelity and overflow, confirm native editability, preserve
    the prior version, and apply one scoped revision before acceptance.
+
+After at most one bounded repair, do not emit a deck that still misses a
+material goal lane, exposes implementation inventory or internal coverage
+bookkeeping, or leaves the maker to invent core objects and relationships.
+Return a non-slide `PPT Mode 未通过` result with the failure type, recoverable
+facts and boundaries, and the options to provide grounding, confirm goal lanes,
+choose a more capable model, or explicitly request Brief.

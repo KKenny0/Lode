@@ -255,7 +255,7 @@ would materially change result selection, grouping, or the requested action.
 Never use `reporting_group` alone as the audience definition, and do not mix
 distinct audience roles in one deck.
 
-## Result Selection and Deck Thesis
+## Result Selection and Goal Narratives
 
 **Slides only.** Select a result only when removing it would change the primary
 audience's understanding, action, or confidence. Implementation inventory,
@@ -266,7 +266,7 @@ Do not admit a result merely because it is effortful, complete, technically
 interesting, or present in Weekly Analysis. The main deck answers the
 communication job; the appendix preserves accountability.
 
-Build one Deck Thesis before page writing:
+For one selected goal lane, build one local thesis before page writing:
 
 ```text
 work goal
@@ -278,8 +278,22 @@ work goal
 
 The work goal answers why the work exists; it must not be reconstructed from
 actions, commits, modules, or effort. Group claims into the fewest semantic
-compositions that preserve this thesis. These groups are internal authoring
-logic, not public Story/Why/Goal fields or mandatory pages.
+compositions that preserve this local thesis. Do not add an overview page.
+
+When two or more independent goal lanes survive Result Selection, keep one
+communication job but do not force one business thesis. Treat lanes as
+independent when no source supports a common objective and they have different
+problems, results or choices, evidence, and remaining gates. Sharing a project,
+reporting group, audience, week, technology, or generic wording such as
+“improve quality” is not common-goal evidence.
+
+Start a multi-goal deck with one weekly goal map. For every selected lane, the
+map states its Why, weekly result, current status, and most important remaining
+boundary. It must contain judgment, not merely names or an agenda. Then keep
+each lane's local narrative contiguous and use only that lane's goal source and
+result evidence. A lane that does not change audience understanding, action, or
+confidence stays in portfolio or appendix. These groups remain internal
+authoring logic rather than public Story/Why/Goal fields.
 
 ## Cognitive Task Decomposition
 
@@ -322,6 +336,37 @@ an internal Source Grounding Packet containing:
 
 Do not expose full packets per page. Preserve only compact claim-to-source
 mapping in the final Evidence Appendix.
+
+### Recover material grounding once, not source by source
+
+Admission cards and artifact dossiers locate evidence; they are not substitutes
+for a commit, code snapshot, eval, or design document when a retained page needs
+exact structure or relationships. After the first reopen pass, identify only
+missing sources that satisfy all of these conditions:
+
+- the result is selected for the main deck;
+- the missing material affects the central claim, objects, relationship, visual
+  expression, or confidence boundary;
+- raw and dossier summaries cannot support the required precision;
+- deleting or degrading the page would remove necessary understanding.
+
+Ask the user once for all such gaps. For each one, name the affected claim, the
+missing grounding, the consequence of skipping it, and acceptable forms such as
+a repository path plus commit id, local document, durable document URL, export,
+or screenshot. Do not interrupt for appendix completeness or optional detail.
+
+Treat supplied material by its actual responsibility: repository plus commit
+and a qualified snapshot can establish committed structure; an accessible
+design document can establish target design; a screenshot establishes only
+visible content; and a user explanation establishes recorded intent or context,
+not code topology, tested behavior, or observed effect.
+
+If the user skips or the source remains inaccessible, merge or omit a
+nonessential page. A dossier may still support an explicitly recorded,
+conceptual design boundary. If exact mechanics are necessary and no source can
+establish them, fail PPT Mode rather than manufacture the page. Weekly uses
+user-supplied material for the current run only; durable capture remains an
+explicit later action.
 
 ### Follow the source chain only as far as the claim requires
 
@@ -427,7 +472,7 @@ cannot be deleted without changing the audience's decision, understanding, or
 confidence.
 
 Prefer one page. Split `design_rationale` from `mechanism` only when both
-pages serve the same Deck Thesis, use different source material and cognitive
+pages serve the same local goal narrative, use different source material and cognitive
 tasks, and the mechanism depends on the facts, constraints, and trade-offs
 presented first. The first page directly presents the design problem and
 choice; the second directly presents operation, branch or fallback, and
@@ -466,20 +511,30 @@ hidden.
 
 For the default same-department weekly meeting, end with one next-week plan page
 that distinguishes confirmed commitments from proposals and gives each item a
-pass/fail closure criterion. Do not fabricate a plan; mark missing ownership or
-an unresolved target explicitly.
+pass/fail closure criterion. Group items by selected goal lane when the deck is
+multi-goal. Do not fabricate a plan; mark missing ownership or an unresolved
+target explicitly. A goal lane must not appear for the first time on this page.
 
 Run these preflights:
 
-1. audience outcome: a fresh member of the primary audience can state the
-   thesis, confidence boundary, and required decision or action after a short
-   read;
+1. audience outcome: a fresh member of the primary audience can state every
+   selected goal lane, its local conclusion and confidence boundary, and the
+   required decision or action after a short read;
 2. claim-to-proof: each title states a supported claim and its body visibly
    proves that wording without unsupported certainty;
 3. standalone reading: a reader can explain the cumulative argument, facts,
    relations, values, risks, and next gate without a PPT;
 4. blind content handoff: a maker can visually translate the Markdown without
    vault research, semantic invention, or a new split decision.
+
+Run at most one bounded repair using the current admission view, reopened
+sources, validator feedback, and draft. If material lanes remain missing or the
+body still consists of implementation inventory instead of presentation
+semantics, return a non-slide result headed `PPT Mode 未通过`. Name one of
+`evidence insufficient`, `contract validation failed`, or `model capability
+insufficient`, then preserve candidate lanes, usable facts, evidence boundaries,
+and user options. Do not number failure content as slides or silently switch to
+Brief or another model.
 
 ## Optional Template-native PPTX
 
