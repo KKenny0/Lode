@@ -1,7 +1,9 @@
 # W31 P3-E acceptance TODO
 
-Status: **open**. This does not block the `0.7.1` patch release, but Phase 2
-remains unaccepted until the real-machine check below passes.
+Status: **open**. This does not block `0.8.0`: Weekly now requests missing
+grounding once and omits or degrades exact architecture when the source stays
+unavailable. The exact code-grounded P3-E path remains unaccepted until the
+real-machine check below passes.
 
 Run on the computer that contains the referenced storyboard repository:
 
