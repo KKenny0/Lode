@@ -1462,6 +1462,64 @@
           ["baseline", "maintenance-noise"],
           ["baseline", "evidence-expansion"]
         ],
+        "change_card_rejection_probes": [
+          "target-as-after",
+          "unsupported-problem",
+          "axis-drift",
+          "decorative-simple-result"
+        ],
+        "change_card_available_source_refs": [
+          "raw:call-trace",
+          "test:validation-negative-path",
+          "raw:source-matrix",
+          "artifact:synthesis"
+        ],
+        "change_explanation_cards": [
+          {
+            "id": "code-validation-rewire",
+            "deletion_effect": "confidence",
+            "comparison_axis": "look-ID uniqueness validation ownership",
+            "before_axis": "look-ID uniqueness validation ownership",
+            "after_axis": "look-ID uniqueness validation ownership",
+            "after_status": "actual",
+            "simple_result": false,
+            "starting_constraint": "The validation contract remained on an uncalled legacy path.",
+            "decisive_move": "Move the check to look-ID assembly and redirect the surviving adapter.",
+            "end_state": "The check executes where look IDs are assembled; the legacy path is removed.",
+            "management_meaning": "The uniqueness contract is executable again, with production acceptance still open.",
+            "problem_evidence_refs": ["raw:call-trace"],
+            "state_transition": {
+              "before": "The validation contract remained on an uncalled legacy path.",
+              "intervention": "Move the check to look-ID assembly and redirect the surviving adapter.",
+              "after": "The check executes where look IDs are assembled; the legacy path is removed.",
+              "remaining_gate": "Production acceptance remains open.",
+              "evidence_refs": ["raw:call-trace", "test:validation-negative-path"]
+            },
+            "visual": {"representation": "diff", "primary_count": 1}
+          },
+          {
+            "id": "research-scope-convergence",
+            "deletion_effect": "judgment",
+            "comparison_axis": "supported scope of the research claim",
+            "before_axis": "supported scope of the research claim",
+            "after_axis": "supported scope of the research claim",
+            "after_status": "actual",
+            "simple_result": false,
+            "starting_constraint": "The initial scope mixed claims with different support levels.",
+            "decisive_move": "Compare claims against the shared evidence and reject unsupported branches.",
+            "end_state": "The conclusion is bounded to the one framing supported across the source bundle.",
+            "management_meaning": "The Wiki can state one defensible conclusion without overstating external validity.",
+            "problem_evidence_refs": ["raw:source-matrix"],
+            "state_transition": {
+              "before": "The source bundle supported several competing framings without a bounded conclusion.",
+              "intervention": "Compare claims against the shared evidence and reject unsupported branches.",
+              "after": "The conclusion is bounded to the one framing supported across the source bundle.",
+              "remaining_gate": "External validity beyond the selected sources is unverified.",
+              "evidence_refs": ["raw:source-matrix", "artifact:synthesis"]
+            },
+            "visual": {"representation": "markdown_table", "primary_count": 1}
+          }
+        ],
         "candidate_outputs": [
           {
             "name": "baseline",

@@ -215,6 +215,65 @@ invariants, remaining boundary, diagram route, and evidence refs. It is an
 optional visual payload, not a requirement for every result and never proof
 that the solution worked.
 
+### Change Explanation Card Projection
+
+**Optional for Brief and Slides.** This is a projection of one existing material
+change, not another analysis object. Reuse its conclusion, `state_transition`,
+`solution_logic`, management meaning, evidence grade, and evidence refs. In
+Slides, apply it only after Result Selection as one semantic composition; it
+does not rank results or create slide candidates. Do not add a mode, schema,
+configuration field, or rendering dependency.
+
+Admit a card only when all of these hold:
+
+- removing the problem/solution explanation or comparison changes judgment,
+  action, or confidence;
+- `before` and `after` describe the same object on the same comparison axis;
+- both states and the problem are supported by current-period evidence;
+- the intervention was actually selected or performed; and
+- the result is complex enough that a visual is clearer than compact prose.
+
+Project the existing fields as follows:
+
+| Card role | Existing source |
+|---|---|
+| conclusion | result conclusion |
+| Before / After | `state_transition.before` / `state_transition.after`, grounded by `starting_constraint` / `end_state` |
+| problem | `starting_constraint`, plus an evidenced root cause or trigger when present |
+| solution | `decisive_move` and `state_transition.intervention`; optional `solution_logic` supplies mechanism detail only |
+| formed change | `end_state` plus `management_meaning` |
+| evidence and boundary | evidence grade, `state_transition.evidence_refs`, and `state_transition.remaining_gate` |
+
+Truth rules:
+
+- **Problem** starts from `starting_constraint` and states only an evidenced root
+  cause or trigger, not a story inferred from commit shape or the eventual
+  solution.
+- **Solution** starts from `decisive_move` and `state_transition.intervention`;
+  `solution_logic` may only add supported mechanism detail. A proposed design is
+  visibly labeled `target / not implemented` and stays outside After.
+- **After** is the current actual state at the weekly cutoff. It is never a
+  target design, expected effect, or implementation used as proof of outcome.
+- **Formed change** distinguishes implementation, tested behavior, observed
+  effect, and production acceptance. Keep `remaining_gate` adjacent.
+- A visual has one proof responsibility and never proves effectiveness by
+  itself.
+
+Choose the lightest representation that fits the evidence:
+
+| Evidence shape | Representation |
+|---|---|
+| comparable state or attributes | Markdown Before/After comparison table |
+| deletion, replacement, or contraction | `diff` fence |
+| structure, call chain, or data flow | one Mermaid diagram with Before and After subgraphs |
+| one case moving through changed steps | aligned `text` trace |
+| two or three sentences are clearer | text only |
+
+Use at most one primary visual per card. If the axes drift, the problem lacks
+support, After is prospective, or deletion leaves understanding and action
+unchanged, downgrade to the compact result or omit the card. Portfolio rows
+never become cards merely to improve visual variety.
+
 ## Audience and Occasion Framing
 
 **Slides only.** Resolve the communication job before selecting presentation

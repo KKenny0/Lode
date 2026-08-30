@@ -333,6 +333,68 @@ function appendixSignalCount(output) {
     + (appendix.claim_evidence || []).reduce((total, claim) => total + (claim.evidence_refs || []).length, 0);
 }
 
+function validateChangeExplanationCard(fixture, card) {
+  const label = `${fixture.id}:${card.id || 'change-card'}`;
+  const availableRefs = new Set(fixture.fixture?.change_card_available_source_refs || []);
+  assert(nonEmptyString(card.id), `${label}: id is missing`);
+  assert(['judgment', 'action', 'confidence'].includes(card.deletion_effect), `${label}: card fails the deletion gate`);
+  assert(nonEmptyString(card.comparison_axis), `${label}: comparison axis is missing`);
+  assert.equal(card.before_axis, card.comparison_axis, `${label}: Before comparison axis drifted`);
+  assert.equal(card.after_axis, card.comparison_axis, `${label}: After comparison axis drifted`);
+  for (const field of ['starting_constraint', 'decisive_move', 'end_state', 'management_meaning']) {
+    assert(nonEmptyString(card[field]), `${label}: existing result field ${field} is missing`);
+  }
+
+  const transition = card.state_transition || {};
+  for (const field of ['before', 'intervention', 'after', 'remaining_gate']) {
+    assert(nonEmptyString(transition[field]), `${label}: state transition ${field} is missing`);
+  }
+  assert(nonEmptyStringArray(transition.evidence_refs), `${label}: state transition evidence is missing`);
+  for (const ref of transition.evidence_refs) {
+    assert(availableRefs.has(ref), `${label}: state transition evidence ${ref} is not available`);
+  }
+  assert.equal(card.after_status, 'actual', `${label}: After must be the current actual state`);
+
+  assert(nonEmptyStringArray(card.problem_evidence_refs), `${label}: problem or root cause is unsupported`);
+  for (const ref of card.problem_evidence_refs) {
+    assert(transition.evidence_refs.includes(ref), `${label}: problem evidence is outside the card evidence boundary`);
+    assert(availableRefs.has(ref), `${label}: problem evidence ${ref} is not available`);
+  }
+
+  const visual = card.visual || {};
+  const allowed = ['markdown_table', 'diff', 'mermaid', 'text_trace', 'text_only'];
+  assert(allowed.includes(visual.representation), `${label}: visual representation is invalid`);
+  assert([0, 1].includes(visual.primary_count), `${label}: card has more than one primary visual`);
+  assert.equal(visual.primary_count, visual.representation === 'text_only' ? 0 : 1, `${label}: visual count does not match representation`);
+  if (card.simple_result) {
+    assert.equal(visual.representation, 'text_only', `${label}: simple result received a decorative visual`);
+  }
+}
+
+function validateChangeExplanationCardProbes(fixture, cards) {
+  for (const probe of fixture.fixture?.change_card_rejection_probes || []) {
+    const mutants = structuredClone(cards);
+    const card = mutants[0];
+    if (probe === 'target-as-after') {
+      card.after_status = 'target';
+      card.state_transition.after = 'Target design, not yet implemented';
+    } else if (probe === 'unsupported-problem') {
+      card.problem_evidence_refs = [];
+    } else if (probe === 'axis-drift') {
+      card.after_axis = 'a different object and measure';
+    } else if (probe === 'decorative-simple-result') {
+      card.simple_result = true;
+      card.visual = {representation: 'mermaid', primary_count: 1};
+    } else {
+      throw new Error(`${fixture.id}: unknown change card rejection probe ${probe}`);
+    }
+    assert.throws(
+      () => mutants.forEach(item => validateChangeExplanationCard(fixture, item)),
+      `${fixture.id}: change card rejection probe ${probe} unexpectedly passed`,
+    );
+  }
+}
+
 export function validateWeeklyBriefCompressionContract(fixture) {
   const outputs = fixture.fixture?.candidate_outputs || [];
   assert(outputs.length > 0, `${fixture.id}: compression candidates are missing`);
@@ -372,6 +434,9 @@ export function validateWeeklyBriefCompressionContract(fixture) {
       `${fixture.id}: ${variantName} did not preserve added accountability or evidence in the appendix`,
     );
   }
+  const cards = fixture.fixture?.change_explanation_cards || [];
+  for (const card of cards) validateChangeExplanationCard(fixture, card);
+  validateChangeExplanationCardProbes(fixture, cards);
 }
 
 const FORBIDDEN_DECK_FIELDS = [

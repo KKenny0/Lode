@@ -5,7 +5,9 @@ weekly). Do not use it for **quick** mode. For **slides**, analyze with the
 brief spine first, then project through `slide-template.md`.
 
 Read `reporting-narrative-contract.md` first. Brief mode does not require
-solution-logic diagrams, implementation narratives, or chart briefs.
+solution-logic diagrams, implementation narratives, or chart briefs. A selected
+material result may use the optional Change Explanation Card below when its
+visual changes judgment, action, or confidence; compact prose remains default.
 
 When coverage is thin or git-only, keep the main sections short, mark affected
 arcs `limited`, and avoid padding with architecture detail that the evidence
@@ -45,6 +47,30 @@ Show an evidence boundary here only when the claim is `limited`, conflicting,
 or expected-only. Verified provenance stays in the appendix. Repeat only when
 another independent change survives the counterfactual deletion test. Multiple
 activities that prove one conclusion stay together.
+
+When admitted by **Change Explanation Card Projection** in
+`weekly-analysis-contract.md`, replace that result's three-line block with:
+
+```markdown
+### {conclusion-led state change}
+
+{one primary visual: Markdown Before/After table, diff fence, Mermaid
+Before/After subgraphs, aligned text trace, or no visual}
+
+**问题：** {evidenced constraint or root cause}
+
+**方案：** {intervention actually chosen and performed}
+
+**形成的变化：** {current observable state and management meaning}
+
+**证据与边界：** {verified | recorded | limited} · {remaining gate}
+```
+
+Before and After compare the same object and axis; After is actual at the
+weekly cutoff. Put proposed designs outside After and label them
+`target / not implemented`. Use at most one primary visual. If the card fails
+the deletion test, the problem lacks evidence, or plain text is clearer, use
+the compact result above. Do not turn portfolio rows into cards.
 
 ## 偏差与决策
 

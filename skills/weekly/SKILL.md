@@ -215,8 +215,11 @@ recorded.
 ### 4. Analyze Change and Variance (brief and slides)
 
 Apply `references/weekly-analysis-contract.md` in the main dialog. For `brief`,
-do not build slide candidates, diagrams, or chart briefs unless the user later
-upgrades to slides.
+do not build slide candidates, chart briefs, or full solution-logic narratives.
+A material change may use one lightweight Change Explanation Card visual when
+removing it would change judgment, action, or confidence; otherwise keep the
+compact text result. Slides-only visual production still waits for an explicit
+upgrade.
 
 For every prior commitment, record whether it was met, advanced, blocked,
 replanned, or not started. No prior commitment may disappear.
@@ -306,7 +309,8 @@ in both slide references. Reuse runtime capability; do not build a renderer.
 - Preserve confirmed versus proposed commitments and inferred versus confirmed
   goals.
 - Keep tables, full commitment accounting, portfolio coverage, and provenance
-  in the brief appendix. The brief body uses prose and bullets only.
+  in the brief appendix. The brief body uses prose and bullets except for each
+  admitted Change Explanation Card's Before/After comparison.
 - Keep `limited`, conflicting, and expected-only boundaries beside the body
   claim they qualify. Verified provenance can remain in the appendix.
 - When evidence is thin or git-only, keep the main narrative short and mark
@@ -402,9 +406,13 @@ coverage in one line; it does not need badges.
   decision or support, next commitment, and confidence boundary.
 - Every body block survives counterfactual deletion; full prior-item,
   portfolio, and evidence coverage stays in the appendix.
-- The body contains no tables, source paths, commit lists, or evidence index.
+- The body contains no tables except each admitted Change Explanation Card's
+  single Before/After comparison; it contains no source paths, commit lists, or
+  evidence index.
 - Appendix ledgers and mappings do not repeat body narrative.
 - Brief mode does not require diagrams, implementation narratives, or charts.
+  It may use one lightweight visual inside an admitted Change Explanation Card;
+  simple results remain text-only.
 
 ### Slides only
 
