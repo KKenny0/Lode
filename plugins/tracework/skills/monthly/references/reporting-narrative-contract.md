@@ -25,8 +25,8 @@ When a scope is **explicit** (user named `work`, `personal`, or another group)
 or **configured** via that default, unassigned projects stay excluded and must
 never be guessed into the scoped report.
 
-When no explicit group and no configured default are present, Daily and Weekly
-use skill-level First-Run rules instead of silently defaulting unassigned work
+When no explicit group and no configured default are present, Daily, Weekly, and Monthly
+use skill-level first-run rules instead of silently defaulting unassigned work
 into `work`: report the current unassigned repository as a `local` lane, label
 it clearly, and keep workplace audience safety intact. An explicit `all`
 request remains the private combined view with separate group sections.

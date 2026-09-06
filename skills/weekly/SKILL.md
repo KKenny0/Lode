@@ -58,7 +58,7 @@ For `brief` and `slides` only:
 
 For `slides` only:
 
-- Full slide sections in `references/weekly-analysis-contract.md`
+- `references/weekly-slides-contract.md` for selection, source recovery, and deck gates
 - `references/slide-template.md`
 
 Do not read `slide-template.md` for `quick` or `brief`.
@@ -253,49 +253,8 @@ fixed length or item count.
 
 ### 6. Build the PPT-ready Markdown Deck
 
-Skip this entire step for `quick` and `brief`. Run it only for `slides`.
-
-```text
-Coverage
-→ Result Selection
-→ Selected-source Reopen
-→ Source Grounding Recovery when a necessary page remains unsupported
-→ Final Deck
-```
-
-Apply the complete slides path in `weekly-analysis-contract.md`. In short:
-
-1. Resolve framing before ranking; default to the same-department weekly meeting.
-2. Build one local narrative per selected lane. A single lane starts directly;
-   multiple lanes use one grounded goal map and contiguous lane pages.
-3. Reopen sources only for selected results and state each evidence item's proof
-   responsibility. Start from the selected raw locators, then open only the
-   commit, snapshot, code, eval, or document needed by the retained claim.
-   Complementary proof objects may share one page.
-4. If a necessary page still lacks exact architecture, design mechanics, or a
-   decision-changing fact, ask once for all material missing sources. State the
-   affected claim, what is missing, what source forms would resolve it, and how
-   the page will degrade if the user skips. Do not ask for appendix-only detail.
-5. Use Cognitive Task Decomposition only to diagnose a complex split. Keep full
-   alternatives local unless the audience must choose now.
-6. Form semantic compositions before template-native pagination. Delete or merge
-   pages that do not change understanding, action, or confidence; review unusual
-   length semantically rather than enforce a numeric cap.
-7. End with confirmed/proposed next-week closure, grouped by selected goal lane.
-
-If data is missing, incomparable, or contradictory, do not invent a chart.
-Use a mechanism or state-change diagram, lower the evidence boundary, expose
-the measurement gap, and name its closure criterion.
-
-If one bounded repair still cannot preserve material goal lanes or produce
-audience-facing semantic compositions, do not emit numbered slides. Return
-`PPT Mode 未通过`, classify the failure as `evidence insufficient`, `contract
-validation failed`, or `model capability insufficient`, and preserve a compact
-recovery pack of candidate lanes, usable facts, boundaries, and next options.
-Do not silently switch models or modes.
-
-For an explicitly requested template-native PPTX, follow the optional contract
-in both slide references. Reuse runtime capability; do not build a renderer.
+Slides only: follow `references/weekly-slides-contract.md` and
+`references/slide-template.md`. Brief and quick skip these files entirely.
 
 ### 7. Write
 
@@ -414,24 +373,6 @@ coverage in one line; it does not need badges.
   It may use one lightweight visual inside an admitted Change Explanation Card;
   simple results remain text-only.
 
-### Slides only
-
-- Resolve one audience and outcome before selection. Absent framing defaults to
-  same-department colleagues, no invented duration, and next-week closure.
-- State each selected goal and bounded conclusion; unrelated goals stay independent.
-- No single-goal overview; a multi-goal Slide 1 maps Why, result, status, and boundary.
-- Keep cognitive roles internal and on demand. Split complex results only for
-  independent evidence and prerequisite claims; keep simple results merged.
-- Give every diagram, number, test, trace, or design artifact a distinct proof
-  responsibility; never use implementation structure as effect evidence.
-- Emit only necessary slides. Zero candidates produce an empty state; unusual
-  length receives deletion/compression review rather than a numeric cap.
-- A target reader and a PPT maker can use the Markdown without vault research,
-  semantic invention, or production instructions.
-- Keep charts comparable, truth states separate, and ordinary main slides free
-  of provenance detail unless technical review explicitly needs it.
-- Template-native PPTX remains editable, rendered, versioned, and revision-safe.
-
 ## Anti-Patterns
 
 ### All modes
@@ -458,34 +399,3 @@ coverage in one line; it does not need badges.
 ### Brief and slides
 
 - Evidence ids dominating the spoken narrative.
-
-### Slides only
-
-- One slide per stream by default.
-- Fixed “design slide + implementation slide” pairs.
-- One proof-object type per page when complementary evidence is needed to prove
-  one claim.
-- A full candidate, constraint, or rejected-alternative inventory when the
-  audience only needs the final choice and its shortest rationale.
-- A public Storyboard or Production Brief beside the public Markdown Deck.
-- `Audience takeaway`, `Recommended visual form`, `Page composition`,
-  `On-slide copy`, `Production constraints`, or page-level Source Grounding
-  Packet sections in the public deck.
-- Public Story, Why/Goal field, or cognitive-role scaffolding that the audience
-  would not expect to see in the actual presentation.
-- Topic, question, process, or object-only titles that hide the supported claim.
-- A design slide that only supplies background, history, or option inventory.
-- A mechanism slide that is only a module, field, code, or step list.
-- Two slides that do not perform independent cognitive work.
-- Content that makes the reader or PPT maker reopen the vault to discover the
-  actual claim, node, relationship, number, or risk.
-- Layout, typography, color, card, or diagram-production instructions.
-- A detail slide whose removal changes neither thesis nor audience decision.
-- Topic-only slide titles such as `结果弧线一`, `方案怎么跑通`, or
-  `工作组合状态`.
-- Charts without comparable evidence, units, or sample context.
-- Decorative architecture diagrams with only component names and arrows.
-- Ungrounded, wrong-cutoff, target-as-current, or prose-reformatting diagrams.
-- Using a solution-logic diagram as proof of effectiveness.
-- Bundled style galleries, flattened slides, or a custom version database when
-  a user-owned template and versioned files already solve the need.

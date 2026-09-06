@@ -36,3 +36,7 @@ New roadmap and query skills should keep local eval fixtures under ignored
 `skills/*/evals/` directories. Public benchmark writeups should describe the
 behavioral contract only: recall quality, intent-sync safety, hard-stuff evidence
 quality, and distillation overfitting safeguards.
+
+`test_evidence_flow.py` exercises historical capture through raw-only monthly
+loading, concurrent appends and registration, atomic-write failure preservation,
+and both supported Daily date formats. It uses temporary synthetic data only.

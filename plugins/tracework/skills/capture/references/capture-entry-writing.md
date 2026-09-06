@@ -20,7 +20,8 @@ is usually `decision`.
 
 Extract in this order:
 
-- motivation: problem, goal, or constraint
+- motivation: the explicitly stated problem, goal, or constraint; preserve the
+  intended state change before describing activity
 - changed state: capability, fix, refactor, decision, risk, or progress
 - reporting boundary: outcome, progress, or activity; impact and evidence
   boundary
@@ -30,6 +31,11 @@ Extract in this order:
 - open questions and risks
 - artifact context: durable artifacts materially created or changed
 
+When already stated in the session, preserve what should change in `motivation`
+and the pass/fail acceptance gate in `context` or `open_questions`. Keep a next
+step proposed unless the user explicitly committed to it. Do not ask for optional
+fields or invent a goal from completed actions.
+
 Skip process-only noise unless it explains a larger report-worthy signal.
 
 ## Raw Entry Shape
@@ -38,7 +44,7 @@ Follow `references/tracework-storage-convention.md`. New entries should use:
 
 ```json
 {
-  "timestamp": "ISO 8601 (helper overwrites this with server clock)",
+  "timestamp": "Work time in ISO 8601; source timestamp for historical --date recovery",
   "capture_depth": "lite | standard | deep",
   "archetype": "decision | build | investigation | repair | maintenance",
   "type": "feature | fix | refactor | decision | risk",

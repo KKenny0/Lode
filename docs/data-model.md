@@ -88,6 +88,10 @@ risks, questions, alternatives, and evidence remain in factual top-level fields.
 Historical rich reporting objects remain readable. Final `O#`, `W#`, `D#`, and
 `E#` ids are report-local and are never stored in raw entries.
 
+`timestamp` is work time; `captured_at` records ingestion time on new entries.
+Historical recovery preserves source work time using `--date`; reports group by
+work time. Ordinary capture uses the system clock. Existing entries remain valid.
+
 `capture_depth` is also optional and additive. It describes how much detail the
 capture skill preserved, not how strong the evidence is.
 
@@ -95,7 +99,7 @@ Code-backed session-end and checkpoint entries may also carry a typed
 `repository_snapshot` source reference. Its `ref` is the full immutable Git
 `HEAD` object id observed at capture and its `path` is the absolute repository
 root. It represents the committed tree only. Weekly may select snapshots whose
-entry timestamp is within its `as_of` cutoff; it must not reconstruct an older
+entry timestamp and `captured_at` (when present) are within its `as_of` cutoff; it must not reconstruct an older
 tree from today's moving branch. Historical entries without snapshots remain
 valid and degrade to their direct commit or raw claim.
 
@@ -158,3 +162,10 @@ partition projects before narrative ranking:
 
 Headline budgets apply per group. Non-headline work remains in portfolio
 coverage rather than disappearing.
+
+## Independent Monthly Input
+
+Monthly reads matching raw entries without requiring Daily Note or an archive.
+Daily/Weekly judgments are optional context. Daily archiving runs only when
+requested. Without a vault, Monthly returns a bounded conversation review;
+implicit unassigned scope remains local, as with Daily and Weekly.

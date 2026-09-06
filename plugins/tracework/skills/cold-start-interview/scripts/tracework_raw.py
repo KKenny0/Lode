@@ -8,6 +8,10 @@ can focus on writing high-quality change signals.
 from __future__ import annotations
 
 import argparse
+from contextlib import contextmanager
+import errno
+import tempfile
+import time
 import datetime as dt
 import json
 import os
@@ -20,6 +24,95 @@ try:
     import yaml  # type: ignore
 except Exception:  # pragma: no cover - optional dependency
     yaml = None
+
+
+LOCK_REGION_BYTES = 1
+WINDOWS_LOCK_TIMEOUT_SECONDS = 4.0
+WINDOWS_LOCK_RETRY_INTERVAL_SECONDS = 0.05
+
+
+def write_json_atomic(path: Path, value: Any) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True, mode=0o700)
+    descriptor, temporary_name = tempfile.mkstemp(
+        prefix=f".{path.name}.",
+        suffix=".tmp",
+        dir=path.parent,
+    )
+    temporary = Path(temporary_name)
+    try:
+        with os.fdopen(descriptor, "w", encoding="utf-8") as handle:
+            json.dump(value, handle, ensure_ascii=False, indent=2)
+            handle.write("\n")
+            handle.flush()
+            os.fsync(handle.fileno())
+        temporary.chmod(0o600)
+        temporary.replace(path)
+    finally:
+        try:
+            temporary.unlink()
+        except FileNotFoundError:
+            pass
+
+
+def prepare_lock_file(handle: Any) -> None:
+    """Ensure the Windows byte-range lock has a region to acquire."""
+    handle.seek(0, os.SEEK_END)
+    size = handle.tell()
+    if size < LOCK_REGION_BYTES:
+        handle.write(b"\0" * (LOCK_REGION_BYTES - size))
+        handle.flush()
+    handle.seek(0)
+
+
+def lock_json_handle(handle: Any) -> None:
+    """Acquire a short-lived cross-platform JSON lock."""
+    if os.name == "nt":
+        import msvcrt
+
+        deadline = time.monotonic() + WINDOWS_LOCK_TIMEOUT_SECONDS
+        while True:
+            handle.seek(0)
+            try:
+                msvcrt.locking(handle.fileno(), msvcrt.LK_NBLCK, LOCK_REGION_BYTES)
+                return
+            except OSError as error:
+                if error.errno not in {errno.EACCES, errno.EAGAIN}:
+                    raise
+                if time.monotonic() >= deadline:
+                    raise
+                time.sleep(WINDOWS_LOCK_RETRY_INTERVAL_SECONDS)
+    else:
+        import fcntl
+
+        fcntl.flock(handle.fileno(), fcntl.LOCK_EX)
+
+
+def unlock_json_handle(handle: Any) -> None:
+    """Release a lock acquired by lock_json_handle."""
+    if os.name == "nt":
+        import msvcrt
+
+        handle.seek(0)
+        msvcrt.locking(handle.fileno(), msvcrt.LK_UNLCK, LOCK_REGION_BYTES)
+    else:
+        import fcntl
+
+        fcntl.flock(handle.fileno(), fcntl.LOCK_UN)
+
+
+@contextmanager
+def json_lock(path: Path):
+    path.parent.mkdir(parents=True, exist_ok=True, mode=0o700)
+    lock_path = path.with_suffix(path.suffix + ".lock")
+    descriptor = os.open(lock_path, os.O_CREAT | os.O_RDWR, 0o600)
+    os.chmod(lock_path, 0o600)
+    with os.fdopen(descriptor, "r+b") as handle:
+        prepare_lock_file(handle)
+        lock_json_handle(handle)
+        try:
+            yield path
+        finally:
+            unlock_json_handle(handle)
 
 
 VALID_TYPES = {"feature", "fix", "refactor", "decision", "risk"}
@@ -627,29 +720,32 @@ def append_entries(
     week = iso_week(date_value)
     entries = load_entries(entry_path)
 
-    # Overwrite LLM-provided timestamps with the authoritative server clock.
-    # LLMs do not have access to a real-time clock and can hallucinate
-    # timestamps that are minutes (or more) off from the actual time.
+    # timestamp is work time; captured_at is ingestion time. Historical recovery
+    # must provide a timezone-aware source timestamp matching the explicit date.
     now_iso = dt.datetime.now().astimezone().isoformat()
     for entry in entries:
-        entry["timestamp"] = now_iso
+        if date_value:
+            occurred = dt.datetime.fromisoformat(entry["timestamp"].replace("Z", "+00:00"))
+            if occurred.tzinfo is None or occurred.date() != dt.date.fromisoformat(date_value):
+                raise ValueError("historical timestamp must include timezone and match --date")
+        else:
+            entry["timestamp"] = now_iso
+        entry["captured_at"] = now_iso
 
     target_dir = vault / "raw" / "weeks" / week
     target_dir.mkdir(parents=True, exist_ok=True)
     target_file = target_dir / f"{slug}.json"
 
-    existing: list[Any] = []
-    if target_file.exists():
-        existing_data = json.loads(target_file.read_text(encoding="utf-8"))
-        if not isinstance(existing_data, list):
-            raise ValueError(f"target file is not a JSON array: {target_file}")
-        existing = existing_data
+    with json_lock(target_file):
+        existing: list[Any] = []
+        if target_file.exists():
+            existing_data = json.loads(target_file.read_text(encoding="utf-8"))
+            if not isinstance(existing_data, list):
+                raise ValueError(f"target file is not a JSON array: {target_file}")
+            existing = existing_data
 
-    existing.extend(entries)
-    target_file.write_text(
-        json.dumps(existing, ensure_ascii=False, indent=2) + "\n",
-        encoding="utf-8",
-    )
+        existing.extend(entries)
+        write_json_atomic(target_file, existing)
     return {
         "week": week,
         "slug": slug,
@@ -719,26 +815,24 @@ def upsert_artifact(
     target_dir.mkdir(parents=True, exist_ok=True)
     target_file = target_dir / f"{slug}.json"
 
-    existing: list[Any] = []
-    if target_file.exists():
-        existing_data = json.loads(target_file.read_text(encoding="utf-8"))
-        if not isinstance(existing_data, list):
-            raise ValueError(f"target file is not a JSON array: {target_file}")
-        existing = existing_data
+    with json_lock(target_file):
+        existing: list[Any] = []
+        if target_file.exists():
+            existing_data = json.loads(target_file.read_text(encoding="utf-8"))
+            if not isinstance(existing_data, list):
+                raise ValueError(f"target file is not a JSON array: {target_file}")
+            existing = existing_data
 
-    action = "created"
-    for index, item in enumerate(existing):
-        if isinstance(item, dict) and item.get("id") == artifact["id"]:
-            existing[index] = artifact
-            action = "updated"
-            break
-    else:
-        existing.append(artifact)
+        action = "created"
+        for index, item in enumerate(existing):
+            if isinstance(item, dict) and item.get("id") == artifact["id"]:
+                existing[index] = artifact
+                action = "updated"
+                break
+        else:
+            existing.append(artifact)
 
-    target_file.write_text(
-        json.dumps(existing, ensure_ascii=False, indent=2) + "\n",
-        encoding="utf-8",
-    )
+        write_json_atomic(target_file, existing)
     return {
         "slug": slug,
         "path": str(target_file),
@@ -770,46 +864,42 @@ def register_project(
     target_dir.mkdir(parents=True, exist_ok=True)
     target_file = target_dir / "projects.json"
 
-    existing: list[dict[str, Any]] = []
-    if target_file.exists():
-        try:
+    with json_lock(target_file):
+        existing: list[dict[str, Any]] = []
+        if target_file.exists():
             data = json.loads(target_file.read_text(encoding="utf-8"))
-            if isinstance(data, list):
-                existing = data
-        except json.JSONDecodeError:
-            existing = []
+            if not isinstance(data, list):
+                raise ValueError(f"target file is not a JSON array: {target_file}")
+            existing = data
 
-    updated = False
-    for index, item in enumerate(existing):
-        if isinstance(item, dict) and same_path(str(item.get("path", "")), cwd):
-            if not resolved_group and isinstance(item.get("reporting_group"), str):
-                resolved_group = item["reporting_group"]
-            existing[index]["name"] = project_name
-            existing[index]["slug"] = slug
-            existing[index]["path"] = project_path
+        updated = False
+        for index, item in enumerate(existing):
+            if isinstance(item, dict) and same_path(str(item.get("path", "")), cwd):
+                if not resolved_group and isinstance(item.get("reporting_group"), str):
+                    resolved_group = item["reporting_group"]
+                existing[index]["name"] = project_name
+                existing[index]["slug"] = slug
+                existing[index]["path"] = project_path
+                if priority:
+                    existing[index]["priority"] = priority
+                if resolved_group:
+                    existing[index]["reporting_group"] = resolved_group
+                updated = True
+                break
+
+        if not updated:
+            entry: dict[str, Any] = {
+                "name": project_name,
+                "slug": slug,
+                "path": project_path,
+            }
             if priority:
-                existing[index]["priority"] = priority
+                entry["priority"] = priority
             if resolved_group:
-                existing[index]["reporting_group"] = resolved_group
-            updated = True
-            break
+                entry["reporting_group"] = resolved_group
+            existing.append(entry)
 
-    if not updated:
-        entry: dict[str, Any] = {
-            "name": project_name,
-            "slug": slug,
-            "path": project_path,
-        }
-        if priority:
-            entry["priority"] = priority
-        if resolved_group:
-            entry["reporting_group"] = resolved_group
-        existing.append(entry)
-
-    target_file.write_text(
-        json.dumps(existing, ensure_ascii=False, indent=2) + "\n",
-        encoding="utf-8",
-    )
+        write_json_atomic(target_file, existing)
     return {
         "action": "updated" if updated else "registered",
         "name": project_name,

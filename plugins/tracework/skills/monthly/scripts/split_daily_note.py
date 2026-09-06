@@ -23,7 +23,7 @@ from datetime import datetime
 # --- 标题识别正则 ---
 RE_YEAR = re.compile(r'^#\s*\d{4}\s*年')
 RE_MONTH = re.compile(r'^##\s*(\d{4})\s*年\s*(\d{1,2})\s*月')
-RE_DATE = re.compile(r'^###\s*(\d{4})\.(\d{2})\.(\d{2})')
+RE_DATE = re.compile(r'^###\s*(\d{4})[.-](\d{2})[.-](\d{2})')
 
 # 保留月标题之前的所有内容作为文件头（如 TODO LIST 等不属于任何月份的内容）
 # 但实际上 Daily Note 结构是 年 > 月 > 日，我们按月切分即可
@@ -73,6 +73,7 @@ def parse_daily_note(filepath):
         # 检测日标题 —— 日标题一定属于当前月
         # 如果没有月级标题，从日期推断月份
         if RE_DATE.match(stripped):
+            found_first_month = True
             date_match = RE_DATE.match(stripped)
             year = int(date_match.group(1))
             month = int(date_match.group(2))

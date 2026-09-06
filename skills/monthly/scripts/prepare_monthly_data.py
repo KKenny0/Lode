@@ -44,7 +44,7 @@ from pathlib import Path
 # ============================================================================
 
 # --- 识别正则 ---
-RE_DATE = re.compile(r'^###\s*(\d{4})\.(\d{2})\.(\d{2})')
+RE_DATE = re.compile(r'^###\s*(\d{4})[.-](\d{2})[.-](\d{2})')
 # 项目标签：- [项目名]，排除 [x] 和 [ ] 任务标记
 RE_PROJECT = re.compile(r'^-\s*\[([^\]]+)\]')
 RE_MODULE = re.compile(r'^(\t| {4})-\s*\{([^}]+)\}')
@@ -209,17 +209,15 @@ def extract_keywords(text, top_n=20):
     return [word for word, count in counter.most_common(top_n)]
 
 
-def parse_monthly_file(filepath):
+def parse_monthly_file(filepath, month_key=None):
     """
     解析月度归档文件，提取结构化信号。
 
     返回：
         dict: 月度信号数据
     """
-    with open(filepath, 'r', encoding='utf-8') as f:
-        lines = f.readlines()
-
-    month_key = os.path.basename(filepath).replace('.md', '')
+    lines = Path(filepath).read_text(encoding='utf-8').splitlines(keepends=True) if filepath else []
+    month_key = month_key or (Path(filepath).stem if filepath else 'unknown')
 
     entries = []
     current_date = None
@@ -867,11 +865,11 @@ def build_review_skeleton(signals, summary_mode='project_focused', evidence_mode
         skeleton['warnings'].append(
             f"有 {len(unassigned)} 条日志条目未归属到任何项目标签"
         )
-    if total_completed == 0 and total_report_items == 0:
+    if entries and total_completed == 0 and total_report_items == 0:
         skeleton['warnings'].append("本月未检测到明确的已完成任务或日报进展字段")
     if not signals.get('raw_entries'):
-        skeleton['warnings'].append("本月未加载到 matching raw entries；月报只能使用 Daily 归档并降低证据等级")
-    if not high_freq:
+        skeleton['warnings'].append("本月无 matching raw entries；其他来源只能作为 limited 证据，无其他信号时返回空状态")
+    if entries and not high_freq:
         skeleton['warnings'].append("未能提取到高频主题关键词")
 
     return skeleton
@@ -885,7 +883,7 @@ def main():
     parser = argparse.ArgumentParser(
         description='从月度归档中提取信号并构建总结骨架（单次遍历）',
     )
-    parser.add_argument('--input', required=True,
+    parser.add_argument('--input', default=None,
                         help='月度归档文件路径 (YYYY-MM.md)')
     parser.add_argument('--signals-output', required=True,
                         help='信号 JSON 输出文件路径')
@@ -909,19 +907,17 @@ def main():
 
     args = parser.parse_args()
 
-    # --- 验证输入文件 ---
-    if not os.path.isfile(args.input):
-        print(f"错误：输入文件不存在 - {args.input}", file=sys.stderr)
-        sys.exit(1)
+    if args.input and not os.path.isfile(args.input):
+        parser.error(f"输入文件不存在 - {args.input}")
+    target_month = args.month or (Path(args.input).stem if args.input else None)
+    try:
+        if not target_month or not re.fullmatch(r'\d{4}-\d{2}', target_month):
+            raise ValueError()
+        datetime.strptime(target_month, '%Y-%m')
+    except ValueError:
+        parser.error("提供 --month YYYY-MM，或使用 YYYY-MM.md 归档")
 
-    # --- Step 1: 解析月度归档，提取信号 ---
-    print(f"正在解析：{args.input}")
-    signals = parse_monthly_file(args.input)
-    target_month = args.month or signals['month']
-    if not re.fullmatch(r'\d{4}-\d{2}', target_month):
-        print(f"错误：月份格式必须是 YYYY-MM - {target_month}", file=sys.stderr)
-        sys.exit(1)
-    signals['month'] = target_month
+    signals = parse_monthly_file(args.input, target_month)
     signals['raw_entries'] = (
         load_monthly_raw_entries(args.vault, target_month) if args.vault else []
     )

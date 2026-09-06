@@ -98,7 +98,12 @@ the transcript path or copy transcript content into the vault.
 ## Write and Advance Watermarks
 
 Append each project's entries through `tracework_raw.py append-entry` using the
-returned `project_root` as `--cwd`.
+returned `project_root` as `--cwd` and the requested date as `--date YYYY-MM-DD`.
+Set each entry's `timestamp` from its latest contributing normalized message on
+that date, including timezone. The helper validates that it matches `--date`,
+keeps it as work time, and adds `captured_at` from the system clock. Do not use
+today's time for historical work. Keep conversation-ref timestamps as ingestion
+watermarks, not substitutes for the entry's work time.
 
 Only after that project's append succeeds, advance every contributing session:
 

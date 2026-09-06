@@ -31,3 +31,25 @@ overwriting the source report. Review:
 Record model, repo SHA, scope, output path, pass/fail, and short failure excerpts.
 Keep private raw data and generated comparisons in ignored local eval folders or
 temporary storage; do not commit them.
+
+## End-to-End Admission
+
+Run `npm --prefix cli test` and `npm --prefix cli run check-skills` first.
+Report these independent boundaries instead of treating an aggregate green as
+proof of usable prose:
+
+| Layer | Pass condition |
+|---|---|
+| Preservation | Concurrent writes retain every entry; failed replacement retains original JSON; historical work reaches its correct period. |
+| Independent consumption | Raw-only Monthly succeeds without Daily/Weekly or a derived index; absent evidence produces an honest empty state. |
+| Claim support | No invented confirmed goals, expected effects as observed, vanished material risk, or silently confirmed proposals. |
+| Reader value | A reader can repeat the change, remaining gate, and needed decision; material claims have source mappings. |
+| Cost | Compare the same mode and evidence before/after, including every required instruction file, source reread, elapsed time, and manual correction count when actually measured. |
+
+For semantic checks, use a small private set covering sparse evidence, late
+cross-month capture, a replan, independent goals, and mixed groups. Name the
+input period and scope exactly; a bounded sample is not full-week acceptance.
+Assign expected material claims and unresolved gates from sources before writing
+the candidate. Record exact failing sentences and revisions. Agent self-review
+and actual reader acceptance are separate results; do not manufacture the latter.
+Keep real inputs and outputs outside tracked public fixtures.

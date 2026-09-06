@@ -37,46 +37,64 @@ Inputs:
 
 Outputs:
 
-- Monthly archive: `{vault}/Work Diary/Monthly/{YYYY-MM}.md`
+- Optional Daily archive: `{vault}/Work Diary/Monthly/{YYYY-MM}.md`
 - Signals: `{vault}/raw/months/{YYYY-MM}/signals.json`
 - Skeleton: `{vault}/raw/months/{YYYY-MM}/skeleton.json`
 - Review: `{vault}/Work Diary/Monthly/{YYYY-MM}.summary.md`
 
 ## Workflow
 
-### 1. Resolve Month and Scope
+### 1. Resolve Month, Scope, and Output
 
-- Parse explicit `all` or an exact registered reporting-group name such as
-  `work` or `personal`.
-- Otherwise use `profile.default_reporting_group`; when absent, default a
-  workplace-facing review to `work`.
-- Partition projects before ranking. Apply the audience-safety rules in the
-  shared narrative contract.
-- Exclude unassigned projects from scoped output and report the missing
-  classification; show them separately only in `all`.
+- Parse the requested month; default to the current month through today.
+- Explicit `all` or a named group wins, then `profile.default_reporting_group`.
+  Otherwise use the current project's group. With no assigned group, use only
+  the current repository as `local` / unassigned, never as `work`.
+- For an explicit/configured group, include only matching projects; exclude
+  unassigned projects and explain an empty result with a configuration hint.
+- `all` remains a private view with separate complete group sections.
+- Partition before ranking. Resolve project config before registry metadata,
+  as required by the shared reporting contract.
+- Without a vault, or in implicit local mode, return the review in conversation
+  and write no files. Do not require cold-start or a Daily archive. Use scoped
+  conversation evidence and lightweight git coverage; git-only remains `limited`.
+- With no meaningful signal, return what was checked and the evidence gap;
+  do not invent phase results, next-month targets, or empty output files.
 
-### 2. Archive Daily Note
+### 2. Build Raw-First Context
 
-Run `<this-skill>/scripts/split_daily_note.py` to preserve the original monthly
-Daily sections without rewriting them. Existing archives follow the configured
-overwrite policy.
-
-### 3. Build Raw-First Context
-
-Run:
+With a vault, collect matching raw entries whether or not Daily/Weekly exist:
 
 ```bash
 python <this-skill>/scripts/prepare_monthly_data.py \
-  --input {vault}/Work\ Diary/Monthly/{YYYY-MM}.md \
   --vault {vault} \
   --month {YYYY-MM} \
-  --signals-output {vault}/raw/months/{YYYY-MM}/signals.json \
-  --skeleton-output {vault}/raw/months/{YYYY-MM}/skeleton.json
+  --signals-output {temporary-directory}/signals.json \
+  --skeleton-output {temporary-directory}/skeleton.json
 ```
 
-The script performs deterministic extraction only. It preserves matching raw
-entries, Daily report fields, project grouping, source coverage, and conflicts.
-It does not decide importance or write the review.
+The helper performs deterministic extraction, not selection or prose writing.
+Its context may contain multiple groups; treat it as private analysis and apply
+resolved scope before synthesis. It does not grant permission to publish the
+unfiltered context. Raw-only input is sufficient. Missing derived indexes and
+Daily/Weekly files do not block the review.
+
+If a matching Daily archive exists, optionally pass `--input <archive.md>` for
+prior judgments and legacy coverage. Matching Weekly reports are also optional
+editorial context. Their absence does not lower a raw claim's evidence grade.
+
+For a normal scoped vault run, save only the in-scope context to the configured
+signals/skeleton paths when useful. Never overwrite another scope's existing
+output without an explicit update request; use a scope-suffixed file instead.
+Local/no-vault runs keep analysis temporary and return conversation output.
+
+### 3. Archive Daily Note Only When Requested
+
+Monthly review does not require archiving. If the user requests monthly Daily
+Note archiving, run `<this-skill>/scripts/split_daily_note.py` with `--month-filter YYYY-MM`.
+Preserve source text and respect the configured overwrite policy. If Daily Note
+is missing, explain that no archive was created and continue the review from raw.
+Do not manufacture a blank archive to satisfy the context helper.
 
 ### 4. Write the Review
 
@@ -100,7 +118,7 @@ Never rank work and personal projects together.
 
 ### 5. Report Execution
 
-Return the output paths, selected scope, raw coverage, Daily-only coverage,
+Return actual output paths (or conversation-only), selected scope, raw coverage, Daily-only coverage,
 warnings, and whether existing files were overwritten.
 
 ## Conflict Rules
@@ -116,6 +134,8 @@ warnings, and whether existing files were overwritten.
 ## Quality Gate
 
 - Scope partition happened before selection.
+- Raw-only input works without Daily/Weekly or derived indexes.
+- No-vault/local runs write nothing; empty evidence produces a short empty state.
 - Work output contains no personal or unassigned material, including appendices.
 - Raw entries are the semantic source whenever available.
 - Every group has one monthly judgment and normally three phase arcs.

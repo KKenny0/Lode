@@ -25,6 +25,8 @@ DEFAULT_INSTRUCTION_FILES = (
     REPO_ROOT / "skills" / "weekly" / "SKILL.md",
     REPO_ROOT / "skills" / "weekly" / "references" / "weekly-analysis-contract.md",
     REPO_ROOT / "skills" / "weekly" / "references" / "slide-template.md",
+    REPO_ROOT / "skills" / "weekly" / "references" / "weekly-slides-contract.md",
+    REPO_ROOT / "skills" / "weekly" / "references" / "reporting-narrative-contract.md",
 )
 
 
@@ -238,6 +240,7 @@ def build_admission(
         if isinstance(entry, dict)
         and isinstance(entry.get("timestamp"), str)
         and not entry_after_cutoff(entry["timestamp"], cutoff)
+        and not entry_after_cutoff(entry.get("captured_at", entry["timestamp"]), cutoff)
     ]
     prior_text = ""
     previous_source_chars = 0

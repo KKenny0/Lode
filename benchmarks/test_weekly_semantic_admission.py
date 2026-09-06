@@ -41,6 +41,17 @@ def entry(timestamp: str, *, outcome: str = "A bounded result") -> dict:
 
 
 class SemanticAdmissionTest(unittest.TestCase):
+    def test_late_capture_is_not_available_at_historical_cutoff(self):
+        with tempfile.TemporaryDirectory() as directory:
+            raw = Path(directory) / "week.json"
+            original = entry("2026-07-31T12:00:00+08:00")
+            late = dict(original, captured_at="2026-08-02T12:00:00+08:00")
+            raw.write_text(json.dumps([original, late]))
+            historical = MODULE.build_admission(raw, slug="project", cutoff="2026-07-31")
+            current = MODULE.build_admission(raw, slug="project", cutoff=None)
+        self.assertEqual(len(historical["model_input"]["cards"]), 1)
+        self.assertEqual(len(current["model_input"]["cards"]), 2)
+
     def test_semantic_fields_lead_and_unknown_reporting_data_stays_out(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             raw = Path(directory) / "week.json"

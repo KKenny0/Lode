@@ -786,10 +786,18 @@ new raw signal.
 
 ## Write Behavior
 
-- **Append** new entries to the existing array (read → append → write)
+- **Append** new entries under a per-file lock (read → append → atomic replace)
 - Do not deduplicate or overwrite — the consumer handles merging
 - **Side-effect failure**: if the project slug cannot be determined or the write fails, skip the change-entry write gracefully. The primary deliverable of each skill is never the change entry — it is always a side effect.
-- **Concurrent writes**: two sessions writing to the same `{slug}.json` simultaneously may lose data. This is acceptable for the intended use case (single developer, single machine). If concurrent access becomes a concern, the consumer should implement merge logic.
+- **Concurrent writes**: the shared helper locks the complete read-modify-write transaction for raw entries, artifact dossiers, and the project registry, and replaces JSON atomically. Never ask consumers to recover overwritten entries. Invalid existing JSON fails without replacing the original.
+
+`timestamp` is work time used by period consumers. Ordinary capture sets it from
+the system clock. Historical capture passes `--date YYYY-MM-DD` and a source
+ISO timestamp with timezone on that date; the helper preserves it and selects
+the corresponding ISO week. New entries also carry `captured_at`, the actual
+system-clock ingestion time. Historical entries need no migration. For an
+as-of reconstruction, exclude evidence captured after the cutoff when
+`captured_at` is available, even if its work timestamp is earlier.
 
 When `scripts/tracework_raw.py` is available in the skill directory or repository,
 producers should write the entry object or array to a temporary JSON file and
